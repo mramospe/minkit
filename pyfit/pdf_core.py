@@ -6,8 +6,12 @@ from . import core
 from . import parameters
 
 import itertools
+import logging
 
 __all__ = ['AddPDFs']
+
+
+logger = logging.getLogger(__name__)
 
 
 class PDF(object):
@@ -50,10 +54,44 @@ class PDF(object):
     def data_pars( self ):
         return self.__data_pars
 
+    def frozen( self, data, norm_range = parameters.FULL ):
+
+        if self.constant:
+            # This PDF is constant, so save itself into a cache
+            logger.info(f'Function "{self.name}" marked as constant; will precalculate values and save them in a cache')
+            return CachePDF(self, data, norm_range)
+        else:
+            return self
+
+    @property
+    def constant( self ):
+        return all(p.constant for p in self.all_args.values())
+
     def norm( self, values = None, norm_range = parameters.FULL ):
         '''
         '''
         raise NotImplementedError('Classes inheriting from "pyfit.PDF" must define the "norm" method')
+
+
+class CachePDF(PDF):
+
+    def __init__( self, pdf, data, norm_range = parameters.FULL ):
+
+        self.__cache = pdf(data, norm_range=norm_range)
+        self.__norm  = pdf.norm(norm_range=norm_range)
+
+        super(CachePDF, self).__init__(pdf.name, pdf.data_pars.to_list(), pdf.args.to_list())
+
+    def __call__( self, data, values = None, norm_range = parameters.FULL, normalized = True ):
+        '''
+        '''
+        if normalized:
+            return self.__cache / self.__norm
+        else:
+            return self.__cache
+
+    def norm( self, values = None, norm_range = parameters.FULL ):
+        return self.__norm
 
 
 class SourcePDF(PDF):
@@ -142,6 +180,19 @@ class AddPDFs(PDF):
     def extended( self ):
         return len(self.__pdfs) == len(self.__yields)
 
+    def frozen( self, data, norm_range = parameters.FULL ):
+
+        if not any(pdf.constant for pdf in self.__pdfs.values()):
+            # There is no constant PDF within this class. Return itself.
+            return self
+        elif self.constant:
+            # This PDF is constant, call the base class method
+            return super(AddPDFs, self).frozen(data, norm_range)
+        else:
+            # At least one of the contained PDFs is constant, must create a new instance
+            pdfs = list(pdf.frozen(data, norm_range) for pdf in self.__pdfs.values())
+            return self.__class__(self.name, pdfs, self.yields.to_list())
+
     def norm( self, values = None, norm_range = parameters.FULL ):
         '''
         '''
@@ -172,7 +223,7 @@ class EvaluatorProxy(object):
         super(EvaluatorProxy, self).__init__()
 
         self.__fcn  = fcn
-        self.__pdf  = pdf
+        self.__pdf  = pdf.frozen(data, norm_range)
         self.__data = data
         self.__norm_range = norm_range
 

@@ -53,6 +53,13 @@ def registry_to_minuit_input( registry, errordef = 1. ):
 @parse_fcn
 def create_minuit( fcn, pdf, data, norm_range = parameters.FULL ):
     '''
+    Create a new instance of :class:`iminuit.Minuit`.
+    This represents a "frozen" object, that is, parameters defining
+    the PDFs are assumed to remain constant during all its lifetime.
+
+    .. warning: Do not change any attribute of the parameters defining the \
+    PDFs, since it will not be properly reflected during the minimization \
+    calls.
     '''
     all_args = pdf.all_args
 

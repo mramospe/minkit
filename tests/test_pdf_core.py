@@ -44,3 +44,12 @@ def test_addpdfs():
     pdf_values = pyfit.scale_pdf_values(pv, values, edges)
 
     assert np.allclose(np.sum(pdf_values), np.sum(values))
+
+    # Test consteness of the PDFs
+    k.constant = True
+    assert e.constant and not pdf.constant
+    g2e.constant = True
+    assert not pdf.constant
+    for p in pdf.all_args.values():
+        p.constant = True
+    assert pdf.constant
