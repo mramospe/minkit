@@ -8,7 +8,7 @@ from . import pdf_core
 __all__ = ['Exponential', 'Gaussian']
 
 
-class Exponential(pdf_core.PDF):
+class Exponential(pdf_core.SourcePDF):
     '''
     Definition of an Exponential.
     '''
@@ -24,7 +24,7 @@ class Exponential(pdf_core.PDF):
         super(Exponential, self).__init__(name, pdf, norm, [x], [k])
 
 
-class Gaussian(pdf_core.PDF):
+class Gaussian(pdf_core.SourcePDF):
     '''
     Definition of a Gaussian.
     '''

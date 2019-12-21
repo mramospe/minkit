@@ -5,7 +5,11 @@ from . import core
 from . import parameters
 from . import types
 
+import logging
+
 __all__ = ['DataSet', 'BinnedDataSet']
+
+logger = logging.getLogger(__name__)
 
 
 class DataSet(object):
@@ -14,6 +18,7 @@ class DataSet(object):
         '''
         '''
         self.__data = {name: core.array(arr) for name, arr in dict(data).items()}
+
         self.__weights = weights if weights is None else core.array(weights)
 
         assert data.keys() == self.__data.keys()
@@ -29,6 +34,11 @@ class DataSet(object):
                 valid = iv
             else:
                 valid *= iv
+
+        # Remove out of range points, if necessary
+        diff = len(valid) - core.sum(valid)
+        if diff != 0:
+            logger.info(f'Removing "{diff}" out of range points')
 
         if self.__weights is not None:
             self.__weights = self.__weights[valid]

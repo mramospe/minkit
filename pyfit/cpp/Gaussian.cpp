@@ -25,6 +25,7 @@ extern "C" {
     double sqrt2s = M_SQRT2 * s;
     double pmin   = (xmin - c) / sqrt2s;
     double pmax   = (xmax - c) / sqrt2s;
-    return SQRTPI_2 * s * (std::erf(xmax) - std::erf(xmin));
+
+    return SQRTPI_2 * s * (std::erf(pmax) - std::erf(pmin));
   }
 }

@@ -5,12 +5,8 @@ extern "C" {
    */
   void Exponential( int len, double *out, double* in, double k ) {
 
-    for ( int i = 0; i < len; ++i ) {
-
-      double x = in[i];
-
-      out[i] = x < 0 ? 0 : std::exp(k * x);
-    }
+    for ( int i = 0; i < len; ++i )
+      out[i] = std::exp(k * in[i]);
   }
 
   /** Normalization for an Exponential PDF.

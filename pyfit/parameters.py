@@ -44,3 +44,6 @@ class Registry(collections.OrderedDict):
             if a.name in self:
                 raise KeyError(f'A parameter with name "{a.name}" already exists in the registry')
             self[a.name] = a
+
+    def to_list( self ):
+        return list(self.values())
