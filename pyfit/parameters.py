@@ -47,3 +47,6 @@ class Registry(collections.OrderedDict):
 
     def to_list( self ):
         return list(self.values())
+
+    def clone( self ):
+        return self.__class__(*self.to_list())

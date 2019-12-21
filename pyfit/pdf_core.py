@@ -112,7 +112,7 @@ class AddPDFs(PDF):
 
     def __call__( self, data, values = None, norm_range = parameters.FULL, normalized = True ):
 
-        yields = [y.value for y in self.__yields.values()]
+        yields = list(self._process_values(values))
         if not self.extended:
             yields.append(1. - sum(yields))
 
@@ -127,7 +127,7 @@ class AddPDFs(PDF):
 
     @property
     def all_args( self ):
-        args = self.args
+        args = self.args.clone()
         for p in self.__pdfs.values():
             args.update(p.all_args)
         return args

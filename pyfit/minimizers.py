@@ -54,11 +54,13 @@ def registry_to_minuit_input( registry, errordef = 1. ):
 def create_minuit( fcn, pdf, data, norm_range = parameters.FULL ):
     '''
     '''
-    cfg = registry_to_minuit_input(pdf.all_args)
+    all_args = pdf.all_args
+
+    cfg = registry_to_minuit_input(all_args)
 
     evaluator = pdf_core.EvaluatorProxy(fcn, pdf, data, norm_range)
 
     return iminuit.Minuit(evaluator,
-                          forced_parameters=tuple(pdf.args.keys()),
+                          forced_parameters=tuple(all_args.keys()),
                           pedantic=False,
                           **cfg)
