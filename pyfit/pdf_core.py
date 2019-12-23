@@ -132,36 +132,19 @@ class SourcePDF(PDF):
         return self.__norm(*fvals, *nr)
 
 
-class AddPDFs(PDF):
+class MultiPDF(PDF):
 
-    def __init__( self, name, pdfs, yields ):
-        '''
-        '''
+    def __init__( self, name, pdfs, arg_pars = None ):
+
+        arg_pars = arg_pars or []
+
         self.__pdfs = parameters.Registry(*pdfs)
-        self.__yields = parameters.Registry(*yields)
-
-        assert len(self.__pdfs) - len(self.__yields) in (0, 1)
 
         data_pars = parameters.Registry()
         for p in pdfs:
             data_pars.update(p.data_pars)
 
-        super(AddPDFs, self).__init__(name, data_pars.to_list(), yields)
-
-    def __call__( self, data, values = None, norm_range = parameters.FULL, normalized = True ):
-
-        yields = list(self._process_values(values))
-        if not self.extended:
-            yields.append(1. - sum(yields))
-
-        out = core.zeros(len(data))
-        for y, pdf in zip(yields, self.__pdfs.values()):
-            out += y * pdf(data, values, norm_range, normalized=True)
-
-        if self.extended and normalized:
-            return out / sum(yields)
-        else:
-            return out
+        super(MultiPDF, self).__init__(name, data_pars.to_list(), arg_pars)
 
     @property
     def all_args( self ):
@@ -176,10 +159,6 @@ class AddPDFs(PDF):
                 return pdf
         raise LookupError(f'No PDF with name "{name}" hass been found')
 
-    @property
-    def extended( self ):
-        return len(self.__pdfs) == len(self.__yields)
-
     def frozen( self, data, norm_range = parameters.FULL ):
 
         if not any(pdf.constant for pdf in self.__pdfs.values()):
@@ -191,29 +170,80 @@ class AddPDFs(PDF):
         else:
             # At least one of the contained PDFs is constant, must create a new instance
             pdfs = list(pdf.frozen(data, norm_range) for pdf in self.__pdfs.values())
-            return self.__class__(self.name, pdfs, self.yields.to_list())
+            return self.__class__(self.name, pdfs, self.args.to_list())
+
+    @property
+    def pdfs( self ):
+        return self.__pdfs
+
+
+
+class AddPDFs(MultiPDF):
+
+    def __init__( self, name, pdfs, yields ):
+        '''
+        '''
+        assert len(pdfs) - len(yields) in (0, 1)
+
+        super(AddPDFs, self).__init__(name, pdfs, yields)
+
+    def __call__( self, data, values = None, norm_range = parameters.FULL, normalized = True ):
+
+        yields = list(self._process_values(values))
+        if not self.extended:
+            yields.append(1. - sum(yields))
+
+        out = core.zeros(len(data))
+        for y, pdf in zip(yields, self.pdfs.values()):
+            out += y * pdf(data, values, norm_range, normalized=True)
+
+        if self.extended and normalized:
+            return out / sum(yields)
+        else:
+            return out
+
+    @property
+    def extended( self ):
+        return len(self.pdfs) == len(self.args)
 
     def norm( self, values = None, norm_range = parameters.FULL ):
         '''
         '''
         if self.extended:
             # An extended PDF has a normalization equal to the sum of yields
-            return sum(y.value for y in self.__yields.values())
+            return sum(y.value for y in self.args.values())
         else:
             # A non-extended PDF is always normalized
             return 1.
-
-    @property
-    def pdfs( self ):
-        return self.__pdfs
 
     @classmethod
     def two_components( cls, name, first, second, yf, ys = None ):
         return cls(name, [first, second], [yf] if ys is None else [yf, ys])
 
-    @property
-    def yields( self ):
-        return self.__yields
+
+class ProdPDFs(MultiPDF):
+
+    def __init__( self, name, pdfs ):
+        '''
+        
+        '''
+        super(ProdPDFs, self).__init__(name, pdfs, [])
+
+    def __call__( self, data, values = None, norm_range = parameters.FULL, normalized = True ):
+
+        out = core.ones(len(data))
+        for pdf in self.pdfs.values():
+            out *= pdf(data, values, norm_range, normalized=True)
+
+        return out
+
+    def norm( self, values = None, norm_range = parameters.FULL ):
+        '''
+        '''
+        n = 1.
+        for p in self.pdfs.values():
+            n *= p.norm(values, norm_range)
+        return n
 
 
 class EvaluatorProxy(object):
