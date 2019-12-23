@@ -16,10 +16,12 @@ __all__ = []
 
 TMPDIR = tempfile.TemporaryDirectory()
 
+PDF_MODULE_CACHE = {}
+
 PDF_CACHE = {}
 
 
-def create_cpp_function_proxy( module, name, ndata_pars, narg_pars ):
+def create_cpp_function_proxy( module, name, ndata_pars, narg_pars = 0, nvar_arg_pars = 0 ):
     '''
     Create a proxy for C++ that handles correctly the input and output data
     types of a fucntion.
@@ -31,6 +33,9 @@ def create_cpp_function_proxy( module, name, ndata_pars, narg_pars ):
 
     # Define the types of the input arguments
     partypes = [types.c_double for _ in range(narg_pars)]
+
+    if nvar_arg_pars:
+        partypes += [types.c_int, types.c_double_p]
 
     # Define the types passed to the normalization function
     functiontypes = [types.c_double for _ in range(ndata_pars)]
@@ -55,7 +60,13 @@ def create_cpp_function_proxy( module, name, ndata_pars, narg_pars ):
         '''
         Internal wrapper.
         '''
-        return function(*tuple(map(types.c_double, args)))
+        if nvar_arg_pars:
+            var_arg_pars = args[-1]
+            vals = tuple(map(types.c_double, args[:-1])) + (nvar_arg_pars, var_arg_pars.ctypes.data_as(types.c_double_p))
+        else:
+            vals = tuple(map(types.c_double, args))
+
+        return function(*vals)
 
     @functools.wraps(evaluate)
     def __evaluate( output_array, *args ):
@@ -64,7 +75,17 @@ def create_cpp_function_proxy( module, name, ndata_pars, narg_pars ):
         '''
         op   = output_array.ctypes.data_as(types.c_double_p)
         ips  = tuple(d.ctypes.data_as(types.c_double_p) for d in args[:ndata_pars])
-        vals = tuple(map(types.c_double, args[ndata_pars:]))
+
+        if nvar_arg_pars:
+
+            # Variable arguments must be the last in the list
+            var_arg_pars = args[-1]
+
+            vals = tuple(map(types.c_double, args[ndata_pars:-1])) + (nvar_arg_pars, var_arg_pars.ctypes.data_as(types.c_double_p))
+
+        else:
+            vals = tuple(map(types.c_double, args[ndata_pars:]))
+
         return evaluate(types.c_int(len(output_array)), op, *ips, *vals)
 
     @functools.wraps(normalization)
@@ -72,45 +93,66 @@ def create_cpp_function_proxy( module, name, ndata_pars, narg_pars ):
         '''
         Internal wrapper.
         '''
-        return normalization(*tuple(map(types.c_double, args)))
+        if nvar_arg_pars:
+            var_arg_pars = args[-1 -2 * ndata_pars]
+            # Normal arguments are parse first
+            vals = tuple(map(types.c_double, args[:-1 -2 * ndata_pars]))
+            # Variable number of arguments follow
+            vals += (types.c_int(nvar_arg_pars), var_arg_pars.ctypes.data_as(types.c_double_p))
+            # Finally, the integration limits must be specified
+            vals += tuple(map(types.c_double, args[-2 * ndata_pars:]))
+        else:
+            vals = tuple(map(types.c_double, args))
+
+        return normalization(*vals)
 
     return __function, __evaluate, __normalization
 
 
-def access_pdf( name, ndata_pars, narg_pars ):
+def access_pdf( name, ndata_pars, narg_pars = 0, nvar_arg_pars = 0 ):
     '''
     Access a PDF with the given name and number of data and parameter arguments.
 
     :returns: PDF and normalization function.
     :rtype: tuple(function, function)
     '''
+    global PDF_MODULE_CACHE
     global PDF_CACHE
-
-    if name in PDF_CACHE:
-        return PDF_CACHE[name]
 
     if core.BACKEND == core.CPU:
 
-        # Compile the C++ code and load the library
         source = os.path.join(PACKAGE_PATH, f'cpp/{name}.cpp')
-        if not os.path.isfile(source):
-            raise RuntimeError(f'Function {name} does not exist in "{source}"')
 
-        compiler = ccompiler.new_compiler()
-        objects  = compiler.compile([source], output_dir=TMPDIR.name)
-        libname  = os.path.join(TMPDIR.name, f'lib{name}.so')
-        compiler.link(f'{name} library', objects, libname)
+        if name in PDF_MODULE_CACHE:
+            # Do not compile again the PDF source if it has already been done
+            module = PDF_MODULE_CACHE[name]
+        else:
+            # Compile the C++ code and load the library
+            if not os.path.isfile(source):
+                raise RuntimeError(f'Function {name} does not exist in "{source}"')
 
-        module = cdll.LoadLibrary(libname)
+            compiler = ccompiler.new_compiler()
+            objects  = compiler.compile([source], output_dir=TMPDIR.name)
+            libname  = os.path.join(TMPDIR.name, f'lib{name}.so')
+            compiler.link(f'{name} library', objects, libname)
+
+            module = cdll.LoadLibrary(libname)
+
+            PDF_MODULE_CACHE[name] = module
 
         # Get the functions
         try:
-            output = create_cpp_function_proxy(module, name, ndata_pars, narg_pars)
+            modname = name if not nvar_arg_pars else f'{name}{nvar_arg_pars}'
+
+            if modname in PDF_CACHE:
+                output = PDF_CACHE[modname]
+            else:
+                output = create_cpp_function_proxy(module, name, ndata_pars, narg_pars, nvar_arg_pars)
+                PDF_CACHE[modname] = output
+
         except AttributeError as ex:
             raise RuntimeError(f'Error loading function "{name}"; make sure that both "{name}" and "normalization" are defined inside "{source}"')
     else:
         raise NotImplementedError(f'Function not implemented for backend "{core.BACKEND}"')
-
-    PDF_CACHE[name] = output
 
     return output

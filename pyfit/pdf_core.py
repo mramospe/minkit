@@ -4,9 +4,11 @@ Base classes to define PDF types.
 
 from . import core
 from . import parameters
+from . import types
 
 import itertools
 import logging
+import numpy as np
 
 __all__ = ['AddPDFs', 'ProdPDFs']
 
@@ -96,20 +98,34 @@ class CachePDF(PDF):
 
 class SourcePDF(PDF):
 
-    def __init__( self, name, function, pdf, normalization, data_pars, args_pars ):
+    def __init__( self, name, function, pdf, normalization, data_pars, arg_pars = None, var_arg_pars = None ):
         '''
         '''
+        arg_pars = arg_pars or []
+
+        if var_arg_pars is not None:
+            var_arg_pars = list(var_arg_pars)
+        else:
+            var_arg_pars = []
+
         self.__function  = function
         self.__pdf       = pdf
         self.__norm      = normalization
+        self.__var_args  = parameters.Registry.from_list(var_arg_pars)
 
-        super(SourcePDF, self).__init__(name, parameters.Registry.from_list(data_pars), parameters.Registry.from_list(args_pars))
+        super(SourcePDF, self).__init__(name, parameters.Registry.from_list(data_pars), parameters.Registry.from_list(arg_pars + var_arg_pars))
 
     def __call__( self, data, values = None, norm_range = parameters.FULL, normalized = True ):
         '''
         '''
         # Determine the values to use
         fvals = self._process_values(values)
+
+        # If there is a variable number of arguments, must be at the end
+        if self.__var_args:
+            nvar_args = len(self.__var_args)
+            var_args_array = np.array(fvals[-nvar_args:], dtype=types.c_double)
+            fvals = fvals[:-nvar_args] + (var_args_array,)
 
         # Prepare the data arrays I/O
         out = core.zeros(len(data))
