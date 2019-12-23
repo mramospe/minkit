@@ -7,6 +7,7 @@ from . import pdf_core
 
 import functools
 import iminuit
+import contextlib
 
 __all__ = ['create_minuit', 'migrad_output_to_registry']
 
@@ -50,6 +51,7 @@ def registry_to_minuit_input( registry, errordef = 1. ):
     return dict(errordef=errordef, **values, **errors, **limits, **const)
 
 
+@contextlib.contextmanager
 @parse_fcn
 def create_minuit( fcn, pdf, data, norm_range = parameters.FULL ):
     '''
@@ -67,7 +69,7 @@ def create_minuit( fcn, pdf, data, norm_range = parameters.FULL ):
 
     evaluator = pdf_core.EvaluatorProxy(fcn, pdf, data, norm_range)
 
-    return iminuit.Minuit(evaluator,
-                          forced_parameters=tuple(all_args.keys()),
-                          pedantic=False,
-                          **cfg)
+    yield iminuit.Minuit(evaluator,
+                         forced_parameters=tuple(all_args.keys()),
+                         pedantic=False,
+                         **cfg)
