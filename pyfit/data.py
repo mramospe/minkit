@@ -54,7 +54,7 @@ class DataSet(object):
     def from_array( cls, arr, data_par, weights = None ):
         '''
         '''
-        return cls({data_par.name: arr}, parameters.Registry(data_par), weights)
+        return cls({data_par.name: arr}, parameters.Registry([(data_par.name, data_par)]), weights)
 
     @classmethod
     def from_records( cls, arr, data_pars, weights = None ):

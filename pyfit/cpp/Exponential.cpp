@@ -3,10 +3,22 @@
 extern "C" {
   /** Definition of an Exponential PDF.
    */
-  void Exponential( int len, double *out, double* in, double k ) {
+  static inline double shared_function( double x, double k ) {
+    return std::exp(k * x);
+  }
+
+  /** Definition of an Exponential PDF.
+   */
+  double function( double x, double k ) {
+    return shared_function(x, k);
+  }
+
+  /** Definition of the evaluation of an Exponential PDF.
+   */
+  void evaluate( int len, double *out, double* in, double k ) {
 
     for ( int i = 0; i < len; ++i )
-      out[i] = std::exp(k * in[i]);
+      out[i] = shared_function(in[i], k);
   }
 
   /** Normalization for an Exponential PDF.

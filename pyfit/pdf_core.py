@@ -8,7 +8,7 @@ from . import parameters
 import itertools
 import logging
 
-__all__ = ['AddPDFs']
+__all__ = ['AddPDFs', 'ProdPDFs']
 
 
 logger = logging.getLogger(__name__)
@@ -20,8 +20,8 @@ class PDF(object):
         '''
         '''
         self.name        = name
-        self.__data_pars = parameters.Registry(*data_pars)
-        self.__arg_pars  = parameters.Registry(*args_pars)
+        self.__data_pars = data_pars
+        self.__arg_pars  = args_pars
         super(PDF, self).__init__()
 
     def _process_values( self, values = None ):
@@ -80,7 +80,7 @@ class CachePDF(PDF):
         self.__cache = pdf(data, norm_range=norm_range)
         self.__norm  = pdf.norm(norm_range=norm_range)
 
-        super(CachePDF, self).__init__(pdf.name, pdf.data_pars.to_list(), pdf.args.to_list())
+        super(CachePDF, self).__init__(pdf.name, pdf.data_pars, pdf.args)
 
     def __call__( self, data, values = None, norm_range = parameters.FULL, normalized = True ):
         '''
@@ -96,12 +96,14 @@ class CachePDF(PDF):
 
 class SourcePDF(PDF):
 
-    def __init__( self, name, function, normalization, data_pars, args_pars ):
+    def __init__( self, name, function, pdf, normalization, data_pars, args_pars ):
         '''
         '''
         self.__function  = function
+        self.__pdf       = pdf
         self.__norm      = normalization
-        super(SourcePDF, self).__init__(name, data_pars, args_pars)
+
+        super(SourcePDF, self).__init__(name, parameters.Registry.from_list(data_pars), parameters.Registry.from_list(args_pars))
 
     def __call__( self, data, values = None, norm_range = parameters.FULL, normalized = True ):
         '''
@@ -114,7 +116,7 @@ class SourcePDF(PDF):
         data_arrs = tuple(data[n] for n in self.data_pars)
 
         # Call the real function
-        self.__function(out, *data_arrs, *fvals)
+        self.__pdf(out, *data_arrs, *fvals)
 
         # Calculate the normalization
         if normalized:
@@ -123,6 +125,15 @@ class SourcePDF(PDF):
             return out / n
         else:
             return out
+
+    def function( *data_values, values = None, norm_range = parameters.FULL ):
+        '''
+        '''
+        fvals = self._process_values(values)
+        nr = self._process_norm_range(norm_range)
+        v = self.__function(*data_values, *fvals)
+        n = self.__norm(*fvals, *nr)
+        return v / n
 
     def norm( self, values = None, norm_range = parameters.FULL ):
         '''
@@ -136,19 +147,22 @@ class MultiPDF(PDF):
 
     def __init__( self, name, pdfs, arg_pars = None ):
 
-        arg_pars = arg_pars or []
+        if arg_pars is not None:
+            arg_pars = parameters.Registry.from_list(arg_pars)
+        else:
+            arg_pars = parameters.Registry()
 
-        self.__pdfs = parameters.Registry(*pdfs)
+        self.__pdfs = parameters.Registry.from_list(pdfs)
 
         data_pars = parameters.Registry()
-        for p in pdfs:
-            data_pars.update(p.data_pars)
+        for pdf in pdfs:
+            data_pars.update(pdf.data_pars)
 
-        super(MultiPDF, self).__init__(name, data_pars.to_list(), arg_pars)
+        super(MultiPDF, self).__init__(name, data_pars, arg_pars)
 
     @property
     def all_args( self ):
-        args = self.args.clone()
+        args = parameters.Registry(self.args)
         for p in self.__pdfs.values():
             args.update(p.all_args)
         return args

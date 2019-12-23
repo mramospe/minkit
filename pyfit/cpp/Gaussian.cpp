@@ -6,16 +6,26 @@
 extern "C" {
   /** Definition of a Gaussian PDF.
    */
-  void Gaussian( int len, double *out, double* in, double c, double s ) {
+  static inline double shared_function( double x, double c, double s ) {
 
-    for ( int i = 0; i < len; ++i ) {
+    double d = x - c;
+    double s2 = s * s;
 
-      double x = in[i];
-      double d = x - c;
-      double s2 = s * s;
+    return std::exp(- d * d / ( 2. * s2 ) );
+  }
 
-      out[i] = std::exp(- d * d / ( 2. * s2 ) );
-    }
+  /** Definition of a Gaussian PDF.
+   */
+  double function( double x, double c, double s ) {
+    return shared_function(x, c, s);
+  }
+
+  /** Definition of the evaluation of a Gaussian PDF.
+   */
+  void evaluate( int len, double *out, double* in, double c, double s ) {
+
+    for ( int i = 0; i < len; ++i )
+      out[i] = shared_function(in[i], c, s);
   }
 
   /** Normalization for a Gaussian PDF.

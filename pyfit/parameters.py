@@ -24,6 +24,10 @@ class Parameter(object):
         self.bounds   = bounds # This sets the FULL range
         self.constant = (bounds is None) or constant
 
+    def __repr__( self ):
+        return '{}(name={}, value={}, bounds={}, error={}, constant={})'.format(
+            self.__class__.__name__, self.name, self.value, self.bounds, self.error, self.constant)
+
     @property
     def bounds( self ):
         return self.__bounds
@@ -36,17 +40,19 @@ class Parameter(object):
 
 class Registry(collections.OrderedDict):
 
-    def __init__( self, *args ):
+    def __init__( self, *args, **kwargs ):
         '''
         '''
-        super(Registry, self).__init__()
+        super(Registry, self).__init__(*args, **kwargs)
+
+    @classmethod
+    def from_list( cls, args ):
+        c = cls()
         for a in args:
-            if a.name in self:
+            if a.name in c:
                 raise KeyError(f'A parameter with name "{a.name}" already exists in the registry')
-            self[a.name] = a
+            c[a.name] = a
+        return c
 
     def to_list( self ):
         return list(self.values())
-
-    def clone( self ):
-        return self.__class__(*self.to_list())

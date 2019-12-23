@@ -14,13 +14,13 @@ def test_addpdfs():
     '''
     Test the "AddPDFs" class.
     '''
-    # Create an Exponential PDF
     m = pyfit.Parameter('m', bounds=(-5, +5))
+
+    # Create an Exponential PDF
     k = pyfit.Parameter('k', -0.05, bounds=(-0.1, 0))
     e = pyfit.Exponential('exponential', m, k)
 
     # Create a Gaussian PDF
-    m = pyfit.Parameter('m', bounds=(-5, +5))
     c = pyfit.Parameter('c', 0., bounds=(-2, +2))
     s = pyfit.Parameter('s', 1., bounds=(-3, +3))
     g = pyfit.Gaussian('gaussian', m, c, s)

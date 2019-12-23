@@ -16,12 +16,12 @@ class Exponential(pdf_core.SourcePDF):
         '''
         Create a new PDF with the parameters related to the data and the slope parameter.
         '''
-        pdf, norm = accessors.access_pdf('Exponential', ndata_pars=1, narg_pars=1)
+        func, pdf, norm = accessors.access_pdf('Exponential', ndata_pars=1, narg_pars=1)
 
         self.__x = x
         self.__k = k
 
-        super(Exponential, self).__init__(name, pdf, norm, [x], [k])
+        super(Exponential, self).__init__(name, func, pdf, norm, [x], [k])
 
 
 class Gaussian(pdf_core.SourcePDF):
@@ -40,10 +40,10 @@ class Gaussian(pdf_core.SourcePDF):
         :param sigma: standard deviation
         :type sigma: Parameter
         '''
-        pdf, norm = accessors.access_pdf('Gaussian', ndata_pars=1, narg_pars=2)
+        func, pdf, norm = accessors.access_pdf('Gaussian', ndata_pars=1, narg_pars=2)
 
         self.__x = x
         self.__c = center
         self.__s = sigma
 
-        super(Gaussian, self).__init__(name, pdf, norm, [x], [center, sigma])
+        super(Gaussian, self).__init__(name, func, pdf, norm, [x], [center, sigma])
