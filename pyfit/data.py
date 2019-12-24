@@ -6,6 +6,7 @@ from . import parameters
 from . import types
 
 import logging
+import numpy as np
 
 __all__ = ['DataSet', 'BinnedDataSet']
 
@@ -17,11 +18,9 @@ class DataSet(object):
     def __init__( self, data, pars, weights = None ):
         '''
         '''
-        self.__data = {name: core.array(arr) for name, arr in dict(data).items()}
-
+        self.__data = {p.name: core.array(data[p.name]) for p in pars.values()}
+        self.__data_pars = pars
         self.__weights = weights if weights is None else core.array(weights)
-
-        assert data.keys() == self.__data.keys()
 
         valid = None
         for p in pars.values():
@@ -46,8 +45,43 @@ class DataSet(object):
         for name, array in self.__data.items():
             self.__data[name] = array[valid]
 
+    def subset( self, cond ):
+        '''
+        '''
+        if self.weights is None:
+            weights = None
+        else:
+            weights = self.weights[cond]
+        return self.__class__({p.name: self[p.name][cond] for p in self.data_pars.values()}, self.data_pars, weights)
+
+    def add( self, other, inplace = False ):
+        '''
+        '''
+        dct = {}
+        for n, p in self.__data.items():
+            dct[n] = core.concatenate(p, other[n])
+
+        if self.weights is not None:
+            if other.weights is None:
+                raise RuntimeError('Attempt to merge samples with and without weihts')
+            weights = core.concatenate(self.weights, other.weights)
+        else:
+            weights = None
+
+        if inplace:
+            for n in self.__data:
+                self.__data[n] = dct[n]
+            return self
+        else:
+            return self.__class__(dct, self.__data_pars, weights)
+
     @property
-    def weights():
+    def data_pars( self ):
+        return self.__data_pars
+    
+
+    @property
+    def weights( self ):
         return self.__weights
 
     @classmethod
@@ -103,3 +137,27 @@ class BinnedDataSet(object):
 
     def __len__( self ):
         return len(self.__centers[tuple(self.__centers.keys())[0]])
+
+
+def evaluation_grid( data_pars, size ):
+    '''
+    '''
+    values = []
+    for p in data_pars.values():
+        values.append(np.linspace(*p.bounds, size))
+
+    data = {p.name: a.flatten() for p, a in zip(data_pars.values(), np.meshgrid(*values))}
+
+    return DataSet(data, data_pars)
+
+
+def uniform_sample( data_pars, size ):
+    '''
+    '''
+    values = []
+    for p in data_pars.values():
+        values.append(np.random.uniform(*p.bounds, size)) # Need a core.meshgrid
+
+    data = {p.name: a.flatten() for p, a in zip(data_pars.values(), np.meshgrid(*values))}
+
+    return DataSet(data, data_pars)

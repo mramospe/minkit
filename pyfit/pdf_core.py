@@ -3,6 +3,7 @@ Base classes to define PDF types.
 '''
 
 from . import core
+from . import data
 from . import parameters
 from . import types
 
@@ -64,6 +65,31 @@ class PDF(object):
             return CachePDF(self, data, norm_range)
         else:
             return self
+
+    def generate( self, size = 10000, values = None, mapsize = 100, safe_factor = 1.1, drop_excess = True ):
+        '''
+        '''
+        grid = data.evaluation_grid(self.data_pars, mapsize)
+
+        m = safe_factor * core.max(self.__call__(grid, values))
+
+        result = None
+
+        while result is None or len(result) < size:
+            
+            d = data.uniform_sample(self.data_pars, size)
+            f = self.__call__(d, values)
+            u = core.random_uniform(0, m, len(d))
+
+            if result is None:
+                result = d.subset(f < u)
+            else:
+                result.add(d.subset(f < u), inplace=True)
+
+        if drop_excess:
+            return result.subset(slice(size))
+        else:
+            return result
 
     @property
     def constant( self ):

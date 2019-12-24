@@ -3,11 +3,12 @@ Definition of the backend where to store the data and run the jobs.
 '''
 import functools
 import logging
+import numpy as np
 import os
 
 from . import types
 
-__all__ = ['array', 'extract_ndarray', 'initialize', 'random_uniform', 'zeros']
+__all__ = ['array', 'extract_ndarray', 'initialize', 'random_uniform', 'zeros', 'max', 'min', 'concatenate']
 
 # Current backend
 BACKEND = None
@@ -49,7 +50,6 @@ def array( *args, **kwargs ):
     :rtype: numpy.ndarray, pyopencl.Buffer or pycuda.gpuarray
     '''
     if BACKEND is CPU:
-        import numpy as np
         return np.array(*args, dtype=types.cpu_type, **kwargs)
     else:
         raise NotImplementedError(f'Function not implemented for backend "{BACKEND}"')
@@ -66,7 +66,6 @@ def extract_ndarray( obj ):
     :rtype: numpy.ndarray
     '''
     if BACKEND is CPU:
-        import numpy as np
         return np.array(obj)
     else:
         raise NotImplementedError(f'Function not implemented for backend "{BACKEND}"')
@@ -87,7 +86,16 @@ def initialize( backend = CPU, interactive = False ):
 
 
 @with_backend
-def random_uniform( size ):
+def concatenate( *arrs ):
+    '''
+    '''
+    if BACKEND == CPU:
+        return np.concatenate(arrs)
+    else:
+        raise NotImplementedError(f'Function not implemented for backend "{BACKEND}"')
+
+@with_backend
+def random_uniform( xmin, xmax, size ):
     '''
     Create data following an uniform distribution between 0 and 1, with size "size".
 
@@ -97,8 +105,7 @@ def random_uniform( size ):
     :rtype: numpy.ndarray, pyopencl.Buffer or pycuda.gpuarray
     '''
     if BACKEND == CPU:
-        import numpy as np
-        return np.random.uniform(0, 1, size)
+        return np.random.uniform(xmin, xmax, size)
     else:
         raise NotImplementedError(f'Function not implemented for backend "{BACKEND}"')
 
@@ -108,7 +115,6 @@ def log( array ):
     '''
     '''
     if BACKEND is CPU:
-        import numpy as np
         return np.log(array)
     else:
         raise NotImplementedError(f'Function not implemented for backend "{BACKEND}"')
@@ -119,11 +125,29 @@ def sum( array ):
     '''
     '''
     if BACKEND is CPU:
-        import numpy as np
         return np.sum(array)
     else:
         raise NotImplementedError(f'Function not implemented for backend "{BACKEND}"')
 
+
+@with_backend
+def max( arr ):
+    '''
+    '''
+    if BACKEND == CPU:
+        return np.max(arr)
+    else:
+        raise NotImplementedError(f'Function not implemented for backend "{BACKEND}"')
+
+
+@with_backend
+def min( arr ):
+    '''
+    '''
+    if BACKEND == CPU:
+        return np.min(arr)
+    else:
+        raise NotImplementedError(f'Function not implemented for backend "{BACKEND}"')
 
 @with_backend
 def zeros( *args, **kwargs ):
@@ -135,7 +159,6 @@ def zeros( *args, **kwargs ):
     :rtype: numpy.ndarray, pyopencl.Buffer or pycuda.gpuarray
     '''
     if BACKEND is CPU:
-        import numpy as np
         return np.zeros(*args, dtype=types.cpu_type, **kwargs)
     else:
         raise NotImplementedError(f'Function not implemented for backend "{BACKEND}"')

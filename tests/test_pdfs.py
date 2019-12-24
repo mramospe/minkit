@@ -68,6 +68,8 @@ def test_polynomial():
 
     _compare_with_numpy(pol0, data, m)
 
+    rndm = pol0.generate(1000)
+
     # Test straight line
     pol1 = pyfit.Polynomial('pol1', m, p1)
 
