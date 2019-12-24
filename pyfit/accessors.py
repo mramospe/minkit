@@ -21,7 +21,7 @@ PDF_MODULE_CACHE = {}
 PDF_CACHE = {}
 
 
-def create_cpp_function_proxy( module, name, ndata_pars, narg_pars = 0, nvar_arg_pars = 0 ):
+def create_cpp_function_proxy( module, name, ndata_pars, narg_pars = 0, nvar_arg_pars = None ):
     '''
     Create a proxy for C++ that handles correctly the input and output data
     types of a fucntion.
@@ -34,7 +34,7 @@ def create_cpp_function_proxy( module, name, ndata_pars, narg_pars = 0, nvar_arg
     # Define the types of the input arguments
     partypes = [types.c_double for _ in range(narg_pars)]
 
-    if nvar_arg_pars:
+    if nvar_arg_pars is not None:
         partypes += [types.c_int, types.c_double_p]
 
     # Define the types passed to the normalization function
@@ -60,7 +60,7 @@ def create_cpp_function_proxy( module, name, ndata_pars, narg_pars = 0, nvar_arg
         '''
         Internal wrapper.
         '''
-        if nvar_arg_pars:
+        if nvar_arg_pars is not None:
             var_arg_pars = args[-1]
             vals = tuple(map(types.c_double, args[:-1])) + (nvar_arg_pars, var_arg_pars.ctypes.data_as(types.c_double_p))
         else:
@@ -76,7 +76,7 @@ def create_cpp_function_proxy( module, name, ndata_pars, narg_pars = 0, nvar_arg
         op   = output_array.ctypes.data_as(types.c_double_p)
         ips  = tuple(d.ctypes.data_as(types.c_double_p) for d in args[:ndata_pars])
 
-        if nvar_arg_pars:
+        if nvar_arg_pars is not None:
 
             # Variable arguments must be the last in the list
             var_arg_pars = args[-1]
@@ -93,7 +93,7 @@ def create_cpp_function_proxy( module, name, ndata_pars, narg_pars = 0, nvar_arg
         '''
         Internal wrapper.
         '''
-        if nvar_arg_pars:
+        if nvar_arg_pars is not None:
             var_arg_pars = args[-1 -2 * ndata_pars]
             # Normal arguments are parse first
             vals = tuple(map(types.c_double, args[:-1 -2 * ndata_pars]))
@@ -109,7 +109,7 @@ def create_cpp_function_proxy( module, name, ndata_pars, narg_pars = 0, nvar_arg
     return __function, __evaluate, __normalization
 
 
-def access_pdf( name, ndata_pars, narg_pars = 0, nvar_arg_pars = 0 ):
+def access_pdf( name, ndata_pars, narg_pars = 0, nvar_arg_pars = None ):
     '''
     Access a PDF with the given name and number of data and parameter arguments.
 
@@ -142,7 +142,7 @@ def access_pdf( name, ndata_pars, narg_pars = 0, nvar_arg_pars = 0 ):
 
         # Get the functions
         try:
-            modname = name if not nvar_arg_pars else f'{name}{nvar_arg_pars}'
+            modname = name if nvar_arg_pars is not None else f'{name}{nvar_arg_pars}'
 
             if modname in PDF_CACHE:
                 output = PDF_CACHE[modname]

@@ -47,7 +47,7 @@ class Polynomial(pdf_core.SourcePDF):
     def  __init__( self, name, x, *coeffs ):
         '''
         Build the class given the name, parameter related to data and the coefficients.
-        Coefficients must be sorted from higher to lower order.
+        Coefficients must be sorted from lower to higher order.
 
         :param name: name of the PDF.
         :type name: str

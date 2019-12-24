@@ -105,13 +105,14 @@ class SourcePDF(PDF):
 
         if var_arg_pars is not None:
             var_arg_pars = list(var_arg_pars)
+            self.__var_args = parameters.Registry.from_list(var_arg_pars)
         else:
             var_arg_pars = []
+            self.__var_args = None
 
         self.__function  = function
         self.__pdf       = pdf
         self.__norm      = normalization
-        self.__var_args  = parameters.Registry.from_list(var_arg_pars)
 
         super(SourcePDF, self).__init__(name, parameters.Registry.from_list(data_pars), parameters.Registry.from_list(arg_pars + var_arg_pars))
 
@@ -122,7 +123,7 @@ class SourcePDF(PDF):
         fvals = self._process_values(values)
 
         # If there is a variable number of arguments, must be at the end
-        if self.__var_args:
+        if self.__var_args is not None:
             nvar_args = len(self.__var_args)
             var_args_array = np.array(fvals[-nvar_args:], dtype=types.c_double)
             fvals = fvals[:-nvar_args] + (var_args_array,)

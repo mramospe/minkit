@@ -57,19 +57,22 @@ def test_polynomial():
     Test the "Polynomial" PDF.
     '''
     m = pyfit.Parameter('m', bounds=(-5, +5))
-    p0 = pyfit.Parameter('p0', 1.)
-    p1 = pyfit.Parameter('p1', 2.)
-    p2 = pyfit.Parameter('p2', 3.)
+    p1 = pyfit.Parameter('p1', 1.)
+    p2 = pyfit.Parameter('p2', 2.)
+    p3 = pyfit.Parameter('p3', 3.)
 
     # Test constant PDF
-    pol0 = pyfit.Polynomial('pol0', m, p0)
+    pol0 = pyfit.Polynomial('pol0', m)
 
     data = np.random.uniform(-5, 5, 100000)
 
     _compare_with_numpy(pol0, data, m)
 
     # Test straight line
-    pol1 = pyfit.Polynomial('pol1', m, p1, p0)
+    pol1 = pyfit.Polynomial('pol1', m, p1)
 
     # Test a parabola
-    pol2 = pyfit.Polynomial('pol2', m, p2, p1, p0)
+    pol2 = pyfit.Polynomial('pol2', m, p1, p2)
+
+    # Test a three-degree polynomial
+    pol2 = pyfit.Polynomial('pol2', m, p1, p2, p3)
