@@ -5,7 +5,7 @@ from . import accessors
 from . import parameters
 from . import pdf_core
 
-__all__ = ['Exponential', 'Gaussian', 'Polynomial']
+__all__ = ['Chebyshev', 'Exponential', 'Gaussian', 'Polynomial']
 
 
 class Exponential(pdf_core.SourcePDF):
@@ -59,3 +59,24 @@ class Polynomial(pdf_core.SourcePDF):
         func, pdf, norm = accessors.access_pdf('Polynomial', ndata_pars=1, nvar_arg_pars=len(coeffs))
         super(Polynomial, self).__init__(name, func, pdf, norm, [x], None, coeffs)
 
+
+class Chebyshev(pdf_core.SourcePDF):
+    '''
+    Definition of a Chebyshev polynomial PDF.
+    '''
+    def __init__( self, name, x, *coeffs ):
+        '''
+        Build the class given the name, parameter related to data and coefficients.
+        Coefficients must be sorted from lower to higher order.
+        Due to the normalization requirement, the first coefficient corresponds to the
+        Chebyshev polynomial of n = 1, thus a straight line.
+
+        :param name: name of the PDF.
+        :type name: str
+        :param x: parameter related to the data.
+        :type x: Parameter
+        :param coeffs: coefficients for the polynomial
+        :type coeffs: tuple(Parameter)
+        '''
+        func, pdf, norm = accessors.access_pdf('Chebyshev', ndata_pars=1, nvar_arg_pars=len(coeffs))
+        super(Chebyshev, self).__init__(name, func, pdf, norm, [x], None, coeffs)
