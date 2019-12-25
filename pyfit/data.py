@@ -88,7 +88,7 @@ class DataSet(object):
     def from_array( cls, arr, data_par, weights = None ):
         '''
         '''
-        return cls({data_par.name: arr}, parameters.Registry([(data_par.name, data_par)]), weights)
+        return cls({data_par.name: core.array(arr)}, parameters.Registry([(data_par.name, data_par)]), weights)
 
     @classmethod
     def from_records( cls, arr, data_pars, weights = None ):
@@ -146,7 +146,7 @@ def evaluation_grid( data_pars, size ):
     for p in data_pars.values():
         values.append(np.linspace(*p.bounds, size))
 
-    data = {p.name: a.flatten() for p, a in zip(data_pars.values(), np.meshgrid(*values))}
+    data = {p.name: a for p, a in zip(data_pars.values(), core.meshgrid(*values))}
 
     return DataSet(data, data_pars)
 
@@ -156,8 +156,8 @@ def uniform_sample( data_pars, size ):
     '''
     values = []
     for p in data_pars.values():
-        values.append(np.random.uniform(*p.bounds, size)) # Need a core.meshgrid
+        values.append(np.random.uniform(*p.bounds, size))
 
-    data = {p.name: a.flatten() for p, a in zip(data_pars.values(), np.meshgrid(*values))}
+    data = {p.name: a for p, a in zip(data_pars.values(), core.meshgrid(*values))}
 
     return DataSet(data, data_pars)

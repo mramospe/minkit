@@ -14,6 +14,8 @@ import numpy as np
 __all__ = ['AddPDFs', 'ProdPDFs']
 
 
+NORM_SIZE = 1000000
+
 logger = logging.getLogger(__name__)
 
 
@@ -136,9 +138,10 @@ class SourcePDF(PDF):
             var_arg_pars = []
             self.__var_args = None
 
-        self.__function  = function
-        self.__pdf       = pdf
-        self.__norm      = normalization
+        self.__function = function
+        self.__pdf      = pdf
+        self.__norm     = normalization
+        self.norm_size  = NORM_SIZE
 
         super(SourcePDF, self).__init__(name, parameters.Registry.from_list(data_pars), parameters.Registry.from_list(arg_pars + var_arg_pars))
 
@@ -163,11 +166,30 @@ class SourcePDF(PDF):
 
         # Calculate the normalization
         if normalized:
-            nr = self._process_norm_range(norm_range)
-            n = self.__norm(*fvals, *nr)
-            return out / n
+            if self.__norm is not None:
+                # There is an analytical approach to calculate the normalization
+                nr = self._process_norm_range(norm_range)
+                n = self.__norm(*fvals, *nr)
+                return out / n
+            else:
+                # Must use a numerical normalization
+                return out / self.numerical_normalization(values, norm_range)
         else:
             return out
+
+    def numerical_normalization( self, values = None, norm_range = parameters.FULL ):
+        '''
+        '''
+        grid = data.evaluation_grid(self.data_pars, self.norm_size**len(self.data_pars))
+
+        a = 1.
+        for p in self.data_pars.values():
+            pmin, pmax = p.ranges[norm_range]
+            a *= (pmax - pmin) * 1. / self.norm_size
+
+        i = self.__call__(grid, values, normalized=False)
+
+        return core.sum(i) * a
 
     def function( *data_values, values = None, norm_range = parameters.FULL ):
         '''
@@ -181,9 +203,12 @@ class SourcePDF(PDF):
     def norm( self, values = None, norm_range = parameters.FULL ):
         '''
         '''
-        fvals = self._process_values(values)
-        nr = self._process_norm_range(norm_range)
-        return self.__norm(*fvals, *nr)
+        if self.__norm is not None:
+            fvals = self._process_values(values)
+            nr = self._process_norm_range(norm_range)
+            return self.__norm(*fvals, *nr)
+        else:
+            return self.numerical_normalization(values, norm_range)
 
 
 class MultiPDF(PDF):

@@ -85,6 +85,15 @@ def initialize( backend = CPU, interactive = False ):
     BACKEND = backend
 
 
+def meshgrid( *arrays ):
+    '''
+    '''
+    if BACKEND == CPU:
+        return tuple(map(np.ndarray.flatten, np.meshgrid(*arrays)))
+    else:
+        raise NotImplementedError(f'Function not implemented for backend "{BACKEND}"')
+
+
 @with_backend
 def concatenate( *arrs ):
     '''
@@ -93,6 +102,7 @@ def concatenate( *arrs ):
         return np.concatenate(arrs)
     else:
         raise NotImplementedError(f'Function not implemented for backend "{BACKEND}"')
+
 
 @with_backend
 def random_uniform( xmin, xmax, size ):

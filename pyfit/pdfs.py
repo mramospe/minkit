@@ -5,7 +5,31 @@ from . import accessors
 from . import parameters
 from . import pdf_core
 
-__all__ = ['Chebyshev', 'Exponential', 'Gaussian', 'Polynomial']
+import logging
+
+__all__ = ['Amoroso', 'Chebyshev', 'Exponential', 'Gaussian', 'Polynomial']
+
+logger = logging.getLogger(__name__)
+
+
+class Amoroso(pdf_core.SourcePDF):
+    '''
+    Definition of the Amoroso PDF.
+    '''
+    def __init__( self, name, x, a, theta, alpha, beta ):
+        '''
+        Create a new PDF with the name, parameter related to the data and the argument parameters.
+
+        .. warning: This function is unstable and the evaluation can explode easily for certain combination of parameters, as the normalization is currently done numerically.
+        '''
+        func, pdf, norm = accessors.access_pdf('Amoroso', ndata_pars=1, narg_pars=4)
+
+        if alpha.value <= 0:
+            logger.warning('Parameter "alpha" for the {self.__class__.__name__} PDF must be greater than zero; check its initial value')
+        if alpha.bounds is not None and alpha.bounds[0] <= 0:
+            logger.warning('Parameter "alpha" for the {self.__class__.__name__} PDF must be greater than zero; check its bounds')
+
+        super(Amoroso, self).__init__(name, func, pdf, norm, [x], [a, theta, alpha, beta])
 
 
 class Exponential(pdf_core.SourcePDF):

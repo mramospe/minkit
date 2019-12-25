@@ -25,6 +25,23 @@ def _compare_with_numpy( pdf, numpy_data, data_par ):
     assert np.allclose(np.sum(pdf_values), np.sum(values))
 
 
+def test_amoroso():
+    '''
+    Test the "Amoroso" PDF.
+    '''
+    # This is actually the chi-square distribution with one degree of freedom
+    m = pyfit.Parameter('m', bounds=(2, 10))
+    a = pyfit.Parameter('a', 0)
+    theta = pyfit.Parameter('theta', 2)
+    alpha = pyfit.Parameter('alpha', 0.5)
+    beta  = pyfit.Parameter('beta', 1)
+    pdf = pyfit.Amoroso('amoroso', m, a, theta, alpha, beta)
+
+    data = np.random.chisquare(1, 100000)
+
+    #_compare_with_numpy(pdf, data, m)
+
+
 def test_exponential():
     '''
     Test the "Exponential" PDF
@@ -36,6 +53,8 @@ def test_exponential():
     data = np.random.exponential(-1. / k.value, 100000)
 
     _compare_with_numpy(e, data, m)
+
+    assert np.allclose(e.numerical_normalization(), e.norm())
 
 
 def test_gaussian():
@@ -50,6 +69,8 @@ def test_gaussian():
     data = np.random.normal(c.value, s.value, 100000)
 
     _compare_with_numpy(g, data, m)
+
+    assert np.allclose(g.numerical_normalization(), g.norm())
 
 
 def test_polynomial():
@@ -69,6 +90,8 @@ def test_polynomial():
     _compare_with_numpy(pol0, data, m)
 
     rndm = pol0.generate(1000)
+
+    assert np.allclose(pol0.numerical_normalization(), pol0.norm())
 
     # Test straight line
     pol1 = pyfit.Polynomial('pol1', m, p1)

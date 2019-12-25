@@ -9,6 +9,7 @@ from distutils import ccompiler
 
 from ctypes import cdll
 import functools
+import numpy as np
 import os
 import tempfile
 
@@ -29,7 +30,11 @@ def create_cpp_function_proxy( module, name, ndata_pars, narg_pars = 0, nvar_arg
     # Get the functions
     function      = module.function
     evaluate      = module.evaluate
-    normalization = module.normalization
+
+    if hasattr(module, 'normalization'):
+        normalization = module.normalization
+    else:
+        normalization = None
 
     # Define the types of the input arguments
     partypes = [types.c_double for _ in range(narg_pars)]
@@ -37,23 +42,11 @@ def create_cpp_function_proxy( module, name, ndata_pars, narg_pars = 0, nvar_arg
     if nvar_arg_pars is not None:
         partypes += [types.c_int, types.c_double_p]
 
-    # Define the types passed to the normalization function
+    # Define the types passed to the function
     functiontypes = [types.c_double for _ in range(ndata_pars)]
     functiontypes += partypes
     function.argtypes = functiontypes
     function.restype = types.c_double
-
-    # Define the types for the arguments passed to the evaluate function
-    argtypes = [types.c_int, types.c_double_p]
-    argtypes += [types.c_double_p for _ in range(ndata_pars)]
-    argtypes += partypes
-    evaluate.argtypes = argtypes
-
-    # Define the types passed to the normalization function
-    normtypes = partypes
-    normtypes += [types.c_double for _ in range(2 * ndata_pars)]
-    normalization.argtypes = normtypes
-    normalization.restype = types.c_double
 
     @functools.wraps(function)
     def __function( *args ):
@@ -68,6 +61,12 @@ def create_cpp_function_proxy( module, name, ndata_pars, narg_pars = 0, nvar_arg
 
         return function(*vals)
 
+    # Define the types for the arguments passed to the evaluate function
+    argtypes = [types.c_int, types.c_double_p]
+    argtypes += [types.c_double_p for _ in range(ndata_pars)]
+    argtypes += partypes
+    evaluate.argtypes = argtypes
+    
     @functools.wraps(evaluate)
     def __evaluate( output_array, *args ):
         '''
@@ -88,23 +87,37 @@ def create_cpp_function_proxy( module, name, ndata_pars, narg_pars = 0, nvar_arg
 
         return evaluate(types.c_int(len(output_array)), op, *ips, *vals)
 
-    @functools.wraps(normalization)
-    def __normalization( *args ):
-        '''
-        Internal wrapper.
-        '''
-        if nvar_arg_pars is not None:
-            var_arg_pars = args[-1 -2 * ndata_pars]
-            # Normal arguments are parse first
-            vals = tuple(map(types.c_double, args[:-1 -2 * ndata_pars]))
-            # Variable number of arguments follow
-            vals += (types.c_int(nvar_arg_pars), var_arg_pars.ctypes.data_as(types.c_double_p))
-            # Finally, the integration limits must be specified
-            vals += tuple(map(types.c_double, args[-2 * ndata_pars:]))
-        else:
-            vals = tuple(map(types.c_double, args))
+    if normalization is not None:
 
-        return normalization(*vals)
+        # Define the types passed to the normalization function
+        normtypes = partypes
+        normtypes += [types.c_double for _ in range(2 * ndata_pars)]
+        normalization.argtypes = normtypes
+        normalization.restype = types.c_double
+
+        @functools.wraps(normalization)
+        def __normalization( *args ):
+            '''
+            Internal wrapper.
+            '''
+            if nvar_arg_pars is not None:
+                if nvar_arg_pars == 0:
+                    # This is special case, must handle index carefully
+                    var_arg_pars = np.array([], dtype=types.c_double)
+                else:
+                    var_arg_pars = args[-1 -2 * ndata_pars]
+                # Normal arguments are parse first
+                vals = tuple(map(types.c_double, args[:-1 -2 * ndata_pars]))
+                # Variable number of arguments follow
+                vals += (types.c_int(nvar_arg_pars), var_arg_pars.ctypes.data_as(types.c_double_p))
+                # Finally, the integration limits must be specified
+                vals += tuple(map(types.c_double, args[-2 * ndata_pars:]))
+            else:
+                vals = tuple(map(types.c_double, args))
+
+            return normalization(*vals)
+    else:
+        __normalization = None
 
     return __function, __evaluate, __normalization
 
