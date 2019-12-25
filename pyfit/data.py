@@ -14,9 +14,19 @@ logger = logging.getLogger(__name__)
 
 
 class DataSet(object):
-
+    '''
+    Definition of a set of data.
+    '''
     def __init__( self, data, pars, weights = None ):
         '''
+        Build the class from a data sample which can be indexed as a dictionary, the data parameters and a possible set of weights.
+
+        :param data: data to load.
+        :type data: dict, numpy.ndarray
+        :param pars: data parameters.
+        :type pars: Registry(str, Parameter)
+        :param weights: possible set of weights.
+        :type weights: numpy.ndarray or None
         '''
         self.__data = {p.name: core.array(data[p.name]) for p in pars.values()}
         self.__data_pars = pars
@@ -45,17 +55,37 @@ class DataSet(object):
         for name, array in self.__data.items():
             self.__data[name] = array[valid]
 
-    def subset( self, cond ):
+    def __getitem__( self, var ):
         '''
+        Get the array of data for the given parameter.
+
+        :returns: data array.
+        :rtype: numpy.ndarray
         '''
-        if self.weights is None:
-            weights = None
-        else:
-            weights = self.weights[cond]
-        return self.__class__({p.name: self[p.name][cond] for p in self.data_pars.values()}, self.data_pars, weights)
+        return self.__data[var]
+
+    def __len__( self ):
+        '''
+        Get the size of the sample.
+
+        :returns: size of the sample.
+        :rtype: int
+        '''
+        return len(self.__data[tuple(self.__data.keys())[0]])
 
     def add( self, other, inplace = False ):
         '''
+        Add a new data set to this one.
+        If "inplace" is set to True, then the data is directly added to
+        the existing class.
+
+        :param other: data set to add.
+        :type other: DataSet
+        :param inplace: whether to do the operation in-place or not.
+        :type inplace: bool
+        :returns: new data set if "inplace" is set to False or otherwise this class, \
+        in both cases with the data arrays concatenated.
+        :rtype: DataSet
         '''
         dct = {}
         for n, p in self.__data.items():
@@ -77,22 +107,39 @@ class DataSet(object):
 
     @property
     def data_pars( self ):
-        return self.__data_pars
-    
+        '''
+        Get the data parameters associated to this sample.
 
-    @property
-    def weights( self ):
-        return self.__weights
+        :returns: data parameters associated to this sample.
+        :rtype: Registry(str, Parameter)
+        '''
+        return self.__data_pars
 
     @classmethod
     def from_array( cls, arr, data_par, weights = None ):
         '''
+        Build the class from a single array.
+
+        :param arr: array of data.
+        :type arr: numpy.ndarray
+        :param data_pars: data parameters.
+        :type data_pars: Registry(name, Parameter)
+        :param weights: possible weights to use.
+        :type weights: numpy.ndarray or None
         '''
         return cls({data_par.name: core.array(arr)}, parameters.Registry([(data_par.name, data_par)]), weights)
 
     @classmethod
     def from_records( cls, arr, data_pars, weights = None ):
         '''
+        Build the class from a :class:`numpy.ndarray` object.
+
+        :param arr: array of data.
+        :type arr: numpy.ndarray
+        :param data_pars: data parameters.
+        :type data_pars: Registry(name, Parameter)
+        :param weights: possible weights to use.
+        :type weights: numpy.ndarray or None
         '''
         dct = {}
         for p in data_pars:
@@ -101,25 +148,58 @@ class DataSet(object):
             dct[p] = arr[p]
         return cls(dct, data_pars, weights=weights)
 
+    def subset( self, cond ):
+        '''
+        Get a subset of this data set.
+
+        :param cond: condition to apply to the data arrays to build the new data set.
+        :type cond: numpy.ndarray or slice
+        :returns: new data set.
+        :rtype: DataSet
+        '''
+        if self.weights is None:
+            weights = None
+        else:
+            weights = self.weights[cond]
+        return self.__class__({p.name: self[p.name][cond] for p in self.data_pars.values()}, self.data_pars, weights)
+
     def to_records():
         '''
+        Convert this class into a :class:`numpy.ndarray` object.
+
+        :returns: this object as a a :class:`numpy.ndarray` object.
+        :rtype: numpy.ndarray
         '''
         out = np.zeros(len(self), dtype=[(n, types.cpu_type) for n in self.__data])
         for n, v in self.__data.items():
             out[n] = core.extract_ndarray(v)
         return out
 
-    def __getitem__( self, var ):
-        return self.__data[var]
+    @property
+    def weights( self ):
+        '''
+        Get the weights of the sample.
 
-    def __len__( self ):
-        return len(self.__data[tuple(self.__data.keys())[0]])
+        :returns: weights of the sample.
+        :rtype: numpy.ndarray or None
+        '''
+        return self.__weights
 
 
 class BinnedDataSet(object):
-
+    '''
+    A binned data set.
+    '''
     def __init__( self, centers, data_pars, values ):
         '''
+        A binned data set.
+
+        :param centers: centers of the bins.
+        :type centers: numpy.ndarray
+        :param data_pars: data parameters.
+        :type data_pars: Registry(name, Parameter)
+        :param values: values of the data for each center.
+        :type values: numpy.ndarray
         '''
         super(BinnedDataSet, self).__init__()
 
@@ -129,45 +209,99 @@ class BinnedDataSet(object):
 
         assert centers.keys() == self.__centers.keys()
 
+    def __getitem__( self, var ):
+        '''
+        Get the centers of the bins for the given parameter.
+
+        :returns: centers of the bins.
+        :rtype: numpy.ndarray
+        '''
+        return self.__centers[var]
+
+    def __len__( self ):
+        '''
+        Get the size of the sample.
+
+        :returns: size of the sample.
+        :rtype: int
+        '''
+        return len(self.__centers[tuple(self.__centers.keys())[0]])
+
+    @property
+    def data_pars( self ):
+        '''
+        Get the data parameters of this sample.
+
+        :returns: data parameters of this sample.
+        :rtype: Registry(str, Parameter)
+        '''
+        return self.__data_pars
+
     @classmethod
     def from_array( cls, centers, data_par, values ):
         '''
+        Build the class from the array of centers and values.
+
+        :param centers: centers of the bins.
+        :type centers: numpy.ndarray
+        :param data_par: data parameter.
+        :type data_par: Parameter
+        :param values: values at each bin.
+        :type values: numpy.ndarray
+        :returns: binned data set.
+        :rtype: BinnedDataSet
         '''
         return cls({data_par.name: core.array(centers)}, parameters.Registry([(data_par.name, data_par)]), values)
 
     @property
-    def data_pars( self ):
-        return self.__data_pars
-
-    @property
     def values( self ):
+        '''
+        Get the values of the data set.
+
+        :returns: values of the data set.
+        :rtype: numpy.ndarray
+        '''
         return self.__values
 
-    def __getitem__( self, var ):
-        return self.__centers[var]
 
-    def __len__( self ):
-        return len(self.__centers[tuple(self.__centers.keys())[0]])
-
-
-def evaluation_grid( data_pars, size ):
+def evaluation_grid( data_pars, size, eval_range = parameters.FULL ):
     '''
+    Create a grid of points to evaluate a :class:`PDF` object.
+
+    :param data_pars: data parameters.
+    :type data_pars: Registry(str, Parameter)
+    :param size: number of entries in the output sample.
+    :type size: int
+    :param eval_range: name of the range to be evaluated.
+    :type eval_range: str
+    :returns: uniform sample.
+    :rtype: DataSet
     '''
     values = []
     for p in data_pars.values():
-        values.append(np.linspace(*p.bounds, size))
+        values.append(np.linspace(*p.ranges[eval_range], size))
 
     data = {p.name: a for p, a in zip(data_pars.values(), core.meshgrid(*values))}
 
     return DataSet(data, data_pars)
 
 
-def uniform_sample( data_pars, size ):
+def uniform_sample( data_pars, size, eval_range = parameters.FULL ):
     '''
+    Generate a sample following an uniform distribution in all data parameters.
+
+    :param data_pars: data parameters.
+    :type data_pars: Registry(name, Parameter)
+    :param size: number of entries in the output sample.
+    :type size: int
+    :param eval_range: name of the range to be evaluated.
+    :type eval_range: str
+    :returns: uniform sample.
+    :rtype: DataSet
     '''
     values = []
     for p in data_pars.values():
-        values.append(core.random_uniform(*p.bounds, size))
+        values.append(core.random_uniform(*p.ranges[eval_range], size))
 
     data = {p.name: a for p, a in zip(data_pars.values(), core.meshgrid(*values))}
 
