@@ -10,6 +10,9 @@ import numpy as np
 
 __all__ = ['DataSet', 'BinnedDataSet']
 
+BINNED = 'binned'
+UNBINNED = 'unbinned'
+
 logger = logging.getLogger(__name__)
 
 
@@ -17,7 +20,7 @@ class DataSet(object):
     '''
     Definition of a set of data.
     '''
-    def __init__( self, data, pars, weights = None ):
+    def __init__( self, data, pars, weights = None, copy = True ):
         '''
         Build the class from a data sample which can be indexed as a dictionary, the data parameters and a possible set of weights.
 
@@ -28,7 +31,7 @@ class DataSet(object):
         :param weights: possible set of weights.
         :type weights: numpy.ndarray or None
         '''
-        self.__data = {p.name: core.array(data[p.name]) for p in pars.values()}
+        self.__data = {p.name: core.array(data[p.name], copy=copy) for p in pars.values()}
         self.__data_pars = pars
         self.__weights = weights if weights is None else core.array(weights)
 
@@ -148,7 +151,7 @@ class DataSet(object):
             dct[p] = arr[p]
         return cls(dct, data_pars, weights=weights)
 
-    def subset( self, cond ):
+    def subset( self, cond = None, range = None, copy = True ):
         '''
         Get a subset of this data set.
 
@@ -157,11 +160,30 @@ class DataSet(object):
         :returns: new data set.
         :rtype: DataSet
         '''
-        if self.weights is None:
-            weights = None
-        else:
+        if cond is None:
+            cond = core.ones(len(self), dtype=types.cpu_bool_type)
+
+        if range is not None:
+            for n, p in self.data_pars.items():
+                r = p.get_range(range)
+                a = self[n]
+                if r.disjoint:
+                    c = core.zeros(len(cond), dtype=types.cpu_bool_type)
+                    for vmin, vmax in r.bounds:
+                        i = core.logical_and(a >= vmin, a <= vmax)
+                        c = core.logical_or(c, i)
+                    cond = core.logical_and(cond, c)
+                else:
+                    i = core.logical_and(a >= r.bounds[0], a <= r.bounds[1])
+                    cond = core.logical_and(cond, i)
+
+        data = {p.name: self[p.name][cond] for p in self.data_pars.values()}
+        if self.__weights is not None:
             weights = self.weights[cond]
-        return self.__class__({p.name: self[p.name][cond] for p in self.data_pars.values()}, self.data_pars, weights)
+        else:
+            weights = self.__weights
+
+        return self.__class__(data, self.data_pars, weights, copy=copy)
 
     def to_records():
         '''
@@ -279,7 +301,7 @@ def evaluation_grid( data_pars, size, eval_range = parameters.FULL ):
     '''
     values = []
     for p in data_pars.values():
-        values.append(np.linspace(*p.ranges[eval_range], size))
+        values.append(np.linspace(*p.get_range(eval_range).bounds, size))
 
     data = {p.name: a for p, a in zip(data_pars.values(), core.meshgrid(*values))}
 
@@ -301,7 +323,7 @@ def uniform_sample( data_pars, size, eval_range = parameters.FULL ):
     '''
     values = []
     for p in data_pars.values():
-        values.append(core.random_uniform(*p.ranges[eval_range], size))
+        values.append(core.random_uniform(*p.get_range(eval_range).bounds, size))
 
     data = {p.name: a for p, a in zip(data_pars.values(), core.meshgrid(*values))}
 

@@ -13,7 +13,7 @@ def pytest_namespace():
     return {'shared_names': None, 'shared_result': None}
 
 
-def test_create_minuit():
+def test_create_minuit_unbinned():
     '''
     Test the "create_minuit" function.
     '''
@@ -26,7 +26,7 @@ def test_create_minuit():
 
     data = pyfit.DataSet.from_array(arr, m)
 
-    with pyfit.create_minuit('uml', g, data) as minuit:
+    with pyfit.create_minuit_unbinned('uml', g, data) as minuit:
         pytest.shared_result = minuit.migrad()
 
     print(pytest.shared_result)

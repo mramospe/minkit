@@ -8,6 +8,7 @@ __all__ = []
 
 # Types for numpy.ndarray objects
 cpu_type = np.float64
+cpu_bool_type = np.bool
 
 # Types to handle with ctypes
 c_int      = ctypes.c_int

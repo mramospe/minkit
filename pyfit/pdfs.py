@@ -26,6 +26,7 @@ class Amoroso(pdf_core.SourcePDF):
 
         if alpha.value <= 0:
             logger.warning('Parameter "alpha" for the {self.__class__.__name__} PDF must be greater than zero; check its initial value')
+
         if alpha.bounds is not None and alpha.bounds[0] <= 0:
             logger.warning('Parameter "alpha" for the {self.__class__.__name__} PDF must be greater than zero; check its bounds')
 

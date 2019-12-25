@@ -1,6 +1,7 @@
 '''
 API for minimizers.
 '''
+from . import dataset
 from . import fcns
 from . import parameters
 from . import pdf_core
@@ -9,25 +10,35 @@ import functools
 import iminuit
 import contextlib
 
-__all__ = ['create_minuit', 'migrad_output_to_registry']
+__all__ = ['create_minuit_binned', 'create_minuit_unbinned', 'migrad_output_to_registry']
 
 
-def parse_fcn( function ):
+def parse_fcn( data_type ):
     '''
     '''
-    @functools.wraps(function)
-    def __wrapper( fcn, pdf, data, *args, **kwargs ):
+    def __wrapper( function ):
         '''
         '''
-        if fcn == 'bml':
-            fcn = fcns.binned_maximum_likelihood
-        elif fcn == 'ueml':
-            fcn = fcns.unbinned_extended_maximum_likelihood
-        elif fcn == 'uml':
-            fcn = fcns.unbinned_maximum_likelihood
-        else:
-            raise ValueError(f'Unknown FCN type "{fcn}"')
-        return function(fcn, pdf, data, *args, **kwargs)
+        @functools.wraps(function)
+        def __wrapper( fcn, pdf, data, *args, **kwargs ):
+            '''
+            '''
+            notimpl = NotImplementedError(f'FCN with name "{fcn}" is not available for "{data_type}" data type')
+
+            if data_type == dataset.BINNED:
+                if fcn == 'bml':
+                    fcn = fcns.binned_maximum_likelihood
+                else:
+                    raise notimpl
+            else:
+                if fcn == 'ueml':
+                    fcn = fcns.unbinned_extended_maximum_likelihood
+                elif fcn == 'uml':
+                    fcn = fcns.unbinned_maximum_likelihood
+                else:
+                    raise notimpl
+            return function(fcn, pdf, data, *args, **kwargs)
+        return __wrapper
     return __wrapper
 
 
@@ -52,8 +63,8 @@ def registry_to_minuit_input( registry, errordef = 1. ):
 
 
 @contextlib.contextmanager
-@parse_fcn
-def create_minuit( fcn, pdf, data, norm_range = parameters.FULL, constraints = None ):
+@parse_fcn('unbinned')
+def create_minuit_unbinned( fcn, pdf, data, **kwargs ):
     '''
     Create a new instance of :class:`iminuit.Minuit`.
     This represents a "frozen" object, that is, parameters defining
@@ -67,7 +78,31 @@ def create_minuit( fcn, pdf, data, norm_range = parameters.FULL, constraints = N
 
     cfg = registry_to_minuit_input(all_args)
 
-    evaluator = pdf_core.EvaluatorProxy(fcn, pdf, data, norm_range, constraints)
+    evaluator = pdf_core.UnbinnedEvaluatorProxy(fcn, pdf, data, **kwargs)
+
+    yield iminuit.Minuit(evaluator,
+                         forced_parameters=tuple(all_args.keys()),
+                         pedantic=False,
+                         **cfg)
+
+
+@contextlib.contextmanager
+@parse_fcn('binned')
+def create_minuit_binned( fcn, pdf, data, **kwargs ):
+    '''
+    Create a new instance of :class:`iminuit.Minuit`.
+    This represents a "frozen" object, that is, parameters defining
+    the PDFs are assumed to remain constant during all its lifetime.
+
+    .. warning: Do not change any attribute of the parameters defining the \
+    PDFs, since it will not be properly reflected during the minimization \
+    calls.
+    '''
+    all_args = pdf.all_args
+
+    cfg = registry_to_minuit_input(all_args)
+
+    evaluator = pdf_core.BinnedEvaluatorProxy(fcn, pdf, data, **kwargs)
 
     yield iminuit.Minuit(evaluator,
                          forced_parameters=tuple(all_args.keys()),

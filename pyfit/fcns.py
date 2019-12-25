@@ -46,7 +46,7 @@ def evaluate_constraints( values = None, constraints = None ):
     return res
 
 
-def binned_chisquare( pdf, data, values = None, norm_range = parameters.FULL, constraints = None ):
+def binned_chisquare( pdf, data, values = None, range = parameters.FULL, constraints = None ):
     '''
     Definition of the binned chi-square FCN.
 
@@ -56,8 +56,8 @@ def binned_chisquare( pdf, data, values = None, norm_range = parameters.FULL, co
     :type data: BinnedDataSet
     :param values: values to be passed to the :method:`PDF.__call__` method.
     :type values: Registry
-    :param norm_range: normalization range of the PDF.
-    :type norm_range: str
+    :param range: normalization range of the PDF.
+    :type range: str
     :param constraints: PDFs with the constraints for paramters in "pdf".
     :type constraints: list(PDF)
     :returns: value of the FCN.
@@ -66,7 +66,7 @@ def binned_chisquare( pdf, data, values = None, norm_range = parameters.FULL, co
     raise NotImplementedError('Function not implemented yet')
 
 
-def binned_maximum_likelihood( pdf, data, values = None, norm_range = parameters.FULL, constraints = None ):
+def binned_maximum_likelihood( pdf, data, values = None, range = parameters.FULL, constraints = None ):
     '''
     Definition of the binned maximum likelihood FCN.
 
@@ -76,18 +76,18 @@ def binned_maximum_likelihood( pdf, data, values = None, norm_range = parameters
     :type data: BinnedDataSet
     :param values: values to be passed to the :method:`PDF.__call__` method.
     :type values: Registry
-    :param norm_range: normalization range of the PDF.
-    :type norm_range: str
+    :param range: normalization range of the PDF.
+    :type range: str
     :param constraints: PDFs with the constraints for paramters in "pdf".
     :type constraints: list(PDF)
     :returns: value of the FCN.
     :rtype: float
     '''
     c = evaluate_constraints(values, constraints)
-    return pdf.norm(values, norm_range) - core.sum(data.values * core.log(c * pdf(data, values, norm_range)))
+    return pdf.norm(values, range) - core.sum(data.values * core.log(c * pdf(data, values, range)))
 
 
-def unbinned_extended_maximum_likelihood( pdf, data, values = None, norm_range = parameters.FULL, constraints = None ):
+def unbinned_extended_maximum_likelihood( pdf, data, values = None, range = parameters.FULL, constraints = None ):
     '''
     Definition of the unbinned extended maximum likelihood FCN.
     In this case, entries in data are assumed to follow a Poissonian distribution.
@@ -99,21 +99,21 @@ def unbinned_extended_maximum_likelihood( pdf, data, values = None, norm_range =
     :type data: DataSet
     :param values: values to be passed to the :method:`PDF.__call__` method.
     :type values: Registry
-    :param norm_range: normalization range of the PDF.
-    :type norm_range: str
+    :param range: normalization range of the PDF.
+    :type range: str
     :param constraints: PDFs with the constraints for paramters in "pdf".
     :type constraints: list(PDF)
     :returns: value of the FCN.
     :rtype: float
     '''
     c  = evaluate_constraints(values, constraints)
-    lf = core.log(pdf(data, values, norm_range))
+    lf = core.log(pdf(data, values, range))
     if data.weights is not None:
         lf *= data.weights
-    return pdf.norm(values, norm_range) - core.sum(lf) - len(data) * np.log(c)
+    return pdf.norm(values, range) - core.sum(lf) - len(data) * np.log(c)
 
 
-def unbinned_maximum_likelihood( pdf, data, values = None, norm_range = parameters.FULL, constraints = None ):
+def unbinned_maximum_likelihood( pdf, data, values = None, range = parameters.FULL, constraints = None ):
     '''
     Definition of the unbinned maximum likelihood FCN.
     The given :class:`PDF` must not be of "extended" type.
@@ -124,15 +124,15 @@ def unbinned_maximum_likelihood( pdf, data, values = None, norm_range = paramete
     :type data: DataSet
     :param values: values to be passed to the :method:`PDF.__call__` method.
     :type values: Registry
-    :param norm_range: normalization range of the PDF.
-    :type norm_range: str
+    :param range: normalization range of the PDF.
+    :type range: str
     :param constraints: PDFs with the constraints for paramters in "pdf".
     :type constraints: list(PDF)
     :returns: value of the FCN.
     :rtype: float
     '''
     c  = evaluate_constraints(values, constraints)
-    lf = core.log(pdf(data, values, norm_range))
+    lf = core.log(pdf(data, values, range))
     if data.weights is not None:
         lf *= data.weights
     return - core.sum(lf) - len(data) * np.log(c)

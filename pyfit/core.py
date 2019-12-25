@@ -159,8 +159,24 @@ def min( arr ):
     else:
         raise NotImplementedError(f'Function not implemented for backend "{BACKEND}"')
 
+
 @with_backend
-def zeros( *args, **kwargs ):
+def ones( *args, dtype=types.cpu_type, **kwargs ):
+    '''
+    Create an array filled with ones using the current backend.
+    Arguments are directly forwarded to the constructor.
+
+    :returns: zeros following the given shape.
+    :rtype: numpy.ndarray, pyopencl.Buffer or pycuda.gpuarray
+    '''
+    if BACKEND is CPU:
+        return np.ones(*args, dtype=dtype, **kwargs)
+    else:
+        raise NotImplementedError(f'Function not implemented for backend "{BACKEND}"')
+
+
+@with_backend
+def zeros( *args, dtype=types.cpu_type, **kwargs ):
     '''
     Create an array filled with zeros using the current backend.
     Arguments are directly forwarded to the constructor.
@@ -169,6 +185,28 @@ def zeros( *args, **kwargs ):
     :rtype: numpy.ndarray, pyopencl.Buffer or pycuda.gpuarray
     '''
     if BACKEND is CPU:
-        return np.zeros(*args, dtype=types.cpu_type, **kwargs)
+        return np.zeros(*args, dtype=dtype, **kwargs)
+    else:
+        raise NotImplementedError(f'Function not implemented for backend "{BACKEND}"')
+
+
+@with_backend
+def logical_and( a, b ):
+    '''
+    Do the logical "and" operation between two arrays.
+    '''
+    if BACKEND == CPU:
+        return np.logical_and(a, b)
+    else:
+        raise NotImplementedError(f'Function not implemented for backend "{BACKEND}"')
+
+
+@with_backend
+def logical_or( a, b ):
+    '''
+    Do the logical "or" operation between two arrays.
+    '''
+    if BACKEND == CPU:
+        return np.logical_or(a, b)
     else:
         raise NotImplementedError(f'Function not implemented for backend "{BACKEND}"')

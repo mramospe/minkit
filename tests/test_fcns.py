@@ -24,7 +24,7 @@ def test_binned_maximum_likelihood():
 
     data = pyfit.BinnedDataSet.from_array(0.5 * (edges[1:] + edges[:-1]), m, values)
 
-    with pyfit.create_minuit('bml', g, data) as minuit:
+    with pyfit.create_minuit_binned('bml', g, data) as minuit:
         r = minuit.migrad()
         print(r)
 
@@ -38,7 +38,7 @@ def test_binned_maximum_likelihood():
     sc = pyfit.Parameter('sc', 0.1)
     gc = pyfit.Gaussian('constraint', c, cc, sc)
 
-    with pyfit.create_minuit('bml', g, data, constraints=[gc]) as minuit:
+    with pyfit.create_minuit_binned('bml', g, data, constraints=[gc]) as minuit:
         r = minuit.migrad()
         print(r)
 
@@ -70,7 +70,7 @@ def test_unbinned_extended_maximum_likelihood():
 
     data = pdf.generate(10000)
 
-    with pyfit.create_minuit('ueml', pdf, data) as minuit:
+    with pyfit.create_minuit_unbinned('ueml', pdf, data) as minuit:
         r = minuit.migrad()
         print(r)
 
@@ -84,7 +84,7 @@ def test_unbinned_extended_maximum_likelihood():
     sc = pyfit.Parameter('sc', 0.1)
     gc = pyfit.Gaussian('constraint', c, cc, sc)
 
-    with pyfit.create_minuit('ueml', pdf, data, constraints=[gc]) as minuit:
+    with pyfit.create_minuit_unbinned('ueml', pdf, data, constraints=[gc]) as minuit:
         r = minuit.migrad()
         print(r)
 
@@ -106,7 +106,7 @@ def test_unbinned_maximum_likelihood():
 
     data = g.generate(10000)
 
-    with pyfit.create_minuit('uml', g, data) as minuit:
+    with pyfit.create_minuit_unbinned('uml', g, data) as minuit:
         r = minuit.migrad()
         print(r)
 
@@ -120,7 +120,7 @@ def test_unbinned_maximum_likelihood():
     sc = pyfit.Parameter('sc', 0.1)
     gc = pyfit.Gaussian('constraint', c, cc, sc)
 
-    with pyfit.create_minuit('uml', g, data, constraints=[gc]) as minuit:
+    with pyfit.create_minuit_unbinned('uml', g, data, constraints=[gc]) as minuit:
         r = minuit.migrad()
         print(r)
 
