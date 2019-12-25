@@ -28,8 +28,8 @@ def create_cpp_function_proxy( module, name, ndata_pars, narg_pars = 0, nvar_arg
     types of a fucntion.
     '''
     # Get the functions
-    function      = module.function
-    evaluate      = module.evaluate
+    function = module.function
+    evaluate = module.evaluate
 
     if hasattr(module, 'normalization'):
         normalization = module.normalization

@@ -53,7 +53,7 @@ def registry_to_minuit_input( registry, errordef = 1. ):
 
 @contextlib.contextmanager
 @parse_fcn
-def create_minuit( fcn, pdf, data, norm_range = parameters.FULL ):
+def create_minuit( fcn, pdf, data, norm_range = parameters.FULL, constraints = None ):
     '''
     Create a new instance of :class:`iminuit.Minuit`.
     This represents a "frozen" object, that is, parameters defining
@@ -67,7 +67,7 @@ def create_minuit( fcn, pdf, data, norm_range = parameters.FULL ):
 
     cfg = registry_to_minuit_input(all_args)
 
-    evaluator = pdf_core.EvaluatorProxy(fcn, pdf, data, norm_range)
+    evaluator = pdf_core.EvaluatorProxy(fcn, pdf, data, norm_range, constraints)
 
     yield iminuit.Minuit(evaluator,
                          forced_parameters=tuple(all_args.keys()),

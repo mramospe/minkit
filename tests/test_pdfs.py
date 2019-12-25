@@ -30,16 +30,16 @@ def test_amoroso():
     Test the "Amoroso" PDF.
     '''
     # This is actually the chi-square distribution with one degree of freedom
-    m = pyfit.Parameter('m', bounds=(2, 10))
+    m = pyfit.Parameter('m', bounds=(0, 10))
     a = pyfit.Parameter('a', 0)
     theta = pyfit.Parameter('theta', 2)
     alpha = pyfit.Parameter('alpha', 0.5)
-    beta  = pyfit.Parameter('beta', 1)
+    beta  = pyfit.Parameter('beta', 2)
     pdf = pyfit.Amoroso('amoroso', m, a, theta, alpha, beta)
 
-    data = np.random.chisquare(1, 100000)
+    data = np.random.chisquare(2, 100000)
 
-    #_compare_with_numpy(pdf, data, m)
+    _compare_with_numpy(pdf, data, m)
 
 
 def test_exponential():

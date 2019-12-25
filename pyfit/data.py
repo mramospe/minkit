@@ -118,15 +118,26 @@ class DataSet(object):
 
 class BinnedDataSet(object):
 
-    def __init__( self, centers, values ):
+    def __init__( self, centers, data_pars, values ):
         '''
         '''
         super(BinnedDataSet, self).__init__()
 
         self.__centers = {name: core.array(arr) for name, arr in dict(centers).items()}
+        self.__data_pars = data_pars
         self.__values = values
 
         assert centers.keys() == self.__centers.keys()
+
+    @classmethod
+    def from_array( cls, centers, data_par, values ):
+        '''
+        '''
+        return cls({data_par.name: core.array(centers)}, parameters.Registry([(data_par.name, data_par)]), values)
+
+    @property
+    def data_pars( self ):
+        return self.__data_pars
 
     @property
     def values( self ):
@@ -156,7 +167,7 @@ def uniform_sample( data_pars, size ):
     '''
     values = []
     for p in data_pars.values():
-        values.append(np.random.uniform(*p.bounds, size))
+        values.append(core.random_uniform(*p.bounds, size))
 
     data = {p.name: a for p, a in zip(data_pars.values(), core.meshgrid(*values))}
 

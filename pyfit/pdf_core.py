@@ -78,15 +78,15 @@ class PDF(object):
         result = None
 
         while result is None or len(result) < size:
-            
+
             d = data.uniform_sample(self.data_pars, size)
             f = self.__call__(d, values)
             u = core.random_uniform(0, m, len(d))
 
             if result is None:
-                result = d.subset(f < u)
+                result = d.subset(u < f)
             else:
-                result.add(d.subset(f < u), inplace=True)
+                result.add(d.subset(u < f), inplace=True)
 
         if drop_excess:
             return result.subset(slice(size))
@@ -191,14 +191,17 @@ class SourcePDF(PDF):
 
         return core.sum(i) * a
 
-    def function( *data_values, values = None, norm_range = parameters.FULL ):
+    def function( self, *data_values, values = None, norm_range = parameters.FULL, normalized = True ):
         '''
         '''
         fvals = self._process_values(values)
-        nr = self._process_norm_range(norm_range)
         v = self.__function(*data_values, *fvals)
-        n = self.__norm(*fvals, *nr)
-        return v / n
+        if normalized:
+            nr = self._process_norm_range(norm_range)
+            n = self.__norm(*fvals, *nr)
+            return v / n
+        else:
+            return v
 
     def norm( self, values = None, norm_range = parameters.FULL ):
         '''
@@ -330,10 +333,11 @@ class ProdPDFs(MultiPDF):
 
 class EvaluatorProxy(object):
 
-    def __init__( self, fcn, pdf, data, norm_range = parameters.FULL ):
+    def __init__( self, fcn, pdf, data, norm_range = parameters.FULL, constraints = None ):
 
         super(EvaluatorProxy, self).__init__()
 
+        self.__constraints = constraints or []
         self.__fcn  = fcn
         self.__pdf  = pdf.frozen(data, norm_range)
         self.__data = data
@@ -347,4 +351,4 @@ class EvaluatorProxy(object):
         for i, n in enumerate(self.__pdf.all_args):
             r[n] = values[i]
 
-        return self.__fcn(self.__pdf, self.__data, r, self.__norm_range)
+        return self.__fcn(self.__pdf, self.__data, r, self.__norm_range, self.__constraints)

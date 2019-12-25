@@ -29,6 +29,8 @@ def test_create_minuit():
     with pyfit.create_minuit('uml', g, data) as minuit:
         pytest.shared_result = minuit.migrad()
 
+    print(pytest.shared_result)
+
     pytest.shared_names = [s for s in g.all_args]
 
 
