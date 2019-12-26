@@ -243,23 +243,23 @@ class PDF(object):
 
         return result
 
-    def _integral_single_bounds( values, bounds ):
+    def _integral_single_bounds( self, values, bounds, norm_range ):
         '''
         '''
-        g = dataset.evaluation_grid(self.data_pars, self.norm_size**len(self.data_pars), range)
+        g = dataset.evaluation_grid(self.data_pars, bounds, self.norm_size**len(self.data_pars))
         a = self._integral_bin_area(bounds, len(g))
-        i = self.__call__(g, values)
+        i = self.__call__(g, values, range=norm_range)
         return core.sum(i) * a
 
-    def integral( self, values = None, range = parameters.FULL ):
+    def integral( self, values = None, range = parameters.FULL, norm_range = parameters.FULL ):
         '''
         Calculate the integral of a :class:`PDF`.
         '''
         bounds = parameters.bounds_for_range(self.data_pars, range)
         if len(bounds.shape) == 1:
-            return self._integral_single_bounds(values, bounds)
+            return self._integral_single_bounds(values, bounds, norm_range)
         else:
-            return np.sum(self._integral_single_bounds(values, b) for b in bounds)
+            return np.sum(self._integral_single_bounds(values, b, norm_range) for b in bounds)
 
     def norm( self, values = None, range = parameters.FULL ):
         '''
@@ -742,12 +742,11 @@ class UnbinnedEvaluatorProxy(object):
         :param kwargs: arguments to be forwarded to the FCN function.
         :type kwargs: dict
         '''
-        constraints = constraints or []
         self.__data        = data.subset(range=range, copy=False)
         self.__fcn         = fcn
         self.__pdf         = pdf.frozen(self.__data, range=range)
         self.__range       = range
-        self.__constraints = constraints
+        self.__constraints = constraints or []
 
         super(UnbinnedEvaluatorProxy, self).__init__()
 
@@ -780,12 +779,10 @@ class BinnedEvaluatorProxy(object):
         :param kwargs: arguments to be forwarded to the FCN function.
         :type kwargs: dict
         '''
-        constraints = constraints or []
-
         self.__data        = data
         self.__fcn         = fcn
         self.__pdf         = pdf.frozen(self.__data, range=range)
-        self.__constraints = constraints
+        self.__constraints = constraints or []
 
         super(BinnedEvaluatorProxy, self).__init__()
 

@@ -10,6 +10,22 @@ pyfit.initialize()
 np.random.seed(98953)
 
 
+def test_pdf():
+    '''
+    General tests for the PDF class.
+    '''
+    # Create a Polynomial PDF
+    m = pyfit.Parameter('m', bounds=(0, 10))
+    e = pyfit.Polynomial('polynomial', m)
+
+    m.set_range('sides', [(0, 4), (6, 10)])
+
+    # integral
+    assert np.allclose(e.integral(range='full', norm_range='full'), 1.)
+    assert np.allclose(e.integral(range='sides', norm_range='full'), 0.8)
+    assert np.allclose(e.integral(range='sides', norm_range='sides'), 1.)
+
+
 def test_addpdfs():
     '''
     Test the "AddPDFs" class.
@@ -53,3 +69,22 @@ def test_addpdfs():
     for p in pdf.all_args.values():
         p.constant = True
     assert pdf.constant
+
+
+def test_sourcepdf():
+    '''
+    Test the "SourcePDF" class.
+    '''
+    # Test the construction of a normal PDF
+    m = pyfit.Parameter('m', bounds=(-5, +5))
+    c = pyfit.Parameter('c', 0., bounds=(-2, +2))
+    s = pyfit.Parameter('s', 1., bounds=(-3, +3))
+    g = pyfit.Gaussian('gaussian', m, c, s)
+
+    # Test the construction of a PDF with variable number of arguments
+    m = pyfit.Parameter('m', bounds=(-5, +5))
+    p1 = pyfit.Parameter('p1', 1.)
+    p2 = pyfit.Parameter('p2', 2.)
+    pol0 = pyfit.Polynomial('pol0', m)
+    pol1 = pyfit.Polynomial('pol1', m, p1)
+    pol2 = pyfit.Polynomial('pol2', m, p1, p2)
