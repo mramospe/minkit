@@ -43,19 +43,16 @@ class PDF(object):
         self.norm_size   = NORM_SIZE
         super(PDF, self).__init__()
 
-    def _integral_bin_area( self, norm_range = parameters.FULL ):
+    def _integral_bin_area( self, bounds, size ):
         '''
         Calculate the area of a bin used to calculate the numerical normalization.
 
-        :param norm_range: normalization range.
-        :type norm_range: str
+        :param bounds: bounds defining the range.
+        :type bounds: numpy.ndarray
         :returns: area of the normalization bin.
         :rtype: float
         '''
-        a = 1.
-        for p in self.data_pars.values():
-            a *= p.get_range(norm_range).size * 1. / self.norm_size
-        return a
+        return np.prod(bounds[1::2] - bounds[0::2]) * 1. / size
 
     def _process_values( self, values = None ):
         '''
@@ -73,46 +70,7 @@ class PDF(object):
         else:
             return tuple(values[n] for n in self.args.keys())
 
-    def _process_norm_range( self, norm_range = parameters.FULL ):
-        '''
-        Process a normalization range, returning the associated bounds for each
-        data parameter.
-        If any of the data parameters have more than one set of associated bounds,
-        all the combinations for the different sets are returned.
-
-        :param norm_range: normalization range.
-        :type norm_range: str
-        :returns: bounds for each data parameter.
-        :rtype: numpy.ndarray
-        '''
-        single_bounds = parameters.Registry()
-        multi_bounds  = parameters.Registry()
-        for p in self.data_pars.values():
-            r = p.get_range(norm_range)
-            if r.disjoint:
-                multi_bounds[p.name] = r
-            else:
-                single_bounds[p.name] = r
-
-        if len(multi_bounds) == 0:
-            # Simple case, all data parameters have only one set of bounds
-            # for this normalization range
-            return np.array([r.bounds for r in single_bounds.values()]).flatten()
-        else:
-            # Must calculate all the combinations of normalization ranges
-            # for every data parameter.
-            mins = parameters.Registry()
-            maxs = parameters.Registry()
-            for n, r in multi_bounds.items():
-                mins[n], maxs[n] = r.bounds.T
-
-            # Get all the combinations of minimum and maximum values for the bounds of each variable
-            mmins = [m.flatten() for m in np.meshgrid(*[b for b in mins.values()])]
-            mmaxs = [m.flatten() for m in np.meshgrid(*[b for b in maxs.values()])]
-
-            return np.concatenate([np.array([mi, ma]).T for mi, ma in zip(mmins, mmaxs)], axis=1)
-
-    def __call__( self, data, values = None, norm_range = parameters.FULL, normalized = True ):
+    def __call__( self, data, values = None, range = parameters.FULL, normalized = True ):
         '''
         Call the PDF in the given set of data.
 
@@ -120,8 +78,8 @@ class PDF(object):
         :type data: DataSet or BinnedDataSet
         :param values: values for the argument parameters to use.
         :type values: Registry(str, float)
-        :param norm_range: normalization range.
-        :type norm_range: str
+        :param range: normalization range.
+        :type range: str
         :param normalized: whether to return a normalized output.
         :type normalized: boole
         '''
@@ -189,7 +147,48 @@ class PDF(object):
         else:
             return self
 
-    def generate( self, size = 10000, values = None, mapsize = 100, safe_factor = 1.1, drop_excess = True, range = parameters.FULL ):
+    def _generate_single_bounds( self, size, values, mapsize, gensize, safe_factor, bounds ):
+        '''
+        Generate data in a single range given the bounds of the different data parameters.
+
+        :param size: size (or minimum size) of the output sample.
+        :type size: int
+        :param values: values of the argument parameters to be used.
+        :type values: Registry(str, float)
+        :param mapsize: number of points to consider per dimension (data parameter) \
+        in order to calculate the maximum value of the PDF.
+        :type mapsize: int
+        :param gensize: number of entries to generate per iteration.
+        :type gensize: int
+        :param safe_factor: additional factor to multiply the numerically calculated \
+        maximum of the function. In general this must be modified if the function is \
+        not well-behaved.
+        :type safe_factor: float
+        :param bounds: bounds of the different data parameters (must be sorted).
+        :type bounds: numpy.ndarray
+        :returns: output sample.
+        :rtype: DataSet
+        '''
+        grid = dataset.evaluation_grid(self.data_pars, bounds, mapsize)
+
+        m = safe_factor * core.max(self.__call__(grid, values))
+
+        result = None
+
+        while result is None or len(result) < size:
+
+            d = dataset.uniform_sample(self.data_pars, gensize)
+            f = self.__call__(d, values)
+            u = core.random_uniform((0, m), len(d))
+
+            if result is None:
+                result = d.subset(u < f)
+            else:
+                result.add(d.subset(u < f), inplace=True)
+
+        return result.subset(slice(size))
+
+    def generate( self, size = 10000, values = None, mapsize = 100, gensize = 10000, safe_factor = 1.1, range = parameters.FULL ):
         '''
         Generate random data.
 
@@ -200,85 +199,112 @@ class PDF(object):
         :param mapsize: number of points to consider per dimension (data parameter) \
         in order to calculate the maximum value of the PDF.
         :type mapsize: int
+        :param gensize: number of entries to generate per iteration.
+        :type gensize: int
         :param safe_factor: additional factor to multiply the numerically calculated \
         maximum of the function. In general this must be modified if the function is \
         not well-behaved.
         :type safe_factor: float
-        :param drop_excess: since the generation is done in chunks, after processing \
-        the size of the output data will be bigger than requested. If set to True, \
-        then the excess is dropped.
-        :type drop_excess: bool
         :param range: range of the data parameters where to generate data.
         :type range: str
         :returns: output sample.
         :rtype: DataSet
         '''
-        grid = dataset.evaluation_grid(self.data_pars, mapsize, range)
-
-        m = safe_factor * core.max(self.__call__(grid, values))
-
-        result = None
-
-        while result is None or len(result) < size:
-
-            d = dataset.uniform_sample(self.data_pars, size)
-            f = self.__call__(d, values)
-            u = core.random_uniform(0, m, len(d))
-
-            if result is None:
-                result = d.subset(u < f)
-            else:
-                result.add(d.subset(u < f), inplace=True)
-
-        if drop_excess:
-            return result.subset(slice(size))
+        bounds = parameters.bounds_for_range(self.data_pars, range)
+        if len(bounds.shape) == 1:
+            result = self._generate_single_bounds(size, values, mapsize, gensize, safe_factor, bounds)
         else:
-            return result
+            # Get the associated number of entries per bounds
+            total = 0.
+            sizes = []
+            for b in bounds:
+                sizes.append(np.prod(b[1::2] - b[0::2]))
+                total += sizes[-1]
+            fracs = sizes / total
+
+            u = core.random_uniform((0, 1), size)
+
+            entries = []
+            for f in fracs[:-1]:
+                entries.append(size * core.sum(u < f))
+            entries.append(size - np.sum(entries))
+
+            # Iterate over the bounds and add data accordingly
+            result = None
+            for e, b in zip(entries, bounds):
+                new = self._generate_single_bounds(e, values, mapsize, gensize, safe_factor, b)
+                if result is None:
+                    result = new
+                else:
+                    result.add(new, inplace=True)
+
+            # Need to shuffle the data to avoid dropping elements from the last bounds only
+            result.shuffle(inplace=True)
+
+        return result
+
+    def _integral_single_bounds( values, bounds ):
+        '''
+        '''
+        g = dataset.evaluation_grid(self.data_pars, self.norm_size**len(self.data_pars), range)
+        a = self._integral_bin_area(bounds, len(g))
+        i = self.__call__(g, values)
+        return core.sum(i) * a
 
     def integral( self, values = None, range = parameters.FULL ):
         '''
         Calculate the integral of a :class:`PDF`.
         '''
-        g = dataset.evaluation_grid(self.data_pars, self.norm_size**len(self.data_pars), range)
-        a = self._integral_bin_area(norm_range)
-        i = self.__call__(g, values)
-        return core.sum(i) * a
+        bounds = parameters.bounds_for_range(self.data_pars, range)
+        if len(bounds.shape) == 1:
+            return self._integral_single_bounds(values, bounds)
+        else:
+            return np.sum(self._integral_single_bounds(values, b) for b in bounds)
 
-    def norm( self, values = None, norm_range = parameters.FULL ):
+    def norm( self, values = None, range = parameters.FULL ):
         '''
         Calculate the normalization of the PDF.
 
         :param values: values of the parameters to use.
         :type values: Registry(str, float)
-        :param norm_range: normalization range to consider.
-        :type norm_range: str
+        :param range: normalization range to consider.
+        :type range: str
         :returns: value of the normalization.
         :rtype: float
         '''
         raise NotImplementedError('Classes inheriting from "pyfit.PDF" must define the "norm" method')
 
-    def numerical_normalization( self, values = None, norm_range = parameters.FULL ):
+    def _numerical_normalization_single_bounds( self, values, bounds ):
+        '''
+        '''
+        g = dataset.evaluation_grid(self.data_pars, bounds, self.norm_size**len(self.data_pars))
+        a = self._integral_bin_area(bounds, len(g))
+        i = self.__call__(g, values, normalized=False)
+        return core.sum(i) * a
+
+    def numerical_normalization( self, values = None, range = parameters.FULL ):
         '''
         Calculate a numerical normalization.
 
         :param values: values to use.
         :type values: Registry(str, float)
-        :param norm_range: normalization range.
-        :type norm_range: str
+        :param range: normalization range.
+        :type range: str
         :returns: normalization.
         :rtype: float
         '''
-        g = dataset.evaluation_grid(self.data_pars, self.norm_size**len(self.data_pars), norm_range)
-        a = self._integral_bin_area(norm_range)
-        i = self.__call__(g, values, normalized=False)
-        return core.sum(i) * a
+        bounds = parameters.bounds_for_range(self.data_pars, range)
+        if len(bounds.shape) == 1:
+            return self._numerical_normalization_single_bounds(values, bounds)
+        else:
+            return np.sum(self._numerical_normalization_single_bounds(values, b) for b in bounds)
 
 
 class CachePDF(PDF):
     '''
     Cache object to replace constant PDFs.
     '''
-    def __init__( self, pdf, data, norm_range = parameters.FULL ):
+    def __init__( self, pdf, data, range = parameters.FULL ):
         '''
         A CachePDF is an object that replaces the an usual PDF when it is marked as
         constant in a minimization process.
@@ -287,11 +313,11 @@ class CachePDF(PDF):
         :type pdf: PDF
         :param data: data where the :class:`PDF` is being evaluated.
         :type data: DataSet or BinnedDataSet.
-        :param norm_range: normalization range.
-        :type norm_range: str
+        :param range: normalization range.
+        :type range: str
         '''
-        self.__cache = pdf(data, norm_range=norm_range)
-        self.__norm  = pdf.norm(norm_range=norm_range)
+        self.__cache = pdf(data, range=range)
+        self.__norm  = pdf.norm(range=range)
 
         super(CachePDF, self).__init__(pdf.name, pdf.data_pars, pdf.args)
 
@@ -362,7 +388,7 @@ class SourcePDF(PDF):
 
         super(SourcePDF, self).__init__(name, parameters.Registry.from_list(data_pars), parameters.Registry.from_list(arg_pars + var_arg_pars))
 
-    def __call__( self, data, values = None, norm_range = parameters.FULL, normalized = True ):
+    def __call__( self, data, values = None, range = parameters.FULL, normalized = True ):
         '''
         Call the PDF in the given set of data.
 
@@ -370,8 +396,8 @@ class SourcePDF(PDF):
         :type data: DataSet or BinnedDataSet
         :param values: values for the argument parameters to use.
         :type values: Registry(str, float)
-        :param norm_range: normalization range.
-        :type norm_range: str
+        :param range: normalization range.
+        :type range: str
         :param normalized: whether to return a normalized output.
         :type normalized: boole
         '''
@@ -395,7 +421,7 @@ class SourcePDF(PDF):
         if normalized:
             if self.__norm is not None:
                 # There is an analytical approach to calculate the normalization
-                nr = self._process_norm_range(norm_range)
+                nr = parameters.bounds_for_range(self.data_pars, range)
                 if len(nr.shape) == 1:
                     n = self.__norm(*fvals, *nr)
                 else:
@@ -403,11 +429,11 @@ class SourcePDF(PDF):
                 return out / n
             else:
                 # Must use a numerical normalization
-                return out / self.numerical_normalization(values, norm_range)
+                return out / self.numerical_normalization(values, range)
         else:
             return out
 
-    def function( self, *data_values, values = None, norm_range = parameters.FULL, normalized = True ):
+    def function( self, *data_values, values = None, range = parameters.FULL, normalized = True ):
         '''
         Evaluate the function, where the data values are provided by the user as single numbers.
 
@@ -415,8 +441,8 @@ class SourcePDF(PDF):
         :type dat_values: tuple(float)
         :param values: values of the argument parameters.
         :type values: Registry(str, float)
-        :param norm_range: normalization range.
-        :type norm_range: str
+        :param range: normalization range.
+        :type range: str
         :param normalized: whether to return a normalized value.
         :type normalized: bool
         :returns: value of the PDF.
@@ -425,7 +451,7 @@ class SourcePDF(PDF):
         fvals = self._process_values(values)
         v = self.__function(*data_values, *fvals)
         if normalized:
-            nr = self._process_norm_range(norm_range)
+            nr = parameters.bounds_for_range(self.data_pars, range)
             if len(nr.shape) == 1:
                 n = self.__norm(*fvals, *nr)
             else:
@@ -434,7 +460,7 @@ class SourcePDF(PDF):
         else:
             return v
 
-    def norm( self, values = None, norm_range = parameters.FULL ):
+    def norm( self, values = None, range = parameters.FULL ):
         '''
         Calculate the normalization of the PDF.
         If the normalization is not defined in the source file, then a
@@ -442,20 +468,20 @@ class SourcePDF(PDF):
 
         :param values: values of the parameters to use.
         :type values: Registry(str, float)
-        :param norm_range: normalization range to consider.
-        :type norm_range: str
+        :param range: normalization range to consider.
+        :type range: str
         :returns: value of the normalization.
         :rtype: float
         '''
         if self.__norm is not None:
             fvals = self._process_values(values)
-            nr = self._process_norm_range(norm_range)
+            nr = parameters.bounds_for_range(self.data_pars, range)
             if len(nr.shape) == 1:
                 return self.__norm(*fvals, *nr)
             else:
                 return np.sum(np.fromiter((self.__norm(*fvals, *inr) for inr in nr), dtype=types.cpu_type))
         else:
-            return self.numerical_normalization(values, norm_range)
+            return self.numerical_normalization(values, range)
 
 
 class MultiPDF(PDF):
@@ -574,7 +600,7 @@ class AddPDFs(MultiPDF):
 
         super(AddPDFs, self).__init__(name, pdfs, yields)
 
-    def __call__( self, data, values = None, norm_range = parameters.FULL, normalized = True ):
+    def __call__( self, data, values = None, range = parameters.FULL, normalized = True ):
         '''
         Call the PDF in the given set of data.
 
@@ -582,8 +608,8 @@ class AddPDFs(MultiPDF):
         :type data: DataSet or BinnedDataSet
         :param values: values for the argument parameters to use.
         :type values: Registry(str, float)
-        :param norm_range: normalization range.
-        :type norm_range: str
+        :param range: normalization range.
+        :type range: str
         :param normalized: whether to return a normalized output.
         :type normalized: boole
         '''
@@ -593,7 +619,7 @@ class AddPDFs(MultiPDF):
 
         out = core.zeros(len(data))
         for y, pdf in zip(yields, self.pdfs.values()):
-            out += y * pdf(data, values, norm_range, normalized=True)
+            out += y * pdf(data, values, range, normalized=True)
 
         if self.extended and normalized:
             return out / sum(yields)
@@ -610,14 +636,14 @@ class AddPDFs(MultiPDF):
         '''
         return len(self.pdfs) == len(self.args)
 
-    def norm( self, values = None, norm_range = parameters.FULL ):
+    def norm( self, values = None, range = parameters.FULL ):
         '''
         Calculate the normalization of the PDF.
 
         :param values: values of the parameters to use.
         :type values: Registry(str, float)
-        :param norm_range: normalization range to consider.
-        :type norm_range: str
+        :param range: normalization range to consider.
+        :type range: str
         :returns: value of the normalization.
         :rtype: float
         '''
@@ -667,7 +693,7 @@ class ProdPDFs(MultiPDF):
         '''
         super(ProdPDFs, self).__init__(name, pdfs, [])
 
-    def __call__( self, data, values = None, norm_range = parameters.FULL, normalized = True ):
+    def __call__( self, data, values = None, range = parameters.FULL, normalized = True ):
         '''
         Call the PDF in the given set of data.
 
@@ -675,31 +701,31 @@ class ProdPDFs(MultiPDF):
         :type data: DataSet or BinnedDataSet
         :param values: values for the argument parameters to use.
         :type values: Registry(str, float)
-        :param norm_range: normalization range.
-        :type norm_range: str
+        :param range: normalization range.
+        :type range: str
         :param normalized: whether to return a normalized output.
         :type normalized: boole
         '''
         out = core.ones(len(data))
         for pdf in self.pdfs.values():
-            out *= pdf(data, values, norm_range, normalized=True)
+            out *= pdf(data, values, range, normalized=True)
 
         return out
 
-    def norm( self, values = None, norm_range = parameters.FULL ):
+    def norm( self, values = None, range = parameters.FULL ):
         '''
         Calculate the normalization of the PDF.
 
         :param values: values of the parameters to use.
         :type values: Registry(str, float)
-        :param norm_range: normalization range to consider.
-        :type norm_range: str
+        :param range: normalization range to consider.
+        :type range: str
         :returns: value of the normalization.
         :rtype: float
         '''
         n = 1.
         for p in self.pdfs.values():
-            n *= p.norm(values, norm_range)
+            n *= p.norm(values, range)
         return n
 
 
@@ -717,10 +743,10 @@ class UnbinnedEvaluatorProxy(object):
         :type kwargs: dict
         '''
         constraints = constraints or []
-
         self.__data        = data.subset(range=range, copy=False)
         self.__fcn         = fcn
         self.__pdf         = pdf.frozen(self.__data, range=range)
+        self.__range       = range
         self.__constraints = constraints
 
         super(UnbinnedEvaluatorProxy, self).__init__()
@@ -738,7 +764,7 @@ class UnbinnedEvaluatorProxy(object):
         r = parameters.Registry()
         for i, n in enumerate(self.__pdf.all_args):
             r[n] = values[i]
-        return self.__fcn(self.__pdf, self.__data, r, constraints=self.__constraints)
+        return self.__fcn(self.__pdf, self.__data, r, self.__range, self.__constraints)
 
 
 class BinnedEvaluatorProxy(object):

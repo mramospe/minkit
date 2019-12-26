@@ -40,7 +40,7 @@ class DataSet(object):
             if p.bounds is None:
                 raise ValueError(f'Must define the bounds for data parameter "{p.name}"')
 
-            iv = (data[p.name] >= p.bounds[0])*(data[p.name] <= p.bounds[1])
+            iv = core.logical_and(data[p.name] >= p.bounds[0], data[p.name] <= p.bounds[1])
 
             if valid is None:
                 valid = iv
@@ -286,26 +286,33 @@ class BinnedDataSet(object):
         return self.__values
 
 
-def evaluation_grid( data_pars, size, eval_range = parameters.FULL ):
+def evaluation_grid( data_pars, bounds, size ):
     '''
     Create a grid of points to evaluate a :class:`PDF` object.
 
     :param data_pars: data parameters.
     :type data_pars: Registry(str, Parameter)
-    :param size: number of entries in the output sample.
+    :param size: number of entries in the output sample. If "eval_range" \
+    makes any of the parameters have more than one set of bounds, then \
+    the output sample might have a bit less entries.
     :type size: int
-    :param eval_range: name of the range to be evaluated.
-    :type eval_range: str
+    :param bounds: bounds of the different data parameters.
+    :type bounds: numpy.ndarray
     :returns: uniform sample.
     :rtype: DataSet
     '''
-    values = []
-    for p in data_pars.values():
-        values.append(np.linspace(*p.get_range(eval_range).bounds, size))
+    bounds = np.array(bounds)
 
-    data = {p.name: a for p, a in zip(data_pars.values(), core.meshgrid(*values))}
+    if bounds.shape == (2,):
+        assert len(data_pars) == 1
+        data = {tuple(data_pars.values())[0].name: core.linspace(*bounds, size)}
+    else:
+        values = []
+        for p, b in zip(data_pars.values(), bounds):
+            values.append(core.linspace(*b, size))
+        data = {p.name: a for p, a in zip(data_pars.values(), core.meshgrid(*values))}
 
-    return DataSet(data, data_pars)
+    return DataSet(data, data_pars, copy=False)
 
 
 def uniform_sample( data_pars, size, eval_range = parameters.FULL ):
@@ -323,7 +330,7 @@ def uniform_sample( data_pars, size, eval_range = parameters.FULL ):
     '''
     values = []
     for p in data_pars.values():
-        values.append(core.random_uniform(*p.get_range(eval_range).bounds, size))
+        values.append(core.random_uniform(p.get_range(eval_range).bounds, size))
 
     data = {p.name: a for p, a in zip(data_pars.values(), core.meshgrid(*values))}
 

@@ -8,7 +8,7 @@ import os
 
 from . import types
 
-__all__ = ['array', 'extract_ndarray', 'initialize', 'random_uniform', 'zeros', 'max', 'min', 'concatenate']
+__all__ = ['array', 'extract_ndarray', 'initialize', 'random_uniform', 'zeros', 'max', 'min', 'concatenate', 'linspace']
 
 # Current backend
 BACKEND = None
@@ -85,6 +85,15 @@ def initialize( backend = CPU, interactive = False ):
     BACKEND = backend
 
 
+def linspace( vmin, vmax, size ):
+    '''
+    '''
+    if BACKEND == CPU:
+        return np.linspace(vmin, vmax, size)
+    else:
+        raise NotImplementedError(f'Function not implemented for backend "{BACKEND}"')
+
+
 def meshgrid( *arrays ):
     '''
     '''
@@ -105,7 +114,7 @@ def concatenate( *arrs ):
 
 
 @with_backend
-def random_uniform( xmin, xmax, size ):
+def random_uniform( bounds, size ):
     '''
     Create data following an uniform distribution between 0 and 1, with size "size".
 
@@ -114,8 +123,31 @@ def random_uniform( xmin, xmax, size ):
     :returns: data following an uniform distribution between 0 and 1.
     :rtype: numpy.ndarray, pyopencl.Buffer or pycuda.gpuarray
     '''
+    bounds = np.array(bounds)
+
     if BACKEND == CPU:
-        return np.random.uniform(xmin, xmax, size)
+        if bounds.shape == (2,):
+            return np.random.uniform(*bounds, size)
+        else:
+            # Get the fraction of data per bounds
+            sizes = bounds.T[1] - bounds.T[0]
+            total = np.sum(sizes)
+            fracs = sizes * 1. / total
+
+            # Sort given the fractions
+            ars = fracs.argsort()
+            fracs = fracs[ars]
+            bounds = bounds[ars]
+
+            u = core.random_uniform((0, 1), size)
+
+            values = []
+            for f, b in zip(fracs, bounds):
+                n = core.sum(u < f)
+                values.append(np.random.uniform(*b, size))
+                u = u[n:]
+
+            return core.concatenate(values)
     else:
         raise NotImplementedError(f'Function not implemented for backend "{BACKEND}"')
 

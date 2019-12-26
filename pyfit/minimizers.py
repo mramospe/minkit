@@ -74,14 +74,12 @@ def create_minuit_unbinned( fcn, pdf, data, **kwargs ):
     PDFs, since it will not be properly reflected during the minimization \
     calls.
     '''
-    all_args = pdf.all_args
-
-    cfg = registry_to_minuit_input(all_args)
+    cfg = registry_to_minuit_input(pdf.all_args)
 
     evaluator = pdf_core.UnbinnedEvaluatorProxy(fcn, pdf, data, **kwargs)
 
     yield iminuit.Minuit(evaluator,
-                         forced_parameters=tuple(all_args.keys()),
+                         forced_parameters=tuple(pdf.all_args.keys()),
                          pedantic=False,
                          **cfg)
 

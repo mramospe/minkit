@@ -1,6 +1,7 @@
 '''
 Define classes and functions to work with parameters.
 '''
+from . import types
 import collections
 import numpy as np
 
@@ -70,7 +71,7 @@ class Range(object):
         if len(self.__bounds.shape) == 1:
             return self.__bounds[1] - self.__bounds[0]
         else:
-            return np.sum((s - f) for f, s in self.__bounds)
+            return np.sum(np.fromiter(((s - f) for f, s in self.__bounds), dtype=types.cpu_type))
 
 
 class Registry(collections.OrderedDict):
@@ -91,3 +92,48 @@ class Registry(collections.OrderedDict):
 
     def to_list( self ):
         return list(self.values())
+
+
+def bounds_for_range( data_pars, range ):
+    '''
+    Get the bounds associated to a given range, and return it as a single array.
+
+    :param data_pars: data parameters.
+    :type data_pars: Registry(str, Parameter)
+    :param range: range to evaluate.
+    :type range: str
+    :returns: bounds for the given range.
+    :rtype: numpy.ndarray
+    '''
+    single_bounds = Registry()
+    multi_bounds  = Registry()
+    for p in data_pars.values():
+        r = p.get_range(range)
+        if r.disjoint:
+            multi_bounds[p.name] = r
+        else:
+            single_bounds[p.name] = r
+
+    if len(multi_bounds) == 0:
+        # Simple case, all data parameters have only one set of bounds
+        # for this normalization range
+        return np.array([r.bounds for r in single_bounds.values()]).flatten()
+    else:
+        # Must calculate all the combinations of normalization ranges
+        # for every data parameter.
+        mins = Registry()
+        maxs = Registry()
+        for n in data_pars:
+            if n in single_bounds:
+                mins[n], maxs[n] = single_bounds[n].bounds.T
+            elif p.name in multi_bounds:
+                mins[n], maxs[n] = multi_bounds[n].bounds.T
+            else:
+                raise RuntimeError('Internal error detected; please report the bug')
+
+        # Get all the combinations of minimum and maximum values for the bounds of each variable
+        mmins = [m.flatten() for m in np.meshgrid(*[b for b in mins.values()])]
+        mmaxs = [m.flatten() for m in np.meshgrid(*[b for b in maxs.values()])]
+
+        return np.concatenate([np.array([mi, ma]).T for mi, ma in zip(mmins, mmaxs)], axis=1)
+

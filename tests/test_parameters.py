@@ -22,8 +22,15 @@ def test_range():
 
     m.set_range('sides', [(0, 4), (6, 10)])
 
+    assert np.allclose(e.norm(range='sides'), e.numerical_normalization(range='sides'))
+
     data = e.generate(10000)
 
     with pyfit.create_minuit_unbinned('uml', e, data, range='sides') as minuit:
         r = minuit.migrad()
         print(r)
+
+    results = pyfit.migrad_output_to_registry(r)
+
+    for n, p in results.items():
+        assert np.allclose(p.value, e.all_args[n].value, rtol=0.01)
