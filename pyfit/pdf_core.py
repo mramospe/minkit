@@ -245,8 +245,18 @@ class PDF(object):
 
     def _integral_single_bounds( self, values, bounds, norm_range ):
         '''
+        Calculate the integral of the PDF on a single set of bounds.
+
+        :param values: values to use in the evaluation.
+        :type values: Registry
+        :param bounds: bounds of the data parameters.
+        :type bounds: numpy.ndarray
+        :param norm_range: normalization range to consider.
+        :type norm_range: str
+        :returns: integral of the PDF in the range defined by "range" normalized to "norm_range".
+        :rtype: float
         '''
-        g = dataset.evaluation_grid(self.data_pars, bounds, self.norm_size**len(self.data_pars))
+        g = dataset.evaluation_grid(self.data_pars, bounds, self.norm_size)
         a = self._integral_bin_area(bounds, len(g))
         i = self.__call__(g, values, range=norm_range)
         return core.sum(i) * a
@@ -254,12 +264,21 @@ class PDF(object):
     def integral( self, values = None, range = parameters.FULL, norm_range = parameters.FULL ):
         '''
         Calculate the integral of a :class:`PDF`.
+
+        :param values: values to use in the evaluation.
+        :type values: Registry
+        :param range: range of the integral to compute.
+        :type range: str
+        :param norm_range: normalization range to consider.
+        :type norm_range: str
+        :returns: integral of the PDF in the range defined by "range" normalized to "norm_range".
+        :rtype: float
         '''
         bounds = parameters.bounds_for_range(self.data_pars, range)
         if len(bounds.shape) == 1:
             return self._integral_single_bounds(values, bounds, norm_range)
         else:
-            return np.sum(self._integral_single_bounds(values, b, norm_range) for b in bounds)
+            return np.sum(np.fromiter((self._integral_single_bounds(values, b, norm_range) for b in bounds), dtype=types.cpu_type))
 
     def norm( self, values = None, range = parameters.FULL ):
         '''
@@ -276,8 +295,16 @@ class PDF(object):
 
     def _numerical_normalization_single_bounds( self, values, bounds ):
         '''
+        Calculate the normalization value for a set of bounds.
+
+        :param values: values to use in the evaluation of the PDF.
+        :type values: Registry
+        :param bounds: bounds of the data parameters.
+        :type bounds: numpy.ndarray
+        :returns: normalization value.
+        :rtype: float
         '''
-        g = dataset.evaluation_grid(self.data_pars, bounds, self.norm_size**len(self.data_pars))
+        g = dataset.evaluation_grid(self.data_pars, bounds, self.norm_size)
         a = self._integral_bin_area(bounds, len(g))
         i = self.__call__(g, values, normalized=False)
         return core.sum(i) * a
@@ -297,7 +324,7 @@ class PDF(object):
         if len(bounds.shape) == 1:
             return self._numerical_normalization_single_bounds(values, bounds)
         else:
-            return np.sum(self._numerical_normalization_single_bounds(values, b) for b in bounds)
+            return np.sum(np.fromiter((self._numerical_normalization_single_bounds(values, b) for b in bounds), dtype=types.cpu_type))
 
 
 class CachePDF(PDF):
@@ -727,6 +754,19 @@ class ProdPDFs(MultiPDF):
         for p in self.pdfs.values():
             n *= p.norm(values, range)
         return n
+
+    def numerical_normalization( self, values = None, range = parameters.FULL ):
+        '''
+        Calculate a numerical normalization.
+
+        :param values: values to use.
+        :type values: Registry(str, float)
+        :param range: normalization range.
+        :type range: str
+        :returns: normalization.
+        :rtype: float
+        '''
+        return np.prod(np.fromiter((pdf.numerical_normalization(values, range) for pdf in self.pdfs.values()), dtype=types.cpu_type))
 
 
 class UnbinnedEvaluatorProxy(object):

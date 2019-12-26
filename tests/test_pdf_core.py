@@ -71,6 +71,35 @@ def test_addpdfs():
     assert pdf.constant
 
 
+def test_prodpdfs():
+    '''
+    Test the "ProdPDFs" class.
+    '''
+    # Create two Gaussians
+    mx = pyfit.Parameter('mx', bounds=(-5, +5))
+    cx = pyfit.Parameter('cx', 0., bounds=(-2, +2))
+    sx = pyfit.Parameter('sx', 1., bounds=(-3, +3))
+    gx = pyfit.Gaussian('gx', mx, cx, sx)
+
+    my = pyfit.Parameter('my', bounds=(-5, +5))
+    cy = pyfit.Parameter('cy', 0., bounds=(-2, +2))
+    sy = pyfit.Parameter('sy', 1., bounds=(-3, +3))
+    gy = pyfit.Gaussian('gy', my, cy, sy)
+
+    pdf = pyfit.ProdPDFs('pdf', [gx, gy])
+
+    # Test integration
+    assert np.allclose(pdf.norm(), pdf.numerical_normalization())
+
+    # Test consteness of the PDFs
+    for p in gx.all_args.values():
+        p.constant = True
+    assert gx.constant and not pdf.constant
+    for p in gy.all_args.values():
+        p.constant = True
+    assert pdf.constant
+
+
 def test_sourcepdf():
     '''
     Test the "SourcePDF" class.

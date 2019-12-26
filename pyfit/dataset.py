@@ -292,11 +292,12 @@ def evaluation_grid( data_pars, bounds, size ):
 
     :param data_pars: data parameters.
     :type data_pars: Registry(str, Parameter)
-    :param size: number of entries in the output sample. If "eval_range" \
-    makes any of the parameters have more than one set of bounds, then \
-    the output sample might have a bit less entries.
+    :param size: number of entries in the output sample per set of bounds. \
+    This means that "size" entries will be generated for each pair of (min, max) \
+    provided, that is, per data parameter.
     :type size: int
-    :param bounds: bounds of the different data parameters.
+    :param bounds: bounds of the different data parameters. Even indices for \
+    the lower bounds, and odd indices for the upper bounds.
     :type bounds: numpy.ndarray
     :returns: uniform sample.
     :rtype: DataSet
@@ -308,8 +309,8 @@ def evaluation_grid( data_pars, bounds, size ):
         data = {tuple(data_pars.values())[0].name: core.linspace(*bounds, size)}
     else:
         values = []
-        for p, b in zip(data_pars.values(), bounds):
-            values.append(core.linspace(*b, size))
+        for p, vmin, vmax in zip(data_pars.values(), bounds[0::2], bounds[1::2]):
+            values.append(core.linspace(vmin, vmax, size))
         data = {p.name: a for p, a in zip(data_pars.values(), core.meshgrid(*values))}
 
     return DataSet(data, data_pars, copy=False)
