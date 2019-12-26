@@ -10,7 +10,8 @@ import numpy as np
 
 __all__ = ['DataSet', 'BinnedDataSet']
 
-BINNED = 'binned'
+# Names of different data types
+BINNED   = 'binned'
 UNBINNED = 'unbinned'
 
 logger = logging.getLogger(__name__)

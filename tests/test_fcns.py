@@ -24,9 +24,11 @@ def test_binned_maximum_likelihood():
 
     data = pyfit.BinnedDataSet.from_array(0.5 * (edges[1:] + edges[:-1]), m, values)
 
-    with pyfit.create_minuit_binned('bml', g, data) as minuit:
+    with pyfit.binned_minimizer('bml', g, data, minimizer='minuit') as minuit:
         r = minuit.migrad()
         print(r)
+
+    assert not r.fmin.hesse_failed
 
     results = pyfit.migrad_output_to_registry(r)
 
@@ -38,9 +40,11 @@ def test_binned_maximum_likelihood():
     sc = pyfit.Parameter('sc', 0.1)
     gc = pyfit.Gaussian('constraint', c, cc, sc)
 
-    with pyfit.create_minuit_binned('bml', g, data, constraints=[gc]) as minuit:
+    with pyfit.binned_minimizer('bml', g, data, minimizer='minuit', constraints=[gc]) as minuit:
         r = minuit.migrad()
         print(r)
+
+    assert not r.fmin.hesse_failed
 
     results = pyfit.migrad_output_to_registry(r)
 
@@ -70,9 +74,11 @@ def test_unbinned_extended_maximum_likelihood():
 
     data = pdf.generate(10000)
 
-    with pyfit.create_minuit_unbinned('ueml', pdf, data) as minuit:
+    with pyfit.unbinned_minimizer('ueml', pdf, data, minimizer='minuit') as minuit:
         r = minuit.migrad()
         print(r)
+
+    assert not r.fmin.hesse_failed
 
     results = pyfit.migrad_output_to_registry(r)
 
@@ -84,9 +90,11 @@ def test_unbinned_extended_maximum_likelihood():
     sc = pyfit.Parameter('sc', 0.1)
     gc = pyfit.Gaussian('constraint', c, cc, sc)
 
-    with pyfit.create_minuit_unbinned('ueml', pdf, data, constraints=[gc]) as minuit:
+    with pyfit.unbinned_minimizer('ueml', pdf, data, minimizer='minuit', constraints=[gc]) as minuit:
         r = minuit.migrad()
         print(r)
+
+    assert not r.fmin.hesse_failed
 
     results = pyfit.migrad_output_to_registry(r)
 
@@ -106,9 +114,11 @@ def test_unbinned_maximum_likelihood():
 
     data = g.generate(10000)
 
-    with pyfit.create_minuit_unbinned('uml', g, data) as minuit:
+    with pyfit.unbinned_minimizer('uml', g, data, minimizer='minuit') as minuit:
         r = minuit.migrad()
         print(r)
+
+    assert not r.fmin.hesse_failed
 
     results = pyfit.migrad_output_to_registry(r)
 
@@ -120,9 +130,11 @@ def test_unbinned_maximum_likelihood():
     sc = pyfit.Parameter('sc', 0.1)
     gc = pyfit.Gaussian('constraint', c, cc, sc)
 
-    with pyfit.create_minuit_unbinned('uml', g, data, constraints=[gc]) as minuit:
+    with pyfit.unbinned_minimizer('uml', g, data, minimizer='minuit', constraints=[gc]) as minuit:
         r = minuit.migrad()
         print(r)
+
+    assert not r.fmin.hesse_failed
 
     results = pyfit.migrad_output_to_registry(r)
 

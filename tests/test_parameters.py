@@ -26,9 +26,11 @@ def test_range():
 
     data = e.generate(10000)
 
-    with pyfit.create_minuit_unbinned('uml', e, data, range='sides') as minuit:
+    with pyfit.unbinned_minimizer('uml', e, data, minimizer='minuit', range='sides') as minuit:
         r = minuit.migrad()
         print(r)
+
+    assert not r.fmin.hesse_failed
 
     results = pyfit.migrad_output_to_registry(r)
 

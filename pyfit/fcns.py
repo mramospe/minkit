@@ -1,13 +1,38 @@
 '''
 Definition of different minimization functions.
 '''
-from . import parameters
 from . import core
+from . import dataset
+from . import parameters
 
 import functools
 import numpy as np
 
 __all__ = ['binned_maximum_likelihood', 'unbinned_extended_maximum_likelihood', 'unbinned_maximum_likelihood']
+
+# Names of different FCNs
+BINNED_MAXIMUM_LIKELIHOOD            = 'bml'
+UNBINNED_MAXIMUM_LIKELIHOOD          = 'uml'
+UNBINNED_EXTENDED_MAXIMUM_LIKELIHOOD = 'ueml'
+
+
+def data_type_for_fcn( fcn ):
+    '''
+    Get the associated data type for a given FCN.
+
+    :param fcn: FCN to consider.
+    :type fcn: str
+    :returns: data type associated to the FCN.
+    :rtype: str
+    :raises ValueError: if the FCN is unknown.
+    '''
+    if fcn in (BINNED_MAXIMUM_LIKELIHOOD,):
+        return dataset.BINNED
+    elif fcn in (UNBINNED_MAXIMUM_LIKELIHOOD,
+                 UNBINNED_EXTENDED_MAXIMUM_LIKELIHOOD):
+        return dataset.UNBINNED
+    else:
+        raise ValueError(f'Unknown FCN type "{fcn}"')
 
 
 def evaluate_constraints( values = None, constraints = None ):
@@ -66,7 +91,7 @@ def binned_chisquare( pdf, data, values = None, range = parameters.FULL, constra
     raise NotImplementedError('Function not implemented yet')
 
 
-def binned_maximum_likelihood( pdf, data, values = None, range = parameters.FULL, constraints = None ):
+def binned_maximum_likelihood( pdf, data, values = None, constraints = None ):
     '''
     Definition of the binned maximum likelihood FCN.
 
@@ -76,15 +101,13 @@ def binned_maximum_likelihood( pdf, data, values = None, range = parameters.FULL
     :type data: BinnedDataSet
     :param values: values to be passed to the :method:`PDF.__call__` method.
     :type values: Registry
-    :param range: normalization range of the PDF.
-    :type range: str
     :param constraints: PDFs with the constraints for paramters in "pdf".
     :type constraints: list(PDF)
     :returns: value of the FCN.
     :rtype: float
     '''
     c = evaluate_constraints(values, constraints)
-    return pdf.norm(values, range) - core.sum(data.values * core.log(c * pdf(data, values, range)))
+    return pdf.norm(values) - core.sum(data.values * core.log(c * pdf(data, values)))
 
 
 def unbinned_extended_maximum_likelihood( pdf, data, values = None, range = parameters.FULL, constraints = None ):
@@ -136,3 +159,22 @@ def unbinned_maximum_likelihood( pdf, data, values = None, range = parameters.FU
     if data.weights is not None:
         lf *= data.weights
     return - core.sum(lf) - len(data) * np.log(c)
+
+
+def fcn_from_name( name ):
+    '''
+    Return the FCN associated to the given name.
+
+    :param name: name of the FCN.
+    :type name: str
+    :returns: associated function.
+    :rtype: function
+    '''
+    if name == BINNED_MAXIMUM_LIKELIHOOD:
+        return binned_maximum_likelihood
+    elif name == UNBINNED_MAXIMUM_LIKELIHOOD:
+        return unbinned_maximum_likelihood
+    elif name == UNBINNED_EXTENDED_MAXIMUM_LIKELIHOOD:
+        return unbinned_extended_maximum_likelihood
+    else:
+        raise ValueError(f'Unknown FCN type "{name}"')

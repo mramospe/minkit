@@ -7,11 +7,10 @@ from . import dataset
 from . import parameters
 from . import types
 
-import itertools
 import logging
 import numpy as np
 
-__all__ = ['AddPDFs', 'ProdPDFs']
+__all__ = ['AddPDFs', 'Category', 'ProdPDFs']
 
 # Default size of the samples to be used during numerical normalization
 NORM_SIZE = 1000000
@@ -767,76 +766,3 @@ class ProdPDFs(MultiPDF):
         :rtype: float
         '''
         return np.prod(np.fromiter((pdf.numerical_normalization(values, range) for pdf in self.pdfs.values()), dtype=types.cpu_type))
-
-
-class UnbinnedEvaluatorProxy(object):
-    '''
-    Definition of a proxy class to evaluate an FCN with a PDF.
-    '''
-    def __init__( self, fcn, pdf, data, range = parameters.FULL, constraints = None ):
-        '''
-        :param fcn: FCN to be used during minimization.
-        :type fcn: str
-        :param data: data sample to process.
-        :type data: DataSet
-        :param kwargs: arguments to be forwarded to the FCN function.
-        :type kwargs: dict
-        '''
-        self.__data        = data.subset(range=range, copy=False)
-        self.__fcn         = fcn
-        self.__pdf         = pdf.frozen(self.__data, range=range)
-        self.__range       = range
-        self.__constraints = constraints or []
-
-        super(UnbinnedEvaluatorProxy, self).__init__()
-
-    def __call__( self, *values ):
-        '''
-        Evaluate the FCN.
-        Values must be provided sorted as :method:`PDF.args`.
-
-        :param values: set of values to evaluate the FCN.
-        :type values: tuple(float)
-        :returns: value of the FCN.
-        :rtype: float
-        '''
-        r = parameters.Registry()
-        for i, n in enumerate(self.__pdf.all_args):
-            r[n] = values[i]
-        return self.__fcn(self.__pdf, self.__data, r, self.__range, self.__constraints)
-
-
-class BinnedEvaluatorProxy(object):
-    '''
-    Definition of a proxy class to evaluate an FCN with a PDF on a BinnedDataSet object.
-    '''
-    def __init__( self, fcn, pdf, data, range = parameters.FULL, constraints = None ):
-        '''
-        :param fcn: FCN to be used during minimization.
-        :type fcn: str
-        :param data: data sample to process.
-        :type data: BinnedDataSet
-        :param kwargs: arguments to be forwarded to the FCN function.
-        :type kwargs: dict
-        '''
-        self.__data        = data
-        self.__fcn         = fcn
-        self.__pdf         = pdf.frozen(self.__data, range=range)
-        self.__constraints = constraints or []
-
-        super(BinnedEvaluatorProxy, self).__init__()
-
-    def __call__( self, *values ):
-        '''
-        Evaluate the FCN.
-        Values must be provided sorted as :method:`PDF.args`.
-
-        :param values: set of values to evaluate the FCN.
-        :type values: tuple(float)
-        :returns: value of the FCN.
-        :rtype: float
-        '''
-        r = parameters.Registry()
-        for i, n in enumerate(self.__pdf.all_args):
-            r[n] = values[i]
-        return self.__fcn(self.__pdf, self.__data, r, constraints=self.__constraints)
