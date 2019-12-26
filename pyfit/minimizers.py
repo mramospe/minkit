@@ -20,7 +20,8 @@ MINUIT = 'minuit'
 # Object to help users to create simultaneous minimizers.
 Category = collections.namedtuple('Category', ['fcn', 'pdf', 'data'])
 Category.__doc__ = '''\
-Object serving as a proxy for an FCN to be evaluated using a PDF on a data set.'''
+Object serving as a proxy for an FCN to be evaluated using a PDF on a data set.
+The type of data (binned/unbinned) is assumed from the FCN.'''
 
 
 def parse_fcn( data_type ):

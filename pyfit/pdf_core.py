@@ -10,7 +10,7 @@ from . import types
 import logging
 import numpy as np
 
-__all__ = ['AddPDFs', 'Category', 'ProdPDFs']
+__all__ = ['AddPDFs', 'Category', 'ConvPDFs', 'ProdPDFs']
 
 # Default size of the samples to be used during numerical normalization
 NORM_SIZE = 1000000
@@ -701,6 +701,108 @@ class AddPDFs(MultiPDF):
         :rtype: AddPDFs
         '''
         return cls(name, [first, second], [yf] if ys is None else [yf, ys])
+
+
+class ConvPDFs(MultiPDF):
+    '''
+    Definition of a convolution of two PDFs.
+    '''
+    def __init__( self, name, first, second, range = None ):
+        '''
+        Represent the convolution of two different PDFs.
+
+        :param name: name of the PDF.
+        :type name: str
+        :param first: first PDF.
+        :type first: PDF
+        :param second: second PDF.
+        :type second: PDF
+        :param range: range of the convolution. This is needed in case part of the \
+        PDFs lie outside the evaluation range. It is set to "full" by default.
+        :type range: str
+        '''
+        error = ValueError(f'Convolution is only supported in 1-dimensional PDFs')
+        if len(first.data_pars) != 1:
+            raise error
+
+        if len(second.data_pars) != 1:
+            raise error
+
+        # The convolution range can be changed by the user
+        self.range = range or parameters.FULL
+
+        # This will point to the data where this class is evaluated many times
+        self.__range_cache       = None
+        self.__interp_data_cache = None
+        self.__interp_pdf_cache  = None
+
+        super(ConvPDFs, self).__init__(name, [first, second])
+
+    def __call__( self, data, values = None, range = parameters.FULL, normalized = True ):
+        '''
+        Call the PDF in the given set of data.
+
+        :param data: data to evaluate.
+        :type data: DataSet or BinnedDataSet
+        :param values: values for the argument parameters to use.
+        :type values: Registry(str, float)
+        :param range: normalization range.
+        :type range: str
+        :param normalized: whether to return a normalized output.
+        :type normalized: boole
+        '''
+        first, second = tuple(self.pdfs.values())
+
+        # Only works for the 1-dimensional case
+        par = tuple(first.data_pars.values())[0]
+
+        bounds = parameters.bounds_for_range(first.data_pars, self.range)
+
+        if bounds.shape != (2,):
+            raise RuntimeError(f'The convolution bounds must not be disjointed')
+
+        # MUST DO THIS PROPERLY, SINCE RANGES CAN BE CHANGED
+        if self.__range_cache != range:
+
+            # Calculate the convolution
+            self.norm_size = 10000
+
+            grid = dataset.evaluation_grid(first.data_pars, bounds, size=self.norm_size)
+
+            step = (bounds[1] - bounds[0]) / self.norm_size
+
+            fv = first(grid, values, range, normalized)
+            sv = second(grid, values, range, normalized)
+            cv = core.fftconvolve(fv, sv, grid[par.name]).real
+
+            # Update the cache
+            self.__range_cache       = range
+            self.__interp_data_cache = grid[par.name]
+            self.__interp_pdf_cache  = cv
+
+        pdf_values = core.interpolate_linear(data[par.name],
+                                             self.__interp_data_cache,
+                                             self.__interp_pdf_cache)
+
+        if normalized:
+            return pdf_values / self.norm(values, range)
+        else:
+            return pdf_values
+
+    def norm( self, values = None, range = parameters.FULL ):
+        '''
+        Calculate the normalization of the PDF.
+        In this case, a numerical normalization is used, so the effect
+        is equivalent to :method:`ConvPDFs.numerical_normalization`.
+
+        :param values: values of the parameters to use.
+        :type values: Registry(str, float)
+        :param range: normalization range to consider.
+        :type range: str
+        :returns: value of the normalization.
+        :rtype: float
+        '''
+        return self.numerical_normalization(values, range)
 
 
 class ProdPDFs(MultiPDF):

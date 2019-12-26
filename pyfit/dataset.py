@@ -162,14 +162,14 @@ class DataSet(object):
         :rtype: DataSet
         '''
         if cond is None:
-            cond = core.ones(len(self), dtype=types.cpu_bool_type)
+            cond = core.ones(len(self), dtype=types.cpu_bool)
 
         if range is not None:
             for n, p in self.data_pars.items():
                 r = p.get_range(range)
                 a = self[n]
                 if r.disjoint:
-                    c = core.zeros(len(cond), dtype=types.cpu_bool_type)
+                    c = core.zeros(len(cond), dtype=types.cpu_bool)
                     for vmin, vmax in r.bounds:
                         i = core.logical_and(a >= vmin, a <= vmax)
                         c = core.logical_or(c, i)

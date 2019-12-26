@@ -20,6 +20,8 @@ OPENCL = 'opencl'
 # CUDA backend
 CUDA = 'cuda'
 
+NOT_IMPLEMENTED = NotImplementedError(f'Function not implemented for backend "{BACKEND}"')
+
 logger = logging.getLogger(__name__)
 
 
@@ -52,7 +54,7 @@ def array( *args, **kwargs ):
     if BACKEND is CPU:
         return np.array(*args, dtype=types.cpu_type, **kwargs)
     else:
-        raise NotImplementedError(f'Function not implemented for backend "{BACKEND}"')
+        raise NOT_IMPLEMENTED
 
 
 @with_backend
@@ -68,7 +70,7 @@ def extract_ndarray( obj ):
     if BACKEND is CPU:
         return np.array(obj)
     else:
-        raise NotImplementedError(f'Function not implemented for backend "{BACKEND}"')
+        raise NOT_IMPLEMENTED
 
 
 def initialize( backend = CPU, interactive = False ):
@@ -91,7 +93,7 @@ def linspace( vmin, vmax, size ):
     if BACKEND == CPU:
         return np.linspace(vmin, vmax, size)
     else:
-        raise NotImplementedError(f'Function not implemented for backend "{BACKEND}"')
+        raise NOT_IMPLEMENTED
 
 
 def meshgrid( *arrays ):
@@ -100,7 +102,7 @@ def meshgrid( *arrays ):
     if BACKEND == CPU:
         return tuple(map(np.ndarray.flatten, np.meshgrid(*arrays)))
     else:
-        raise NotImplementedError(f'Function not implemented for backend "{BACKEND}"')
+        raise NOT_IMPLEMENTED
 
 
 @with_backend
@@ -110,7 +112,7 @@ def concatenate( *arrs ):
     if BACKEND == CPU:
         return np.concatenate(arrs)
     else:
-        raise NotImplementedError(f'Function not implemented for backend "{BACKEND}"')
+        raise NOT_IMPLEMENTED
 
 
 @with_backend
@@ -139,17 +141,17 @@ def random_uniform( bounds, size ):
             fracs = fracs[ars]
             bounds = bounds[ars]
 
-            u = core.random_uniform((0, 1), size)
+            u = random_uniform((0, 1), size)
 
             values = []
             for f, b in zip(fracs, bounds):
-                n = core.sum(u < f)
+                n = sum(u < f)
                 values.append(np.random.uniform(*b, size))
                 u = u[n:]
 
-            return core.concatenate(values)
+            return concatenate(values)
     else:
-        raise NotImplementedError(f'Function not implemented for backend "{BACKEND}"')
+        raise NOT_IMPLEMENTED
 
 
 @with_backend
@@ -159,7 +161,7 @@ def log( array ):
     if BACKEND is CPU:
         return np.log(array)
     else:
-        raise NotImplementedError(f'Function not implemented for backend "{BACKEND}"')
+        raise NOT_IMPLEMENTED
 
 
 @with_backend
@@ -169,7 +171,7 @@ def sum( array ):
     if BACKEND is CPU:
         return np.sum(array)
     else:
-        raise NotImplementedError(f'Function not implemented for backend "{BACKEND}"')
+        raise NOT_IMPLEMENTED
 
 
 @with_backend
@@ -179,7 +181,7 @@ def max( arr ):
     if BACKEND == CPU:
         return np.max(arr)
     else:
-        raise NotImplementedError(f'Function not implemented for backend "{BACKEND}"')
+        raise NOT_IMPLEMENTED
 
 
 @with_backend
@@ -189,7 +191,17 @@ def min( arr ):
     if BACKEND == CPU:
         return np.min(arr)
     else:
-        raise NotImplementedError(f'Function not implemented for backend "{BACKEND}"')
+        raise NOT_IMPLEMENTED
+
+
+@with_backend
+def arange( *args, **kwargs ):
+    '''
+    '''
+    if BACKEND == CPU:
+        return np.arange(*args, **kwargs)
+    else:
+        raise NOT_IMPLEMENTED
 
 
 @with_backend
@@ -204,7 +216,7 @@ def ones( *args, dtype=types.cpu_type, **kwargs ):
     if BACKEND is CPU:
         return np.ones(*args, dtype=dtype, **kwargs)
     else:
-        raise NotImplementedError(f'Function not implemented for backend "{BACKEND}"')
+        raise NOT_IMPLEMENTED
 
 
 @with_backend
@@ -219,7 +231,7 @@ def zeros( *args, dtype=types.cpu_type, **kwargs ):
     if BACKEND is CPU:
         return np.zeros(*args, dtype=dtype, **kwargs)
     else:
-        raise NotImplementedError(f'Function not implemented for backend "{BACKEND}"')
+        raise NOT_IMPLEMENTED
 
 
 @with_backend
@@ -230,7 +242,7 @@ def logical_and( a, b ):
     if BACKEND == CPU:
         return np.logical_and(a, b)
     else:
-        raise NotImplementedError(f'Function not implemented for backend "{BACKEND}"')
+        raise NOT_IMPLEMENTED
 
 
 @with_backend
@@ -241,4 +253,93 @@ def logical_or( a, b ):
     if BACKEND == CPU:
         return np.logical_or(a, b)
     else:
-        raise NotImplementedError(f'Function not implemented for backend "{BACKEND}"')
+        raise NOT_IMPLEMENTED
+
+
+@with_backend
+def fft( a ):
+    '''
+    Calculate the fast-Fourier transform of an array.
+    '''
+    if BACKEND == CPU:
+        return np.fft.fft(a)
+    else:
+        raise NOT_IMPLEMENTED
+
+
+@with_backend
+def ifft( a ):
+    '''
+    Calculate the fast-Fourier transform of an array.
+    '''
+    if BACKEND == CPU:
+        return np.fft.ifft(a)
+    else:
+        raise NOT_IMPLEMENTED
+
+
+@with_backend
+def interpolate_linear( x, xp, yp):
+    '''
+    '''
+    if BACKEND == CPU:
+        return np.interp(x, xp, yp)
+    else:
+        raise NOT_IMPLEMENTED
+
+
+def fftconvolve( a, b, data = None, normalized = True ):
+    '''
+    Calculate the convolution using a FFT of two arrays.
+
+    :param a: first array.
+    :type a: numpy.ndarray
+    :param b: first array.
+    :type b: numpy.ndarray
+    :param data: possible values where "a" and "b" where taken from.
+    :type data: numpy.ndarray
+    :param normalized: whether to return a normalized output or not.
+    :type normalized: bool
+    :returns: convolution of the two array.
+    :rtype: numpy.ndarray
+    '''
+    fa = fft(a)
+    fb = fft(b)
+
+    if data is not None:
+        shift = fftshift(data)
+    else:
+        shift = 1.
+
+    prod = fa * shift * fb
+
+    output = fft(prod)
+
+    if normalized:
+        return output * (data[1] - data[0]) / len(output)
+    else:
+        return output
+
+
+def fftshift( a ):
+    '''
+    Compute the shift in frequencies needed for "fftconvolve" to return values in the same data range.
+
+    :param a: input array.
+    :type a: numpy.ndarray
+    :returns: shift in the frequency domain.
+    :rtype: numpy.ndarray
+    '''
+    n0  = sum(a < 0)
+    nt  = len(a)
+    com = types.cpu_complex(+2.j * np.pi * n0 / nt)
+    rng = arange(nt, dtype=types.cpu_int).astype(types.cpu_complex)
+    return exp(com * rng)
+
+
+@with_backend
+def exp( a ):
+    if BACKEND == CPU:
+        return np.exp(a)
+    else:
+        raise NOT_IMPLEMENTED

@@ -3,6 +3,7 @@ Test the "pdf_core" module.
 '''
 import numpy as np
 import pyfit
+import pytest
 
 pyfit.initialize()
 
@@ -69,6 +70,50 @@ def test_addpdfs():
     for p in pdf.all_args.values():
         p.constant = True
     assert pdf.constant
+
+
+def test_category():
+    '''
+    Test the "Category" class.
+    '''
+    with pytest.raises(TypeError):
+        c = pyfit.Category()
+
+
+def test_convpdfs():
+    '''
+    Test the "ConvPDFs" class.
+    '''
+    m = pyfit.Parameter('m', bounds=(-20, +20))
+
+    # Create two Gaussians
+    c1 = pyfit.Parameter('c1', 0., bounds=(-2, +2))
+    s1 = pyfit.Parameter('s1', 3., bounds=(0.1, +10))
+    g1 = pyfit.Gaussian('g1', m, c1, s1)
+
+    c2 = pyfit.Parameter('c2', 0., bounds=(-2, +2))
+    s2 = pyfit.Parameter('s2', 4., bounds=(0.1, +10))
+    g2 = pyfit.Gaussian('g2', m, c2, s2)
+
+    pdf = pyfit.ConvPDFs('convolution', g1, g2)
+
+    data = pdf.generate(size=100000)
+
+    # Check that the output is another Gaussian with bigger standard deviation
+    mean = np.sum(data[m.name]) / len(data)
+    var  = np.sum((data[m.name] - mean)**2) / len(data)
+
+    assert np.allclose(var, s1.value**2 + s2.value**2, rtol=0.01)
+
+    values, edges = np.histogram(pyfit.extract_ndarray(data[m.name]), bins=100, range=m.bounds)
+
+    centers = pyfit.DataSet.from_array(0.5 * (edges[1:] + edges[:-1]), m)
+
+    pv = pyfit.extract_ndarray(pdf(centers))
+
+    pdf_values = pyfit.scale_pdf_values(pv, values, edges)
+
+    assert np.allclose(np.sum(pdf_values), np.sum(values), rtol=0.01)
 
 
 def test_prodpdfs():
