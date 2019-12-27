@@ -23,6 +23,36 @@ CONV_SIZE = 10000
 logger = logging.getLogger(__name__)
 
 
+def allows_cache( method ):
+    '''
+    Wrap the method of a class with a "cache" (expressed as a dictionary).
+    If "using_cache" evaluates to true, a search is done in the cache for
+    the associated value, and it is returned.
+    If it does not exist, it is previously created.
+    In case "using_cache" is False, the method is called without saving the
+    output.
+
+    :param method: method of the class.
+    :type method: function
+    :returns: wrapper around the method.
+    :rtype: function
+    '''
+    @functools.wraps(method)
+    def __wrapper( self, *args, **kwargs ):
+        '''
+        Internal wrapper.
+        '''
+        if self.using_cache:
+            n = method.__name__
+            v = self.cache.get(n, None)
+            if v is None:
+                self.cache[n] = method(self, *args, **kwargs)
+            return self.cache[n]
+        else:
+            return method(self, *args, **kwargs)
+    return __wrapper
+
+
 class PDF(object):
     '''
     Object defining the properties of a PDF.
@@ -47,7 +77,7 @@ class PDF(object):
         self.norm_size   = NORM_SIZE
 
         # The cache is saved on a dictionary, and inherited classes must avoid colliding names
-        self.__cache = {}
+        self.__cache = None
 
         super(PDF, self).__init__()
 
@@ -66,24 +96,17 @@ class PDF(object):
         '''
         raise NotImplementedError('Classes inheriting from "pyfit.PDF" must define the "__call__" operator')
 
-    def _create_cache( self, values = None, range = parameters.FULL, normalized = True ):
+    def _enable_cache( self ):
         '''
-        Method to create a cache with values for this PDF.
-
-        :param values: values for the argument parameters to use.
-        :type values: Registry(str, float)
-        :param range: normalization range.
-        :type range: str
-        :param normalized: whether to return a normalized output.
-        :type normalized: bool
+        Method to enable the cache for values of this PDF.
         '''
-        pass
+        self.__cache = {}
 
     def _free_cache( self ):
         '''
         Free the cache from memory.
         '''
-        self.__cache.clear()
+        self.__cache = None
 
     def _generate_single_bounds( self, size, mapsize, gensize, safe_factor, bounds, values ):
         '''
@@ -241,7 +264,13 @@ class PDF(object):
 
     @property
     def using_cache( self ):
-        return bool(self.__cache)
+        '''
+        Get whether there are elements in the cache or not.
+
+        :returns: whether there are elements in the cache or not.
+        :rtype: bool
+        '''
+        return self.__cache is not None
 
     @contextlib.contextmanager
     def bind( self, values = None, range = parameters.FULL, normalized = True ):
@@ -258,7 +287,7 @@ class PDF(object):
         :param normalized: whether to return a normalized output.
         :type normalized: bool
         '''
-        self._create_cache(values, range, normalized)
+        self._enable_cache()
         yield bindings.bind_class_arguments(self, values=values, range=range, normalized=normalized)
         self._free_cache()
 
@@ -633,7 +662,7 @@ class MultiPDF(PDF):
         :type normalized: bool
         '''
         for pdf in self.pdfs.values():
-            pdf._create_cache(values, range, normalized)
+            pdf._enable_cache()
         with super(MultiPDF, self).bind(values, range, normalized) as base:
             yield base
         for pdf in self.pdfs.values():
@@ -833,10 +862,7 @@ class ConvPDFs(MultiPDF):
         :param normalized: whether to return a normalized output.
         :type normalized: bool
         '''
-        if self.using_cache:
-            dv, cv = self.cache['conv_data'], self.cache['conv_values']
-        else:
-            dv, cv = self._convolve(values, range, normalized)
+        dv, cv = self.convolve(values, range, normalized)
 
         par = tuple(self.data_pars.values())[0]
 
@@ -844,7 +870,8 @@ class ConvPDFs(MultiPDF):
 
         return pdf_values
 
-    def _convolve( self, values = None, range = parameters.FULL, normalized = True ):
+    @allows_cache
+    def convolve( self, values = None, range = parameters.FULL, normalized = True ):
         '''
         Calculate the convolution.
 
@@ -875,14 +902,6 @@ class ConvPDFs(MultiPDF):
         sv = second(grid, values, range, normalized)
 
         return grid[par.name], core.fftconvolve(fv, sv, grid[par.name]).real
-
-    @core.calling_base_class_method
-    def _create_cache( self, values = None, range = parameters.FULL, normalized = True ):
-        '''
-        '''
-        dv, fv = self._convolve(values, range, normalized)
-        self.cache['conv_data'] = dv
-        self.cache['conv_values'] = fv
 
     def norm( self, values = None, range = parameters.FULL ):
         '''
