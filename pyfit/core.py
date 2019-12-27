@@ -25,6 +25,25 @@ NOT_IMPLEMENTED = NotImplementedError(f'Function not implemented for backend "{B
 logger = logging.getLogger(__name__)
 
 
+def calling_base_class_method( method ):
+    '''
+    Decorator to always call a base class method.
+    The execution will take place before the call to the derived class method.
+
+    :param method: method to decorate.
+    :type method: function
+    :returns: wrapper
+    :rtype: function
+    '''
+    def __wrapper( self, *args, **kwargs ):
+        '''
+        Internal wrapper.
+        '''
+        getattr(super(self.__class__, self), method.__name__)(*args, **kwargs)
+        return method(self)
+    return __wrapper
+
+
 def with_backend( func ):
     '''
     Check whether a backend has been defined and raise an error if not.

@@ -4,6 +4,11 @@ Test the "parameters" module.
 import pyfit
 import numpy as np
 
+pyfit.initialize()
+
+# For reproducibility
+np.random.seed(98953)
+
 
 def test_range():
     '''

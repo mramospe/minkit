@@ -5,6 +5,11 @@ import pyfit
 from pyfit import dataset
 import numpy as np
 
+pyfit.initialize()
+
+# For reproducibility
+np.random.seed(98953)
+
 
 def test_evaluation_grid():
     '''

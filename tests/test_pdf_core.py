@@ -22,9 +22,9 @@ def test_pdf():
     m.set_range('sides', [(0, 4), (6, 10)])
 
     # integral
-    assert np.allclose(e.integral(range='full', norm_range='full'), 1.)
-    assert np.allclose(e.integral(range='sides', norm_range='full'), 0.8)
-    assert np.allclose(e.integral(range='sides', norm_range='sides'), 1.)
+    assert np.allclose(e.integral(integral_range='full', range='full'), 1.)
+    assert np.allclose(e.integral(integral_range='sides', range='full'), 0.8)
+    assert np.allclose(e.integral(integral_range='sides', range='sides'), 1.)
 
 
 def test_addpdfs():
@@ -97,13 +97,13 @@ def test_convpdfs():
 
     pdf = pyfit.ConvPDFs('convolution', g1, g2)
 
-    data = pdf.generate(size=100000)
+    data = pdf.generate(size=10000)
 
     # Check that the output is another Gaussian with bigger standard deviation
     mean = np.sum(data[m.name]) / len(data)
     var  = np.sum((data[m.name] - mean)**2) / len(data)
 
-    assert np.allclose(var, s1.value**2 + s2.value**2, rtol=0.01)
+    assert np.allclose(var, s1.value**2 + s2.value**2, rtol=0.05)
 
     values, edges = np.histogram(pyfit.extract_ndarray(data[m.name]), bins=100, range=m.bounds)
 
@@ -114,6 +114,12 @@ def test_convpdfs():
     pdf_values = pyfit.scale_pdf_values(pv, values, edges)
 
     assert np.allclose(np.sum(pdf_values), np.sum(values), rtol=0.01)
+
+    with pyfit.unbinned_minimizer('uml', pdf, data, minimizer='minuit') as minuit:
+        r = minuit.migrad()
+        print(r)
+
+    assert not r.fmin.hesse_failed
 
 
 def test_prodpdfs():

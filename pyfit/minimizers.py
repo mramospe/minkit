@@ -59,7 +59,7 @@ class BinnedEvaluatorProxy(object):
         '''
         self.__data        = data
         self.__fcn         = fcn
-        self.__pdf         = pdf.frozen(self.__data)
+        self.__pdf         = pdf.cache_if_constant(self.__data)
         self.__constraints = constraints or []
 
         super(BinnedEvaluatorProxy, self).__init__()
@@ -106,7 +106,7 @@ class UnbinnedEvaluatorProxy(object):
         '''
         self.__data        = data.subset(range=range, copy=False)
         self.__fcn         = fcn
-        self.__pdf         = pdf.frozen(self.__data, range=range)
+        self.__pdf         = pdf.cache_if_constant(self.__data, range=range)
         self.__range       = range
         self.__constraints = constraints or []
 
@@ -221,7 +221,7 @@ def registry_to_minuit_input( registry, errordef = 1. ):
 def unbinned_minimizer( fcn, pdf, data, minimizer = MINUIT, **kwargs ):
     '''
     Create a new instance of :class:`iminuit.Minuit`.
-    This represents a "frozen" object, that is, parameters defining
+    This represents a "constant" object, that is, parameters defining
     the PDFs are assumed to remain constant during all its lifetime.
 
     .. warning: Do not change any attribute of the parameters defining the \
@@ -244,7 +244,7 @@ def unbinned_minimizer( fcn, pdf, data, minimizer = MINUIT, **kwargs ):
 def binned_minimizer( fcn, pdf, data, minimizer = MINUIT, **kwargs ):
     '''
     Create a new instance of :class:`iminuit.Minuit`.
-    This represents a "frozen" object, that is, parameters defining
+    This represents a "constant" object, that is, parameters defining
     the PDFs are assumed to remain constant during all its lifetime.
 
     .. warning: Do not change any attribute of the parameters defining the \
@@ -267,7 +267,7 @@ def binned_minimizer( fcn, pdf, data, minimizer = MINUIT, **kwargs ):
 def simultaneous_unbinned_minimizer( fcn, pdfs, data, minimizer = MINUIT, **kwargs ):
     '''
     Create a new instance of :class:`iminuit.Minuit`.
-    This represents a "frozen" object, that is, parameters defining
+    This represents a "constant" object, that is, parameters defining
     the PDFs are assumed to remain constant during all its lifetime.
 
     .. warning: Do not change any attribute of the parameters defining the \
@@ -291,7 +291,7 @@ def simultaneous_unbinned_minimizer( fcn, pdfs, data, minimizer = MINUIT, **kwar
 def simultaneous_minimizer( categories, minimizer = MINUIT, range = parameters.FULL, constraints = None ):
     '''
     Create a new instance of :class:`iminuit.Minuit`.
-    This represents a "frozen" object, that is, parameters defining
+    This represents a "constant" object, that is, parameters defining
     the PDFs are assumed to remain constant during all its lifetime.
 
     .. warning: Do not change any attribute of the parameters defining the \
