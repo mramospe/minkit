@@ -23,14 +23,22 @@ CONV_SIZE = 10000
 logger = logging.getLogger(__name__)
 
 
-def allows_cache( method ):
+def process_cache( cache, method, self, args, kwargs ):
     '''
-    Wrap the method of a class with a "cache" (expressed as a dictionary).
-    If "using_cache" evaluates to true, a search is done in the cache for
-    the associated value, and it is returned.
-    If it does not exist, it is previously created.
-    In case "using_cache" is False, the method is called without saving the
-    output.
+    Update a cache (as a dictionary) by evaluating the given
+    method.
+    '''
+    n = method.__name__
+    v = self.cache.get(n, None)
+    if v is None:
+        v = method(self, *args, **kwargs)
+        self.cache[n] = v
+    return v
+
+
+def allows_bind_cache( method ):
+    '''
+    Wrap the method of a class.
 
     :param method: method of the class.
     :type method: function
@@ -42,12 +50,50 @@ def allows_cache( method ):
         '''
         Internal wrapper.
         '''
-        if self.using_cache:
-            n = method.__name__
-            v = self.cache.get(n, None)
-            if v is None:
-                self.cache[n] = method(self, *args, **kwargs)
-            return self.cache[n]
+        if self.cache_type == PDF.BIND:
+            return process_cache(self.cache, method, self, args, kwargs)
+        else:
+            return method(self, *args, **kwargs)
+    return __wrapper
+
+
+def allows_const_cache( method ):
+    '''
+    Wrap the method of a class, using a cache if the class is marked as constant.
+
+    :param method: method of the class.
+    :type method: function
+    :returns: wrapper around the method.
+    :rtype: function
+    '''
+    @functools.wraps(method)
+    def __wrapper( self, *args, **kwargs ):
+        '''
+        Internal wrapper.
+        '''
+        if self.cache_type == PDF.CONST and self.constant:
+            return process_cache(self.cache, method, self, args, kwargs)
+        else:
+            return method(self, *args, **kwargs)
+    return __wrapper
+
+
+def allows_bind_or_const_cache( method ):
+    '''
+    Wrap the method of a class, using a cache if the class is marked as constant.
+
+    :param method: method of the class.
+    :type method: function
+    :returns: wrapper around the method.
+    :rtype: function
+    '''
+    @functools.wraps(method)
+    def __wrapper( self, *args, **kwargs ):
+        '''
+        Internal wrapper.
+        '''
+        if self.cache_type == PDF.BIND or (self.cache_type == PDF.CONST and self.constant):
+            return process_cache(self.cache, method, self, args, kwargs)
         else:
             return method(self, *args, **kwargs)
     return __wrapper
@@ -57,6 +103,12 @@ class PDF(object):
     '''
     Object defining the properties of a PDF.
     '''
+    # Cache types
+    BIND  = 'bind'
+    CONST = 'const'
+
+    CACHE_TYPES = (BIND, CONST)
+
     def __init__( self, name, data_pars, args_pars ):
         '''
         Build the class from a name, a set of data parameters and argument parameters.
@@ -77,10 +129,12 @@ class PDF(object):
         self.norm_size   = NORM_SIZE
 
         # The cache is saved on a dictionary, and inherited classes must avoid colliding names
-        self.__cache = None
+        self.__cache      = None
+        self.__cache_type = None
 
         super(PDF, self).__init__()
 
+    @allows_const_cache
     def __call__( self, data, values = None, range = parameters.FULL, normalized = True ):
         '''
         Call the PDF in the given set of data.
@@ -95,18 +149,6 @@ class PDF(object):
         :type normalized: bool
         '''
         raise NotImplementedError('Classes inheriting from "pyfit.PDF" must define the "__call__" operator')
-
-    def _enable_cache( self ):
-        '''
-        Method to enable the cache for values of this PDF.
-        '''
-        self.__cache = {}
-
-    def _free_cache( self ):
-        '''
-        Free the cache from memory.
-        '''
-        self.__cache = None
 
     def _generate_single_bounds( self, size, mapsize, gensize, safe_factor, bounds, values ):
         '''
@@ -243,6 +285,16 @@ class PDF(object):
         return self.__cache
 
     @property
+    def cache_type( self ):
+        '''
+        Get whether there are elements in the cache or not.
+
+        :returns: whether there are elements in the cache or not.
+        :rtype: bool
+        '''
+        return self.__cache_type
+
+    @property
     def constant( self ):
         '''
         Get whether this is a constant :class:`PDF`.
@@ -262,18 +314,8 @@ class PDF(object):
         '''
         return self.__data_pars
 
-    @property
-    def using_cache( self ):
-        '''
-        Get whether there are elements in the cache or not.
-
-        :returns: whether there are elements in the cache or not.
-        :rtype: bool
-        '''
-        return self.__cache is not None
-
     @contextlib.contextmanager
-    def bind( self, values = None, range = parameters.FULL, normalized = True ):
+    def bind_values( self, values = None, range = parameters.FULL, normalized = True ):
         '''
         Prepare an object that will be called many times with the same set of
         values.
@@ -287,34 +329,39 @@ class PDF(object):
         :param normalized: whether to return a normalized output.
         :type normalized: bool
         '''
-        self._enable_cache()
+        self.enable_cache(PDF.BIND)
         yield bindings.bind_class_arguments(self, values=values, range=range, normalized=normalized)
-        self._free_cache()
+        self.free_cache()
 
-    def cache_if_constant( self, data, range = parameters.FULL ):
+    def enable_cache( self, ctype ):
         '''
-        Check whether this PDF is constant or not.
-        If so, it returns a cached version of it, and itself otherwise.
-        This is meant to be used before successive possible expensive calls.
+        Method to enable the cache for values of this PDF.
 
-        :param data: data where this class is supposed to be evaluated.
-        :type data: DataSet or BinnedDataSet
-        :param range: normalization range.
-        :type range: str
-        :returns: a cached version of this object, if it is constant, itself otherwise.
-        :rtype: PDF
+        :param ctype: cache type, it can be any of ('bind', 'const').
+        :type ctype: str
+
+        .. warning:: This method is not meant to be utilized by users since \
+        it can turn really harmful if not handled properly.
         '''
-        if self.constant:
-            # This PDF is constant, so save itself into a cache
-            logger.info(f'Function "{self.name}" marked as constant; will precalculate values and save them in a cache')
-            return ConstPDF(self, data, range)
-        else:
-            return self
+        if ctype not in PDF.CACHE_TYPES:
+            raise ValueError(f'Unknown cache type "{ctype}"; select from: {PDF.CACHE_TYPES}')
+        self.__cache      = {}
+        self.__cache_type = ctype
+
+    def free_cache( self ):
+        '''
+        Free the cache from memory.
+
+        .. warning:: This method is not meant to be utilized by users since \
+        it can turn really harmful if not handled properly.
+        '''
+        self.__cache      = None
+        self.__cache_type = None
 
     def generate( self, size = 10000, values = None, mapsize = 100, gensize = 10000, safe_factor = 1.1, range = parameters.FULL ):
         '''
         Generate random data.
-        A call to :method:`PDF.bind` is implicit, since several calls will be done
+        A call to :method:`PDF.bind_values` is implicit, since several calls will be done
         to the PDF with the same sets of values.
 
         :param size: size (or minimum size) of the output sample.
@@ -335,7 +382,7 @@ class PDF(object):
         :returns: output sample.
         :rtype: DataSet
         '''
-        with self.bind(values, range, normalized=False) as proxy:
+        with self.bind_values(values, range, normalized=False) as proxy:
 
             bounds = parameters.bounds_for_range(proxy.data_pars, range)
             if len(bounds.shape) == 1:
@@ -388,6 +435,7 @@ class PDF(object):
         else:
             return np.sum(np.fromiter((self._integral_single_bounds(b, range, values) for b in bounds), dtype=types.cpu_type))
 
+    @allows_bind_or_const_cache
     def norm( self, values = None, range = parameters.FULL ):
         '''
         Calculate the normalization of the PDF.
@@ -401,6 +449,7 @@ class PDF(object):
         '''
         raise NotImplementedError('Classes inheriting from "pyfit.PDF" must define the "norm" method')
 
+    @allows_bind_or_const_cache
     def numerical_normalization( self, values = None, range = parameters.FULL ):
         '''
         Calculate a numerical normalization.
@@ -440,6 +489,7 @@ class ConstPDF(PDF):
 
         super(ConstPDF, self).__init__(pdf.name, pdf.data_pars, pdf.args)
 
+    @allows_const_cache
     def __call__( self, *args, normalized = True, **kwargs ):
         '''
         Return the evaluation of the PDF in the data.
@@ -456,6 +506,7 @@ class ConstPDF(PDF):
         else:
             return self.__cache
 
+    @allows_bind_or_const_cache
     def norm( self, *args, **kwargs ):
         '''
         Return the normalization of the PDF.
@@ -507,6 +558,7 @@ class SourcePDF(PDF):
 
         super(SourcePDF, self).__init__(name, parameters.Registry.from_list(data_pars), parameters.Registry.from_list(arg_pars + var_arg_pars))
 
+    @allows_const_cache
     def __call__( self, data, values = None, range = parameters.FULL, normalized = True ):
         '''
         Call the PDF in the given set of data.
@@ -579,6 +631,7 @@ class SourcePDF(PDF):
         else:
             return v
 
+    @allows_bind_or_const_cache
     def norm( self, values = None, range = parameters.FULL ):
         '''
         Calculate the normalization of the PDF.
@@ -646,8 +699,18 @@ class MultiPDF(PDF):
             args.update(p.all_args)
         return args
 
+    @property
+    def pdfs( self ):
+        '''
+        Get the registry of PDFs within this class.
+
+        :returns: PDFs owned by this class.
+        :rtype: Registry(str, PDF)
+        '''
+        return self.__pdfs
+
     @contextlib.contextmanager
-    def bind( self, values = None, range = parameters.FULL, normalized = True ):
+    def bind_values( self, values = None, range = parameters.FULL, normalized = True ):
         '''
         Prepare an object that will be called many times with the same set of
         values.
@@ -662,12 +725,12 @@ class MultiPDF(PDF):
         :type normalized: bool
         '''
         for pdf in self.pdfs.values():
-            pdf._enable_cache()
-        with super(MultiPDF, self).bind(values, range, normalized) as base:
+            pdf.enable_cache(PDF.BIND)
+        with super(MultiPDF, self).bind_values(values, range, normalized) as base:
             yield base
         for pdf in self.pdfs.values():
-            pdf._free_cache()
-    
+            pdf.free_cache()
+
     def component( self, name ):
         '''
         Get the :class:`PDF` object with the given name.
@@ -682,15 +745,30 @@ class MultiPDF(PDF):
                 return pdf
         raise LookupError(f'No PDF with name "{name}" hass been found')
 
-    @property
-    def pdfs( self ):
+    def enable_cache( self, ctype ):
         '''
-        Get the registry of PDFs within this class.
+        Method to enable the cache for values of this PDF.
 
-        :returns: PDFs owned by this class.
-        :rtype: Registry(str, PDF)
+        :param ctype: cache type, it can be any of ('bind', 'const').
+        :type ctype: str
+
+        .. warning:: This method is not meant to be utilized by users since \
+        it can turn really harmful if not handled properly.
         '''
-        return self.__pdfs
+        super(MultiPDF, self).enable_cache(ctype)
+        for pdf in self.pdfs.values():
+            pdf.enable_cache(ctype)
+
+    def free_cache( self ):
+        '''
+        Free the cache from memory.
+
+        .. warning:: This method is not meant to be utilized by users since \
+        it can turn really harmful if not handled properly.
+        '''
+        super(MultiPDF, self).free_cache()
+        for pdf in self.pdfs.values():
+            pdf.free_cache()
 
 
 class AddPDFs(MultiPDF):
@@ -717,6 +795,7 @@ class AddPDFs(MultiPDF):
 
         super(AddPDFs, self).__init__(name, pdfs, yields)
 
+    @allows_const_cache
     def __call__( self, data, values = None, range = parameters.FULL, normalized = True ):
         '''
         Call the PDF in the given set of data.
@@ -775,30 +854,7 @@ class AddPDFs(MultiPDF):
         '''
         return len(self.pdfs) == len(self.args)
 
-    def cache_if_constant( self, data, range = parameters.FULL ):
-        '''
-        Check whether this PDF is constant or not.
-        If so, it returns a cached version of it, and itself otherwise.
-        This is meant to be used before successive possible expensive calls.
-
-        :param data: data where this class is supposed to be evaluated.
-        :type data: DataSet or BinnedDataSet
-        :param range: normalization range.
-        :type range: str
-        :returns: a cached version of this object, if it is constant, itself otherwise.
-        :rtype: PDF
-        '''
-        if not any(pdf.constant for pdf in self.pdfs.values()):
-            # There is no constant PDF within this class. Return itself.
-            return self
-        elif self.constant:
-            # This PDF is constant, call the base class method
-            return super(AddPDFs, self).cache_if_constant(data, range)
-        else:
-            # At least one of the contained PDFs is constant, must create a new instance
-            pdfs = list(pdf.cache_if_constant(data, range) for pdf in self.pdfs.values())
-            return self.__class__(self.name, pdfs, self.args.to_list())
-
+    @allows_bind_or_const_cache
     def norm( self, values = None, range = parameters.FULL ):
         '''
         Calculate the normalization of the PDF.
@@ -849,6 +905,7 @@ class ConvPDFs(MultiPDF):
 
         super(ConvPDFs, self).__init__(name, [first, second])
 
+    @allows_const_cache
     def __call__( self, data, values = None, range = parameters.FULL, normalized = True ):
         '''
         Call the PDF in the given set of data.
@@ -870,7 +927,7 @@ class ConvPDFs(MultiPDF):
 
         return pdf_values
 
-    @allows_cache
+    @allows_bind_cache
     def convolve( self, values = None, range = parameters.FULL, normalized = True ):
         '''
         Calculate the convolution.
@@ -903,6 +960,7 @@ class ConvPDFs(MultiPDF):
 
         return grid[par.name], core.fftconvolve(fv, sv, grid[par.name]).real
 
+    @allows_bind_or_const_cache
     def norm( self, values = None, range = parameters.FULL ):
         '''
         Calculate the normalization of the PDF.
@@ -935,6 +993,7 @@ class ProdPDFs(MultiPDF):
         '''
         super(ProdPDFs, self).__init__(name, pdfs, [])
 
+    @allows_const_cache
     def __call__( self, data, values = None, range = parameters.FULL, normalized = True ):
         '''
         Call the PDF in the given set of data.
@@ -954,50 +1013,7 @@ class ProdPDFs(MultiPDF):
 
         return out
 
-    def bind( self, values = None, range = parameters.FULL, normalized = True ):
-        '''
-        Prepare an object that will be called many times with the same set of
-        values.
-        This is usefull for PDFs using a cache, to avoid creating it many times
-        in sucessive calls to :method:`PDF.__call__`.
-
-        :param values: values for the argument parameters to use.
-        :type values: Registry(str, float)
-        :param range: normalization range.
-        :type range: str
-        :param normalized: whether to return a normalized output.
-        :type normalized: bool
-        '''
-        pdfs = [pdf.bind(values, range, normalized) for pdf in self.pdfs.values()]
-        if any(cache is not pdf for cache, pdf in zip(pdfs, self.pdfs)):
-            return self.__class__(self.name, pdfs)
-        else:
-            return self
-
-    def cache_if_constant( self, data, range = parameters.FULL ):
-        '''
-        Check whether this PDF is constant or not.
-        If so, it returns a cached version of it, and itself otherwise.
-        This is meant to be used before successive possible expensive calls.
-
-        :param data: data where this class is supposed to be evaluated.
-        :type data: DataSet or BinnedDataSet
-        :param range: normalization range.
-        :type range: str
-        :returns: a cached version of this object, if it is constant, itself otherwise.
-        :rtype: PDF
-        '''
-        if not any(pdf.constant for pdf in self.pdfs.values()):
-            # There is no constant PDF within this class. Return itself.
-            return self
-        elif self.constant:
-            # This PDF is constant, call the base class method
-            return super(ProdPDFs, self).cache_if_constant(data, range)
-        else:
-            # At least one of the contained PDFs is constant, must create a new instance
-            pdfs = list(pdf.cache_if_constant(data, range) for pdf in self.pdfs.values())
-            return self.__class__(self.name, pdfs)
-
+    @allows_bind_or_const_cache
     def norm( self, values = None, range = parameters.FULL ):
         '''
         Calculate the normalization of the PDF.
@@ -1014,6 +1030,7 @@ class ProdPDFs(MultiPDF):
             n *= p.norm(values, range)
         return n
 
+    @allows_bind_or_const_cache
     def numerical_normalization( self, values = None, range = parameters.FULL ):
         '''
         Calculate a numerical normalization.

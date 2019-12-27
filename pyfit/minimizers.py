@@ -4,6 +4,7 @@ API for minimizers.
 from . import dataset
 from . import fcns
 from . import parameters
+from . import pdf_core
 from . import types
 
 import collections
@@ -57,9 +58,10 @@ class BinnedEvaluatorProxy(object):
         :param kwargs: arguments to be forwarded to the FCN function.
         :type kwargs: dict
         '''
+        pdf.enable_cache(pdf_core.PDF.CONST)
         self.__data        = data
         self.__fcn         = fcn
-        self.__pdf         = pdf.cache_if_constant(self.__data)
+        self.__pdf         = pdf
         self.__constraints = constraints or []
 
         super(BinnedEvaluatorProxy, self).__init__()
@@ -104,9 +106,10 @@ class UnbinnedEvaluatorProxy(object):
         :param kwargs: arguments to be forwarded to the FCN function.
         :type kwargs: dict
         '''
+        pdf.enable_cache(pdf_core.PDF.CONST)
         self.__data        = data.subset(range=range, copy=False)
         self.__fcn         = fcn
-        self.__pdf         = pdf.cache_if_constant(self.__data, range=range)
+        self.__pdf         = pdf
         self.__range       = range
         self.__constraints = constraints or []
 

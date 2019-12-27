@@ -80,6 +80,39 @@ def test_category():
         c = pyfit.Category()
 
 
+def test_constpdf():
+    '''
+    Test a fit with a constant PDF.
+    '''
+    m = pyfit.Parameter('m', bounds=(0, 10))
+
+    # Create an Exponential PDF
+    k = pyfit.Parameter('k', -0.05)
+    e = pyfit.Exponential('exponential', m, k)
+
+    # Create a Gaussian PDF
+    c = pyfit.Parameter('c', 5., bounds=(0, 10))
+    s = pyfit.Parameter('s', 1., bounds=(0.1, 3))
+    g = pyfit.Gaussian('gaussian', m, c, s)
+
+    # Add them together
+    g2e = pyfit.Parameter('g2e', 0.5, bounds=(0, 1))
+    pdf = pyfit.AddPDFs.two_components('model', g, e, g2e)
+
+    data = pdf.generate(10000)
+
+    with pyfit.unbinned_minimizer('uml', pdf, data, minimizer='minuit') as minuit:
+        r = minuit.migrad()
+        print(r)
+
+    assert not r.fmin.hesse_failed
+
+    results = pyfit.migrad_output_to_registry(r)
+
+    for n, p in results.items():
+        assert np.allclose(pdf.all_args[n].value, p.value, rtol=0.05)
+
+
 def test_convpdfs():
     '''
     Test the "ConvPDFs" class.
