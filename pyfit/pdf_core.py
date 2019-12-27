@@ -51,33 +51,6 @@ class PDF(object):
 
         super(PDF, self).__init__()
 
-    def _integral_bin_area( self, bounds, size ):
-        '''
-        Calculate the area of a bin used to calculate the numerical normalization.
-
-        :param bounds: bounds defining the range.
-        :type bounds: numpy.ndarray
-        :returns: area of the normalization bin.
-        :rtype: float
-        '''
-        return np.prod(bounds[1::2] - bounds[0::2]) * 1. / size
-
-    def _process_values( self, values = None ):
-        '''
-        Process the input values.
-        If "values" is set to None, then the values from the argument 
-        parameters are used.
-
-        :param values: possible values for the parameters to use.
-        :type values: Registry(str, float)
-        :returns: processed values, sorted following the argument parameters.
-        :rtype: tuple(float)
-        '''
-        if values is None:
-            return tuple(v.value for v in self.args.values())
-        else:
-            return tuple(values[n] for n in self.args.keys())
-
     def __call__( self, data, values = None, range = parameters.FULL, normalized = True ):
         '''
         Call the PDF in the given set of data.
@@ -111,101 +84,6 @@ class PDF(object):
         Free the cache from memory.
         '''
         self.__cache.clear()
-
-    @property
-    def cache( self ):
-        '''
-        Return the cached values for this PDF.
-
-        :returns: cache
-        :rtype: dict
-        '''
-        return self.__cache
-
-    @property
-    def all_args( self ):
-        '''
-        Get all the argument parameters associated to this class.
-        If this object is composed by many :class:`PDF`, a recursion is done in order
-        to get all of them.
-
-        :returns: all the argument parameters associated to this class.
-        :rtype: Registry(str, Parameter)
-        '''
-        return self.args
-
-    @property
-    def args( self ):
-        '''
-        Get the argument parameters this object directly depends on.
-
-        :returns: parameters this object directly depends on.
-        :rtype: Registry(str, Parameter)
-        '''
-        return self.__arg_pars
-
-    @property
-    def constant( self ):
-        '''
-        Get whether this is a constant :class:`PDF`.
-
-        :returns: whether this object can be marked as constant.
-        :rtype: bool
-        '''
-        return all(p.constant for p in self.all_args.values())
-
-    @property
-    def data_pars( self ):
-        '''
-        Get the data parameters this object directly depends on.
-
-        :returns: parameters this object directly depends on.
-        :rtype: Registry(str, Parameter)
-        '''
-        return self.__data_pars
-
-    @property
-    def using_cache( self ):
-        return bool(self.__cache)
-
-    def cache_if_constant( self, data, range = parameters.FULL ):
-        '''
-        Check whether this PDF is constant or not.
-        If so, it returns a cached version of it, and itself otherwise.
-        This is meant to be used before successive possible expensive calls.
-
-        :param data: data where this class is supposed to be evaluated.
-        :type data: DataSet or BinnedDataSet
-        :param range: normalization range.
-        :type range: str
-        :returns: a cached version of this object, if it is constant, itself otherwise.
-        :rtype: PDF
-        '''
-        if self.constant:
-            # This PDF is constant, so save itself into a cache
-            logger.info(f'Function "{self.name}" marked as constant; will precalculate values and save them in a cache')
-            return ConstPDF(self, data, range)
-        else:
-            return self
-
-    @contextlib.contextmanager
-    def bind( self, values = None, range = parameters.FULL, normalized = True ):
-        '''
-        Prepare an object that will be called many times with the same set of
-        values.
-        This is usefull for PDFs using a cache, to avoid creating it many times
-        in sucessive calls to :method:`PDF.__call__`.
-
-        :param values: values for the argument parameters to use.
-        :type values: Registry(str, float)
-        :param range: normalization range.
-        :type range: str
-        :param normalized: whether to return a normalized output.
-        :type normalized: bool
-        '''
-        self._create_cache(values, range, normalized)
-        yield bindings.bind_class_arguments(self, values=values, range=range, normalized=normalized)
-        self._free_cache()
 
     def _generate_single_bounds( self, size, mapsize, gensize, safe_factor, bounds, values ):
         '''
@@ -247,6 +125,162 @@ class PDF(object):
                 result.add(d.subset(u < f), inplace=True)
 
         return result.subset(slice(size))
+
+    def _integral_bin_area( self, bounds, size ):
+        '''
+        Calculate the area of a bin used to calculate the numerical normalization.
+
+        :param bounds: bounds defining the range.
+        :type bounds: numpy.ndarray
+        :returns: area of the normalization bin.
+        :rtype: float
+        '''
+        return np.prod(bounds[1::2] - bounds[0::2]) * 1. / size
+
+    def _integral_single_bounds( self, bounds, range, values ):
+        '''
+        Calculate the integral of the PDF on a single set of bounds.
+
+        :param values: values to use in the evaluation.
+        :type values: Registry
+        :param bounds: bounds of the data parameters.
+        :type bounds: numpy.ndarray
+        :param range: normalization range to consider.
+        :type range: str
+        :returns: integral of the PDF in the range defined by "bounds" normalized to "range".
+        :rtype: float
+        '''
+        g = dataset.evaluation_grid(self.data_pars, bounds, self.norm_size)
+        a = self._integral_bin_area(bounds, len(g))
+        i = self.__call__(g, values, range=range)
+        return core.sum(i) * a
+
+    def _numerical_normalization_single_bounds( self, bounds, values ):
+        '''
+        Calculate the normalization value for a set of bounds.
+
+        :param values: values to use in the evaluation of the PDF.
+        :type values: Registry
+        :param bounds: bounds of the data parameters.
+        :type bounds: numpy.ndarray
+        :returns: normalization value.
+        :rtype: float
+        '''
+        g = dataset.evaluation_grid(self.data_pars, bounds, self.norm_size)
+        a = self._integral_bin_area(bounds, len(g))
+        i = self.__call__(g, values, normalized=False)
+        return core.sum(i) * a
+
+    def _process_values( self, values = None ):
+        '''
+        Process the input values.
+        If "values" is set to None, then the values from the argument 
+        parameters are used.
+
+        :param values: possible values for the parameters to use.
+        :type values: Registry(str, float)
+        :returns: processed values, sorted following the argument parameters.
+        :rtype: tuple(float)
+        '''
+        if values is None:
+            return tuple(v.value for v in self.args.values())
+        else:
+            return tuple(values[n] for n in self.args.keys())
+
+    @property
+    def all_args( self ):
+        '''
+        Get all the argument parameters associated to this class.
+        If this object is composed by many :class:`PDF`, a recursion is done in order
+        to get all of them.
+
+        :returns: all the argument parameters associated to this class.
+        :rtype: Registry(str, Parameter)
+        '''
+        return self.args
+
+    @property
+    def args( self ):
+        '''
+        Get the argument parameters this object directly depends on.
+
+        :returns: parameters this object directly depends on.
+        :rtype: Registry(str, Parameter)
+        '''
+        return self.__arg_pars
+
+    @property
+    def cache( self ):
+        '''
+        Return the cached values for this PDF.
+
+        :returns: cache
+        :rtype: dict
+        '''
+        return self.__cache
+
+    @property
+    def constant( self ):
+        '''
+        Get whether this is a constant :class:`PDF`.
+
+        :returns: whether this object can be marked as constant.
+        :rtype: bool
+        '''
+        return all(p.constant for p in self.all_args.values())
+
+    @property
+    def data_pars( self ):
+        '''
+        Get the data parameters this object directly depends on.
+
+        :returns: parameters this object directly depends on.
+        :rtype: Registry(str, Parameter)
+        '''
+        return self.__data_pars
+
+    @property
+    def using_cache( self ):
+        return bool(self.__cache)
+
+    @contextlib.contextmanager
+    def bind( self, values = None, range = parameters.FULL, normalized = True ):
+        '''
+        Prepare an object that will be called many times with the same set of
+        values.
+        This is usefull for PDFs using a cache, to avoid creating it many times
+        in sucessive calls to :method:`PDF.__call__`.
+
+        :param values: values for the argument parameters to use.
+        :type values: Registry(str, float)
+        :param range: normalization range.
+        :type range: str
+        :param normalized: whether to return a normalized output.
+        :type normalized: bool
+        '''
+        self._create_cache(values, range, normalized)
+        yield bindings.bind_class_arguments(self, values=values, range=range, normalized=normalized)
+        self._free_cache()
+
+    def cache_if_constant( self, data, range = parameters.FULL ):
+        '''
+        Check whether this PDF is constant or not.
+        If so, it returns a cached version of it, and itself otherwise.
+        This is meant to be used before successive possible expensive calls.
+
+        :param data: data where this class is supposed to be evaluated.
+        :type data: DataSet or BinnedDataSet
+        :param range: normalization range.
+        :type range: str
+        :returns: a cached version of this object, if it is constant, itself otherwise.
+        :rtype: PDF
+        '''
+        if self.constant:
+            # This PDF is constant, so save itself into a cache
+            logger.info(f'Function "{self.name}" marked as constant; will precalculate values and save them in a cache')
+            return ConstPDF(self, data, range)
+        else:
+            return self
 
     def generate( self, size = 10000, values = None, mapsize = 100, gensize = 10000, safe_factor = 1.1, range = parameters.FULL ):
         '''
@@ -306,24 +340,6 @@ class PDF(object):
 
             return result
 
-    def _integral_single_bounds( self, bounds, range, values ):
-        '''
-        Calculate the integral of the PDF on a single set of bounds.
-
-        :param values: values to use in the evaluation.
-        :type values: Registry
-        :param bounds: bounds of the data parameters.
-        :type bounds: numpy.ndarray
-        :param range: normalization range to consider.
-        :type range: str
-        :returns: integral of the PDF in the range defined by "bounds" normalized to "range".
-        :rtype: float
-        '''
-        g = dataset.evaluation_grid(self.data_pars, bounds, self.norm_size)
-        a = self._integral_bin_area(bounds, len(g))
-        i = self.__call__(g, values, range=range)
-        return core.sum(i) * a
-
     def integral( self, values = None, integral_range = parameters.FULL, range = parameters.FULL ):
         '''
         Calculate the integral of a :class:`PDF`.
@@ -355,22 +371,6 @@ class PDF(object):
         :rtype: float
         '''
         raise NotImplementedError('Classes inheriting from "pyfit.PDF" must define the "norm" method')
-
-    def _numerical_normalization_single_bounds( self, bounds, values ):
-        '''
-        Calculate the normalization value for a set of bounds.
-
-        :param values: values to use in the evaluation of the PDF.
-        :type values: Registry
-        :param bounds: bounds of the data parameters.
-        :type bounds: numpy.ndarray
-        :returns: normalization value.
-        :rtype: float
-        '''
-        g = dataset.evaluation_grid(self.data_pars, bounds, self.norm_size)
-        a = self._integral_bin_area(bounds, len(g))
-        i = self.__call__(g, values, normalized=False)
-        return core.sum(i) * a
 
     def numerical_normalization( self, values = None, range = parameters.FULL ):
         '''
@@ -714,6 +714,38 @@ class AddPDFs(MultiPDF):
         else:
             return out
 
+    @classmethod
+    def two_components( cls, name, first, second, yf, ys = None ):
+        '''
+        Build the class from two components.
+
+        :param name: name of the class.
+        :type name: str
+        :param first: first PDF to use.
+        :type first: PDF
+        :param second: second PDF to use.
+        :type second: PDF
+        :param yf: yield associated to the first PDF, if both "yf" and "ys" \
+        are provided. If "ys" is not provided, then "yf" is the faction \
+        associated to the first PDF.
+        :type yf: Parameter
+        :param ys: possible yield for the second PDF.
+        :type ys: Parameter
+        :returns: the built class.
+        :rtype: AddPDFs
+        '''
+        return cls(name, [first, second], [yf] if ys is None else [yf, ys])
+
+    @property
+    def extended( self ):
+        '''
+        Get whether this PDF is of "extended" type.
+
+        :returns: whether this PDF is of "extended" type.
+        :rtype: bool
+        '''
+        return len(self.pdfs) == len(self.args)
+
     def cache_if_constant( self, data, range = parameters.FULL ):
         '''
         Check whether this PDF is constant or not.
@@ -737,16 +769,6 @@ class AddPDFs(MultiPDF):
             # At least one of the contained PDFs is constant, must create a new instance
             pdfs = list(pdf.cache_if_constant(data, range) for pdf in self.pdfs.values())
             return self.__class__(self.name, pdfs, self.args.to_list())
-        
-    @property
-    def extended( self ):
-        '''
-        Get whether this PDF is of "extended" type.
-
-        :returns: whether this PDF is of "extended" type.
-        :rtype: bool
-        '''
-        return len(self.pdfs) == len(self.args)
 
     def norm( self, values = None, range = parameters.FULL ):
         '''
@@ -765,28 +787,6 @@ class AddPDFs(MultiPDF):
         else:
             # A non-extended PDF is always normalized
             return 1.
-
-    @classmethod
-    def two_components( cls, name, first, second, yf, ys = None ):
-        '''
-        Build the class from two components.
-
-        :param name: name of the class.
-        :type name: str
-        :param first: first PDF to use.
-        :type first: PDF
-        :param second: second PDF to use.
-        :type second: PDF
-        :param yf: yield associated to the first PDF, if both "yf" and "ys" \
-        are provided. If "ys" is not provided, then "yf" is the faction \
-        associated to the first PDF.
-        :type yf: Parameter
-        :param ys: possible yield for the second PDF.
-        :type ys: Parameter
-        :returns: the built class.
-        :rtype: AddPDFs
-        '''
-        return cls(name, [first, second], [yf] if ys is None else [yf, ys])
 
 
 class ConvPDFs(MultiPDF):
@@ -844,14 +844,6 @@ class ConvPDFs(MultiPDF):
 
         return pdf_values
 
-    @core.calling_base_class_method
-    def _create_cache( self, values = None, range = parameters.FULL, normalized = True ):
-        '''
-        '''
-        dv, fv = self._convolve(values, range, normalized)
-        self.cache['conv_data'] = dv
-        self.cache['conv_values'] = fv
-
     def _convolve( self, values = None, range = parameters.FULL, normalized = True ):
         '''
         Calculate the convolution.
@@ -883,6 +875,14 @@ class ConvPDFs(MultiPDF):
         sv = second(grid, values, range, normalized)
 
         return grid[par.name], core.fftconvolve(fv, sv, grid[par.name]).real
+
+    @core.calling_base_class_method
+    def _create_cache( self, values = None, range = parameters.FULL, normalized = True ):
+        '''
+        '''
+        dv, fv = self._convolve(values, range, normalized)
+        self.cache['conv_data'] = dv
+        self.cache['conv_values'] = fv
 
     def norm( self, values = None, range = parameters.FULL ):
         '''
@@ -935,6 +935,26 @@ class ProdPDFs(MultiPDF):
 
         return out
 
+    def bind( self, values = None, range = parameters.FULL, normalized = True ):
+        '''
+        Prepare an object that will be called many times with the same set of
+        values.
+        This is usefull for PDFs using a cache, to avoid creating it many times
+        in sucessive calls to :method:`PDF.__call__`.
+
+        :param values: values for the argument parameters to use.
+        :type values: Registry(str, float)
+        :param range: normalization range.
+        :type range: str
+        :param normalized: whether to return a normalized output.
+        :type normalized: bool
+        '''
+        pdfs = [pdf.bind(values, range, normalized) for pdf in self.pdfs.values()]
+        if any(cache is not pdf for cache, pdf in zip(pdfs, self.pdfs)):
+            return self.__class__(self.name, pdfs)
+        else:
+            return self
+
     def cache_if_constant( self, data, range = parameters.FULL ):
         '''
         Check whether this PDF is constant or not.
@@ -958,26 +978,6 @@ class ProdPDFs(MultiPDF):
             # At least one of the contained PDFs is constant, must create a new instance
             pdfs = list(pdf.cache_if_constant(data, range) for pdf in self.pdfs.values())
             return self.__class__(self.name, pdfs)
-
-    def bind( self, values = None, range = parameters.FULL, normalized = True ):
-        '''
-        Prepare an object that will be called many times with the same set of
-        values.
-        This is usefull for PDFs using a cache, to avoid creating it many times
-        in sucessive calls to :method:`PDF.__call__`.
-
-        :param values: values for the argument parameters to use.
-        :type values: Registry(str, float)
-        :param range: normalization range.
-        :type range: str
-        :param normalized: whether to return a normalized output.
-        :type normalized: bool
-        '''
-        pdfs = [pdf.bind(values, range, normalized) for pdf in self.pdfs.values()]
-        if any(cache is not pdf for cache, pdf in zip(pdfs, self.pdfs)):
-            return self.__class__(self.name, pdfs)
-        else:
-            return self
 
     def norm( self, values = None, range = parameters.FULL ):
         '''
