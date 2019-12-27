@@ -41,11 +41,14 @@ class PDF(object):
         :param arg_pars: argument parameters.
         :type arg_pars: Registry(str, Parameter)
         '''
-        self.name          = name
-        self.__data_pars   = data_pars
-        self.__arg_pars    = args_pars
-        self.__using_cache = False
-        self.norm_size     = NORM_SIZE
+        self.name        = name
+        self.__data_pars = data_pars
+        self.__arg_pars  = args_pars
+        self.norm_size   = NORM_SIZE
+
+        # The cache is saved on a dictionary, and inherited classes must avoid colliding names
+        self.__cache = {}
+
         super(PDF, self).__init__()
 
     def _integral_bin_area( self, bounds, size ):
@@ -86,19 +89,38 @@ class PDF(object):
         :param range: normalization range.
         :type range: str
         :param normalized: whether to return a normalized output.
-        :type normalized: boole
+        :type normalized: bool
         '''
         raise NotImplementedError('Classes inheriting from "pyfit.PDF" must define the "__call__" operator')
 
     def _create_cache( self, values = None, range = parameters.FULL, normalized = True ):
         '''
+        Method to create a cache with values for this PDF.
+
+        :param values: values for the argument parameters to use.
+        :type values: Registry(str, float)
+        :param range: normalization range.
+        :type range: str
+        :param normalized: whether to return a normalized output.
+        :type normalized: bool
         '''
-        self.__using_cache = True
+        pass
 
     def _free_cache( self ):
         '''
+        Free the cache from memory.
         '''
-        self.__using_cache = False
+        self.__cache.clear()
+
+    @property
+    def cache( self ):
+        '''
+        Return the cached values for this PDF.
+
+        :returns: cache
+        :rtype: dict
+        '''
+        return self.__cache
 
     @property
     def all_args( self ):
@@ -144,7 +166,7 @@ class PDF(object):
 
     @property
     def using_cache( self ):
-        return self.__using_cache
+        return bool(self.__cache)
 
     def cache_if_constant( self, data, range = parameters.FULL ):
         '''
@@ -179,7 +201,7 @@ class PDF(object):
         :param range: normalization range.
         :type range: str
         :param normalized: whether to return a normalized output.
-        :type normalized: boole
+        :type normalized: bool
         '''
         self._create_cache(values, range, normalized)
         yield bindings.bind_class_arguments(self, values=values, range=range, normalized=normalized)
@@ -467,7 +489,7 @@ class SourcePDF(PDF):
         :param range: normalization range.
         :type range: str
         :param normalized: whether to return a normalized output.
-        :type normalized: boole
+        :type normalized: bool
         '''
         # Determine the values to use
         fvals = self._process_values(values)
@@ -608,7 +630,7 @@ class MultiPDF(PDF):
         :param range: normalization range.
         :type range: str
         :param normalized: whether to return a normalized output.
-        :type normalized: boole
+        :type normalized: bool
         '''
         for pdf in self.pdfs.values():
             pdf._create_cache(values, range, normalized)
@@ -677,7 +699,7 @@ class AddPDFs(MultiPDF):
         :param range: normalization range.
         :type range: str
         :param normalized: whether to return a normalized output.
-        :type normalized: boole
+        :type normalized: bool
         '''
         yields = list(self._process_values(values))
         if not self.extended:
@@ -796,9 +818,6 @@ class ConvPDFs(MultiPDF):
         self.range = range or parameters.FULL
         self.conv_size = CONV_SIZE
 
-        # Cache values
-        self._free_cache()
-
         super(ConvPDFs, self).__init__(name, [first, second])
 
     def __call__( self, data, values = None, range = parameters.FULL, normalized = True ):
@@ -812,10 +831,10 @@ class ConvPDFs(MultiPDF):
         :param range: normalization range.
         :type range: str
         :param normalized: whether to return a normalized output.
-        :type normalized: boole
+        :type normalized: bool
         '''
         if self.using_cache:
-            dv, cv = self.__vals_cache, self.__conv_cache
+            dv, cv = self.cache['conv_data'], self.cache['conv_values']
         else:
             dv, cv = self._convolve(values, range, normalized)
 
@@ -829,14 +848,9 @@ class ConvPDFs(MultiPDF):
     def _create_cache( self, values = None, range = parameters.FULL, normalized = True ):
         '''
         '''
-        self.__vals_cache, self.__conv_cache = self._convolve(values, range, normalized)
-        
-    @core.calling_base_class_method
-    def _free_cache( self ):
-        '''
-        '''
-        self.__vals_cache = None
-        self.__conv_cache = None
+        dv, fv = self._convolve(values, range, normalized)
+        self.cache['conv_data'] = dv
+        self.cache['conv_values'] = fv
 
     def _convolve( self, values = None, range = parameters.FULL, normalized = True ):
         '''
@@ -847,7 +861,7 @@ class ConvPDFs(MultiPDF):
         :param range: normalization range.
         :type range: str
         :param normalized: whether to return a normalized output.
-        :type normalized: boole
+        :type normalized: bool
         :returns: data and result of the evaluation.
         :rtype: numpy.ndarray, numpy.ndarray
         '''
@@ -913,7 +927,7 @@ class ProdPDFs(MultiPDF):
         :param range: normalization range.
         :type range: str
         :param normalized: whether to return a normalized output.
-        :type normalized: boole
+        :type normalized: bool
         '''
         out = core.ones(len(data))
         for pdf in self.pdfs.values():
@@ -957,7 +971,7 @@ class ProdPDFs(MultiPDF):
         :param range: normalization range.
         :type range: str
         :param normalized: whether to return a normalized output.
-        :type normalized: boole
+        :type normalized: bool
         '''
         pdfs = [pdf.bind(values, range, normalized) for pdf in self.pdfs.values()]
         if any(cache is not pdf for cache, pdf in zip(pdfs, self.pdfs)):
