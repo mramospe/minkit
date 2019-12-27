@@ -215,9 +215,9 @@ class PDF(object):
 
         while result is None or len(result) < size:
 
-            d = dataset.uniform_sample(self.data_pars, gensize)
+            d = dataset.uniform_sample(self.data_pars, bounds, gensize)
             f = self.__call__(d, values, normalized=False)
-            u = core.random_uniform((0, m), len(d))
+            u = core.random_uniform(0, m, len(d))
 
             if result is None:
                 result = d.subset(u < f)
@@ -257,24 +257,23 @@ class PDF(object):
                 result = proxy._generate_single_bounds(size, mapsize, gensize, safe_factor, bounds, values)
             else:
                 # Get the associated number of entries per bounds
-                total = 0.
-                sizes = []
-                for b in bounds:
-                    sizes.append(np.prod(b[1::2] - b[0::2]))
-                    total += sizes[-1]
-                fracs = sizes / total
+                fracs = []
+                for b in bounds[:-1]: # The last does not need to be calculated
+                    fracs.append(self._integral_single_bounds(b, range, values))
 
-                u = core.random_uniform((0, 1), size)
+                u = core.random_uniform(0, 1, size)
 
                 entries = []
-                for f in fracs[:-1]:
-                    entries.append(size * core.sum(u < f))
-                entries.append(size - np.sum(entries))
+                for f in fracs:
+                    entries.append(core.sum(u < f))
+                entries.append(size - np.sum(entries)) # The last is calculated from the required number of entries
 
                 # Iterate over the bounds and add data accordingly
                 result = None
                 for e, b in zip(entries, bounds):
+
                     new = proxy._generate_single_bounds(e, mapsize, gensize, safe_factor, b, values)
+
                     if result is None:
                         result = new
                     else:

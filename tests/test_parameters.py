@@ -41,3 +41,17 @@ def test_range():
 
     for n, p in results.items():
         assert np.allclose(p.value, e.all_args[n].value, rtol=0.01)
+
+    # Test generation of data only in the range
+    data = e.generate(10000, range='sides')
+
+    with pyfit.unbinned_minimizer('uml', e, data, minimizer='minuit', range='sides') as minuit:
+        r = minuit.migrad()
+        print(r)
+
+    assert not r.fmin.hesse_failed
+
+    results = pyfit.migrad_output_to_registry(r)
+
+    for n, p in results.items():
+        assert np.allclose(p.value, e.all_args[n].value, rtol=0.01)

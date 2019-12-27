@@ -152,6 +152,22 @@ class DataSet(object):
             dct[p] = arr[p]
         return cls(dct, data_pars, weights=weights)
 
+    def shuffle( self, inplace = False ):
+        '''
+        '''
+        index = core.shuffling_index(len(self))
+
+        if inplace:
+
+            for k, v in self.__data.items():
+                self.__data[k] = v[index]
+            if self.__weights is not None:
+                self.__weights = self.__weights[index]
+
+            return self
+        else:
+            return self.subset(index)
+
     def subset( self, cond = None, range = None, copy = True ):
         '''
         Get a subset of this data set.
@@ -317,7 +333,7 @@ def evaluation_grid( data_pars, bounds, size ):
     return DataSet(data, data_pars, copy=False)
 
 
-def uniform_sample( data_pars, size, eval_range = parameters.FULL ):
+def uniform_sample( data_pars, bounds, size ):
     '''
     Generate a sample following an uniform distribution in all data parameters.
 
@@ -325,15 +341,11 @@ def uniform_sample( data_pars, size, eval_range = parameters.FULL ):
     :type data_pars: Registry(name, Parameter)
     :param size: number of entries in the output sample.
     :type size: int
-    :param eval_range: name of the range to be evaluated.
-    :type eval_range: str
+    :param bounds: bounds where to create the sample.
+    :type bounds: tuple(float, float)
     :returns: uniform sample.
     :rtype: DataSet
     '''
-    values = []
-    for p in data_pars.values():
-        values.append(core.random_uniform(p.get_range(eval_range).bounds, size))
-
-    data = {p.name: a for p, a in zip(data_pars.values(), core.meshgrid(*values))}
-
+    data = {n: core.random_uniform(l, h, size)
+            for n, l, h in zip(data_pars, bounds[0::2], bounds[1::2])}
     return DataSet(data, data_pars)

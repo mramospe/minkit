@@ -8,7 +8,7 @@ import os
 
 from . import types
 
-__all__ = ['array', 'extract_ndarray', 'initialize', 'random_uniform', 'zeros', 'max', 'min', 'concatenate', 'linspace']
+__all__ = ['array', 'extract_ndarray', 'initialize', 'random_uniform', 'zeros', 'max', 'min', 'concatenate', 'linspace', 'shuffling_index']
 
 # Current backend
 BACKEND = None
@@ -135,7 +135,7 @@ def concatenate( *arrs ):
 
 
 @with_backend
-def random_uniform( bounds, size ):
+def random_uniform( vmin, vmax, size ):
     '''
     Create data following an uniform distribution between 0 and 1, with size "size".
 
@@ -144,31 +144,8 @@ def random_uniform( bounds, size ):
     :returns: data following an uniform distribution between 0 and 1.
     :rtype: numpy.ndarray, pyopencl.Buffer or pycuda.gpuarray
     '''
-    bounds = np.array(bounds)
-
     if BACKEND == CPU:
-        if bounds.shape == (2,):
-            return np.random.uniform(*bounds, size)
-        else:
-            # Get the fraction of data per bounds
-            sizes = bounds.T[1] - bounds.T[0]
-            total = np.sum(sizes)
-            fracs = sizes * 1. / total
-
-            # Sort given the fractions
-            ars = fracs.argsort()
-            fracs = fracs[ars]
-            bounds = bounds[ars]
-
-            u = random_uniform((0, 1), size)
-
-            values = []
-            for f, b in zip(fracs, bounds):
-                n = sum(u < f)
-                values.append(np.random.uniform(*b, size))
-                u = u[n:]
-
-            return concatenate(values)
+        return np.random.uniform(vmin, vmax, size)
     else:
         raise NOT_IMPLEMENTED
 
@@ -360,5 +337,23 @@ def fftshift( a ):
 def exp( a ):
     if BACKEND == CPU:
         return np.exp(a)
+    else:
+        raise NOT_IMPLEMENTED
+
+
+@with_backend
+def shuffling_index( n ):
+    '''
+    Return an array to shuffle data, with length "n".
+
+    :param n: size of the data.
+    :type n: int
+    :returns: shuffling array.
+    :rtype: numpy.ndarray
+    '''
+    if BACKEND == CPU:
+        indices = np.arange(n)
+        np.random.shuffle(indices)
+        return indices
     else:
         raise NOT_IMPLEMENTED
