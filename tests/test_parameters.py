@@ -40,7 +40,7 @@ def test_range():
     results = pyfit.migrad_output_to_registry(r)
 
     for n, p in results.items():
-        assert np.allclose(p.value, e.all_args[n].value, rtol=0.01)
+        assert np.allclose(p.value, e.all_args[n].value, rtol=0.05)
 
     # Test generation of data only in the range
     data = e.generate(10000, range='sides')
@@ -54,4 +54,4 @@ def test_range():
     results = pyfit.migrad_output_to_registry(r)
 
     for n, p in results.items():
-        assert np.allclose(p.value, e.all_args[n].value, rtol=0.01)
+        assert np.allclose(p.value, e.all_args[n].value, rtol=0.05)

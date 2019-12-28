@@ -33,7 +33,7 @@ def test_binned_maximum_likelihood():
     results = pyfit.migrad_output_to_registry(r)
 
     for n, p in results.items():
-        assert np.allclose(p.value, g.all_args[n].value, rtol=0.02)
+        assert np.allclose(p.value, g.all_args[n].value, rtol=0.05)
 
     # Add constraints
     cc = pyfit.Parameter('cc', 10)
@@ -49,7 +49,7 @@ def test_binned_maximum_likelihood():
     results = pyfit.migrad_output_to_registry(r)
 
     for n, p in results.items():
-        assert np.allclose(g.all_args[n].value, p.value, rtol=0.02)
+        assert np.allclose(g.all_args[n].value, p.value, rtol=0.05)
 
 
 def test_unbinned_extended_maximum_likelihood():
@@ -72,7 +72,7 @@ def test_unbinned_extended_maximum_likelihood():
     ne = pyfit.Parameter('ne', 1000, bounds=(0, 100000))
     pdf = pyfit.AddPDFs.two_components('model', g, e, ng, ne)
 
-    data = pdf.generate(10000)
+    data = pdf.generate(ng.value + ne.value)
 
     with pyfit.unbinned_minimizer('ueml', pdf, data, minimizer='minuit') as minuit:
         r = minuit.migrad()
@@ -83,7 +83,7 @@ def test_unbinned_extended_maximum_likelihood():
     results = pyfit.migrad_output_to_registry(r)
 
     for n, p in results.items():
-        assert np.allclose(pdf.all_args[n].value, p.value, rtol=0.05)
+        assert np.allclose(pdf.all_args[n].value, p.value, rtol=0.1)
 
     # Add constraints
     cc = pyfit.Parameter('cc', 10)
@@ -99,7 +99,7 @@ def test_unbinned_extended_maximum_likelihood():
     results = pyfit.migrad_output_to_registry(r)
 
     for n, p in results.items():
-        assert np.allclose(pdf.all_args[n].value, p.value, rtol=0.05)
+        assert np.allclose(pdf.all_args[n].value, p.value, rtol=0.1)
 
 
 def test_unbinned_maximum_likelihood():
@@ -123,7 +123,7 @@ def test_unbinned_maximum_likelihood():
     results = pyfit.migrad_output_to_registry(r)
 
     for n, p in results.items():
-        assert np.allclose(p.value, g.all_args[n].value, rtol=0.01)
+        assert np.allclose(p.value, g.all_args[n].value, rtol=0.05)
 
     # Add constraints
     cc = pyfit.Parameter('cc', 10)
@@ -139,4 +139,4 @@ def test_unbinned_maximum_likelihood():
     results = pyfit.migrad_output_to_registry(r)
 
     for n, p in results.items():
-        assert np.allclose(p.value, g.all_args[n].value, rtol=0.01)
+        assert np.allclose(p.value, g.all_args[n].value, rtol=0.05)

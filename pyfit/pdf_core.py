@@ -25,14 +25,26 @@ logger = logging.getLogger(__name__)
 
 def process_cache( cache, method, self, args, kwargs ):
     '''
-    Update a cache (as a dictionary) by evaluating the given
-    method.
+    Update a cache (as a dictionary) by evaluating the given method.
+
+    :param cache: output cache
+    :type cache: dict
+    :param method: method to call.
+    :type method: function
+    :param self: class where to evaluate the method.
+    :type self: class
+    :param args: arguments to forward to the method call.
+    :type args: tuple
+    :param kwargs: keyword arguments to forward to the method call.
+    :type kwargs: dict
+    :returns: whatever "method" returns.
+    :rtype: type of whatever "method" returns.
     '''
     n = method.__name__
-    v = self.cache.get(n, None)
+    v = cache.get(n, None)
     if v is None:
         v = method(self, *args, **kwargs)
-        self.cache[n] = v
+        cache[n] = v
     return v
 
 
@@ -315,7 +327,7 @@ class PDF(object):
         return self.__data_pars
 
     @contextlib.contextmanager
-    def bind_values( self, values = None, range = parameters.FULL, normalized = True ):
+    def bind( self, values = None, range = parameters.FULL, normalized = True ):
         '''
         Prepare an object that will be called many times with the same set of
         values.
@@ -361,7 +373,7 @@ class PDF(object):
     def generate( self, size = 10000, values = None, mapsize = 100, gensize = 10000, safe_factor = 1.1, range = parameters.FULL ):
         '''
         Generate random data.
-        A call to :method:`PDF.bind_values` is implicit, since several calls will be done
+        A call to :method:`PDF.bind` is implicit, since several calls will be done
         to the PDF with the same sets of values.
 
         :param size: size (or minimum size) of the output sample.
@@ -382,7 +394,7 @@ class PDF(object):
         :returns: output sample.
         :rtype: DataSet
         '''
-        with self.bind_values(values, range, normalized=False) as proxy:
+        with self.bind(values, range, normalized=False) as proxy:
 
             bounds = parameters.bounds_for_range(proxy.data_pars, range)
             if len(bounds.shape) == 1:
@@ -710,7 +722,7 @@ class MultiPDF(PDF):
         return self.__pdfs
 
     @contextlib.contextmanager
-    def bind_values( self, values = None, range = parameters.FULL, normalized = True ):
+    def bind( self, values = None, range = parameters.FULL, normalized = True ):
         '''
         Prepare an object that will be called many times with the same set of
         values.
@@ -726,7 +738,7 @@ class MultiPDF(PDF):
         '''
         for pdf in self.pdfs.values():
             pdf.enable_cache(PDF.BIND)
-        with super(MultiPDF, self).bind_values(values, range, normalized) as base:
+        with super(MultiPDF, self).bind(values, range, normalized) as base:
             yield base
         for pdf in self.pdfs.values():
             pdf.free_cache()
@@ -810,6 +822,7 @@ class AddPDFs(MultiPDF):
         :type normalized: bool
         '''
         yields = list(self._process_values(values))
+
         if not self.extended:
             yields.append(1. - sum(yields))
 
@@ -867,8 +880,8 @@ class AddPDFs(MultiPDF):
         :rtype: float
         '''
         if self.extended:
-            # An extended PDF has a normalization equal to the sum of yields
-            return sum(y.value for y in self.args.values())
+            # An extended PDF has as normalization the sum of yields
+            return sum(self._process_values(values))
         else:
             # A non-extended PDF is always normalized
             return 1.
@@ -919,15 +932,21 @@ class ConvPDFs(MultiPDF):
         :param normalized: whether to return a normalized output.
         :type normalized: bool
         '''
-        dv, cv = self.convolve(values, range, normalized)
+        # Avoid convolving also for the "norm" call
+        with self.bind(values, range, normalized) as proxy:
 
-        par = tuple(self.data_pars.values())[0]
+            dv, cv = proxy.convolve(values, range, normalized)
 
-        pdf_values = core.interpolate_linear(data[par.name], dv, cv)
+            par = tuple(proxy.data_pars.values())[0]
 
-        return pdf_values
+            pdf_values = core.interpolate_linear(data[par.name], dv, cv)
 
-    @allows_bind_cache
+            if normalized:
+                return pdf_values * 1. / proxy.norm(values, range)
+            else:
+                return pdf_values
+
+    @allows_bind_or_const_cache
     def convolve( self, values = None, range = parameters.FULL, normalized = True ):
         '''
         Calculate the convolution.

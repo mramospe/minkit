@@ -66,6 +66,11 @@ class BinnedEvaluatorProxy(object):
 
         super(BinnedEvaluatorProxy, self).__init__()
 
+    def __del__( self ):
+        '''
+        '''
+        self.__pdf.free_cache()
+
     def __call__( self, *values ):
         '''
         Evaluate the FCN.
@@ -114,6 +119,11 @@ class UnbinnedEvaluatorProxy(object):
         self.__constraints = constraints or []
 
         super(UnbinnedEvaluatorProxy, self).__init__()
+
+    def __del__( self ):
+        '''
+        '''
+        self.__pdf.free_cache()
 
     def __call__( self, *values ):
         '''

@@ -136,8 +136,9 @@ def test_convpdfs():
     mean = np.sum(data[m.name]) / len(data)
     var  = np.sum((data[m.name] - mean)**2) / len(data)
 
-    assert np.allclose(var, s1.value**2 + s2.value**2, rtol=0.05)
+    assert np.allclose(var, s1.value**2 + s2.value**2, rtol=0.1)
 
+    # Ordinary check for PDFs
     values, edges = np.histogram(pyfit.extract_ndarray(data[m.name]), bins=100, range=m.bounds)
 
     centers = pyfit.DataSet.from_array(0.5 * (edges[1:] + edges[:-1]), m)
@@ -148,6 +149,7 @@ def test_convpdfs():
 
     assert np.allclose(np.sum(pdf_values), np.sum(values), rtol=0.01)
 
+    # Test a fit
     with pyfit.unbinned_minimizer('uml', pdf, data, minimizer='minuit') as minuit:
         r = minuit.migrad()
         print(r)

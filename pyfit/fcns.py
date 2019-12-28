@@ -130,7 +130,7 @@ def unbinned_extended_maximum_likelihood( pdf, data, values = None, range = para
     :rtype: float
     '''
     c  = evaluate_constraints(values, constraints)
-    lf = core.log(pdf(data, values, range))
+    lf = core.log(pdf(data, values, range, normalized=False))
     if data.weights is not None:
         lf *= data.weights
     return pdf.norm(values, range) - core.sum(lf) - len(data) * np.log(c)

@@ -18,52 +18,44 @@ def bind_method_arguments( method, **binded_kwargs ):
     :returns: wrapper function
     :rtype: function
     '''
-    argspec = inspect.getfullargspec(method)
+    method_pars = inspect.signature(method).parameters # ordered dictionary
 
-    if argspec.defaults:
-        arg_names   = argspec.args[1:-len(argspec.defaults)]
-        kwarg_names = argspec.args[-len(argspec.defaults):]
-    else:
-        arg_names   = argspec.args[1:]
-        kwarg_names = []
+    arg_names   = list(p.name for p in filter(lambda p: p.default == inspect.Parameter.empty, method_pars.values()))
+    kwarg_names = list(p.name for p in filter(lambda p: p.default != inspect.Parameter.empty, method_pars.values()))
 
-    # Check that the arguments are consumed in the right order
-    args = list(map(lambda a: a in binded_kwargs, arg_names))
-    if not all(f <= s for f, s in zip(args[:-1], args[1:])):
-        raise RuntimeError(f'Problems parsing the positional arguments of "{method.__name__}"; make sure they are specified maintaining the order')
+    # Get the argument names that must be specified
+    available_args = []
+    for i, n in enumerate(arg_names):
+        if n not in binded_kwargs:
+            available_args.append(n)
+        else:
+            break
 
-    # Dictionary to store the binded values
-    replace_kwargs  = {b: binded_kwargs[b] for b in filter(lambda b: b in argspec.args, binded_kwargs)}
-
-    # Store the names that are still available
-    available_args   = list(filter(lambda a: a not in binded_kwargs, arg_names))
-    available_kwargs = list(filter(lambda a: a not in binded_kwargs, kwarg_names))
+    # Keep only those arguments that are needed for the function call
+    replace_kwargs = {k: binded_kwargs[k] for k in filter(lambda s: s in method_pars, binded_kwargs)}
 
     @functools.wraps(method)
     def __wrapper( self, *args, **kwargs ):
         '''
         Internal wrapper to execute "method" checking the input arguments.
         '''
-        # Check the specified arguments
-        if len(args) > len(arg_names):
-            raise ValueError(f'Number of input arguments is greater than the function admits: args={available_args}, kwargs={available_kwargs}')
-
         # Check that the call is done with the same arguments
         for name, v in kwargs.items():
             if name in replace_kwargs and replace_kwargs[name] is not v:
                 raise ValueError(f'Positional argument "{name}" is being called with a different input value')
 
-        for name, arg in zip(arg_names, args):
-            if name in replace_kwargs and replace_kwargs[name] is not arg:
-                raise ValueError(f'Keyword argument "{name}" is being called with a different input value')
+        trueargs = []
+        for name, arg in zip(method_pars, args):
+            if name in replace_kwargs:
+                if replace_kwargs[name] is not arg:
+                    raise ValueError(f'Keyword argument "{name}" is being called with a different input value')
+            else:
+                trueargs.append(arg)
 
         # Replace values
         kwargs.update(replace_kwargs)
 
-        for a in filter(lambda a: a in kwargs, arg_names[:len(args)]):
-            kwargs.pop(a)
-
-        return method(*args, **kwargs)
+        return method(*trueargs, **kwargs)
 
     return __wrapper
 
