@@ -53,10 +53,12 @@ class BinnedEvaluatorProxy(object):
         '''
         :param fcn: FCN to be used during minimization.
         :type fcn: str
+        :param pdf: PDF to minimize.
+        :type pdf: PDF
         :param data: data sample to process.
         :type data: BinnedDataSet
-        :param kwargs: arguments to be forwarded to the FCN function.
-        :type kwargs: dict
+        :param constraints: set of constraints to consider in the minimization.
+        :type constraints: list(PDF)
         '''
         pdf.enable_cache(pdf_core.PDF.CONST)
         self.__data        = data
@@ -65,11 +67,6 @@ class BinnedEvaluatorProxy(object):
         self.__constraints = constraints or []
 
         super(BinnedEvaluatorProxy, self).__init__()
-
-    def __del__( self ):
-        '''
-        '''
-        self.__pdf.free_cache()
 
     def __call__( self, *values ):
         '''
@@ -86,16 +83,32 @@ class BinnedEvaluatorProxy(object):
             r[n] = values[i]
         return self.call_from_dict(r)
 
-    def call_from_dict( self, values ):
+    def __del__( self ):
         '''
+        Free the cache of the PDFs.
         '''
-        return self.__fcn(self.__pdf, self.__data, values, self.__constraints)
+        self.__pdf.free_cache()
 
     @property
     def args( self ):
         '''
+        Return all the arguments of the PDF.
+
+        :returns: all the arguments of the PDF.
+        :rtype: Registry
         '''
         return self.__pdf.all_args
+
+    def call_from_dict( self, values ):
+        '''
+        Call to the FCN given a set of values as a dictionary.
+
+        :param values: dictionary of values.
+        :type values: dict(str, float)
+        :returns: result of evaluating the FCN with the given set of values.
+        :rtype: float
+        '''
+        return self.__fcn(self.__pdf, self.__data, values, self.__constraints)
 
 
 class UnbinnedEvaluatorProxy(object):
@@ -106,10 +119,14 @@ class UnbinnedEvaluatorProxy(object):
         '''
         :param fcn: FCN to be used during minimization.
         :type fcn: str
+        :param pdf: PDF to minimize.
+        :type pdf: PDF
         :param data: data sample to process.
         :type data: DataSet
-        :param kwargs: arguments to be forwarded to the FCN function.
-        :type kwargs: dict
+        :param range: range of data to minimize.
+        :type range: str
+        :param constraints: set of constraints to consider in the minimization.
+        :type constraints: list(PDF)
         '''
         pdf.enable_cache(pdf_core.PDF.CONST)
         self.__data        = data.subset(range=range, copy=False)
@@ -122,6 +139,7 @@ class UnbinnedEvaluatorProxy(object):
 
     def __del__( self ):
         '''
+        Free the cache of the PDFs.
         '''
         self.__pdf.free_cache()
 
@@ -140,16 +158,26 @@ class UnbinnedEvaluatorProxy(object):
             r[n] = values[i]
         return self.call_from_dict(r)
 
-    def call_from_dict( self, values ):
-        '''
-        '''
-        return self.__fcn(self.__pdf, self.__data, values, self.__range, self.__constraints)
-
     @property
     def args( self ):
         '''
+        Return all the arguments of the PDF.
+
+        :returns: all the arguments of the PDF.
+        :rtype: Registry
         '''
         return self.__pdf.all_args
+
+    def call_from_dict( self, values ):
+        '''
+        Call to the FCN given a set of values as a dictionary.
+
+        :param values: dictionary of values.
+        :type values: dict(str, float)
+        :returns: result of evaluating the FCN with the given set of values.
+        :rtype: float
+        '''
+        return self.__fcn(self.__pdf, self.__data, values, self.__range, self.__constraints)
 
 
 class SimultaneousEvaluator(object):
@@ -276,36 +304,22 @@ def binned_minimizer( fcn, pdf, data, minimizer = MINUIT, **kwargs ):
 
 
 @contextlib.contextmanager
-@parse_fcn('unbinned')
-def simultaneous_unbinned_minimizer( fcn, pdfs, data, minimizer = MINUIT, **kwargs ):
-    '''
-    Create a new instance of :class:`iminuit.Minuit`.
-    This represents a "constant" object, that is, parameters defining
-    the PDFs are assumed to remain constant during all its lifetime.
-
-    .. warning: Do not change any attribute of the parameters defining the \
-    PDFs, since it will not be properly reflected during the minimization \
-    calls.
-    '''
-    if minimizer == MINUIT:
-        cfg = registry_to_minuit_input(pdf.all_args)
-
-        evaluator = UnbinnedEvaluatorProxy(fcn, pdf, data, **kwargs)
-
-        yield iminuit.Minuit(evaluator,
-                             forced_parameters=tuple(pdf.all_args.keys()),
-                             pedantic=False,
-                             **cfg)
-    else:
-        raise ValueError(f'Unknown minimizer "{minimizer}"')
-
-
-@contextlib.contextmanager
 def simultaneous_minimizer( categories, minimizer = MINUIT, range = parameters.FULL, constraints = None ):
     '''
     Create a new instance of :class:`iminuit.Minuit`.
     This represents a "constant" object, that is, parameters defining
     the PDFs are assumed to remain constant during all its lifetime.
+
+    :param categories: categories to process.
+    :type categories: list(Category)
+    :param minimizer: minimizer to use (only "minuit" is available for the moment).
+    :type minimizer: str
+    :param range: range of data to minimize.
+    :type range: str
+    :param constraints: set of constraints to consider in the minimization.
+    :type constraints: list(PDF)
+    :returns: minimizer to call.
+    :rtype:depends on the "minimizer" argument
 
     .. warning: Do not change any attribute of the parameters defining the \
     PDFs, since it will not be properly reflected during the minimization \

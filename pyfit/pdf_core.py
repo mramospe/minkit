@@ -932,19 +932,13 @@ class ConvPDFs(MultiPDF):
         :param normalized: whether to return a normalized output.
         :type normalized: bool
         '''
-        # Avoid convolving also for the "norm" call
-        with self.bind(values, range, normalized) as proxy:
+        dv, cv = self.convolve(values, range, normalized)
 
-            dv, cv = proxy.convolve(values, range, normalized)
+        par = tuple(self.data_pars.values())[0]
 
-            par = tuple(proxy.data_pars.values())[0]
+        pdf_values = core.interpolate_linear(data[par.name], dv, cv)
 
-            pdf_values = core.interpolate_linear(data[par.name], dv, cv)
-
-            if normalized:
-                return pdf_values * 1. / proxy.norm(values, range)
-            else:
-                return pdf_values
+        return pdf_values
 
     @allows_bind_or_const_cache
     def convolve( self, values = None, range = parameters.FULL, normalized = True ):
@@ -972,8 +966,6 @@ class ConvPDFs(MultiPDF):
 
         grid = dataset.evaluation_grid(first.data_pars, bounds, size=self.conv_size)
 
-        step = (bounds[1] - bounds[0]) / self.norm_size
-
         fv = first(grid, values, range, normalized)
         sv = second(grid, values, range, normalized)
 
@@ -993,7 +985,22 @@ class ConvPDFs(MultiPDF):
         :returns: value of the normalization.
         :rtype: float
         '''
-        return self.numerical_normalization(values, range)    
+        return self.numerical_normalization(values, range)
+
+    @allows_bind_or_const_cache
+    def numerical_normalization( self, values = None, range = parameters.FULL ):
+        '''
+        Calculate a numerical normalization.
+
+        :param values: values to use.
+        :type values: Registry(str, float)
+        :param range: normalization range.
+        :type range: str
+        :returns: normalization.
+        :rtype: float
+        '''
+        # A convolutions is always normalized
+        return 1.
 
 
 class ProdPDFs(MultiPDF):

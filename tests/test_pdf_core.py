@@ -138,6 +138,12 @@ def test_convpdfs():
 
     assert np.allclose(var, s1.value**2 + s2.value**2, rtol=0.1)
 
+    # Check that the normalization is correct
+    with pdf.bind() as proxy:
+        assert np.allclose(proxy.integral(), 1.)
+        assert np.allclose(proxy.norm(), 1.)
+        assert np.allclose(proxy.numerical_normalization(), 1.)
+
     # Ordinary check for PDFs
     values, edges = np.histogram(pyfit.extract_ndarray(data[m.name]), bins=100, range=m.bounds)
 

@@ -284,7 +284,7 @@ def interpolate_linear( x, xp, yp):
         raise NOT_IMPLEMENTED
 
 
-def fftconvolve( a, b, data = None, normalized = True ):
+def fftconvolve( a, b, data = None ):
     '''
     Calculate the convolution using a FFT of two arrays.
 
@@ -294,8 +294,6 @@ def fftconvolve( a, b, data = None, normalized = True ):
     :type b: numpy.ndarray
     :param data: possible values where "a" and "b" where taken from.
     :type data: numpy.ndarray
-    :param normalized: whether to return a normalized output or not.
-    :type normalized: bool
     :returns: convolution of the two array.
     :rtype: numpy.ndarray
     '''
@@ -307,14 +305,9 @@ def fftconvolve( a, b, data = None, normalized = True ):
     else:
         shift = 1.
 
-    prod = fa * shift * fb
+    output = ifft(fa * shift * fb)
 
-    output = fft(prod)
-
-    if normalized:
-        return output * (data[1] - data[0]) / len(output)
-    else:
-        return output
+    return output * (data[1] - data[0])
 
 
 def fftshift( a ):
