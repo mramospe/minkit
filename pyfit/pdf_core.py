@@ -12,7 +12,7 @@ import functools
 import logging
 import numpy as np
 
-__all__ = ['AddPDFs', 'Category', 'ConvPDFs', 'ProdPDFs']
+__all__ = ['AddPDFs', 'Category', 'ConvPDFs', 'PDF', 'ProdPDFs']
 
 # Default size of the samples to be used during numerical normalization
 NORM_SIZE = 1000000
@@ -20,7 +20,24 @@ NORM_SIZE = 1000000
 # Default size of the grid for the convolution PDFs
 CONV_SIZE = 10000
 
+# Registry of PDF classes so they can be built by name
+PDF_REGISTRY = {}
+
 logger = logging.getLogger(__name__)
+
+
+def register_pdf( cl ):
+    '''
+    Decorator to register PDF classes in the PDF_REGISTRY registry.
+
+    :param cl: decorated class.
+    :type cl: class
+    :returns: class descriptor.
+    :rtype: class
+    '''
+    if cl.__name__ not in PDF_REGISTRY:
+        PDF_REGISTRY[cl.__name__] = cl
+    return cl
 
 
 def process_cache( cache, method, self, args, kwargs ):
@@ -161,6 +178,25 @@ class PDF(object):
         :type normalized: bool
         '''
         raise NotImplementedError('Classes inheriting from "pyfit.PDF" must define the "__call__" operator')
+
+    @classmethod
+    def from_json_object( cls, obj ):
+        '''
+        Build a PDF from a JSON object.
+        This object must represent the internal structure of the PDF.
+
+        :param obj: JSON object.
+        :type obj: dict
+        :returns: newly constructed PDF and parameters.
+        :rtype: PDF
+        '''
+        class_name = obj['class']
+        if class_name == 'PDF':
+            raise NotImplementedError('Classes inheriting from "pyfit.PDF" must define the "to_json_object" method')
+        cl = PDF_REGISTRY.get(class_name, None)
+        if cl is None:
+            raise RuntimeError(f'Class "{class_name}" does not appear in the registry')
+        return cl.from_json_object(obj) # Use the correct constructor
 
     def _generate_single_bounds( self, size, mapsize, gensize, safe_factor, bounds, values ):
         '''
@@ -479,56 +515,15 @@ class PDF(object):
         else:
             return np.sum(np.fromiter((self._numerical_normalization_single_bounds(b, values) for b in bounds), dtype=types.cpu_type))
 
-
-class ConstPDF(PDF):
-    '''
-    Cache object to replace constant PDFs.
-    '''
-    def __init__( self, pdf, data, range = parameters.FULL ):
+    def to_json_object( self ):
         '''
-        A ConstPDF is an object that replaces the an usual PDF when it is marked as
-        constant in a minimization process.
+        Dump the PDF information into a JSON object.
+        The PDF can be constructed at any time by calling :method:`PDF.from_json_object`.
 
-        :param pdf: function to process.
-        :type pdf: PDF
-        :param data: data where the :class:`PDF` is being evaluated.
-        :type data: DataSet or BinnedDataSet.
-        :param range: normalization range.
-        :type range: str
+        :returns: object that can be saved into a JSON file.
+        :rtype: dict
         '''
-        self.__cache = pdf(data, range=range)
-        self.__norm  = pdf.norm(range=range)
-
-        super(ConstPDF, self).__init__(pdf.name, pdf.data_pars, pdf.args)
-
-    @allows_const_cache
-    def __call__( self, *args, normalized = True, **kwargs ):
-        '''
-        Return the evaluation of the PDF in the data.
-        Only the "normalized" keyword is considered for this class, since the other
-        input arguments do not make any effect.
-
-        :param normalized: whether to return a normalized output or not.
-        :type normalized: bool
-        :returns: values of the PDF in the data.
-        :rtype: numpy.ndarray
-        '''
-        if normalized:
-            return self.__cache / self.__norm
-        else:
-            return self.__cache
-
-    @allows_bind_or_const_cache
-    def norm( self, *args, **kwargs ):
-        '''
-        Return the normalization of the PDF.
-        Since the information has been saved in the cache, it simply returns
-        the normalization stored.
-
-        :returns: normalization.
-        :rtype: float
-        '''
-        return self.__norm
+        raise NotImplementedError('Classes inheriting from "pyfit.PDF" must define the "to_json_object" method')
 
 
 class SourcePDF(PDF):
@@ -616,6 +611,25 @@ class SourcePDF(PDF):
         else:
             return out
 
+    @classmethod
+    def from_json_object( cls, obj ):
+        '''
+        Build a PDF from a JSON object.
+        This object must represent the internal structure of the PDF.
+
+        :param obj: JSON object.
+        :type obj: dict
+        :returns: newly constructed PDF and parameters.
+        :rtype: PDF
+        '''
+        if cls.__name__ == 'SourcePDF':
+            raise NotImplementedError('SourcePDF is an abstract class; do not use it directly')
+
+        data_pars = list(map(parameters.Parameter.from_json_object, obj['data_pars']))
+        arg_pars  = list(map(parameters.Parameter.from_json_object, obj['arg_pars']))
+
+        return cls(obj['name'], *data_pars, *arg_pars)
+
     def function( self, *data_values, values = None, range = parameters.FULL, normalized = True ):
         '''
         Evaluate the function, where the data values are provided by the user as single numbers.
@@ -666,6 +680,20 @@ class SourcePDF(PDF):
                 return np.sum(np.fromiter((self.__norm(*fvals, *inr) for inr in nr), dtype=types.cpu_type))
         else:
             return self.numerical_normalization(values, range)
+
+    def to_json_object( self ):
+        '''
+        Dump the PDF information into a JSON object.
+        The PDF can be constructed at any time by calling :method:`PDF.from_json_object`.
+
+        :returns: object that can be saved into a JSON file.
+        :rtype: dict
+        '''
+        return {'class': self.__class__.__name__, # Save also the class name of the PDF
+                'name': self.name,
+                'data_pars': [p.to_json_object() for p in self.data_pars.values()],
+                'arg_pars': list(map(parameters.Parameter.to_json_object, self.args.values()))}
+
 
 
 class MultiPDF(PDF):
@@ -783,6 +811,7 @@ class MultiPDF(PDF):
             pdf.free_cache()
 
 
+@register_pdf
 class AddPDFs(MultiPDF):
     '''
     Definition of the addition of many PDFs.
@@ -836,6 +865,21 @@ class AddPDFs(MultiPDF):
             return out
 
     @classmethod
+    def from_json_object( cls, obj ):
+        '''
+        Build a PDF from a JSON object.
+        This object must represent the internal structure of the PDF.
+
+        :param obj: JSON object.
+        :type obj: dict
+        :returns: newly constructed PDF and parameters.
+        :rtype: PDF
+        '''
+        pdfs   = list(map(PDF.from_json_object, obj['pdfs']))
+        yields = list(map(parameters.Parameter.from_json_object, obj['yields']))
+        return cls(obj['name'], pdfs, yields)
+
+    @classmethod
     def two_components( cls, name, first, second, yf, ys = None ):
         '''
         Build the class from two components.
@@ -886,7 +930,21 @@ class AddPDFs(MultiPDF):
             # A non-extended PDF is always normalized
             return 1.
 
+    def to_json_object( self ):
+        '''
+        Dump the PDF information into a JSON object.
+        The PDF can be constructed at any time by calling :method:`PDF.from_json_object`.
 
+        :returns: object that can be saved into a JSON file.
+        :rtype: dict
+        '''
+        return {'class': self.__class__.__name__, # Save also the class name of the PDF
+                'name': self.name,
+                'pdfs': [p.to_json_object() for p in self.pdfs.values()],
+                'yields': list(map(parameters.Parameter.to_json_object, self.args.values()))}
+
+
+@register_pdf
 class ConvPDFs(MultiPDF):
     '''
     Definition of a convolution of two PDFs.
@@ -939,6 +997,21 @@ class ConvPDFs(MultiPDF):
         pdf_values = core.interpolate_linear(data[par.name], dv, cv)
 
         return pdf_values
+
+    @classmethod
+    def from_json_object( cls, obj ):
+        '''
+        Build a PDF from a JSON object.
+        This object must represent the internal structure of the PDF.
+
+        :param obj: JSON object.
+        :type obj: dict
+        :returns: newly constructed PDF and parameters.
+        :rtype: PDF
+        '''
+        first  = PDF.from_json_object(obj['first'])
+        second = PDF.from_json_object(obj['second'])
+        return cls(obj['name'], first, second, obj['range'])
 
     @allows_bind_or_const_cache
     def convolve( self, values = None, range = parameters.FULL, normalized = True ):
@@ -1002,7 +1075,23 @@ class ConvPDFs(MultiPDF):
         # A convolutions is always normalized
         return 1.
 
+    def to_json_object( self ):
+        '''
+        Dump the PDF information into a JSON object.
+        The PDF can be constructed at any time by calling :method:`PDF.from_json_object`.
 
+        :returns: object that can be saved into a JSON file.
+        :rtype: dict
+        '''
+        first, second = self.pdfs.values()
+        return {'class': self.__class__.__name__, # Save also the class name of the PDF
+                'name': self.name,
+                'first': first.to_json_object(),
+                'second': second.to_json_object(),
+                'range': self.range}
+
+
+@register_pdf
 class ProdPDFs(MultiPDF):
     '''
     Definition of the product of two different PDFs with different data parameters.
@@ -1039,6 +1128,20 @@ class ProdPDFs(MultiPDF):
 
         return out
 
+    @classmethod
+    def from_json_object( cls, obj ):
+        '''
+        Build a PDF from a JSON object.
+        This object must represent the internal structure of the PDF.
+
+        :param obj: JSON object.
+        :type obj: dict
+        :returns: newly constructed PDF and parameters.
+        :rtype: PDF
+        '''
+        pdfs = list(map(PDF.from_json_object, obj['pdfs']))
+        return cls(obj['name'], pdfs)
+
     @allows_bind_or_const_cache
     def norm( self, values = None, range = parameters.FULL ):
         '''
@@ -1069,3 +1172,15 @@ class ProdPDFs(MultiPDF):
         :rtype: float
         '''
         return np.prod(np.fromiter((pdf.numerical_normalization(values, range) for pdf in self.pdfs.values()), dtype=types.cpu_type))
+
+    def to_json_object( self ):
+        '''
+        Dump the PDF information into a JSON object.
+        The PDF can be constructed at any time by calling :method:`PDF.from_json_object`.
+
+        :returns: object that can be saved into a JSON file.
+        :rtype: dict
+        '''
+        return {'class': self.__class__.__name__, # Save also the class name of the PDF
+                'name': self.name,
+                'pdfs': [p.to_json_object() for p in self.pdfs.values()]}

@@ -3,6 +3,8 @@ Define classes and functions to work with parameters.
 '''
 from . import types
 import collections
+import json
+import logging
 import numpy as np
 
 __all__ = ['Parameter', 'Range', 'Registry']
@@ -10,21 +12,25 @@ __all__ = ['Parameter', 'Range', 'Registry']
 # Default range
 FULL = 'full'
 
+logger = logging.getLogger(__name__)
+
 
 class Parameter(object):
 
     def __init__( self, name, value = None, bounds = None, ranges = None, error = 0., constant = False ):
         '''
         '''
-        if ranges is not None and FULL in ranges:
-            logger.error(f'Range with name "{FULL}" is protected; use another name')
-
         self.name     = name
         self.value    = value
         self.error    = error
         self.__ranges = {}
         self.bounds   = bounds # This sets the FULL range
         self.constant = (bounds is None) or constant
+
+        # Set the ranges skipping the FULL range, since it is determined by the bounds
+        for n, r in (ranges or {}).items():
+            if n != FULL:
+                self.__ranges[n] = Range(r)
 
     def __repr__( self ):
         return '{}(name={}, value={}, bounds={}, error={}, constant={})'.format(
@@ -39,6 +45,14 @@ class Parameter(object):
         self.__bounds = values
         self.__ranges[FULL] = Range(self.__bounds)
 
+    @classmethod
+    def from_json_object( cls, obj ):
+        '''
+        '''
+        obj = dict(obj)
+        obj['ranges'] = {n: Range(o) for n, o in obj['ranges'].items()}
+        return cls(**obj)
+
     def get_range( self, name ):
         return self.__ranges[name]
 
@@ -46,6 +60,16 @@ class Parameter(object):
         if name == FULL:
             raise ValueError(f'Range name "{name}" is protected; can not be used')
         self.__ranges[name] = Range(values)
+
+    def to_json_object( self ):
+        '''
+        '''
+        return {'name': self.name,
+                'value': self.value,
+                'bounds': self.bounds,
+                'ranges': {n: r.bounds.tolist() for n, r in self.__ranges.items()},
+                'error': self.error,
+                'constant': self.constant}
 
 
 class Range(object):
@@ -92,6 +116,17 @@ class Registry(collections.OrderedDict):
 
     def to_list( self ):
         return list(self.values())
+
+    @classmethod
+    def from_json_object( cls, obj ):
+        '''
+        '''
+        return cls.from_list(map(Parameter.from_json_object, obj))
+
+    def to_json_object( self ):
+        '''
+        '''
+        return [p.to_json_object() for p in self.values()]
 
 
 def bounds_for_range( data_pars, range ):

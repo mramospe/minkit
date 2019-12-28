@@ -1,13 +1,40 @@
 '''
 Test the "parameters" module.
 '''
-import pyfit
+import json
 import numpy as np
+import os
+import pyfit
 
 pyfit.initialize()
 
 # For reproducibility
 np.random.seed(98953)
+
+
+def _check_parameters( f, s ):
+    '''
+    Check that two parameters have the same values for the attributes.
+    '''
+    for attr in ('name', 'value', 'error', 'constant'):
+        assert getattr(f, attr) == getattr(s, attr)
+
+    assert np.all(np.array(f.bounds) == np.array(s.bounds))
+
+
+def test_parameter( tmp_path ):
+    '''
+    Test the "Parameter" class.
+    '''
+    f = pyfit.Parameter('a', 1., (-5, +5), {'sides': [(-5, -2), (+2, +5)]}, 0.1, False)
+
+    with open(os.path.join(tmp_path, 'a.json'), 'wt') as fi:
+        json.dump(f.to_json_object(), fi)
+
+    with open(os.path.join(tmp_path, 'a.json'), 'rt') as fi:
+        s = pyfit.Parameter.from_json_object(json.load(fi))
+
+    _check_parameters(f, s)
 
 
 def test_range():
@@ -55,3 +82,24 @@ def test_range():
 
     for n, p in results.items():
         assert np.allclose(p.value, e.all_args[n].value, rtol=0.05)
+
+
+def test_registry( tmp_path ):
+    '''
+    Test the "Registry" class.
+    '''
+    a = pyfit.Parameter('a', 1., (-5, +5), None, 0.1, False)
+    b = pyfit.Parameter('b', 0., (-10, +10), None, 2., True)
+
+    f = pyfit.Registry.from_list([a, b])
+
+    with open(os.path.join(tmp_path, 'r.json'), 'wt') as fi:
+        json.dump(f.to_json_object(), fi)
+
+    with open(os.path.join(tmp_path, 'r.json'), 'rt') as fi:
+        s = pyfit.Registry.from_json_object(json.load(fi))
+
+    assert f.keys() == s.keys()
+
+    for fv, sv in zip(f.values(), s.values()):
+        _check_parameters(fv, sv)

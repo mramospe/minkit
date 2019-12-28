@@ -1,7 +1,9 @@
 '''
 Test the "pdf_core" module.
 '''
+import json
 import numpy as np
+import os
 import pyfit
 import pytest
 
@@ -9,6 +11,39 @@ pyfit.initialize()
 
 # For reproducibility
 np.random.seed(98953)
+
+
+def _check_parameters( f, s ):
+    '''
+    Check that two parameters have the same values for the attributes.
+    '''
+    for attr in ('name', 'value', 'error', 'constant'):
+        assert getattr(f, attr) == getattr(s, attr)
+    assert np.all(np.array(f.bounds) == np.array(s.bounds))
+
+
+def _check_pdfs( f, s ):
+    '''
+    Check that two PDFs have the same values for the attributes.
+    '''
+    assert f.name == s.name
+    for fa, sa in zip(f.args.values(), s.args.values()):
+        _check_parameters(fa, sa)
+    for fa, sa in zip(f.data_pars.values(), s.data_pars.values()):
+        _check_parameters(fa, sa)
+
+
+def _check_multi_pdfs( f, s ):
+    '''
+    Check that two PDFs have the same values for the attributes.
+    '''
+    assert f.name == s.name
+    for fa, sa in zip(f.args.values(), s.args.values()):
+        _check_parameters(fa, sa)
+    for fa, sa in zip(f.data_pars.values(), s.data_pars.values()):
+        _check_parameters(fa, sa)
+    for fp, sp in zip(f.pdfs.values(), s.pdfs.values()):
+        _check_pdfs(fp, sp)
 
 
 def test_pdf():
@@ -80,7 +115,7 @@ def test_category():
         c = pyfit.Category()
 
 
-def test_constpdf():
+def test_constpdf( tmp_path ):
     '''
     Test a fit with a constant PDF.
     '''
@@ -112,8 +147,17 @@ def test_constpdf():
     for n, p in results.items():
         assert np.allclose(pdf.all_args[n].value, p.value, rtol=0.05)
 
+    # Test the JSON conversion
+    with open(os.path.join(tmp_path, 'pdf.json'), 'wt') as fi:
+        json.dump(pdf.to_json_object(), fi)
 
-def test_convpdfs():
+    with open(os.path.join(tmp_path, 'pdf.json'), 'rt') as fi:
+        s = pyfit.PDF.from_json_object(json.load(fi))
+
+    _check_multi_pdfs(s, pdf)
+
+
+def test_convpdfs( tmp_path ):
     '''
     Test the "ConvPDFs" class.
     '''
@@ -162,8 +206,17 @@ def test_convpdfs():
 
     assert not r.fmin.hesse_failed
 
+    # Test the JSON conversion
+    with open(os.path.join(tmp_path, 'pdf.json'), 'wt') as fi:
+        json.dump(pdf.to_json_object(), fi)
 
-def test_prodpdfs():
+    with open(os.path.join(tmp_path, 'pdf.json'), 'rt') as fi:
+        s = pyfit.PDF.from_json_object(json.load(fi))
+
+    _check_multi_pdfs(s, pdf)
+
+
+def test_prodpdfs( tmp_path ):
     '''
     Test the "ProdPDFs" class.
     '''
@@ -191,8 +244,17 @@ def test_prodpdfs():
         p.constant = True
     assert pdf.constant
 
+    # Test the JSON conversion
+    with open(os.path.join(tmp_path, 'pdf.json'), 'wt') as fi:
+        json.dump(pdf.to_json_object(), fi)
 
-def test_sourcepdf():
+    with open(os.path.join(tmp_path, 'pdf.json'), 'rt') as fi:
+        s = pyfit.PDF.from_json_object(json.load(fi))
+
+    _check_multi_pdfs(s, pdf)
+
+
+def test_sourcepdf( tmp_path ):
     '''
     Test the "SourcePDF" class.
     '''
@@ -209,3 +271,12 @@ def test_sourcepdf():
     pol0 = pyfit.Polynomial('pol0', m)
     pol1 = pyfit.Polynomial('pol1', m, p1)
     pol2 = pyfit.Polynomial('pol2', m, p1, p2)
+
+    # Test the JSON conversion
+    with open(os.path.join(tmp_path, 'pdf.json'), 'wt') as fi:
+        json.dump(pol0.to_json_object(), fi)
+
+    with open(os.path.join(tmp_path, 'pdf.json'), 'rt') as fi:
+        s = pyfit.PDF.from_json_object(json.load(fi))
+
+    _check_pdfs(s, pol0)

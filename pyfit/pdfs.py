@@ -12,6 +12,7 @@ __all__ = ['Amoroso', 'Chebyshev', 'Exponential', 'Gaussian', 'Polynomial']
 logger = logging.getLogger(__name__)
 
 
+@pdf_core.register_pdf
 class Amoroso(pdf_core.SourcePDF):
     '''
     Definition of the Amoroso PDF.
@@ -33,6 +34,7 @@ class Amoroso(pdf_core.SourcePDF):
         super(Amoroso, self).__init__(name, func, pdf, norm, [x], [a, theta, alpha, beta])
 
 
+@pdf_core.register_pdf
 class Exponential(pdf_core.SourcePDF):
     '''
     Definition of an Exponential.
@@ -45,6 +47,7 @@ class Exponential(pdf_core.SourcePDF):
         super(Exponential, self).__init__(name, func, pdf, norm, [x], [k])
 
 
+@pdf_core.register_pdf
 class Gaussian(pdf_core.SourcePDF):
     '''
     Definition of a Gaussian.
@@ -65,6 +68,7 @@ class Gaussian(pdf_core.SourcePDF):
         super(Gaussian, self).__init__(name, func, pdf, norm, [x], [center, sigma])
 
 
+@pdf_core.register_pdf
 class Polynomial(pdf_core.SourcePDF):
     '''
     Definition of a polynomial PDF.
@@ -85,6 +89,7 @@ class Polynomial(pdf_core.SourcePDF):
         super(Polynomial, self).__init__(name, func, pdf, norm, [x], None, coeffs)
 
 
+@pdf_core.register_pdf
 class Chebyshev(pdf_core.SourcePDF):
     '''
     Definition of a Chebyshev polynomial PDF.
