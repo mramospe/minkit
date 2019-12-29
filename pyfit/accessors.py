@@ -155,7 +155,7 @@ def access_pdf( name, ndata_pars, narg_pars = 0, nvar_arg_pars = None ):
 
         # Get the functions
         try:
-            modname = name if nvar_arg_pars is not None else f'{name}{nvar_arg_pars}'
+            modname = name if nvar_arg_pars is None else f'{name}{nvar_arg_pars}'
 
             if modname in PDF_CACHE:
                 output = PDF_CACHE[modname]

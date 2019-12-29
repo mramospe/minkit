@@ -52,17 +52,23 @@ def test_pdf():
     '''
     # Create a Polynomial PDF
     m = pyfit.Parameter('m', bounds=(0, 10))
-    e = pyfit.Polynomial('polynomial', m)
+    p1 = pyfit.Parameter('p1', 0.)
+    p2 = pyfit.Parameter('p2', 0.)
+    p = pyfit.Polynomial('polynomial', m, p1, p2)
 
     m.set_range('sides', [(0, 4), (6, 10)])
 
     # integral
-    assert np.allclose(e.integral(integral_range='full', range='full'), 1.)
-    assert np.allclose(e.integral(integral_range='sides', range='full'), 0.8)
-    assert np.allclose(e.integral(integral_range='sides', range='sides'), 1.)
+    assert np.allclose(p.integral(integral_range='full', range='full'), 1.)
+    assert np.allclose(p.integral(integral_range='sides', range='full'), 0.8)
+    assert np.allclose(p.integral(integral_range='sides', range='sides'), 1.)
+
+    # We can call the PDF over a set of data providing only some of the values
+    data = p.generate(1000, values={'p1': 1.})
+    p(data, values={'p1': 1.})
 
 
-def test_addpdfs():
+def test_addpdfs( tmp_path ):
     '''
     Test the "AddPDFs" class.
     '''
@@ -105,6 +111,15 @@ def test_addpdfs():
     for p in pdf.all_args.values():
         p.constant = True
     assert pdf.constant
+
+    # Test the JSON conversion
+    with open(os.path.join(tmp_path, 'pdf.json'), 'wt') as fi:
+        json.dump(pdf.to_json_object(), fi)
+
+    with open(os.path.join(tmp_path, 'pdf.json'), 'rt') as fi:
+        s = pyfit.PDF.from_json_object(json.load(fi))
+
+    _check_multi_pdfs(s, pdf)
 
 
 def test_category():

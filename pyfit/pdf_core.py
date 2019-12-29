@@ -295,10 +295,15 @@ class PDF(object):
         :returns: processed values, sorted following the argument parameters.
         :rtype: tuple(float)
         '''
+        parsed_values = list(v.value for v in self.args.values())
         if values is None:
-            return tuple(v.value for v in self.args.values())
+            return tuple(parsed_values)
         else:
-            return tuple(values[n] for n in self.args.keys())
+            for i, k in enumerate(self.args):
+                v = values.get(k, None)
+                if v is not None:
+                    parsed_values[i] = values[k]
+            return tuple(parsed_values)
 
     @property
     def all_args( self ):

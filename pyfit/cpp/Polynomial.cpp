@@ -46,6 +46,6 @@ extern "C" {
     for ( int i = 1; i < n; ++i )
       l += xmin * l + p[n - i - 1] / (n - i);
 
-    return r * xmax - l * xmin;
+    return (1. + r) * xmax - (1. + l) * xmin;
   }
 }
