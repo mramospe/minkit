@@ -52,7 +52,7 @@ The sample can be easily fitted calling:
    with minkit.unbinned_minimizer('uml', g, data) as minimizer:
       r = minimizer.migrad()
 
-In this case "minimizer" is a `Minuit <https://iminuit.readthedocs.io/en/latest/reference.html#minuit`_ instance, since by default `Minuit <https://iminuit.readthedocs.io/en/latest/reference.html#minuit>`_ is used to do the minimization.
+In this case "minimizer" is a `Minuit <https://iminuit.readthedocs.io/en/latest/reference.html#minuit>`_ instance, since by default `Minuit <https://iminuit.readthedocs.io/en/latest/reference.html#minuit>`_ is used to do the minimization.
 The string "uml" specifies the type of figure to minimize (FCN), unbinned-maximum likelihood, in this case.
 
 Installation:
