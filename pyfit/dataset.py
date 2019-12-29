@@ -168,7 +168,7 @@ class DataSet(object):
         else:
             return self.subset(index)
 
-    def subset( self, cond = None, range = None, copy = True ):
+    def subset( self, cond = None, range = None, copy = True, rescale_weights = False ):
         '''
         Get a subset of this data set.
 
@@ -195,8 +195,13 @@ class DataSet(object):
                     cond = core.logical_and(cond, i)
 
         data = {p.name: self[p.name][cond] for p in self.data_pars.values()}
+
         if self.__weights is not None:
+
             weights = self.weights[cond]
+
+            if rescale_weights:
+                weights = weights * core.sum(weights) / core.sum(weights**2)
         else:
             weights = self.__weights
 
@@ -223,6 +228,18 @@ class DataSet(object):
         :rtype: numpy.ndarray or None
         '''
         return self.__weights
+
+    @weights.setter
+    def weights( self, weights ):
+        '''
+        Set the weights of the sample.
+
+        :param weights: input weights.
+        :type weights: numpy.ndarray
+        '''
+        if len(weights) != len(self):
+            raise ValueError('Length of the provided weights does not match that of the DataSet')
+        self.__weights = core.array(weights)
 
 
 class BinnedDataSet(object):

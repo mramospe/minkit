@@ -15,6 +15,7 @@ import numpy as np
 __all__ = ['AddPDFs', 'Category', 'ConvPDFs', 'PDF', 'ProdPDFs']
 
 # Default size of the samples to be used during numerical normalization
+# and calculation of integrals
 NORM_SIZE = 1000000
 
 # Default size of the grid for the convolution PDFs

@@ -11,9 +11,12 @@ import collections
 import contextlib
 import functools
 import iminuit
+import logging
 import numpy as np
 
 __all__ = ['Category', 'binned_minimizer', 'unbinned_minimizer', 'migrad_output_to_registry', 'simultaneous_minimizer']
+
+logger = logging.getLogger(__name__)
 
 # Names for the minimizers
 MINUIT = 'minuit'
@@ -115,7 +118,7 @@ class UnbinnedEvaluatorProxy(object):
     '''
     Definition of a proxy class to evaluate an FCN with a PDF.
     '''
-    def __init__( self, fcn, pdf, data, range = parameters.FULL, constraints = None ):
+    def __init__( self, fcn, pdf, data, range = parameters.FULL, constraints = None, rescale_weights = True ):
         '''
         :param fcn: FCN to be used during minimization.
         :type fcn: str
@@ -127,9 +130,18 @@ class UnbinnedEvaluatorProxy(object):
         :type range: str
         :param constraints: set of constraints to consider in the minimization.
         :type constraints: list(PDF)
+        :param rescale_weights: whether to rescale the weights, so the statistical power remains constant.
+        :type rescale_weights: bool
         '''
         pdf.enable_cache(pdf_core.PDF.CONST)
-        self.__data        = data.subset(range=range, copy=False)
+
+        if data.weights is not None:
+            if rescale_weights:
+                logger.info('Rescaling weights for the fit')
+                self.__data = data.subset(range=range, copy=False, rescale_weights=rescale_weights)
+        else:
+            self.__data = data.subset(range=range, copy=False)
+
         self.__fcn         = fcn
         self.__pdf         = pdf
         self.__range       = range
@@ -259,7 +271,7 @@ def registry_to_minuit_input( registry, errordef = 1. ):
 
 @contextlib.contextmanager
 @parse_fcn('unbinned')
-def unbinned_minimizer( fcn, pdf, data, minimizer = MINUIT, **kwargs ):
+def unbinned_minimizer( fcn, pdf, data, minimizer = MINUIT, minimizer_config = None, rescale_weights = True, **kwargs ):
     '''
     Create a new instance of :class:`iminuit.Minuit`.
     This represents a "constant" object, that is, parameters defining
@@ -271,10 +283,13 @@ def unbinned_minimizer( fcn, pdf, data, minimizer = MINUIT, **kwargs ):
     '''
     evaluator = UnbinnedEvaluatorProxy(fcn, pdf, data, **kwargs)
 
+    minimizer_config = minimizer_config or {}
+
     if minimizer == MINUIT:
         yield iminuit.Minuit(evaluator,
                              forced_parameters=tuple(pdf.all_args.keys()),
                              pedantic=False,
+                             **minimizer_config,
                              **registry_to_minuit_input(pdf.all_args))
     else:
         raise ValueError(f'Unknown minimizer "{minimizer}"')
@@ -282,7 +297,7 @@ def unbinned_minimizer( fcn, pdf, data, minimizer = MINUIT, **kwargs ):
 
 @contextlib.contextmanager
 @parse_fcn('binned')
-def binned_minimizer( fcn, pdf, data, minimizer = MINUIT, **kwargs ):
+def binned_minimizer( fcn, pdf, data, minimizer = MINUIT, minimizer_config = None, **kwargs ):
     '''
     Create a new instance of :class:`iminuit.Minuit`.
     This represents a "constant" object, that is, parameters defining
@@ -294,17 +309,20 @@ def binned_minimizer( fcn, pdf, data, minimizer = MINUIT, **kwargs ):
     '''
     evaluator = BinnedEvaluatorProxy(fcn, pdf, data, **kwargs)
 
+    minimizer_config = minimizer_config or {}
+
     if minimizer == MINUIT:
         yield iminuit.Minuit(evaluator,
                              forced_parameters=tuple(pdf.all_args.keys()),
                              pedantic=False,
+                             **minimizer_config,
                              **registry_to_minuit_input(pdf.all_args))
     else:
         raise ValueError(f'Unknown minimizer "{minimizer}"')
 
 
 @contextlib.contextmanager
-def simultaneous_minimizer( categories, minimizer = MINUIT, range = parameters.FULL, constraints = None ):
+def simultaneous_minimizer( categories, minimizer = MINUIT, minimizer_config = None, rescale_weights = True, range = parameters.FULL, constraints = None ):
     '''
     Create a new instance of :class:`iminuit.Minuit`.
     This represents a "constant" object, that is, parameters defining
@@ -334,16 +352,20 @@ def simultaneous_minimizer( categories, minimizer = MINUIT, range = parameters.F
         if fcns.data_type_for_fcn(cat.fcn) == dataset.BINNED:
             e = BinnedEvaluatorProxy(fcn, cat.pdf, cat.data, constraints)
         else:
-            e = UnbinnedEvaluatorProxy(fcn, cat.pdf, cat.data, range, constraints)
+            e = UnbinnedEvaluatorProxy(fcn, cat.pdf, cat.data, range, constraints, rescale_weights)
+
         evaluators.append(e)
 
     evaluator = SimultaneousEvaluator(evaluators)
+
+    minimizer_config = minimizer_config or {}
 
     # Return the minimizer
     if minimizer == MINUIT:
         yield iminuit.Minuit(evaluator,
                              forced_parameters=tuple(evaluator.args.keys()),
                              pedantic=False,
+                             **minimizer_config,
                              **registry_to_minuit_input(evaluator.args))
     else:
         raise ValueError(f'Unknown minimizer "{minimizer}"')

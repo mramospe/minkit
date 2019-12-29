@@ -35,6 +35,29 @@ def test_unbinned_minimizer():
 
     pytest.shared_names = [s for s in g.all_args]
 
+    # Unweighted fit to uniform distribution fails
+    arr = np.random.uniform(*m.bounds, 10000)
+    data = pyfit.DataSet.from_array(arr, m)
+
+    with pyfit.unbinned_minimizer('uml', g, data, minimizer='minuit') as minuit:
+        r = minuit.migrad()
+        print(r)
+
+    results = pyfit.migrad_output_to_registry(r)
+
+    assert not all(np.allclose(p.value, g.all_args[n].value, rtol=0.05) for n, p in results.items())
+
+    # With weights fits correctly
+    data.weights = g(data)
+
+    with pyfit.unbinned_minimizer('uml', g, data, minimizer='minuit') as minuit:
+        r = minuit.migrad()
+        print(r)
+
+    results = pyfit.migrad_output_to_registry(r)
+
+    assert all(np.allclose(p.value, g.all_args[n].value, rtol=0.05) for n, p in results.items())
+
 
 def test_simultaneous_minimizer():
     '''
