@@ -2,10 +2,10 @@
 Tests fot the "bindings.py" module.
 '''
 import numpy as np
-import pyfit
+import minkit
 import pytest
 
-pyfit.initialize()
+minkit.initialize()
 
 # For reproducibility
 np.random.seed(98953)
@@ -15,10 +15,10 @@ def test_bind_class_arguments():
     '''
     Test the "bind_class_arguments" function.
     '''
-    m = pyfit.Parameter('m', bounds=(-5, +5))
-    c = pyfit.Parameter('c', 0., bounds=(-2, +2))
-    s = pyfit.Parameter('s', 1., bounds=(-3, +3))
-    g = pyfit.Gaussian('gaussian', m, c, s)
+    m = minkit.Parameter('m', bounds=(-5, +5))
+    c = minkit.Parameter('c', 0., bounds=(-2, +2))
+    s = minkit.Parameter('s', 1., bounds=(-3, +3))
+    g = minkit.Gaussian('gaussian', m, c, s)
 
     data = g.generate(10000)
 

@@ -1,0 +1,29 @@
+language: python
+os: linux
+env:
+  - MPLBACKEND=Agg
+before_install:
+  - python --version
+  - pip install pytest
+  - pip install pytest-cov
+  - pip install codecov
+install:
+  - pip install -r requirements.txt
+  - pip install .
+script: pytest
+after_success:
+  - codecov
+jobs:
+  include:
+    - name: "Python 3.5"
+      python: 3.5
+    - name: "Python 3.6"
+      python: 3.6
+    - stage: format
+      python: 3.6
+      install: pip install autopep8
+      before_script: " "
+      script:
+        - python setup.py check_format --directory docs --file-type python
+        - python setup.py check_format --directory hep_spt --file-type all
+        - python setup.py check_format --directory tests --file-type python

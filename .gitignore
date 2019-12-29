@@ -54,8 +54,8 @@ Thumbs.db
 ##########################
 .eggs/
 build/
-pyfit.egg-info/
-pyfit/version.py
+minkit.egg-info/
+minkit/version.py
 
 # Other files #
 ###############

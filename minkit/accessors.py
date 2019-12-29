@@ -22,7 +22,7 @@ PDF_MODULE_CACHE = {}
 PDF_CACHE = {}
 
 
-def create_cpp_function_proxy( module, name, ndata_pars, narg_pars = 0, nvar_arg_pars = None ):
+def create_cpp_function_proxy(module, name, ndata_pars, narg_pars=0, nvar_arg_pars=None):
     '''
     Create a proxy for C++ that handles correctly the input and output data
     types of a fucntion.
@@ -49,13 +49,14 @@ def create_cpp_function_proxy( module, name, ndata_pars, narg_pars = 0, nvar_arg
     function.restype = types.c_double
 
     @functools.wraps(function)
-    def __function( *args ):
+    def __function(*args):
         '''
         Internal wrapper.
         '''
         if nvar_arg_pars is not None:
             var_arg_pars = args[-1]
-            vals = tuple(map(types.c_double, args[:-1])) + (nvar_arg_pars, var_arg_pars.ctypes.data_as(types.c_double_p))
+            vals = tuple(map(types.c_double, args[:-1])) + (
+                nvar_arg_pars, var_arg_pars.ctypes.data_as(types.c_double_p))
         else:
             vals = tuple(map(types.c_double, args))
 
@@ -66,21 +67,23 @@ def create_cpp_function_proxy( module, name, ndata_pars, narg_pars = 0, nvar_arg
     argtypes += [types.c_double_p for _ in range(ndata_pars)]
     argtypes += partypes
     evaluate.argtypes = argtypes
-    
+
     @functools.wraps(evaluate)
-    def __evaluate( output_array, *args ):
+    def __evaluate(output_array, *args):
         '''
         Internal wrapper.
         '''
-        op   = output_array.ctypes.data_as(types.c_double_p)
-        ips  = tuple(d.ctypes.data_as(types.c_double_p) for d in args[:ndata_pars])
+        op = output_array.ctypes.data_as(types.c_double_p)
+        ips = tuple(d.ctypes.data_as(types.c_double_p)
+                    for d in args[:ndata_pars])
 
         if nvar_arg_pars is not None:
 
             # Variable arguments must be the last in the list
             var_arg_pars = args[-1]
 
-            vals = tuple(map(types.c_double, args[ndata_pars:-1])) + (nvar_arg_pars, var_arg_pars.ctypes.data_as(types.c_double_p))
+            vals = tuple(map(types.c_double, args[ndata_pars:-1])) + (
+                nvar_arg_pars, var_arg_pars.ctypes.data_as(types.c_double_p))
 
         else:
             vals = tuple(map(types.c_double, args[ndata_pars:]))
@@ -96,7 +99,7 @@ def create_cpp_function_proxy( module, name, ndata_pars, narg_pars = 0, nvar_arg
         normalization.restype = types.c_double
 
         @functools.wraps(normalization)
-        def __normalization( *args ):
+        def __normalization(*args):
             '''
             Internal wrapper.
             '''
@@ -105,11 +108,12 @@ def create_cpp_function_proxy( module, name, ndata_pars, narg_pars = 0, nvar_arg
                     # This is special case, must handle index carefully
                     var_arg_pars = np.array([], dtype=types.c_double)
                 else:
-                    var_arg_pars = args[-1 -2 * ndata_pars]
+                    var_arg_pars = args[-1 - 2 * ndata_pars]
                 # Normal arguments are parse first
-                vals = tuple(map(types.c_double, args[:-1 -2 * ndata_pars]))
+                vals = tuple(map(types.c_double, args[:-1 - 2 * ndata_pars]))
                 # Variable number of arguments follow
-                vals += (types.c_int(nvar_arg_pars), var_arg_pars.ctypes.data_as(types.c_double_p))
+                vals += (types.c_int(nvar_arg_pars),
+                         var_arg_pars.ctypes.data_as(types.c_double_p))
                 # Finally, the integration limits must be specified
                 vals += tuple(map(types.c_double, args[-2 * ndata_pars:]))
             else:
@@ -122,7 +126,7 @@ def create_cpp_function_proxy( module, name, ndata_pars, narg_pars = 0, nvar_arg
     return __function, __evaluate, __normalization
 
 
-def access_pdf( name, ndata_pars, narg_pars = 0, nvar_arg_pars = None ):
+def access_pdf(name, ndata_pars, narg_pars=0, nvar_arg_pars=None):
     '''
     Access a PDF with the given name and number of data and parameter arguments.
 
@@ -142,11 +146,12 @@ def access_pdf( name, ndata_pars, narg_pars = 0, nvar_arg_pars = None ):
         else:
             # Compile the C++ code and load the library
             if not os.path.isfile(source):
-                raise RuntimeError(f'Function {name} does not exist in "{source}"')
+                raise RuntimeError(
+                    f'Function {name} does not exist in "{source}"')
 
             compiler = ccompiler.new_compiler()
-            objects  = compiler.compile([source], output_dir=TMPDIR.name)
-            libname  = os.path.join(TMPDIR.name, f'lib{name}.so')
+            objects = compiler.compile([source], output_dir=TMPDIR.name)
+            libname = os.path.join(TMPDIR.name, f'lib{name}.so')
             compiler.link(f'{name} library', objects, libname)
 
             module = cdll.LoadLibrary(libname)
@@ -160,12 +165,15 @@ def access_pdf( name, ndata_pars, narg_pars = 0, nvar_arg_pars = None ):
             if modname in PDF_CACHE:
                 output = PDF_CACHE[modname]
             else:
-                output = create_cpp_function_proxy(module, name, ndata_pars, narg_pars, nvar_arg_pars)
+                output = create_cpp_function_proxy(
+                    module, name, ndata_pars, narg_pars, nvar_arg_pars)
                 PDF_CACHE[modname] = output
 
         except AttributeError as ex:
-            raise RuntimeError(f'Error loading function "{name}"; make sure that both "{name}" and "normalization" are defined inside "{source}"')
+            raise RuntimeError(
+                f'Error loading function "{name}"; make sure that both "{name}" and "normalization" are defined inside "{source}"')
     else:
-        raise NotImplementedError(f'Function not implemented for backend "{core.BACKEND}"')
+        raise NotImplementedError(
+            f'Function not implemented for backend "{core.BACKEND}"')
 
     return output

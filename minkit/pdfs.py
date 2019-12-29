@@ -17,21 +17,26 @@ class Amoroso(pdf_core.SourcePDF):
     '''
     Definition of the Amoroso PDF.
     '''
-    def __init__( self, name, x, a, theta, alpha, beta ):
+
+    def __init__(self, name, x, a, theta, alpha, beta):
         '''
         Create a new PDF with the name, parameter related to the data and the argument parameters.
 
         .. warning: This function is unstable and the evaluation can explode easily for certain combination of parameters, as the normalization is currently done numerically.
         '''
-        func, pdf, norm = accessors.access_pdf('Amoroso', ndata_pars=1, narg_pars=4)
+        func, pdf, norm = accessors.access_pdf(
+            'Amoroso', ndata_pars=1, narg_pars=4)
 
         if alpha.value <= 0:
-            logger.warning('Parameter "alpha" for the {self.__class__.__name__} PDF must be greater than zero; check its initial value')
+            logger.warning(
+                'Parameter "alpha" for the {self.__class__.__name__} PDF must be greater than zero; check its initial value')
 
         if alpha.bounds is not None and alpha.bounds[0] <= 0:
-            logger.warning('Parameter "alpha" for the {self.__class__.__name__} PDF must be greater than zero; check its bounds')
+            logger.warning(
+                'Parameter "alpha" for the {self.__class__.__name__} PDF must be greater than zero; check its bounds')
 
-        super(Amoroso, self).__init__(name, func, pdf, norm, [x], [a, theta, alpha, beta])
+        super(Amoroso, self).__init__(name, func,
+                                      pdf, norm, [x], [a, theta, alpha, beta])
 
 
 @pdf_core.register_pdf
@@ -39,11 +44,13 @@ class Exponential(pdf_core.SourcePDF):
     '''
     Definition of an Exponential.
     '''
-    def __init__( self, name, x, k ):
+
+    def __init__(self, name, x, k):
         '''
         Create a new PDF with the parameters related to the data and the slope parameter.
         '''
-        func, pdf, norm = accessors.access_pdf('Exponential', ndata_pars=1, narg_pars=1)
+        func, pdf, norm = accessors.access_pdf(
+            'Exponential', ndata_pars=1, narg_pars=1)
         super(Exponential, self).__init__(name, func, pdf, norm, [x], [k])
 
 
@@ -52,7 +59,8 @@ class Gaussian(pdf_core.SourcePDF):
     '''
     Definition of a Gaussian.
     '''
-    def __init__( self, name, x, center, sigma ):
+
+    def __init__(self, name, x, center, sigma):
         '''
         Create a new PDF with the parameters related to the data, center and standard
         deviation.
@@ -64,8 +72,10 @@ class Gaussian(pdf_core.SourcePDF):
         :param sigma: standard deviation
         :type sigma: Parameter
         '''
-        func, pdf, norm = accessors.access_pdf('Gaussian', ndata_pars=1, narg_pars=2)
-        super(Gaussian, self).__init__(name, func, pdf, norm, [x], [center, sigma])
+        func, pdf, norm = accessors.access_pdf(
+            'Gaussian', ndata_pars=1, narg_pars=2)
+        super(Gaussian, self).__init__(
+            name, func, pdf, norm, [x], [center, sigma])
 
 
 @pdf_core.register_pdf
@@ -73,7 +83,8 @@ class Polynomial(pdf_core.SourcePDF):
     '''
     Definition of a polynomial PDF.
     '''
-    def  __init__( self, name, x, *coeffs ):
+
+    def __init__(self, name, x, *coeffs):
         '''
         Build the class given the name, parameter related to data and the coefficients.
         Coefficients must be sorted from lower to higher order.
@@ -85,8 +96,10 @@ class Polynomial(pdf_core.SourcePDF):
         :param coeffs: coefficients for the polynomial
         :type coeffs: tuple(Parameter)
         '''
-        func, pdf, norm = accessors.access_pdf('Polynomial', ndata_pars=1, nvar_arg_pars=len(coeffs))
-        super(Polynomial, self).__init__(name, func, pdf, norm, [x], None, coeffs)
+        func, pdf, norm = accessors.access_pdf(
+            'Polynomial', ndata_pars=1, nvar_arg_pars=len(coeffs))
+        super(Polynomial, self).__init__(
+            name, func, pdf, norm, [x], None, coeffs)
 
 
 @pdf_core.register_pdf
@@ -94,7 +107,8 @@ class Chebyshev(pdf_core.SourcePDF):
     '''
     Definition of a Chebyshev polynomial PDF.
     '''
-    def __init__( self, name, x, *coeffs ):
+
+    def __init__(self, name, x, *coeffs):
         '''
         Build the class given the name, parameter related to data and coefficients.
         Coefficients must be sorted from lower to higher order.
@@ -108,5 +122,7 @@ class Chebyshev(pdf_core.SourcePDF):
         :param coeffs: coefficients for the polynomial
         :type coeffs: tuple(Parameter)
         '''
-        func, pdf, norm = accessors.access_pdf('Chebyshev', ndata_pars=1, nvar_arg_pars=len(coeffs))
-        super(Chebyshev, self).__init__(name, func, pdf, norm, [x], None, coeffs)
+        func, pdf, norm = accessors.access_pdf(
+            'Chebyshev', ndata_pars=1, nvar_arg_pars=len(coeffs))
+        super(Chebyshev, self).__init__(
+            name, func, pdf, norm, [x], None, coeffs)

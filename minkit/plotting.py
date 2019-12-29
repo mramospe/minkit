@@ -6,7 +6,7 @@ import numpy as np
 __all__ = ['scale_pdf_values']
 
 
-def scale_pdf_values( pdf_values, data_values, edges ):
+def scale_pdf_values(pdf_values, data_values, edges):
     '''
     Scale the PDF values given the data values that have already been
     plotted using a defined set of edges.

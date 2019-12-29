@@ -17,14 +17,14 @@ logger = logging.getLogger(__name__)
 
 class Parameter(object):
 
-    def __init__( self, name, value = None, bounds = None, ranges = None, error = 0., constant = False ):
+    def __init__(self, name, value=None, bounds=None, ranges=None, error=0., constant=False):
         '''
         '''
-        self.name     = name
-        self.value    = value
-        self.error    = error
+        self.name = name
+        self.value = value
+        self.error = error
         self.__ranges = {}
-        self.bounds   = bounds # This sets the FULL range
+        self.bounds = bounds  # This sets the FULL range
         self.constant = (bounds is None) or constant
 
         # Set the ranges skipping the FULL range, since it is determined by the bounds
@@ -32,36 +32,37 @@ class Parameter(object):
             if n != FULL:
                 self.__ranges[n] = Range(r)
 
-    def __repr__( self ):
+    def __repr__(self):
         return '{}(name={}, value={}, bounds={}, error={}, constant={})'.format(
             self.__class__.__name__, self.name, self.value, self.bounds, self.error, self.constant)
 
     @property
-    def bounds( self ):
+    def bounds(self):
         return self.__bounds
 
     @bounds.setter
-    def bounds( self, values ):
+    def bounds(self, values):
         self.__bounds = values
         self.__ranges[FULL] = Range(self.__bounds)
 
     @classmethod
-    def from_json_object( cls, obj ):
+    def from_json_object(cls, obj):
         '''
         '''
         obj = dict(obj)
         obj['ranges'] = {n: Range(o) for n, o in obj['ranges'].items()}
         return cls(**obj)
 
-    def get_range( self, name ):
+    def get_range(self, name):
         return self.__ranges[name]
 
-    def set_range( self, name, values ):
+    def set_range(self, name, values):
         if name == FULL:
-            raise ValueError(f'Range name "{name}" is protected; can not be used')
+            raise ValueError(
+                f'Range name "{name}" is protected; can not be used')
         self.__ranges[name] = Range(values)
 
-    def to_json_object( self ):
+    def to_json_object(self):
         '''
         '''
         return {'name': self.name,
@@ -74,24 +75,24 @@ class Parameter(object):
 
 class Range(object):
 
-    def __init__( self, bounds ):
+    def __init__(self, bounds):
         '''
         '''
         self.__bounds = np.array(bounds)
 
-    def __len__( self ):
+    def __len__(self):
         return len(self.__bounds)
 
     @property
-    def bounds( self ):
+    def bounds(self):
         return self.__bounds
 
     @property
-    def disjoint( self ):
+    def disjoint(self):
         return len(self.__bounds.shape) > 1
 
     @property
-    def size( self ):
+    def size(self):
         if len(self.__bounds.shape) == 1:
             return self.__bounds[1] - self.__bounds[0]
         else:
@@ -100,36 +101,37 @@ class Range(object):
 
 class Registry(collections.OrderedDict):
 
-    def __init__( self, *args, **kwargs ):
+    def __init__(self, *args, **kwargs):
         '''
         '''
         super(Registry, self).__init__(*args, **kwargs)
 
     @classmethod
-    def from_list( cls, args ):
+    def from_list(cls, args):
         c = cls()
         for a in args:
             if a.name in c:
-                raise KeyError(f'A parameter with name "{a.name}" already exists in the registry')
+                raise KeyError(
+                    f'A parameter with name "{a.name}" already exists in the registry')
             c[a.name] = a
         return c
 
-    def to_list( self ):
+    def to_list(self):
         return list(self.values())
 
     @classmethod
-    def from_json_object( cls, obj ):
+    def from_json_object(cls, obj):
         '''
         '''
         return cls.from_list(map(Parameter.from_json_object, obj))
 
-    def to_json_object( self ):
+    def to_json_object(self):
         '''
         '''
         return [p.to_json_object() for p in self.values()]
 
 
-def bounds_for_range( data_pars, range ):
+def bounds_for_range(data_pars, range):
     '''
     Get the bounds associated to a given range, and return it as a single array.
 
@@ -141,7 +143,7 @@ def bounds_for_range( data_pars, range ):
     :rtype: numpy.ndarray
     '''
     single_bounds = Registry()
-    multi_bounds  = Registry()
+    multi_bounds = Registry()
     for p in data_pars.values():
         r = p.get_range(range)
         if r.disjoint:
@@ -164,11 +166,11 @@ def bounds_for_range( data_pars, range ):
             elif p.name in multi_bounds:
                 mins[n], maxs[n] = multi_bounds[n].bounds.T
             else:
-                raise RuntimeError('Internal error detected; please report the bug')
+                raise RuntimeError(
+                    'Internal error detected; please report the bug')
 
         # Get all the combinations of minimum and maximum values for the bounds of each variable
         mmins = [m.flatten() for m in np.meshgrid(*[b for b in mins.values()])]
         mmaxs = [m.flatten() for m in np.meshgrid(*[b for b in maxs.values()])]
 
         return np.concatenate([np.array([mi, ma]).T for mi, ma in zip(mmins, mmaxs)], axis=1)
-

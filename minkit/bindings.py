@@ -7,7 +7,7 @@ import functools
 __all__ = []
 
 
-def bind_method_arguments( method, **binded_kwargs ):
+def bind_method_arguments(method, **binded_kwargs):
     '''
     Bind the arguments of a method so they are replace by those given.
 
@@ -18,10 +18,12 @@ def bind_method_arguments( method, **binded_kwargs ):
     :returns: wrapper function
     :rtype: function
     '''
-    method_pars = inspect.signature(method).parameters # ordered dictionary
+    method_pars = inspect.signature(method).parameters  # ordered dictionary
 
-    arg_names   = list(p.name for p in filter(lambda p: p.default == inspect.Parameter.empty, method_pars.values()))
-    kwarg_names = list(p.name for p in filter(lambda p: p.default != inspect.Parameter.empty, method_pars.values()))
+    arg_names = list(p.name for p in filter(
+        lambda p: p.default == inspect.Parameter.empty, method_pars.values()))
+    kwarg_names = list(p.name for p in filter(
+        lambda p: p.default != inspect.Parameter.empty, method_pars.values()))
 
     # Get the argument names that must be specified
     available_args = []
@@ -32,23 +34,26 @@ def bind_method_arguments( method, **binded_kwargs ):
             break
 
     # Keep only those arguments that are needed for the function call
-    replace_kwargs = {k: binded_kwargs[k] for k in filter(lambda s: s in method_pars, binded_kwargs)}
+    replace_kwargs = {k: binded_kwargs[k] for k in filter(
+        lambda s: s in method_pars, binded_kwargs)}
 
     @functools.wraps(method)
-    def __wrapper( self, *args, **kwargs ):
+    def __wrapper(self, *args, **kwargs):
         '''
         Internal wrapper to execute "method" checking the input arguments.
         '''
         # Check that the call is done with the same arguments
         for name, v in kwargs.items():
             if name in replace_kwargs and replace_kwargs[name] is not v:
-                raise ValueError(f'Positional argument "{name}" is being called with a different input value')
+                raise ValueError(
+                    f'Positional argument "{name}" is being called with a different input value')
 
         trueargs = []
         for name, arg in zip(method_pars, args):
             if name in replace_kwargs:
                 if replace_kwargs[name] is not arg:
-                    raise ValueError(f'Keyword argument "{name}" is being called with a different input value')
+                    raise ValueError(
+                        f'Keyword argument "{name}" is being called with a different input value')
             else:
                 trueargs.append(arg)
 
@@ -60,7 +65,7 @@ def bind_method_arguments( method, **binded_kwargs ):
     return __wrapper
 
 
-def bind_class_arguments( cls, **kwargs ):
+def bind_class_arguments(cls, **kwargs):
     '''
     Dinamically create a new class based on "cls", where all the methods are wrapped,
     so the input arguments are replaced (if they exist) by those in "kwargs".
@@ -74,11 +79,14 @@ def bind_class_arguments( cls, **kwargs ):
     :rtype: class
     '''
     class_members = inspect.getmembers(cls, predicate=inspect.ismethod)
-    name    = f'Bind{cls.__class__.__name__}'
+    name = f'Bind{cls.__class__.__name__}'
     parents = (object,)
-    members = {name: bind_method_arguments(method, **kwargs) for name, method in class_members if name not in ('__init__',)}
-    attributes = inspect.getmembers(cls, predicate=lambda a: not inspect.isroutine(a))
-    members.update({name: a for name, a in attributes if not name.startswith('__')})
+    members = {name: bind_method_arguments(
+        method, **kwargs) for name, method in class_members if name not in ('__init__',)}
+    attributes = inspect.getmembers(
+        cls, predicate=lambda a: not inspect.isroutine(a))
+    members.update(
+        {name: a for name, a in attributes if not name.startswith('__')})
     members['__enter__'] = lambda self, *args, **kwargs: self
     members['__exit__'] = lambda self, *args, **kwargs: self
     BindObject = type(name, parents, members)

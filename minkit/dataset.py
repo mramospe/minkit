@@ -11,7 +11,7 @@ import numpy as np
 __all__ = ['DataSet', 'BinnedDataSet']
 
 # Names of different data types
-BINNED   = 'binned'
+BINNED = 'binned'
 UNBINNED = 'unbinned'
 
 logger = logging.getLogger(__name__)
@@ -21,7 +21,8 @@ class DataSet(object):
     '''
     Definition of a set of data.
     '''
-    def __init__( self, data, pars, weights = None, copy = True ):
+
+    def __init__(self, data, pars, weights=None, copy=True):
         '''
         Build the class from a data sample which can be indexed as a dictionary, the data parameters and a possible set of weights.
 
@@ -32,16 +33,19 @@ class DataSet(object):
         :param weights: possible set of weights.
         :type weights: numpy.ndarray or None
         '''
-        self.__data = {p.name: core.array(data[p.name], copy=copy) for p in pars.values()}
+        self.__data = {p.name: core.array(
+            data[p.name], copy=copy) for p in pars.values()}
         self.__data_pars = pars
         self.__weights = weights if weights is None else core.array(weights)
 
         valid = None
         for p in pars.values():
             if p.bounds is None:
-                raise ValueError(f'Must define the bounds for data parameter "{p.name}"')
+                raise ValueError(
+                    f'Must define the bounds for data parameter "{p.name}"')
 
-            iv = core.logical_and(data[p.name] >= p.bounds[0], data[p.name] <= p.bounds[1])
+            iv = core.logical_and(
+                data[p.name] >= p.bounds[0], data[p.name] <= p.bounds[1])
 
             if valid is None:
                 valid = iv
@@ -59,7 +63,7 @@ class DataSet(object):
         for name, array in self.__data.items():
             self.__data[name] = array[valid]
 
-    def __getitem__( self, var ):
+    def __getitem__(self, var):
         '''
         Get the array of data for the given parameter.
 
@@ -68,7 +72,7 @@ class DataSet(object):
         '''
         return self.__data[var]
 
-    def __len__( self ):
+    def __len__(self):
         '''
         Get the size of the sample.
 
@@ -77,7 +81,7 @@ class DataSet(object):
         '''
         return len(self.__data[tuple(self.__data.keys())[0]])
 
-    def add( self, other, inplace = False ):
+    def add(self, other, inplace=False):
         '''
         Add a new data set to this one.
         If "inplace" is set to True, then the data is directly added to
@@ -97,7 +101,8 @@ class DataSet(object):
 
         if self.weights is not None:
             if other.weights is None:
-                raise RuntimeError('Attempt to merge samples with and without weihts')
+                raise RuntimeError(
+                    'Attempt to merge samples with and without weihts')
             weights = core.concatenate(self.weights, other.weights)
         else:
             weights = None
@@ -110,7 +115,7 @@ class DataSet(object):
             return self.__class__(dct, self.__data_pars, weights)
 
     @property
-    def data_pars( self ):
+    def data_pars(self):
         '''
         Get the data parameters associated to this sample.
 
@@ -120,7 +125,7 @@ class DataSet(object):
         return self.__data_pars
 
     @classmethod
-    def from_array( cls, arr, data_par, weights = None ):
+    def from_array(cls, arr, data_par, weights=None):
         '''
         Build the class from a single array.
 
@@ -134,7 +139,7 @@ class DataSet(object):
         return cls({data_par.name: core.array(arr)}, parameters.Registry([(data_par.name, data_par)]), weights)
 
     @classmethod
-    def from_records( cls, arr, data_pars, weights = None ):
+    def from_records(cls, arr, data_pars, weights=None):
         '''
         Build the class from a :class:`numpy.ndarray` object.
 
@@ -148,11 +153,12 @@ class DataSet(object):
         dct = {}
         for p in data_pars:
             if p not in arr.dtype.names:
-                raise RuntimeError(f'No data for parameter "{p.name}" has been found in the input array')
+                raise RuntimeError(
+                    f'No data for parameter "{p.name}" has been found in the input array')
             dct[p] = arr[p]
         return cls(dct, data_pars, weights=weights)
 
-    def shuffle( self, inplace = False ):
+    def shuffle(self, inplace=False):
         '''
         '''
         index = core.shuffling_index(len(self))
@@ -168,7 +174,7 @@ class DataSet(object):
         else:
             return self.subset(index)
 
-    def subset( self, cond = None, range = None, copy = True, rescale_weights = False ):
+    def subset(self, cond=None, range=None, copy=True, rescale_weights=False):
         '''
         Get a subset of this data set.
 
@@ -214,13 +220,14 @@ class DataSet(object):
         :returns: this object as a a :class:`numpy.ndarray` object.
         :rtype: numpy.ndarray
         '''
-        out = np.zeros(len(self), dtype=[(n, types.cpu_type) for n in self.__data])
+        out = np.zeros(len(self), dtype=[
+                       (n, types.cpu_type) for n in self.__data])
         for n, v in self.__data.items():
             out[n] = core.extract_ndarray(v)
         return out
 
     @property
-    def weights( self ):
+    def weights(self):
         '''
         Get the weights of the sample.
 
@@ -230,7 +237,7 @@ class DataSet(object):
         return self.__weights
 
     @weights.setter
-    def weights( self, weights ):
+    def weights(self, weights):
         '''
         Set the weights of the sample.
 
@@ -238,7 +245,8 @@ class DataSet(object):
         :type weights: numpy.ndarray
         '''
         if len(weights) != len(self):
-            raise ValueError('Length of the provided weights does not match that of the DataSet')
+            raise ValueError(
+                'Length of the provided weights does not match that of the DataSet')
         self.__weights = core.array(weights)
 
 
@@ -246,7 +254,8 @@ class BinnedDataSet(object):
     '''
     A binned data set.
     '''
-    def __init__( self, centers, data_pars, values ):
+
+    def __init__(self, centers, data_pars, values):
         '''
         A binned data set.
 
@@ -259,13 +268,14 @@ class BinnedDataSet(object):
         '''
         super(BinnedDataSet, self).__init__()
 
-        self.__centers = {name: core.array(arr) for name, arr in dict(centers).items()}
+        self.__centers = {name: core.array(arr)
+                          for name, arr in dict(centers).items()}
         self.__data_pars = data_pars
         self.__values = values
 
         assert centers.keys() == self.__centers.keys()
 
-    def __getitem__( self, var ):
+    def __getitem__(self, var):
         '''
         Get the centers of the bins for the given parameter.
 
@@ -274,7 +284,7 @@ class BinnedDataSet(object):
         '''
         return self.__centers[var]
 
-    def __len__( self ):
+    def __len__(self):
         '''
         Get the size of the sample.
 
@@ -284,7 +294,7 @@ class BinnedDataSet(object):
         return len(self.__centers[tuple(self.__centers.keys())[0]])
 
     @property
-    def data_pars( self ):
+    def data_pars(self):
         '''
         Get the data parameters of this sample.
 
@@ -294,7 +304,7 @@ class BinnedDataSet(object):
         return self.__data_pars
 
     @classmethod
-    def from_array( cls, centers, data_par, values ):
+    def from_array(cls, centers, data_par, values):
         '''
         Build the class from the array of centers and values.
 
@@ -310,7 +320,7 @@ class BinnedDataSet(object):
         return cls({data_par.name: core.array(centers)}, parameters.Registry([(data_par.name, data_par)]), values)
 
     @property
-    def values( self ):
+    def values(self):
         '''
         Get the values of the data set.
 
@@ -320,7 +330,7 @@ class BinnedDataSet(object):
         return self.__values
 
 
-def evaluation_grid( data_pars, bounds, size ):
+def evaluation_grid(data_pars, bounds, size):
     '''
     Create a grid of points to evaluate a :class:`PDF` object.
 
@@ -340,17 +350,19 @@ def evaluation_grid( data_pars, bounds, size ):
 
     if bounds.shape == (2,):
         assert len(data_pars) == 1
-        data = {tuple(data_pars.values())[0].name: core.linspace(*bounds, size)}
+        data = {tuple(data_pars.values())[
+            0].name: core.linspace(*bounds, size)}
     else:
         values = []
         for p, vmin, vmax in zip(data_pars.values(), bounds[0::2], bounds[1::2]):
             values.append(core.linspace(vmin, vmax, size))
-        data = {p.name: a for p, a in zip(data_pars.values(), core.meshgrid(*values))}
+        data = {p.name: a for p, a in zip(
+            data_pars.values(), core.meshgrid(*values))}
 
     return DataSet(data, data_pars, copy=False)
 
 
-def uniform_sample( data_pars, bounds, size ):
+def uniform_sample(data_pars, bounds, size):
     '''
     Generate a sample following an uniform distribution in all data parameters.
 

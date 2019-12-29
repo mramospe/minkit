@@ -27,7 +27,7 @@ PDF_REGISTRY = {}
 logger = logging.getLogger(__name__)
 
 
-def register_pdf( cl ):
+def register_pdf(cl):
     '''
     Decorator to register PDF classes in the PDF_REGISTRY registry.
 
@@ -41,7 +41,7 @@ def register_pdf( cl ):
     return cl
 
 
-def process_cache( cache, method, self, args, kwargs ):
+def process_cache(cache, method, self, args, kwargs):
     '''
     Update a cache (as a dictionary) by evaluating the given method.
 
@@ -66,7 +66,7 @@ def process_cache( cache, method, self, args, kwargs ):
     return v
 
 
-def allows_bind_cache( method ):
+def allows_bind_cache(method):
     '''
     Wrap the method of a class.
 
@@ -76,7 +76,7 @@ def allows_bind_cache( method ):
     :rtype: function
     '''
     @functools.wraps(method)
-    def __wrapper( self, *args, **kwargs ):
+    def __wrapper(self, *args, **kwargs):
         '''
         Internal wrapper.
         '''
@@ -87,7 +87,7 @@ def allows_bind_cache( method ):
     return __wrapper
 
 
-def allows_const_cache( method ):
+def allows_const_cache(method):
     '''
     Wrap the method of a class, using a cache if the class is marked as constant.
 
@@ -97,7 +97,7 @@ def allows_const_cache( method ):
     :rtype: function
     '''
     @functools.wraps(method)
-    def __wrapper( self, *args, **kwargs ):
+    def __wrapper(self, *args, **kwargs):
         '''
         Internal wrapper.
         '''
@@ -108,7 +108,7 @@ def allows_const_cache( method ):
     return __wrapper
 
 
-def allows_bind_or_const_cache( method ):
+def allows_bind_or_const_cache(method):
     '''
     Wrap the method of a class, using a cache if the class is marked as constant.
 
@@ -118,7 +118,7 @@ def allows_bind_or_const_cache( method ):
     :rtype: function
     '''
     @functools.wraps(method)
-    def __wrapper( self, *args, **kwargs ):
+    def __wrapper(self, *args, **kwargs):
         '''
         Internal wrapper.
         '''
@@ -134,12 +134,12 @@ class PDF(object):
     Object defining the properties of a PDF.
     '''
     # Cache types
-    BIND  = 'bind'
+    BIND = 'bind'
     CONST = 'const'
 
     CACHE_TYPES = (BIND, CONST)
 
-    def __init__( self, name, data_pars, args_pars ):
+    def __init__(self, name, data_pars, args_pars):
         '''
         Build the class from a name, a set of data parameters and argument parameters.
         The first correspond to those that must be present on any :class:`DataSet` or
@@ -153,19 +153,19 @@ class PDF(object):
         :param arg_pars: argument parameters.
         :type arg_pars: Registry(str, Parameter)
         '''
-        self.name        = name
+        self.name = name
         self.__data_pars = data_pars
-        self.__arg_pars  = args_pars
-        self.norm_size   = NORM_SIZE
+        self.__arg_pars = args_pars
+        self.norm_size = NORM_SIZE
 
         # The cache is saved on a dictionary, and inherited classes must avoid colliding names
-        self.__cache      = None
+        self.__cache = None
         self.__cache_type = None
 
         super(PDF, self).__init__()
 
     @allows_const_cache
-    def __call__( self, data, values = None, range = parameters.FULL, normalized = True ):
+    def __call__(self, data, values=None, range=parameters.FULL, normalized=True):
         '''
         Call the PDF in the given set of data.
 
@@ -178,10 +178,11 @@ class PDF(object):
         :param normalized: whether to return a normalized output.
         :type normalized: bool
         '''
-        raise NotImplementedError('Classes inheriting from "pyfit.PDF" must define the "__call__" operator')
+        raise NotImplementedError(
+            'Classes inheriting from "minkit.PDF" must define the "__call__" operator')
 
     @classmethod
-    def from_json_object( cls, obj ):
+    def from_json_object(cls, obj):
         '''
         Build a PDF from a JSON object.
         This object must represent the internal structure of the PDF.
@@ -193,13 +194,15 @@ class PDF(object):
         '''
         class_name = obj['class']
         if class_name == 'PDF':
-            raise NotImplementedError('Classes inheriting from "pyfit.PDF" must define the "to_json_object" method')
+            raise NotImplementedError(
+                'Classes inheriting from "minkit.PDF" must define the "to_json_object" method')
         cl = PDF_REGISTRY.get(class_name, None)
         if cl is None:
-            raise RuntimeError(f'Class "{class_name}" does not appear in the registry')
-        return cl.from_json_object(obj) # Use the correct constructor
+            raise RuntimeError(
+                f'Class "{class_name}" does not appear in the registry')
+        return cl.from_json_object(obj)  # Use the correct constructor
 
-    def _generate_single_bounds( self, size, mapsize, gensize, safe_factor, bounds, values ):
+    def _generate_single_bounds(self, size, mapsize, gensize, safe_factor, bounds, values):
         '''
         Generate data in a single range given the bounds of the different data parameters.
 
@@ -223,7 +226,8 @@ class PDF(object):
         '''
         grid = dataset.evaluation_grid(self.data_pars, bounds, mapsize)
 
-        m = safe_factor * core.max(self.__call__(grid, values, normalized=False))
+        m = safe_factor * \
+            core.max(self.__call__(grid, values, normalized=False))
 
         result = None
 
@@ -240,7 +244,7 @@ class PDF(object):
 
         return result.subset(slice(size))
 
-    def _integral_bin_area( self, bounds, size ):
+    def _integral_bin_area(self, bounds, size):
         '''
         Calculate the area of a bin used to calculate the numerical normalization.
 
@@ -251,7 +255,7 @@ class PDF(object):
         '''
         return np.prod(bounds[1::2] - bounds[0::2]) * 1. / size
 
-    def _integral_single_bounds( self, bounds, range, values ):
+    def _integral_single_bounds(self, bounds, range, values):
         '''
         Calculate the integral of the PDF on a single set of bounds.
 
@@ -269,7 +273,7 @@ class PDF(object):
         i = self.__call__(g, values, range=range)
         return core.sum(i) * a
 
-    def _numerical_normalization_single_bounds( self, bounds, values ):
+    def _numerical_normalization_single_bounds(self, bounds, values):
         '''
         Calculate the normalization value for a set of bounds.
 
@@ -285,7 +289,7 @@ class PDF(object):
         i = self.__call__(g, values, normalized=False)
         return core.sum(i) * a
 
-    def _process_values( self, values = None ):
+    def _process_values(self, values=None):
         '''
         Process the input values.
         If "values" is set to None, then the values from the argument 
@@ -307,7 +311,7 @@ class PDF(object):
             return tuple(parsed_values)
 
     @property
-    def all_args( self ):
+    def all_args(self):
         '''
         Get all the argument parameters associated to this class.
         If this object is composed by many :class:`PDF`, a recursion is done in order
@@ -319,7 +323,7 @@ class PDF(object):
         return self.args
 
     @property
-    def args( self ):
+    def args(self):
         '''
         Get the argument parameters this object directly depends on.
 
@@ -329,7 +333,7 @@ class PDF(object):
         return self.__arg_pars
 
     @property
-    def cache( self ):
+    def cache(self):
         '''
         Return the cached values for this PDF.
 
@@ -339,7 +343,7 @@ class PDF(object):
         return self.__cache
 
     @property
-    def cache_type( self ):
+    def cache_type(self):
         '''
         Get whether there are elements in the cache or not.
 
@@ -349,7 +353,7 @@ class PDF(object):
         return self.__cache_type
 
     @property
-    def constant( self ):
+    def constant(self):
         '''
         Get whether this is a constant :class:`PDF`.
 
@@ -359,7 +363,7 @@ class PDF(object):
         return all(p.constant for p in self.all_args.values())
 
     @property
-    def data_pars( self ):
+    def data_pars(self):
         '''
         Get the data parameters this object directly depends on.
 
@@ -369,7 +373,7 @@ class PDF(object):
         return self.__data_pars
 
     @contextlib.contextmanager
-    def bind( self, values = None, range = parameters.FULL, normalized = True ):
+    def bind(self, values=None, range=parameters.FULL, normalized=True):
         '''
         Prepare an object that will be called many times with the same set of
         values.
@@ -387,7 +391,7 @@ class PDF(object):
         yield bindings.bind_class_arguments(self, values=values, range=range, normalized=normalized)
         self.free_cache()
 
-    def enable_cache( self, ctype ):
+    def enable_cache(self, ctype):
         '''
         Method to enable the cache for values of this PDF.
 
@@ -398,21 +402,22 @@ class PDF(object):
         it can turn really harmful if not handled properly.
         '''
         if ctype not in PDF.CACHE_TYPES:
-            raise ValueError(f'Unknown cache type "{ctype}"; select from: {PDF.CACHE_TYPES}')
-        self.__cache      = {}
+            raise ValueError(
+                f'Unknown cache type "{ctype}"; select from: {PDF.CACHE_TYPES}')
+        self.__cache = {}
         self.__cache_type = ctype
 
-    def free_cache( self ):
+    def free_cache(self):
         '''
         Free the cache from memory.
 
         .. warning:: This method is not meant to be utilized by users since \
         it can turn really harmful if not handled properly.
         '''
-        self.__cache      = None
+        self.__cache = None
         self.__cache_type = None
 
-    def generate( self, size = 10000, values = None, mapsize = 100, gensize = 10000, safe_factor = 1.1, range = parameters.FULL ):
+    def generate(self, size=10000, values=None, mapsize=100, gensize=10000, safe_factor=1.1, range=parameters.FULL):
         '''
         Generate random data.
         A call to :method:`PDF.bind` is implicit, since several calls will be done
@@ -440,25 +445,29 @@ class PDF(object):
 
             bounds = parameters.bounds_for_range(proxy.data_pars, range)
             if len(bounds.shape) == 1:
-                result = proxy._generate_single_bounds(size, mapsize, gensize, safe_factor, bounds, values)
+                result = proxy._generate_single_bounds(
+                    size, mapsize, gensize, safe_factor, bounds, values)
             else:
                 # Get the associated number of entries per bounds
                 fracs = []
-                for b in bounds[:-1]: # The last does not need to be calculated
-                    fracs.append(self._integral_single_bounds(b, range, values))
+                for b in bounds[:-1]:  # The last does not need to be calculated
+                    fracs.append(
+                        self._integral_single_bounds(b, range, values))
 
                 u = core.random_uniform(0, 1, size)
 
                 entries = []
                 for f in fracs:
                     entries.append(core.sum(u < f))
-                entries.append(size - np.sum(entries)) # The last is calculated from the required number of entries
+                # The last is calculated from the required number of entries
+                entries.append(size - np.sum(entries))
 
                 # Iterate over the bounds and add data accordingly
                 result = None
                 for e, b in zip(entries, bounds):
 
-                    new = proxy._generate_single_bounds(e, mapsize, gensize, safe_factor, b, values)
+                    new = proxy._generate_single_bounds(
+                        e, mapsize, gensize, safe_factor, b, values)
 
                     if result is None:
                         result = new
@@ -470,7 +479,7 @@ class PDF(object):
 
             return result
 
-    def integral( self, values = None, integral_range = parameters.FULL, range = parameters.FULL ):
+    def integral(self, values=None, integral_range=parameters.FULL, range=parameters.FULL):
         '''
         Calculate the integral of a :class:`PDF`.
 
@@ -490,7 +499,7 @@ class PDF(object):
             return np.sum(np.fromiter((self._integral_single_bounds(b, range, values) for b in bounds), dtype=types.cpu_type))
 
     @allows_bind_or_const_cache
-    def norm( self, values = None, range = parameters.FULL ):
+    def norm(self, values=None, range=parameters.FULL):
         '''
         Calculate the normalization of the PDF.
 
@@ -501,10 +510,11 @@ class PDF(object):
         :returns: value of the normalization.
         :rtype: float
         '''
-        raise NotImplementedError('Classes inheriting from "pyfit.PDF" must define the "norm" method')
+        raise NotImplementedError(
+            'Classes inheriting from "minkit.PDF" must define the "norm" method')
 
     @allows_bind_or_const_cache
-    def numerical_normalization( self, values = None, range = parameters.FULL ):
+    def numerical_normalization(self, values=None, range=parameters.FULL):
         '''
         Calculate a numerical normalization.
 
@@ -521,7 +531,7 @@ class PDF(object):
         else:
             return np.sum(np.fromiter((self._numerical_normalization_single_bounds(b, values) for b in bounds), dtype=types.cpu_type))
 
-    def to_json_object( self ):
+    def to_json_object(self):
         '''
         Dump the PDF information into a JSON object.
         The PDF can be constructed at any time by calling :method:`PDF.from_json_object`.
@@ -529,14 +539,16 @@ class PDF(object):
         :returns: object that can be saved into a JSON file.
         :rtype: dict
         '''
-        raise NotImplementedError('Classes inheriting from "pyfit.PDF" must define the "to_json_object" method')
+        raise NotImplementedError(
+            'Classes inheriting from "minkit.PDF" must define the "to_json_object" method')
 
 
 class SourcePDF(PDF):
     '''
     A PDF created from source files.
     '''
-    def __init__( self, name, function, pdf, normalization, data_pars, arg_pars = None, var_arg_pars = None ):
+
+    def __init__(self, name, function, pdf, normalization, data_pars, arg_pars=None, var_arg_pars=None):
         '''
         This object defines a PDF built from source files (C++, PyOpenCL or CUDA), which depend
         on the backend to use.
@@ -566,13 +578,14 @@ class SourcePDF(PDF):
             self.__var_args = None
 
         self.__function = function
-        self.__pdf      = pdf
-        self.__norm     = normalization
+        self.__pdf = pdf
+        self.__norm = normalization
 
-        super(SourcePDF, self).__init__(name, parameters.Registry.from_list(data_pars), parameters.Registry.from_list(arg_pars + var_arg_pars))
+        super(SourcePDF, self).__init__(name, parameters.Registry.from_list(
+            data_pars), parameters.Registry.from_list(arg_pars + var_arg_pars))
 
     @allows_const_cache
-    def __call__( self, data, values = None, range = parameters.FULL, normalized = True ):
+    def __call__(self, data, values=None, range=parameters.FULL, normalized=True):
         '''
         Call the PDF in the given set of data.
 
@@ -609,7 +622,8 @@ class SourcePDF(PDF):
                 if len(nr.shape) == 1:
                     n = self.__norm(*fvals, *nr)
                 else:
-                    n = np.sum(np.fromiter((self.__norm(*fvals, *inr) for inr in nr), dtype=types.cpu_type))
+                    n = np.sum(np.fromiter((self.__norm(*fvals, *inr)
+                                            for inr in nr), dtype=types.cpu_type))
                 return out / n
             else:
                 # Must use a numerical normalization
@@ -618,7 +632,7 @@ class SourcePDF(PDF):
             return out
 
     @classmethod
-    def from_json_object( cls, obj ):
+    def from_json_object(cls, obj):
         '''
         Build a PDF from a JSON object.
         This object must represent the internal structure of the PDF.
@@ -629,14 +643,17 @@ class SourcePDF(PDF):
         :rtype: PDF
         '''
         if cls.__name__ == 'SourcePDF':
-            raise NotImplementedError('SourcePDF is an abstract class; do not use it directly')
+            raise NotImplementedError(
+                'SourcePDF is an abstract class; do not use it directly')
 
-        data_pars = list(map(parameters.Parameter.from_json_object, obj['data_pars']))
-        arg_pars  = list(map(parameters.Parameter.from_json_object, obj['arg_pars']))
+        data_pars = list(
+            map(parameters.Parameter.from_json_object, obj['data_pars']))
+        arg_pars = list(
+            map(parameters.Parameter.from_json_object, obj['arg_pars']))
 
         return cls(obj['name'], *data_pars, *arg_pars)
 
-    def function( self, *data_values, values = None, range = parameters.FULL, normalized = True ):
+    def function(self, *data_values, values=None, range=parameters.FULL, normalized=True):
         '''
         Evaluate the function, where the data values are provided by the user as single numbers.
 
@@ -658,13 +675,14 @@ class SourcePDF(PDF):
             if len(nr.shape) == 1:
                 n = self.__norm(*fvals, *nr)
             else:
-                n = np.sum(np.fromiter((self.__norm(*fvals, *inr) for inr in nr), dtype=types.cpu_type))
+                n = np.sum(np.fromiter((self.__norm(*fvals, *inr)
+                                        for inr in nr), dtype=types.cpu_type))
             return v / n
         else:
             return v
 
     @allows_bind_or_const_cache
-    def norm( self, values = None, range = parameters.FULL ):
+    def norm(self, values=None, range=parameters.FULL):
         '''
         Calculate the normalization of the PDF.
         If the normalization is not defined in the source file, then a
@@ -687,7 +705,7 @@ class SourcePDF(PDF):
         else:
             return self.numerical_normalization(values, range)
 
-    def to_json_object( self ):
+    def to_json_object(self):
         '''
         Dump the PDF information into a JSON object.
         The PDF can be constructed at any time by calling :method:`PDF.from_json_object`.
@@ -695,18 +713,18 @@ class SourcePDF(PDF):
         :returns: object that can be saved into a JSON file.
         :rtype: dict
         '''
-        return {'class': self.__class__.__name__, # Save also the class name of the PDF
+        return {'class': self.__class__.__name__,  # Save also the class name of the PDF
                 'name': self.name,
                 'data_pars': [p.to_json_object() for p in self.data_pars.values()],
                 'arg_pars': list(map(parameters.Parameter.to_json_object, self.args.values()))}
-
 
 
 class MultiPDF(PDF):
     '''
     Base class for subclasses managing multiple PDFs.
     '''
-    def __init__( self, name, pdfs, arg_pars = None ):
+
+    def __init__(self, name, pdfs, arg_pars=None):
         '''
         Base class owing many PDFs.
 
@@ -731,7 +749,7 @@ class MultiPDF(PDF):
         super(MultiPDF, self).__init__(name, data_pars, arg_pars)
 
     @property
-    def all_args( self ):
+    def all_args(self):
         '''
         Get all the argument parameters associated to this class.
         If this object is composed by many :class:`PDF`, a recursion is done in order
@@ -746,7 +764,7 @@ class MultiPDF(PDF):
         return args
 
     @property
-    def pdfs( self ):
+    def pdfs(self):
         '''
         Get the registry of PDFs within this class.
 
@@ -756,7 +774,7 @@ class MultiPDF(PDF):
         return self.__pdfs
 
     @contextlib.contextmanager
-    def bind( self, values = None, range = parameters.FULL, normalized = True ):
+    def bind(self, values=None, range=parameters.FULL, normalized=True):
         '''
         Prepare an object that will be called many times with the same set of
         values.
@@ -777,7 +795,7 @@ class MultiPDF(PDF):
         for pdf in self.pdfs.values():
             pdf.free_cache()
 
-    def component( self, name ):
+    def component(self, name):
         '''
         Get the :class:`PDF` object with the given name.
 
@@ -791,7 +809,7 @@ class MultiPDF(PDF):
                 return pdf
         raise LookupError(f'No PDF with name "{name}" hass been found')
 
-    def enable_cache( self, ctype ):
+    def enable_cache(self, ctype):
         '''
         Method to enable the cache for values of this PDF.
 
@@ -805,7 +823,7 @@ class MultiPDF(PDF):
         for pdf in self.pdfs.values():
             pdf.enable_cache(ctype)
 
-    def free_cache( self ):
+    def free_cache(self):
         '''
         Free the cache from memory.
 
@@ -822,7 +840,8 @@ class AddPDFs(MultiPDF):
     '''
     Definition of the addition of many PDFs.
     '''
-    def __init__( self, name, pdfs, yields ):
+
+    def __init__(self, name, pdfs, yields):
         '''
         This special PDF defines the sum of many different PDFs, where each
         of them is multiplied by a factor.
@@ -843,7 +862,7 @@ class AddPDFs(MultiPDF):
         super(AddPDFs, self).__init__(name, pdfs, yields)
 
     @allows_const_cache
-    def __call__( self, data, values = None, range = parameters.FULL, normalized = True ):
+    def __call__(self, data, values=None, range=parameters.FULL, normalized=True):
         '''
         Call the PDF in the given set of data.
 
@@ -871,7 +890,7 @@ class AddPDFs(MultiPDF):
             return out
 
     @classmethod
-    def from_json_object( cls, obj ):
+    def from_json_object(cls, obj):
         '''
         Build a PDF from a JSON object.
         This object must represent the internal structure of the PDF.
@@ -881,12 +900,13 @@ class AddPDFs(MultiPDF):
         :returns: newly constructed PDF and parameters.
         :rtype: PDF
         '''
-        pdfs   = list(map(PDF.from_json_object, obj['pdfs']))
-        yields = list(map(parameters.Parameter.from_json_object, obj['yields']))
+        pdfs = list(map(PDF.from_json_object, obj['pdfs']))
+        yields = list(
+            map(parameters.Parameter.from_json_object, obj['yields']))
         return cls(obj['name'], pdfs, yields)
 
     @classmethod
-    def two_components( cls, name, first, second, yf, ys = None ):
+    def two_components(cls, name, first, second, yf, ys=None):
         '''
         Build the class from two components.
 
@@ -908,7 +928,7 @@ class AddPDFs(MultiPDF):
         return cls(name, [first, second], [yf] if ys is None else [yf, ys])
 
     @property
-    def extended( self ):
+    def extended(self):
         '''
         Get whether this PDF is of "extended" type.
 
@@ -918,7 +938,7 @@ class AddPDFs(MultiPDF):
         return len(self.pdfs) == len(self.args)
 
     @allows_bind_or_const_cache
-    def norm( self, values = None, range = parameters.FULL ):
+    def norm(self, values=None, range=parameters.FULL):
         '''
         Calculate the normalization of the PDF.
 
@@ -936,7 +956,7 @@ class AddPDFs(MultiPDF):
             # A non-extended PDF is always normalized
             return 1.
 
-    def to_json_object( self ):
+    def to_json_object(self):
         '''
         Dump the PDF information into a JSON object.
         The PDF can be constructed at any time by calling :method:`PDF.from_json_object`.
@@ -944,7 +964,7 @@ class AddPDFs(MultiPDF):
         :returns: object that can be saved into a JSON file.
         :rtype: dict
         '''
-        return {'class': self.__class__.__name__, # Save also the class name of the PDF
+        return {'class': self.__class__.__name__,  # Save also the class name of the PDF
                 'name': self.name,
                 'pdfs': [p.to_json_object() for p in self.pdfs.values()],
                 'yields': list(map(parameters.Parameter.to_json_object, self.args.values()))}
@@ -955,7 +975,8 @@ class ConvPDFs(MultiPDF):
     '''
     Definition of a convolution of two PDFs.
     '''
-    def __init__( self, name, first, second, range = None ):
+
+    def __init__(self, name, first, second, range=None):
         '''
         Represent the convolution of two different PDFs.
 
@@ -969,7 +990,8 @@ class ConvPDFs(MultiPDF):
         PDFs lie outside the evaluation range. It is set to "full" by default.
         :type range: str
         '''
-        error = ValueError(f'Convolution is only supported in 1-dimensional PDFs')
+        error = ValueError(
+            f'Convolution is only supported in 1-dimensional PDFs')
         if len(first.data_pars) != 1:
             raise error
 
@@ -983,7 +1005,7 @@ class ConvPDFs(MultiPDF):
         super(ConvPDFs, self).__init__(name, [first, second])
 
     @allows_const_cache
-    def __call__( self, data, values = None, range = parameters.FULL, normalized = True ):
+    def __call__(self, data, values=None, range=parameters.FULL, normalized=True):
         '''
         Call the PDF in the given set of data.
 
@@ -1005,7 +1027,7 @@ class ConvPDFs(MultiPDF):
         return pdf_values
 
     @classmethod
-    def from_json_object( cls, obj ):
+    def from_json_object(cls, obj):
         '''
         Build a PDF from a JSON object.
         This object must represent the internal structure of the PDF.
@@ -1015,12 +1037,12 @@ class ConvPDFs(MultiPDF):
         :returns: newly constructed PDF and parameters.
         :rtype: PDF
         '''
-        first  = PDF.from_json_object(obj['first'])
+        first = PDF.from_json_object(obj['first'])
         second = PDF.from_json_object(obj['second'])
         return cls(obj['name'], first, second, obj['range'])
 
     @allows_bind_or_const_cache
-    def convolve( self, values = None, range = parameters.FULL, normalized = True ):
+    def convolve(self, values=None, range=parameters.FULL, normalized=True):
         '''
         Calculate the convolution.
 
@@ -1038,12 +1060,14 @@ class ConvPDFs(MultiPDF):
         bounds = parameters.bounds_for_range(first.data_pars, self.range)
 
         if bounds.shape != (2,):
-            raise RuntimeError(f'The convolution bounds must not be disjointed')
+            raise RuntimeError(
+                f'The convolution bounds must not be disjointed')
 
         # Only works for the 1-dimensional case
         par = tuple(first.data_pars.values())[0]
 
-        grid = dataset.evaluation_grid(first.data_pars, bounds, size=self.conv_size)
+        grid = dataset.evaluation_grid(
+            first.data_pars, bounds, size=self.conv_size)
 
         fv = first(grid, values, range, normalized)
         sv = second(grid, values, range, normalized)
@@ -1051,7 +1075,7 @@ class ConvPDFs(MultiPDF):
         return grid[par.name], core.fftconvolve(fv, sv, grid[par.name]).real
 
     @allows_bind_or_const_cache
-    def norm( self, values = None, range = parameters.FULL ):
+    def norm(self, values=None, range=parameters.FULL):
         '''
         Calculate the normalization of the PDF.
         In this case, a numerical normalization is used, so the effect
@@ -1067,7 +1091,7 @@ class ConvPDFs(MultiPDF):
         return self.numerical_normalization(values, range)
 
     @allows_bind_or_const_cache
-    def numerical_normalization( self, values = None, range = parameters.FULL ):
+    def numerical_normalization(self, values=None, range=parameters.FULL):
         '''
         Calculate a numerical normalization.
 
@@ -1081,7 +1105,7 @@ class ConvPDFs(MultiPDF):
         # A convolutions is always normalized
         return 1.
 
-    def to_json_object( self ):
+    def to_json_object(self):
         '''
         Dump the PDF information into a JSON object.
         The PDF can be constructed at any time by calling :method:`PDF.from_json_object`.
@@ -1090,7 +1114,7 @@ class ConvPDFs(MultiPDF):
         :rtype: dict
         '''
         first, second = self.pdfs.values()
-        return {'class': self.__class__.__name__, # Save also the class name of the PDF
+        return {'class': self.__class__.__name__,  # Save also the class name of the PDF
                 'name': self.name,
                 'first': first.to_json_object(),
                 'second': second.to_json_object(),
@@ -1102,7 +1126,8 @@ class ProdPDFs(MultiPDF):
     '''
     Definition of the product of two different PDFs with different data parameters.
     '''
-    def __init__( self, name, pdfs ):
+
+    def __init__(self, name, pdfs):
         '''
         This object represents the product of many PDFs where the data parameters are
         not shared among them.
@@ -1115,7 +1140,7 @@ class ProdPDFs(MultiPDF):
         super(ProdPDFs, self).__init__(name, pdfs, [])
 
     @allows_const_cache
-    def __call__( self, data, values = None, range = parameters.FULL, normalized = True ):
+    def __call__(self, data, values=None, range=parameters.FULL, normalized=True):
         '''
         Call the PDF in the given set of data.
 
@@ -1135,7 +1160,7 @@ class ProdPDFs(MultiPDF):
         return out
 
     @classmethod
-    def from_json_object( cls, obj ):
+    def from_json_object(cls, obj):
         '''
         Build a PDF from a JSON object.
         This object must represent the internal structure of the PDF.
@@ -1149,7 +1174,7 @@ class ProdPDFs(MultiPDF):
         return cls(obj['name'], pdfs)
 
     @allows_bind_or_const_cache
-    def norm( self, values = None, range = parameters.FULL ):
+    def norm(self, values=None, range=parameters.FULL):
         '''
         Calculate the normalization of the PDF.
 
@@ -1166,7 +1191,7 @@ class ProdPDFs(MultiPDF):
         return n
 
     @allows_bind_or_const_cache
-    def numerical_normalization( self, values = None, range = parameters.FULL ):
+    def numerical_normalization(self, values=None, range=parameters.FULL):
         '''
         Calculate a numerical normalization.
 
@@ -1179,7 +1204,7 @@ class ProdPDFs(MultiPDF):
         '''
         return np.prod(np.fromiter((pdf.numerical_normalization(values, range) for pdf in self.pdfs.values()), dtype=types.cpu_type))
 
-    def to_json_object( self ):
+    def to_json_object(self):
         '''
         Dump the PDF information into a JSON object.
         The PDF can be constructed at any time by calling :method:`PDF.from_json_object`.
@@ -1187,6 +1212,6 @@ class ProdPDFs(MultiPDF):
         :returns: object that can be saved into a JSON file.
         :rtype: dict
         '''
-        return {'class': self.__class__.__name__, # Save also the class name of the PDF
+        return {'class': self.__class__.__name__,  # Save also the class name of the PDF
                 'name': self.name,
                 'pdfs': [p.to_json_object() for p in self.pdfs.values()]}

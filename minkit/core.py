@@ -8,7 +8,8 @@ import os
 
 from . import types
 
-__all__ = ['array', 'extract_ndarray', 'initialize', 'random_uniform', 'zeros', 'max', 'min', 'concatenate', 'linspace', 'shuffling_index']
+__all__ = ['array', 'extract_ndarray', 'initialize', 'random_uniform',
+           'zeros', 'max', 'min', 'concatenate', 'linspace', 'shuffling_index']
 
 # Current backend
 BACKEND = None
@@ -20,12 +21,13 @@ OPENCL = 'opencl'
 # CUDA backend
 CUDA = 'cuda'
 
-NOT_IMPLEMENTED = NotImplementedError(f'Function not implemented for backend "{BACKEND}"')
+NOT_IMPLEMENTED = NotImplementedError(
+    f'Function not implemented for backend "{BACKEND}"')
 
 logger = logging.getLogger(__name__)
 
 
-def calling_base_class_method( method ):
+def calling_base_class_method(method):
     '''
     Decorator to always call a base class method.
     The execution will take place before the call to the derived class method.
@@ -35,7 +37,8 @@ def calling_base_class_method( method ):
     :returns: wrapper
     :rtype: function
     '''
-    def __wrapper( self, *args, **kwargs ):
+
+    def __wrapper(self, *args, **kwargs):
         '''
         Internal wrapper.
         '''
@@ -44,25 +47,26 @@ def calling_base_class_method( method ):
     return __wrapper
 
 
-def with_backend( func ):
+def with_backend(func):
     '''
     Check whether a backend has been defined and raise an error if not.
 
     :raises RuntimeError: if a backend is not set.
     '''
     @functools.wraps(func)
-    def __wrapper( *args, **kwargs ):
+    def __wrapper(*args, **kwargs):
         '''
         Internal wrapper around the decorated function.
         '''
         if BACKEND is None:
-            raise RuntimeError(f'A backend must be specified before a call to "{func.__name__}"')
+            raise RuntimeError(
+                f'A backend must be specified before a call to "{func.__name__}"')
         return func(*args, **kwargs)
     return __wrapper
 
 
 @with_backend
-def array( *args, **kwargs ):
+def array(*args, **kwargs):
     '''
     Create an array using the current backend.
     Arguments are directly forwarded to the constructor.
@@ -77,7 +81,7 @@ def array( *args, **kwargs ):
 
 
 @with_backend
-def extract_ndarray( obj ):
+def extract_ndarray(obj):
     '''
     Get an :class:`numpy.ndarray` class from the input object.
 
@@ -92,7 +96,7 @@ def extract_ndarray( obj ):
         raise NOT_IMPLEMENTED
 
 
-def initialize( backend = CPU, interactive = False ):
+def initialize(backend=CPU, interactive=False):
     '''
     Initialize the package, setting the backend and determining what packages to
     use accordingly.
@@ -100,13 +104,14 @@ def initialize( backend = CPU, interactive = False ):
     global BACKEND
 
     if BACKEND is not None:
-        logger.error(f'Unable to set backend to "{backend}"; already set ({BACKEND})')
+        logger.error(
+            f'Unable to set backend to "{backend}"; already set ({BACKEND})')
         return
 
     BACKEND = backend
 
 
-def linspace( vmin, vmax, size ):
+def linspace(vmin, vmax, size):
     '''
     '''
     if BACKEND == CPU:
@@ -115,7 +120,7 @@ def linspace( vmin, vmax, size ):
         raise NOT_IMPLEMENTED
 
 
-def meshgrid( *arrays ):
+def meshgrid(*arrays):
     '''
     '''
     if BACKEND == CPU:
@@ -125,7 +130,7 @@ def meshgrid( *arrays ):
 
 
 @with_backend
-def concatenate( *arrs ):
+def concatenate(*arrs):
     '''
     '''
     if BACKEND == CPU:
@@ -135,7 +140,7 @@ def concatenate( *arrs ):
 
 
 @with_backend
-def random_uniform( vmin, vmax, size ):
+def random_uniform(vmin, vmax, size):
     '''
     Create data following an uniform distribution between 0 and 1, with size "size".
 
@@ -151,7 +156,7 @@ def random_uniform( vmin, vmax, size ):
 
 
 @with_backend
-def log( array ):
+def log(array):
     '''
     '''
     if BACKEND is CPU:
@@ -161,7 +166,7 @@ def log( array ):
 
 
 @with_backend
-def sum( array ):
+def sum(array):
     '''
     '''
     if BACKEND is CPU:
@@ -171,7 +176,7 @@ def sum( array ):
 
 
 @with_backend
-def max( arr ):
+def max(arr):
     '''
     '''
     if BACKEND == CPU:
@@ -181,7 +186,7 @@ def max( arr ):
 
 
 @with_backend
-def min( arr ):
+def min(arr):
     '''
     '''
     if BACKEND == CPU:
@@ -191,7 +196,7 @@ def min( arr ):
 
 
 @with_backend
-def arange( *args, **kwargs ):
+def arange(*args, **kwargs):
     '''
     '''
     if BACKEND == CPU:
@@ -201,7 +206,7 @@ def arange( *args, **kwargs ):
 
 
 @with_backend
-def ones( *args, dtype=types.cpu_type, **kwargs ):
+def ones(*args, dtype=types.cpu_type, **kwargs):
     '''
     Create an array filled with ones using the current backend.
     Arguments are directly forwarded to the constructor.
@@ -216,7 +221,7 @@ def ones( *args, dtype=types.cpu_type, **kwargs ):
 
 
 @with_backend
-def zeros( *args, dtype=types.cpu_type, **kwargs ):
+def zeros(*args, dtype=types.cpu_type, **kwargs):
     '''
     Create an array filled with zeros using the current backend.
     Arguments are directly forwarded to the constructor.
@@ -231,7 +236,7 @@ def zeros( *args, dtype=types.cpu_type, **kwargs ):
 
 
 @with_backend
-def logical_and( a, b ):
+def logical_and(a, b):
     '''
     Do the logical "and" operation between two arrays.
     '''
@@ -242,7 +247,7 @@ def logical_and( a, b ):
 
 
 @with_backend
-def logical_or( a, b ):
+def logical_or(a, b):
     '''
     Do the logical "or" operation between two arrays.
     '''
@@ -253,7 +258,7 @@ def logical_or( a, b ):
 
 
 @with_backend
-def fft( a ):
+def fft(a):
     '''
     Calculate the fast-Fourier transform of an array.
     '''
@@ -264,7 +269,7 @@ def fft( a ):
 
 
 @with_backend
-def ifft( a ):
+def ifft(a):
     '''
     Calculate the fast-Fourier transform of an array.
     '''
@@ -275,7 +280,7 @@ def ifft( a ):
 
 
 @with_backend
-def interpolate_linear( x, xp, yp):
+def interpolate_linear(x, xp, yp):
     '''
     '''
     if BACKEND == CPU:
@@ -284,7 +289,7 @@ def interpolate_linear( x, xp, yp):
         raise NOT_IMPLEMENTED
 
 
-def fftconvolve( a, b, data = None ):
+def fftconvolve(a, b, data=None):
     '''
     Calculate the convolution using a FFT of two arrays.
 
@@ -310,7 +315,7 @@ def fftconvolve( a, b, data = None ):
     return output * (data[1] - data[0])
 
 
-def fftshift( a ):
+def fftshift(a):
     '''
     Compute the shift in frequencies needed for "fftconvolve" to return values in the same data range.
 
@@ -319,15 +324,15 @@ def fftshift( a ):
     :returns: shift in the frequency domain.
     :rtype: numpy.ndarray
     '''
-    n0  = sum(a < 0)
-    nt  = len(a)
+    n0 = sum(a < 0)
+    nt = len(a)
     com = types.cpu_complex(+2.j * np.pi * n0 / nt)
     rng = arange(nt, dtype=types.cpu_int).astype(types.cpu_complex)
     return exp(com * rng)
 
 
 @with_backend
-def exp( a ):
+def exp(a):
     if BACKEND == CPU:
         return np.exp(a)
     else:
@@ -335,7 +340,7 @@ def exp( a ):
 
 
 @with_backend
-def shuffling_index( n ):
+def shuffling_index(n):
     '''
     Return an array to shuffle data, with length "n".
 
