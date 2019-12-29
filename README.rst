@@ -13,7 +13,7 @@ minkit
 
 .. inclusion-marker-do-not-remove
 
-This package provides tools to fit probability density functions (PDFs) to both unbinned and binned data, using different minimizers (like `Minuit <https://iminuit.readthedocs.io/en/latest/reference.html#minuit>`_).
+This package provides tools to fit probability density functions (PDFs) to both unbinned and binned data, using different minimizers (like `Minuit <https://iminuit.readthedocs.io/en/latest/reference.html>`_).
 It has support for both CPU and GPU backends, providing an easy API in order to manage both backends, being transparent for the user.
 PDFs are implemented in C++ and CUDA, allowing a fast evaluation of the functions.
 
