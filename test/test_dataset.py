@@ -1,16 +1,20 @@
 '''
 Tests for the "dataset.py" module.
 '''
+import helpers
 import minkit
 from minkit import dataset
 import numpy as np
+import pytest
 
+helpers.configure_logging()
 minkit.initialize()
 
 # For reproducibility
 np.random.seed(98953)
 
 
+@pytest.mark.core
 def test_evaluation_grid():
     '''
     Test the "evaluation_grid" function.

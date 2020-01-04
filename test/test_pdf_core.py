@@ -1,51 +1,22 @@
 '''
 Test the "pdf_core" module.
 '''
+from helpers import check_parameters, check_pdfs, check_multi_pdfs
 import json
+import helpers
 import numpy as np
 import os
 import minkit
 import pytest
 
+helpers.configure_logging()
 minkit.initialize()
 
 # For reproducibility
 np.random.seed(98953)
 
 
-def _check_parameters(f, s):
-    '''
-    Check that two parameters have the same values for the attributes.
-    '''
-    for attr in ('name', 'value', 'error', 'constant'):
-        assert getattr(f, attr) == getattr(s, attr)
-    assert np.all(np.array(f.bounds) == np.array(s.bounds))
-
-
-def _check_pdfs(f, s):
-    '''
-    Check that two PDFs have the same values for the attributes.
-    '''
-    assert f.name == s.name
-    for fa, sa in zip(f.args.values(), s.args.values()):
-        _check_parameters(fa, sa)
-    for fa, sa in zip(f.data_pars.values(), s.data_pars.values()):
-        _check_parameters(fa, sa)
-
-
-def _check_multi_pdfs(f, s):
-    '''
-    Check that two PDFs have the same values for the attributes.
-    '''
-    assert f.name == s.name
-    for fa, sa in zip(f.args.values(), s.args.values()):
-        _check_parameters(fa, sa)
-    for fa, sa in zip(f.data_pars.values(), s.data_pars.values()):
-        _check_parameters(fa, sa)
-    for fp, sp in zip(f.pdfs.values(), s.pdfs.values()):
-        _check_pdfs(fp, sp)
-
-
+@pytest.mark.pdfs
 def test_pdf():
     '''
     General tests for the PDF class.
@@ -68,7 +39,9 @@ def test_pdf():
     p(data, values={'p1': 1.})
 
 
-def test_addpdfs(tmp_path):
+@pytest.mark.pdfs
+@pytest.mark.multipdf
+def test_addpdfs(tmpdir):
     '''
     Test the "AddPDFs" class.
     '''
@@ -97,7 +70,7 @@ def test_addpdfs(tmp_path):
 
     centers = minkit.DataSet.from_array(0.5 * (edges[1:] + edges[:-1]), m)
 
-    pv = minkit.extract_ndarray(pdf(centers))
+    pv = minkit.aop.extract_ndarray(pdf(centers))
 
     pdf_values = minkit.scale_pdf_values(pv, values, edges)
 
@@ -113,15 +86,16 @@ def test_addpdfs(tmp_path):
     assert pdf.constant
 
     # Test the JSON conversion
-    with open(os.path.join(tmp_path, 'pdf.json'), 'wt') as fi:
+    with open(os.path.join(tmpdir, 'pdf.json'), 'wt') as fi:
         json.dump(pdf.to_json_object(), fi)
 
-    with open(os.path.join(tmp_path, 'pdf.json'), 'rt') as fi:
+    with open(os.path.join(tmpdir, 'pdf.json'), 'rt') as fi:
         s = minkit.PDF.from_json_object(json.load(fi))
 
-    _check_multi_pdfs(s, pdf)
+    check_multi_pdfs(s, pdf)
 
 
+@pytest.mark.core
 def test_category():
     '''
     Test the "Category" class.
@@ -130,7 +104,9 @@ def test_category():
         c = minkit.Category()
 
 
-def test_constpdf(tmp_path):
+@pytest.mark.pdfs
+@pytest.mark.multipdf
+def test_constpdf(tmpdir):
     '''
     Test a fit with a constant PDF.
     '''
@@ -163,16 +139,18 @@ def test_constpdf(tmp_path):
         assert np.allclose(pdf.all_args[n].value, p.value, rtol=0.05)
 
     # Test the JSON conversion
-    with open(os.path.join(tmp_path, 'pdf.json'), 'wt') as fi:
+    with open(os.path.join(tmpdir, 'pdf.json'), 'wt') as fi:
         json.dump(pdf.to_json_object(), fi)
 
-    with open(os.path.join(tmp_path, 'pdf.json'), 'rt') as fi:
+    with open(os.path.join(tmpdir, 'pdf.json'), 'rt') as fi:
         s = minkit.PDF.from_json_object(json.load(fi))
 
-    _check_multi_pdfs(s, pdf)
+    check_multi_pdfs(s, pdf)
 
 
-def test_convpdfs(tmp_path):
+@pytest.mark.pdfs
+@pytest.mark.multipdf
+def test_convpdfs(tmpdir):
     '''
     Test the "ConvPDFs" class.
     '''
@@ -192,8 +170,8 @@ def test_convpdfs(tmp_path):
     data = pdf.generate(size=10000)
 
     # Check that the output is another Gaussian with bigger standard deviation
-    mean = np.sum(data[m.name]) / len(data)
-    var = np.sum((data[m.name] - mean)**2) / len(data)
+    mean = minkit.aop.sum(data[m.name]) / len(data)
+    var = minkit.aop.sum((data[m.name] - mean)**2) / len(data)
 
     assert np.allclose(var, s1.value**2 + s2.value**2, rtol=0.1)
 
@@ -204,12 +182,12 @@ def test_convpdfs(tmp_path):
         assert np.allclose(proxy.numerical_normalization(), 1.)
 
     # Ordinary check for PDFs
-    values, edges = np.histogram(minkit.extract_ndarray(
+    values, edges = np.histogram(minkit.aop.extract_ndarray(
         data[m.name]), bins=100, range=m.bounds)
 
     centers = minkit.DataSet.from_array(0.5 * (edges[1:] + edges[:-1]), m)
 
-    pv = minkit.extract_ndarray(pdf(centers))
+    pv = minkit.aop.extract_ndarray(pdf(centers))
 
     pdf_values = minkit.scale_pdf_values(pv, values, edges)
 
@@ -223,16 +201,18 @@ def test_convpdfs(tmp_path):
     assert not r.fmin.hesse_failed
 
     # Test the JSON conversion
-    with open(os.path.join(tmp_path, 'pdf.json'), 'wt') as fi:
+    with open(os.path.join(tmpdir, 'pdf.json'), 'wt') as fi:
         json.dump(pdf.to_json_object(), fi)
 
-    with open(os.path.join(tmp_path, 'pdf.json'), 'rt') as fi:
+    with open(os.path.join(tmpdir, 'pdf.json'), 'rt') as fi:
         s = minkit.PDF.from_json_object(json.load(fi))
 
-    _check_multi_pdfs(s, pdf)
+    check_multi_pdfs(s, pdf)
 
 
-def test_prodpdfs(tmp_path):
+@pytest.mark.pdfs
+@pytest.mark.multipdf
+def test_prodpdfs(tmpdir):
     '''
     Test the "ProdPDFs" class.
     '''
@@ -261,16 +241,18 @@ def test_prodpdfs(tmp_path):
     assert pdf.constant
 
     # Test the JSON conversion
-    with open(os.path.join(tmp_path, 'pdf.json'), 'wt') as fi:
+    with open(os.path.join(tmpdir, 'pdf.json'), 'wt') as fi:
         json.dump(pdf.to_json_object(), fi)
 
-    with open(os.path.join(tmp_path, 'pdf.json'), 'rt') as fi:
+    with open(os.path.join(tmpdir, 'pdf.json'), 'rt') as fi:
         s = minkit.PDF.from_json_object(json.load(fi))
 
-    _check_multi_pdfs(s, pdf)
+    check_multi_pdfs(s, pdf)
 
 
-def test_sourcepdf(tmp_path):
+@pytest.mark.pdfs
+@pytest.mark.source_pdf
+def test_sourcepdf(tmpdir):
     '''
     Test the "SourcePDF" class.
     '''
@@ -289,10 +271,10 @@ def test_sourcepdf(tmp_path):
     pol2 = minkit.Polynomial('pol2', m, p1, p2)
 
     # Test the JSON conversion
-    with open(os.path.join(tmp_path, 'pdf.json'), 'wt') as fi:
+    with open(os.path.join(tmpdir, 'pdf.json'), 'wt') as fi:
         json.dump(pol0.to_json_object(), fi)
 
-    with open(os.path.join(tmp_path, 'pdf.json'), 'rt') as fi:
+    with open(os.path.join(tmpdir, 'pdf.json'), 'rt') as fi:
         s = minkit.PDF.from_json_object(json.load(fi))
 
-    _check_pdfs(s, pol0)
+    check_pdfs(s, pol0)

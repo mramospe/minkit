@@ -1,9 +1,16 @@
 '''
 Test the "minimizers" module.
 '''
+import helpers
 import numpy as np
 import minkit
 import pytest
+
+helpers.configure_logging()
+minkit.initialize()
+
+# For reproducibility
+np.random.seed(98953)
 
 
 def pytest_namespace():
@@ -13,6 +20,7 @@ def pytest_namespace():
     return {'shared_names': None, 'shared_result': None}
 
 
+@pytest.mark.minimization
 def test_unbinned_minimizer():
     '''
     Test the "unbinned_minimizer" function.
@@ -61,6 +69,7 @@ def test_unbinned_minimizer():
         p.value, g.all_args[n].value, rtol=0.05) for n, p in results.items())
 
 
+@pytest.mark.minimization
 def test_simultaneous_minimizer():
     '''
     Test the "simultaneous_minimizer" function.
@@ -91,6 +100,7 @@ def test_simultaneous_minimizer():
     assert not r.fmin.hesse_failed
 
 
+@pytest.mark.minimization
 def test_migrad_output_to_registry():
     '''
     Test the "migrad_output_to_registry" function.

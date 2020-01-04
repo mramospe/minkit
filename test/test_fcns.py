@@ -1,15 +1,19 @@
 '''
 Test the "fcns" module.
 '''
-import numpy as np
+import helpers
 import minkit
+import numpy as np
+import pytest
 
+helpers.configure_logging()
 minkit.initialize()
 
 # For reproducibility
 np.random.seed(98953)
 
 
+@pytest.mark.minimization
 def test_binned_maximum_likelihood():
     '''
     Tets the "binned_maximum_likelihood" FCN.
@@ -54,6 +58,7 @@ def test_binned_maximum_likelihood():
         assert np.allclose(g.all_args[n].value, p.value, rtol=0.05)
 
 
+@pytest.mark.minimization
 def test_unbinned_extended_maximum_likelihood():
     '''
     Test the "unbinned_extended_maximum_likelihood" FCN.
@@ -104,6 +109,7 @@ def test_unbinned_extended_maximum_likelihood():
         assert np.allclose(pdf.all_args[n].value, p.value, rtol=0.1)
 
 
+@pytest.mark.minimization
 def test_unbinned_maximum_likelihood():
     '''
     Test the "unbinned_maximum_likelihood" FCN.

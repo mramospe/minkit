@@ -1,43 +1,39 @@
 '''
 Test the "parameters" module.
 '''
+from helpers import check_parameters
 import json
+import helpers
+import minkit
 import numpy as np
 import os
-import minkit
+import pytest
 
+helpers.configure_logging()
 minkit.initialize()
 
 # For reproducibility
 np.random.seed(98953)
 
 
-def _check_parameters(f, s):
-    '''
-    Check that two parameters have the same values for the attributes.
-    '''
-    for attr in ('name', 'value', 'error', 'constant'):
-        assert getattr(f, attr) == getattr(s, attr)
-
-    assert np.all(np.array(f.bounds) == np.array(s.bounds))
-
-
-def test_parameter(tmp_path):
+@pytest.mark.core
+def test_parameter(tmpdir):
     '''
     Test the "Parameter" class.
     '''
     f = minkit.Parameter('a', 1., (-5, +5),
-                        {'sides': [(-5, -2), (+2, +5)]}, 0.1, False)
+                         {'sides': [(-5, -2), (+2, +5)]}, 0.1, False)
 
-    with open(os.path.join(tmp_path, 'a.json'), 'wt') as fi:
+    with open(os.path.join(tmpdir, 'a.json'), 'wt') as fi:
         json.dump(f.to_json_object(), fi)
 
-    with open(os.path.join(tmp_path, 'a.json'), 'rt') as fi:
+    with open(os.path.join(tmpdir, 'a.json'), 'rt') as fi:
         s = minkit.Parameter.from_json_object(json.load(fi))
 
-    _check_parameters(f, s)
+    check_parameters(f, s)
 
 
+@pytest.mark.core
 def test_range():
     '''
     Test the "Range" class.
@@ -86,7 +82,8 @@ def test_range():
         assert np.allclose(p.value, e.all_args[n].value, rtol=0.05)
 
 
-def test_registry(tmp_path):
+@pytest.mark.core
+def test_registry(tmpdir):
     '''
     Test the "Registry" class.
     '''
@@ -95,13 +92,13 @@ def test_registry(tmp_path):
 
     f = minkit.Registry.from_list([a, b])
 
-    with open(os.path.join(tmp_path, 'r.json'), 'wt') as fi:
+    with open(os.path.join(tmpdir, 'r.json'), 'wt') as fi:
         json.dump(f.to_json_object(), fi)
 
-    with open(os.path.join(tmp_path, 'r.json'), 'rt') as fi:
+    with open(os.path.join(tmpdir, 'r.json'), 'rt') as fi:
         s = minkit.Registry.from_json_object(json.load(fi))
 
     assert f.keys() == s.keys()
 
     for fv, sv in zip(f.values(), s.values()):
-        _check_parameters(fv, sv)
+        check_parameters(fv, sv)

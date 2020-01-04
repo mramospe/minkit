@@ -1,18 +1,20 @@
 '''
 Base classes to define PDF types.
 '''
+from . import accessors
 from . import bindings
-from . import core
+from .core import aop
 from . import dataset
 from . import parameters
-from . import types
+from .operations import types
 
 import contextlib
 import functools
 import logging
 import numpy as np
 
-__all__ = ['AddPDFs', 'Category', 'ConvPDFs', 'PDF', 'ProdPDFs']
+__all__ = ['AddPDFs', 'Category', 'ConvPDFs',
+           'PDF', 'ProdPDFs', 'register_pdf', 'SourcePDF']
 
 # Default size of the samples to be used during numerical normalization
 # and calculation of integrals
@@ -227,7 +229,7 @@ class PDF(object):
         grid = dataset.evaluation_grid(self.data_pars, bounds, mapsize)
 
         m = safe_factor * \
-            core.max(self.__call__(grid, values, normalized=False))
+            aop.max(self.__call__(grid, values, normalized=False))
 
         result = None
 
@@ -235,14 +237,15 @@ class PDF(object):
 
             d = dataset.uniform_sample(self.data_pars, bounds, gensize)
             f = self.__call__(d, values, normalized=False)
-            u = core.random_uniform(0, m, len(d))
+            u = aop.random_uniform(0, m, len(d))
 
             if result is None:
                 result = d.subset(u < f)
             else:
                 result.add(d.subset(u < f), inplace=True)
 
-        return result.subset(slice(size))
+        # Can not use "slice" since __getitem__ does not support it for GPUArrays
+        return result.subset(cond=aop.true_till(len(result), size))
 
     def _integral_bin_area(self, bounds, size):
         '''
@@ -271,7 +274,7 @@ class PDF(object):
         g = dataset.evaluation_grid(self.data_pars, bounds, self.norm_size)
         a = self._integral_bin_area(bounds, len(g))
         i = self.__call__(g, values, range=range)
-        return core.sum(i) * a
+        return aop.sum(i) * a
 
     def _numerical_normalization_single_bounds(self, bounds, values):
         '''
@@ -287,7 +290,7 @@ class PDF(object):
         g = dataset.evaluation_grid(self.data_pars, bounds, self.norm_size)
         a = self._integral_bin_area(bounds, len(g))
         i = self.__call__(g, values, normalized=False)
-        return core.sum(i) * a
+        return aop.sum(i) * a
 
     def _process_values(self, values=None):
         '''
@@ -378,7 +381,7 @@ class PDF(object):
         Prepare an object that will be called many times with the same set of
         values.
         This is usefull for PDFs using a cache, to avoid creating it many times
-        in sucessive calls to :method:`PDF.__call__`.
+        in sucessive calls to :meth:`PDF.__call__`.
 
         :param values: values for the argument parameters to use.
         :type values: Registry(str, float)
@@ -420,7 +423,7 @@ class PDF(object):
     def generate(self, size=10000, values=None, mapsize=100, gensize=10000, safe_factor=1.1, range=parameters.FULL):
         '''
         Generate random data.
-        A call to :method:`PDF.bind` is implicit, since several calls will be done
+        A call to :meth:`PDF.bind` is implicit, since several calls will be done
         to the PDF with the same sets of values.
 
         :param size: size (or minimum size) of the output sample.
@@ -454,11 +457,12 @@ class PDF(object):
                     fracs.append(
                         self._integral_single_bounds(b, range, values))
 
-                u = core.random_uniform(0, 1, size)
+                u = aop.random_uniform(0, 1, size)
 
                 entries = []
                 for f in fracs:
-                    entries.append(core.sum(u < f))
+                    # TODO: MUST DEFINE PROPERLY FOR BOOLEANS
+                    entries.append(int(aop.sum(u < f)))
                 # The last is calculated from the required number of entries
                 entries.append(size - np.sum(entries))
 
@@ -534,7 +538,7 @@ class PDF(object):
     def to_json_object(self):
         '''
         Dump the PDF information into a JSON object.
-        The PDF can be constructed at any time by calling :method:`PDF.from_json_object`.
+        The PDF can be constructed at any time by calling :meth:`PDF.from_json_object`.
 
         :returns: object that can be saved into a JSON file.
         :rtype: dict
@@ -548,19 +552,15 @@ class SourcePDF(PDF):
     A PDF created from source files.
     '''
 
-    def __init__(self, name, function, pdf, normalization, data_pars, arg_pars=None, var_arg_pars=None):
+    def __init__(self, name, data_pars, arg_pars=None, var_arg_pars=None):
         '''
         This object defines a PDF built from source files (C++, PyOpenCL or CUDA), which depend
         on the backend to use.
+        The name of the PDF is inferred from the class name, so a file with name "name.cpp" (CPU) or
+        "name.c" (CUDA an OpenCL) is expected to be in PDF_PATH.
 
         :param name: name of the PDF.
         :type name: str
-        :param function: function where the input data is a simple float.
-        :type function: function
-        :param pdf: function where the input data is considered as an array.
-        :type pdf: function
-        :param norm: normalization function.
-        :type norm: function
         :param data_pars: data parameters.
         :type data_pars: Registry(str, Parameter)
         :param arg_pars: argument parameters.
@@ -570,12 +570,20 @@ class SourcePDF(PDF):
         '''
         arg_pars = arg_pars or []
 
-        if var_arg_pars is not None:
-            var_arg_pars = list(var_arg_pars)
-            self.__var_args = parameters.Registry.from_list(var_arg_pars)
-        else:
+        # Must parse it correctly, since "None" means the function can not be built with
+        # a variable number of arguments
+        if var_arg_pars is None:
+            nvar_arg_pars = None
             var_arg_pars = []
             self.__var_args = None
+        else:
+            nvar_arg_pars = len(var_arg_pars)
+            var_arg_pars = list(var_arg_pars)
+            self.__var_args = parameters.Registry.from_list(var_arg_pars)
+
+        # Access the PDF
+        function, pdf, normalization = accessors.access_pdf(
+            self.__class__.__name__, ndata_pars=len(data_pars), narg_pars=len(arg_pars), nvar_arg_pars=nvar_arg_pars)
 
         self.__function = function
         self.__pdf = pdf
@@ -608,7 +616,7 @@ class SourcePDF(PDF):
             fvals = fvals[:-nvar_args] + (var_args_array,)
 
         # Prepare the data arrays I/O
-        out = core.zeros(len(data))
+        out = aop.zeros(len(data))
         data_arrs = tuple(data[n] for n in self.data_pars)
 
         # Call the real function
@@ -708,7 +716,7 @@ class SourcePDF(PDF):
     def to_json_object(self):
         '''
         Dump the PDF information into a JSON object.
-        The PDF can be constructed at any time by calling :method:`PDF.from_json_object`.
+        The PDF can be constructed at any time by calling :meth:`PDF.from_json_object`.
 
         :returns: object that can be saved into a JSON file.
         :rtype: dict
@@ -779,7 +787,7 @@ class MultiPDF(PDF):
         Prepare an object that will be called many times with the same set of
         values.
         This is usefull for PDFs using a cache, to avoid creating it many times
-        in sucessive calls to :method:`PDF.__call__`.
+        in sucessive calls to :meth:`PDF.__call__`.
 
         :param values: values for the argument parameters to use.
         :type values: Registry(str, float)
@@ -792,8 +800,6 @@ class MultiPDF(PDF):
             pdf.enable_cache(PDF.BIND)
         with super(MultiPDF, self).bind(values, range, normalized) as base:
             yield base
-        for pdf in self.pdfs.values():
-            pdf.free_cache()
 
     def component(self, name):
         '''
@@ -880,7 +886,7 @@ class AddPDFs(MultiPDF):
         if not self.extended:
             yields.append(1. - sum(yields))
 
-        out = core.zeros(len(data))
+        out = aop.zeros(len(data))
         for y, pdf in zip(yields, self.pdfs.values()):
             out += y * pdf(data, values, range, normalized=True)
 
@@ -959,7 +965,7 @@ class AddPDFs(MultiPDF):
     def to_json_object(self):
         '''
         Dump the PDF information into a JSON object.
-        The PDF can be constructed at any time by calling :method:`PDF.from_json_object`.
+        The PDF can be constructed at any time by calling :meth:`PDF.from_json_object`.
 
         :returns: object that can be saved into a JSON file.
         :rtype: dict
@@ -1022,7 +1028,7 @@ class ConvPDFs(MultiPDF):
 
         par = tuple(self.data_pars.values())[0]
 
-        pdf_values = core.interpolate_linear(data[par.name], dv, cv)
+        pdf_values = aop.interpolate_linear(data[par.name], dv, cv)
 
         return pdf_values
 
@@ -1072,14 +1078,14 @@ class ConvPDFs(MultiPDF):
         fv = first(grid, values, range, normalized)
         sv = second(grid, values, range, normalized)
 
-        return grid[par.name], core.fftconvolve(fv, sv, grid[par.name]).real
+        return grid[par.name], aop.real(aop.fftconvolve(fv, sv, grid[par.name]))
 
     @allows_bind_or_const_cache
     def norm(self, values=None, range=parameters.FULL):
         '''
         Calculate the normalization of the PDF.
         In this case, a numerical normalization is used, so the effect
-        is equivalent to :method:`ConvPDFs.numerical_normalization`.
+        is equivalent to :meth:`ConvPDFs.numerical_normalization`.
 
         :param values: values of the parameters to use.
         :type values: Registry(str, float)
@@ -1108,7 +1114,7 @@ class ConvPDFs(MultiPDF):
     def to_json_object(self):
         '''
         Dump the PDF information into a JSON object.
-        The PDF can be constructed at any time by calling :method:`PDF.from_json_object`.
+        The PDF can be constructed at any time by calling :meth:`PDF.from_json_object`.
 
         :returns: object that can be saved into a JSON file.
         :rtype: dict
@@ -1153,7 +1159,7 @@ class ProdPDFs(MultiPDF):
         :param normalized: whether to return a normalized output.
         :type normalized: bool
         '''
-        out = core.ones(len(data))
+        out = aop.ones(len(data))
         for pdf in self.pdfs.values():
             out *= pdf(data, values, range, normalized=True)
 
@@ -1207,7 +1213,7 @@ class ProdPDFs(MultiPDF):
     def to_json_object(self):
         '''
         Dump the PDF information into a JSON object.
-        The PDF can be constructed at any time by calling :method:`PDF.from_json_object`.
+        The PDF can be constructed at any time by calling :meth:`PDF.from_json_object`.
 
         :returns: object that can be saved into a JSON file.
         :rtype: dict

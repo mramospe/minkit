@@ -1,7 +1,7 @@
 '''
 Define classes and functions to work with parameters.
 '''
-from . import types
+from .operations import types
 import collections
 import json
 import logging
@@ -25,7 +25,7 @@ class Parameter(object):
         self.error = error
         self.__ranges = {}
         self.bounds = bounds  # This sets the FULL range
-        self.constant = (bounds is None) or constant
+        self.__constant = constant
 
         # Set the ranges skipping the FULL range, since it is determined by the bounds
         for n, r in (ranges or {}).items():
@@ -44,6 +44,14 @@ class Parameter(object):
     def bounds(self, values):
         self.__bounds = values
         self.__ranges[FULL] = Range(self.__bounds)
+
+    @property
+    def constant(self):
+        return self.__constant or (self.__bounds is None)
+
+    @constant.setter
+    def constant(self, v):
+        self.__constant = v
 
     @classmethod
     def from_json_object(cls, obj):

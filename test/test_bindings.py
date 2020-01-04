@@ -1,16 +1,19 @@
 '''
 Tests fot the "bindings.py" module.
 '''
+import helpers
 import numpy as np
 import minkit
 import pytest
 
+helpers.configure_logging()
 minkit.initialize()
 
 # For reproducibility
 np.random.seed(98953)
 
 
+@pytest.mark.core
 def test_bind_class_arguments():
     '''
     Test the "bind_class_arguments" function.

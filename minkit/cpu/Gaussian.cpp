@@ -8,10 +8,9 @@ extern "C" {
    */
   static inline double shared_function( double x, double c, double s ) {
 
-    double d = x - c;
-    double s2 = s * s;
+    double d = (x - c) / s;
 
-    return std::exp(- d * d / ( 2. * s2 ) );
+    return std::exp(-0.5 * d * d );
   }
 
   /** Definition of a Gaussian PDF.

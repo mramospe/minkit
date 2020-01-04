@@ -1,9 +1,9 @@
 '''
 Functions and classes to handle sets of data.
 '''
-from . import core
+from .core import aop
 from . import parameters
-from . import types
+from .operations import types
 
 import logging
 import numpy as np
@@ -22,7 +22,7 @@ class DataSet(object):
     Definition of a set of data.
     '''
 
-    def __init__(self, data, pars, weights=None, copy=True):
+    def __init__(self, data, pars, weights=None, copy=True, convert=True):
         '''
         Build the class from a data sample which can be indexed as a dictionary, the data parameters and a possible set of weights.
 
@@ -33,10 +33,11 @@ class DataSet(object):
         :param weights: possible set of weights.
         :type weights: numpy.ndarray or None
         '''
-        self.__data = {p.name: core.array(
-            data[p.name], copy=copy) for p in pars.values()}
+        self.__data = {p.name: aop.array(
+            data[p.name], copy=copy, convert=convert) for p in pars.values()}
         self.__data_pars = pars
-        self.__weights = weights if weights is None else core.array(weights)
+        self.__weights = weights if weights is None else aop.array(
+            weights, copy=copy, convert=convert)
 
         valid = None
         for p in pars.values():
@@ -44,8 +45,9 @@ class DataSet(object):
                 raise ValueError(
                     f'Must define the bounds for data parameter "{p.name}"')
 
-            iv = core.logical_and(
-                data[p.name] >= p.bounds[0], data[p.name] <= p.bounds[1])
+            iv = aop.logical_and(
+                aop.geq(self.__data[p.name], p.bounds[0]),
+                aop.leq(self.__data[p.name], p.bounds[1]))
 
             if valid is None:
                 valid = iv
@@ -53,15 +55,17 @@ class DataSet(object):
                 valid *= iv
 
         # Remove out of range points, if necessary
-        diff = len(valid) - core.sum(valid)
+        diff = len(valid) - aop.sum(valid)
         if diff != 0:
             logger.info(f'Removing "{diff}" out of range points')
 
         if self.__weights is not None:
-            self.__weights = self.__weights[valid]
+            self.__weights = aop.slice_from_boolean(
+                self.__weights, valid)
 
         for name, array in self.__data.items():
-            self.__data[name] = array[valid]
+            self.__data[name] = aop.slice_from_boolean(
+                array, valid)
 
     def __getitem__(self, var):
         '''
@@ -97,13 +101,13 @@ class DataSet(object):
         '''
         dct = {}
         for n, p in self.__data.items():
-            dct[n] = core.concatenate(p, other[n])
+            dct[n] = aop.concatenate(p, other[n])
 
         if self.weights is not None:
             if other.weights is None:
                 raise RuntimeError(
                     'Attempt to merge samples with and without weihts')
-            weights = core.concatenate(self.weights, other.weights)
+            weights = aop.concatenate(self.weights, other.weights)
         else:
             weights = None
 
@@ -125,7 +129,7 @@ class DataSet(object):
         return self.__data_pars
 
     @classmethod
-    def from_array(cls, arr, data_par, weights=None):
+    def from_array(cls, arr, data_par, weights=None, copy=True, convert=True):
         '''
         Build the class from a single array.
 
@@ -136,7 +140,7 @@ class DataSet(object):
         :param weights: possible weights to use.
         :type weights: numpy.ndarray or None
         '''
-        return cls({data_par.name: core.array(arr)}, parameters.Registry([(data_par.name, data_par)]), weights)
+        return cls({data_par.name: arr}, parameters.Registry([(data_par.name, data_par)]), weights, copy=copy, convert=convert)
 
     @classmethod
     def from_records(cls, arr, data_pars, weights=None):
@@ -161,18 +165,27 @@ class DataSet(object):
     def shuffle(self, inplace=False):
         '''
         '''
-        index = core.shuffling_index(len(self))
+        index = aop.shuffling_index(len(self))
 
         if inplace:
 
             for k, v in self.__data.items():
-                self.__data[k] = v[index]
+                self.__data[k] = aop.slice_from_integer(v, index)
             if self.__weights is not None:
-                self.__weights = self.__weights[index]
+                self.__weights = aop.slice_from_integer(
+                    self.__weights, index)
 
             return self
         else:
-            return self.subset(index)
+            data = {n: aop.slice_from_integer(
+                self.__data[n], index) for n in self.data_pars}
+
+            if self.__weights is None:
+                weights = None
+            else:
+                weights = self.__weights[index]
+
+            return self.__class__(data, self.data_pars, weights, copy=False, convert=False)
 
     def subset(self, cond=None, range=None, copy=True, rescale_weights=False):
         '''
@@ -184,34 +197,49 @@ class DataSet(object):
         :rtype: DataSet
         '''
         if cond is None:
-            cond = core.ones(len(self), dtype=types.cpu_bool)
+            cond = aop.ones(len(self), dtype=types.cpu_bool)
 
         if range is not None:
             for n, p in self.data_pars.items():
                 r = p.get_range(range)
                 a = self[n]
                 if r.disjoint:
-                    c = core.zeros(len(cond), dtype=types.cpu_bool)
+                    c = aop.zeros(len(cond), dtype=types.cpu_bool)
                     for vmin, vmax in r.bounds:
-                        i = core.logical_and(a >= vmin, a <= vmax)
-                        c = core.logical_or(c, i)
-                    cond = core.logical_and(cond, c)
+                        i = aop.logical_and(aop.geq(a, vmin),
+                                            aop.leq(a, vmax))
+                        c = aop.logical_or(c, i)
+                    cond = aop.logical_and(cond, c)
                 else:
-                    i = core.logical_and(a >= r.bounds[0], a <= r.bounds[1])
-                    cond = core.logical_and(cond, i)
+                    i = aop.logical_and(
+                        aop.geq(a, r.bounds[0]),
+                        aop.leq(a, r.bounds[1]))
+                    cond = aop.logical_and(cond, i)
 
-        data = {p.name: self[p.name][cond] for p in self.data_pars.values()}
+        if cond.dtype == types.cpu_int:
+            data = {p.name: aop.slice_from_integer(
+                self[p.name], cond) for p in self.data_pars.values()}
+        else:
+            data = {p.name: aop.slice_from_boolean(
+                self[p.name], cond) for p in self.data_pars.values()}
 
         if self.__weights is not None:
 
-            weights = self.weights[cond]
+            if cond.dtype == types.cpu_int:
+                weights = aop.slice_from_integer(
+                    self.__weights, cond)
+            else:
+                weights = aop.slice_from_boolean(
+                    self.__weights, cond)
 
             if rescale_weights:
-                weights = weights * core.sum(weights) / core.sum(weights**2)
+                weights = weights * \
+                    aop.sum(weights) / \
+                    aop.sum(weights**2)
         else:
             weights = self.__weights
 
-        return self.__class__(data, self.data_pars, weights, copy=copy)
+        return self.__class__(data, self.data_pars, weights, copy=copy, convert=False)
 
     def to_records():
         '''
@@ -223,7 +251,7 @@ class DataSet(object):
         out = np.zeros(len(self), dtype=[
                        (n, types.cpu_type) for n in self.__data])
         for n, v in self.__data.items():
-            out[n] = core.extract_ndarray(v)
+            out[n] = aop.extract_ndarray(v)
         return out
 
     @property
@@ -247,7 +275,7 @@ class DataSet(object):
         if len(weights) != len(self):
             raise ValueError(
                 'Length of the provided weights does not match that of the DataSet')
-        self.__weights = core.array(weights)
+        self.__weights = aop.array(weights)
 
 
 class BinnedDataSet(object):
@@ -255,7 +283,7 @@ class BinnedDataSet(object):
     A binned data set.
     '''
 
-    def __init__(self, centers, data_pars, values):
+    def __init__(self, centers, data_pars, values, copy=True, convert=True):
         '''
         A binned data set.
 
@@ -268,10 +296,11 @@ class BinnedDataSet(object):
         '''
         super(BinnedDataSet, self).__init__()
 
-        self.__centers = {name: core.array(arr)
+        self.__centers = {name: aop.array(arr, copy=copy, convert=convert)
                           for name, arr in dict(centers).items()}
         self.__data_pars = data_pars
-        self.__values = values
+        self.__values = aop.array(
+            values, copy=copy, convert=convert)
 
         assert centers.keys() == self.__centers.keys()
 
@@ -304,7 +333,7 @@ class BinnedDataSet(object):
         return self.__data_pars
 
     @classmethod
-    def from_array(cls, centers, data_par, values):
+    def from_array(cls, centers, data_par, values, copy=True, convert=True):
         '''
         Build the class from the array of centers and values.
 
@@ -317,7 +346,7 @@ class BinnedDataSet(object):
         :returns: binned data set.
         :rtype: BinnedDataSet
         '''
-        return cls({data_par.name: core.array(centers)}, parameters.Registry([(data_par.name, data_par)]), values)
+        return cls({data_par.name: centers}, parameters.Registry([(data_par.name, data_par)]), values, copy=copy, convert=convert)
 
     @property
     def values(self):
@@ -351,13 +380,13 @@ def evaluation_grid(data_pars, bounds, size):
     if bounds.shape == (2,):
         assert len(data_pars) == 1
         data = {tuple(data_pars.values())[
-            0].name: core.linspace(*bounds, size)}
+            0].name: aop.linspace(*bounds, size)}
     else:
         values = []
         for p, vmin, vmax in zip(data_pars.values(), bounds[0::2], bounds[1::2]):
-            values.append(core.linspace(vmin, vmax, size))
+            values.append(aop.linspace(vmin, vmax, size))
         data = {p.name: a for p, a in zip(
-            data_pars.values(), core.meshgrid(*values))}
+            data_pars.values(), aop.meshgrid(*values))}
 
     return DataSet(data, data_pars, copy=False)
 
@@ -375,6 +404,6 @@ def uniform_sample(data_pars, bounds, size):
     :returns: uniform sample.
     :rtype: DataSet
     '''
-    data = {n: core.random_uniform(l, h, size)
+    data = {n: aop.random_uniform(l, h, size)
             for n, l, h in zip(data_pars, bounds[0::2], bounds[1::2])}
     return DataSet(data, data_pars)

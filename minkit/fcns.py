@@ -1,7 +1,7 @@
 '''
 Definition of different minimization functions.
 '''
-from . import core
+from .core import aop
 from . import dataset
 from . import parameters
 
@@ -80,7 +80,7 @@ def binned_chisquare(pdf, data, values=None, range=parameters.FULL, constraints=
     :type pdf: PDF
     :param data: data to evaluate.
     :type data: BinnedDataSet
-    :param values: values to be passed to the :method:`PDF.__call__` method.
+    :param values: values to be passed to the :meth:`PDF.__call__` method.
     :type values: Registry
     :param range: normalization range of the PDF.
     :type range: str
@@ -100,7 +100,7 @@ def binned_maximum_likelihood(pdf, data, values=None, constraints=None):
     :type pdf: PDF
     :param data: data to evaluate.
     :type data: BinnedDataSet
-    :param values: values to be passed to the :method:`PDF.__call__` method.
+    :param values: values to be passed to the :meth:`PDF.__call__` method.
     :type values: Registry
     :param constraints: PDFs with the constraints for paramters in "pdf".
     :type constraints: list(PDF)
@@ -108,7 +108,7 @@ def binned_maximum_likelihood(pdf, data, values=None, constraints=None):
     :rtype: float
     '''
     c = evaluate_constraints(values, constraints)
-    return pdf.norm(values) - core.sum(data.values * core.log(c * pdf(data, values)))
+    return pdf.norm(values) - aop.sum(data.values * aop.log(c * pdf(data, values)))
 
 
 def unbinned_extended_maximum_likelihood(pdf, data, values=None, range=parameters.FULL, constraints=None):
@@ -121,7 +121,7 @@ def unbinned_extended_maximum_likelihood(pdf, data, values=None, range=parameter
     :type pdf: PDF
     :param data: data to evaluate.
     :type data: DataSet
-    :param values: values to be passed to the :method:`PDF.__call__` method.
+    :param values: values to be passed to the :meth:`PDF.__call__` method.
     :type values: Registry
     :param range: normalization range of the PDF.
     :type range: str
@@ -131,10 +131,10 @@ def unbinned_extended_maximum_likelihood(pdf, data, values=None, range=parameter
     :rtype: float
     '''
     c = evaluate_constraints(values, constraints)
-    lf = core.log(pdf(data, values, range, normalized=False))
+    lf = aop.log(pdf(data, values, range, normalized=False))
     if data.weights is not None:
         lf *= data.weights
-    return pdf.norm(values, range) - core.sum(lf) - len(data) * np.log(c)
+    return pdf.norm(values, range) - aop.sum(lf) - len(data) * np.log(c)
 
 
 def unbinned_maximum_likelihood(pdf, data, values=None, range=parameters.FULL, constraints=None):
@@ -146,7 +146,7 @@ def unbinned_maximum_likelihood(pdf, data, values=None, range=parameters.FULL, c
     :type pdf: PDF
     :param data: data to evaluate.
     :type data: DataSet
-    :param values: values to be passed to the :method:`PDF.__call__` method.
+    :param values: values to be passed to the :meth:`PDF.__call__` method.
     :type values: Registry
     :param range: normalization range of the PDF.
     :type range: str
@@ -156,10 +156,10 @@ def unbinned_maximum_likelihood(pdf, data, values=None, range=parameters.FULL, c
     :rtype: float
     '''
     c = evaluate_constraints(values, constraints)
-    lf = core.log(pdf(data, values, range))
+    lf = aop.log(pdf(data, values, range))
     if data.weights is not None:
         lf *= data.weights
-    return - core.sum(lf) - len(data) * np.log(c)
+    return - aop.sum(lf) - len(data) * np.log(c)
 
 
 def fcn_from_name(name):

@@ -88,11 +88,11 @@ setup(
     packages=find_packages(),
 
     # Install data
-    package_dir={'minkit': 'minkit/cpp'},
-    package_data={'minkit': ['minkit/cpp/*.dat']},
+    package_dir={'minkit': 'minkit'},
+    package_data={'minkit': ['cpu/*.cpp', 'gpu/*.c']},
 
     # Test requirements
-    setup_requires=['pytest-runner'],
+    setup_requires=['numpy', 'iminuit', 'pytest-runner'],
 
     tests_require=['pytest'],
 )

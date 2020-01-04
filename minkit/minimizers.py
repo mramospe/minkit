@@ -5,7 +5,7 @@ from . import dataset
 from . import fcns
 from . import parameters
 from . import pdf_core
-from . import types
+from .operations import types
 
 import collections
 import contextlib
@@ -77,7 +77,7 @@ class BinnedEvaluatorProxy(object):
     def __call__(self, *values):
         '''
         Evaluate the FCN.
-        Values must be provided sorted as :method:`PDF.args`.
+        Values must be provided sorted as :meth:`PDF.args`.
 
         :param values: set of values to evaluate the FCN.
         :type values: tuple(float)
@@ -163,7 +163,7 @@ class UnbinnedEvaluatorProxy(object):
     def __call__(self, *values):
         '''
         Evaluate the FCN.
-        Values must be provided sorted as :method:`PDF.args`.
+        Values must be provided sorted as :meth:`PDF.args`.
 
         :param values: set of values to evaluate the FCN.
         :type values: tuple(float)
@@ -220,9 +220,9 @@ class SimultaneousEvaluator(object):
 
         :param data: data samples to process.
         :type data: list(DataSet or BinnedDataSet)
-        :param args: forwarded to :method:`PDF.__call__`
+        :param args: forwarded to :meth:`PDF.__call__`
         :type args: tuple
-        :param kwargs: forwarded to :method:`PDF.__call__`
+        :param kwargs: forwarded to :meth:`PDF.__call__`
         :type kwargs: dict
         '''
         r = parameters.Registry()
@@ -246,7 +246,7 @@ def migrad_output_to_registry(result):
     Transform the output from a call to Migrade into a :class:`Registry`.
 
     :param result: result from a migrad call.
-    :type result: iminuit.Migrad
+    :type result: iminuit.Minuit
     :returns: registry of parameters with the result from Migrad.
     :rtype: Registry(str, Parameter)
     '''
@@ -344,7 +344,7 @@ def simultaneous_minimizer(categories, minimizer=MINUIT, minimizer_config=None, 
     :param constraints: set of constraints to consider in the minimization.
     :type constraints: list(PDF)
     :returns: minimizer to call.
-    :rtype:depends on the "minimizer" argument
+    :rtype: depends on the "minimizer" argument
 
     .. warning: Do not change any attribute of the parameters defining the \
     PDFs, since it will not be properly reflected during the minimization \

@@ -1,25 +1,30 @@
 '''
 Definition of the backend where to store the data and run the jobs.
 '''
+import atexit
 import functools
 import logging
 import numpy as np
 import os
 
-from . import types
+from .operations import types
+from .operations import gpu_core
 
-__all__ = ['array', 'extract_ndarray', 'initialize', 'random_uniform',
-           'zeros', 'max', 'min', 'concatenate', 'linspace', 'shuffling_index']
+__all__ = ['aop', 'initialize']
 
-# Current backend
-BACKEND = None
 
 # CPU backend
 CPU = 'cpu'
 # OpenCL backend
-OPENCL = 'opencl'
+OPENCL = gpu_core.OPENCL
 # CUDA backend
-CUDA = 'cuda'
+CUDA = gpu_core.CUDA
+
+# Keep the module to do operation on arrays
+ARRAY_OPERATION = None
+
+# Current backend (by default use CPU)
+BACKEND = None
 
 NOT_IMPLEMENTED = NotImplementedError(
     f'Function not implemented for backend "{BACKEND}"')
@@ -47,311 +52,90 @@ def calling_base_class_method(method):
     return __wrapper
 
 
-def with_backend(func):
+def with_backend(function):
     '''
     Check whether a backend has been defined and raise an error if not.
 
+    :param function: function to decorate.
+    :type function: function
     :raises RuntimeError: if a backend is not set.
     '''
-    @functools.wraps(func)
+    @functools.wraps(function)
     def __wrapper(*args, **kwargs):
         '''
         Internal wrapper around the decorated function.
         '''
         if BACKEND is None:
             raise RuntimeError(
-                f'A backend must be specified before a call to "{func.__name__}"')
-        return func(*args, **kwargs)
+                f'A backend must be specified before a call to "{function.__name__}"')
+        return function(*args, **kwargs)
     return __wrapper
 
 
-@with_backend
-def array(*args, **kwargs):
+class meta_operation(type):
     '''
-    Create an array using the current backend.
-    Arguments are directly forwarded to the constructor.
-
-    :returns: input data converted to the correct type for the current backend.
-    :rtype: numpy.ndarray, pyopencl.Buffer or pycuda.gpuarray
+    Metaclass to hold the operations.
     '''
-    if BACKEND is CPU:
-        return np.array(*args, dtype=types.cpu_type, **kwargs)
-    else:
-        raise NOT_IMPLEMENTED
+    @with_backend
+    def __getattr__(cls, name):
+        '''
+        Get an operation with name "name".
+
+        :param name: name of the operation.
+        :type name: str
+        :returns: operation
+        :rtype: function
+        '''
+        return getattr(ARRAY_OPERATION, name)
 
 
-@with_backend
-def extract_ndarray(obj):
+class aop(metaclass=meta_operation):
     '''
-    Get an :class:`numpy.ndarray` class from the input object.
-
-    :param obj: input data.
-    :type obj: numpy.ndarray, pyopencl.Buffer or pycuda.gpuarray
-    :returns: data as :class:`numpy.ndarray`
-    :rtype: numpy.ndarray
+    Access the operations on arrays for the current backend.
     '''
-    if BACKEND is CPU:
-        return np.array(obj)
-    else:
-        raise NOT_IMPLEMENTED
+    pass
 
 
-def initialize(backend=CPU, interactive=False):
+def initialize(backend=CPU, **kwargs):
     '''
     Initialize the package, setting the backend and determining what packages to
     use accordingly.
+    The argument "kwargs" is meant to be used in the CUDA backend, and may contain
+    any of the following values:
+    - interactive: (bool) whether to select the device manually (defaults to False)
+    - device: (int) number of the device to use (defaults to None).
+
+    .. note:: The backend can be also specified as an environmental variable \
+    MINKIT_BACKEND, overriding that specified in any :func:`initialize` call.
     '''
     global BACKEND
+    global ARRAY_OPERATION
 
-    if BACKEND is not None:
+    # Override the backend from the environmental variable "MINKIT_BACKEND"
+    backend = os.environ.get('MINKIT_BACKEND', backend).lower()
+
+    if BACKEND is not None and backend != BACKEND:
         logger.error(
             f'Unable to set backend to "{backend}"; already set ({BACKEND})')
+        return
+    elif backend == BACKEND:
+        # It is asking to initialize the same backend again; skip
         return
 
     BACKEND = backend
 
+    logger.info(f'Using backend "{BACKEND}"')
 
-def linspace(vmin, vmax, size):
-    '''
-    '''
     if BACKEND == CPU:
-        return np.linspace(vmin, vmax, size)
+        from .operations import cpu
+        ARRAY_OPERATION = cpu
+    elif BACKEND == CUDA or BACKEND == OPENCL:
+
+        # Must be called only once
+        gpu_core.initialize_gpu(BACKEND, **kwargs)
+
+        from .operations import gpu
+        ARRAY_OPERATION = gpu
+
     else:
-        raise NOT_IMPLEMENTED
-
-
-def meshgrid(*arrays):
-    '''
-    '''
-    if BACKEND == CPU:
-        return tuple(map(np.ndarray.flatten, np.meshgrid(*arrays)))
-    else:
-        raise NOT_IMPLEMENTED
-
-
-@with_backend
-def concatenate(*arrs):
-    '''
-    '''
-    if BACKEND == CPU:
-        return np.concatenate(arrs)
-    else:
-        raise NOT_IMPLEMENTED
-
-
-@with_backend
-def random_uniform(vmin, vmax, size):
-    '''
-    Create data following an uniform distribution between 0 and 1, with size "size".
-
-    :param size: size of the data to create
-    :type size: int
-    :returns: data following an uniform distribution between 0 and 1.
-    :rtype: numpy.ndarray, pyopencl.Buffer or pycuda.gpuarray
-    '''
-    if BACKEND == CPU:
-        return np.random.uniform(vmin, vmax, size)
-    else:
-        raise NOT_IMPLEMENTED
-
-
-@with_backend
-def log(array):
-    '''
-    '''
-    if BACKEND is CPU:
-        return np.log(array)
-    else:
-        raise NOT_IMPLEMENTED
-
-
-@with_backend
-def sum(array):
-    '''
-    '''
-    if BACKEND is CPU:
-        return np.sum(array)
-    else:
-        raise NOT_IMPLEMENTED
-
-
-@with_backend
-def max(arr):
-    '''
-    '''
-    if BACKEND == CPU:
-        return np.max(arr)
-    else:
-        raise NOT_IMPLEMENTED
-
-
-@with_backend
-def min(arr):
-    '''
-    '''
-    if BACKEND == CPU:
-        return np.min(arr)
-    else:
-        raise NOT_IMPLEMENTED
-
-
-@with_backend
-def arange(*args, **kwargs):
-    '''
-    '''
-    if BACKEND == CPU:
-        return np.arange(*args, **kwargs)
-    else:
-        raise NOT_IMPLEMENTED
-
-
-@with_backend
-def ones(*args, dtype=types.cpu_type, **kwargs):
-    '''
-    Create an array filled with ones using the current backend.
-    Arguments are directly forwarded to the constructor.
-
-    :returns: zeros following the given shape.
-    :rtype: numpy.ndarray, pyopencl.Buffer or pycuda.gpuarray
-    '''
-    if BACKEND is CPU:
-        return np.ones(*args, dtype=dtype, **kwargs)
-    else:
-        raise NOT_IMPLEMENTED
-
-
-@with_backend
-def zeros(*args, dtype=types.cpu_type, **kwargs):
-    '''
-    Create an array filled with zeros using the current backend.
-    Arguments are directly forwarded to the constructor.
-
-    :returns: zeros following the given shape.
-    :rtype: numpy.ndarray, pyopencl.Buffer or pycuda.gpuarray
-    '''
-    if BACKEND is CPU:
-        return np.zeros(*args, dtype=dtype, **kwargs)
-    else:
-        raise NOT_IMPLEMENTED
-
-
-@with_backend
-def logical_and(a, b):
-    '''
-    Do the logical "and" operation between two arrays.
-    '''
-    if BACKEND == CPU:
-        return np.logical_and(a, b)
-    else:
-        raise NOT_IMPLEMENTED
-
-
-@with_backend
-def logical_or(a, b):
-    '''
-    Do the logical "or" operation between two arrays.
-    '''
-    if BACKEND == CPU:
-        return np.logical_or(a, b)
-    else:
-        raise NOT_IMPLEMENTED
-
-
-@with_backend
-def fft(a):
-    '''
-    Calculate the fast-Fourier transform of an array.
-    '''
-    if BACKEND == CPU:
-        return np.fft.fft(a)
-    else:
-        raise NOT_IMPLEMENTED
-
-
-@with_backend
-def ifft(a):
-    '''
-    Calculate the fast-Fourier transform of an array.
-    '''
-    if BACKEND == CPU:
-        return np.fft.ifft(a)
-    else:
-        raise NOT_IMPLEMENTED
-
-
-@with_backend
-def interpolate_linear(x, xp, yp):
-    '''
-    '''
-    if BACKEND == CPU:
-        return np.interp(x, xp, yp)
-    else:
-        raise NOT_IMPLEMENTED
-
-
-def fftconvolve(a, b, data=None):
-    '''
-    Calculate the convolution using a FFT of two arrays.
-
-    :param a: first array.
-    :type a: numpy.ndarray
-    :param b: first array.
-    :type b: numpy.ndarray
-    :param data: possible values where "a" and "b" where taken from.
-    :type data: numpy.ndarray
-    :returns: convolution of the two array.
-    :rtype: numpy.ndarray
-    '''
-    fa = fft(a)
-    fb = fft(b)
-
-    if data is not None:
-        shift = fftshift(data)
-    else:
-        shift = 1.
-
-    output = ifft(fa * shift * fb)
-
-    return output * (data[1] - data[0])
-
-
-def fftshift(a):
-    '''
-    Compute the shift in frequencies needed for "fftconvolve" to return values in the same data range.
-
-    :param a: input array.
-    :type a: numpy.ndarray
-    :returns: shift in the frequency domain.
-    :rtype: numpy.ndarray
-    '''
-    n0 = sum(a < 0)
-    nt = len(a)
-    com = types.cpu_complex(+2.j * np.pi * n0 / nt)
-    rng = arange(nt, dtype=types.cpu_int).astype(types.cpu_complex)
-    return exp(com * rng)
-
-
-@with_backend
-def exp(a):
-    if BACKEND == CPU:
-        return np.exp(a)
-    else:
-        raise NOT_IMPLEMENTED
-
-
-@with_backend
-def shuffling_index(n):
-    '''
-    Return an array to shuffle data, with length "n".
-
-    :param n: size of the data.
-    :type n: int
-    :returns: shuffling array.
-    :rtype: numpy.ndarray
-    '''
-    if BACKEND == CPU:
-        indices = np.arange(n)
-        np.random.shuffle(indices)
-        return indices
-    else:
-        raise NOT_IMPLEMENTED
+        raise ValueError(f'Unknown backend "{BACKEND}"')

@@ -5,3 +5,5 @@ The following examples have been generated using Jupyter notebooks, and constitu
 
 .. toctree::
    :maxdepth: 2
+
+   notebooks/basic
