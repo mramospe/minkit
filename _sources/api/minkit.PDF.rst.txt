@@ -1,0 +1,61 @@
+PDF
+===
+
+.. currentmodule:: minkit
+
+.. autoclass:: PDF
+   :show-inheritance:
+
+   .. rubric:: Attributes Summary
+
+   .. autosummary::
+
+      ~PDF.BIND
+      ~PDF.CACHE_TYPES
+      ~PDF.CONST
+      ~PDF.all_args
+      ~PDF.args
+      ~PDF.cache
+      ~PDF.cache_type
+      ~PDF.constant
+      ~PDF.data_pars
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+
+      ~PDF.__call__
+      ~PDF.bind
+      ~PDF.enable_cache
+      ~PDF.free_cache
+      ~PDF.from_json_object
+      ~PDF.generate
+      ~PDF.integral
+      ~PDF.norm
+      ~PDF.numerical_normalization
+      ~PDF.to_json_object
+
+   .. rubric:: Attributes Documentation
+
+   .. autoattribute:: BIND
+   .. autoattribute:: CACHE_TYPES
+   .. autoattribute:: CONST
+   .. autoattribute:: all_args
+   .. autoattribute:: args
+   .. autoattribute:: cache
+   .. autoattribute:: cache_type
+   .. autoattribute:: constant
+   .. autoattribute:: data_pars
+
+   .. rubric:: Methods Documentation
+
+   .. automethod:: __call__
+   .. automethod:: bind
+   .. automethod:: enable_cache
+   .. automethod:: free_cache
+   .. automethod:: from_json_object
+   .. automethod:: generate
+   .. automethod:: integral
+   .. automethod:: norm
+   .. automethod:: numerical_normalization
+   .. automethod:: to_json_object

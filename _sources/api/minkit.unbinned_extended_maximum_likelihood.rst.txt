@@ -1,0 +1,6 @@
+unbinned_extended_maximum_likelihood
+====================================
+
+.. currentmodule:: minkit
+
+.. autofunction:: unbinned_extended_maximum_likelihood

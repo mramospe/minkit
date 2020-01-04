@@ -1,0 +1,35 @@
+AddPDFs
+=======
+
+.. currentmodule:: minkit
+
+.. autoclass:: AddPDFs
+   :show-inheritance:
+
+   .. rubric:: Attributes Summary
+
+   .. autosummary::
+
+      ~AddPDFs.extended
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+
+      ~AddPDFs.__call__
+      ~AddPDFs.from_json_object
+      ~AddPDFs.norm
+      ~AddPDFs.to_json_object
+      ~AddPDFs.two_components
+
+   .. rubric:: Attributes Documentation
+
+   .. autoattribute:: extended
+
+   .. rubric:: Methods Documentation
+
+   .. automethod:: __call__
+   .. automethod:: from_json_object
+   .. automethod:: norm
+   .. automethod:: to_json_object
+   .. automethod:: two_components

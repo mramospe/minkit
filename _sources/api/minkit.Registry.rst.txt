@@ -1,0 +1,23 @@
+Registry
+========
+
+.. currentmodule:: minkit
+
+.. autoclass:: Registry
+   :show-inheritance:
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+
+      ~Registry.from_json_object
+      ~Registry.from_list
+      ~Registry.to_json_object
+      ~Registry.to_list
+
+   .. rubric:: Methods Documentation
+
+   .. automethod:: from_json_object
+   .. automethod:: from_list
+   .. automethod:: to_json_object
+   .. automethod:: to_list

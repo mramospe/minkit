@@ -1,0 +1,335 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>minkit.core &mdash; minkit 0.0.0.dev0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> minkit
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.0.0.dev0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../main.html">Functions and classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples.html">Examples</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">minkit</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>minkit.core</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for minkit.core</h1><div class="highlight"><pre>
+<span></span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Definition of the backend where to store the data and run the jobs.</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="kn">import</span> <span class="nn">atexit</span>
+<span class="kn">import</span> <span class="nn">functools</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">from</span> <span class="nn">.operations</span> <span class="k">import</span> <span class="n">types</span>
+<span class="kn">from</span> <span class="nn">.operations</span> <span class="k">import</span> <span class="n">gpu_core</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;aop&#39;</span><span class="p">,</span> <span class="s1">&#39;initialize&#39;</span><span class="p">]</span>
+
+
+<span class="c1"># CPU backend</span>
+<span class="n">CPU</span> <span class="o">=</span> <span class="s1">&#39;cpu&#39;</span>
+<span class="c1"># OpenCL backend</span>
+<span class="n">OPENCL</span> <span class="o">=</span> <span class="n">gpu_core</span><span class="o">.</span><span class="n">OPENCL</span>
+<span class="c1"># CUDA backend</span>
+<span class="n">CUDA</span> <span class="o">=</span> <span class="n">gpu_core</span><span class="o">.</span><span class="n">CUDA</span>
+
+<span class="c1"># Keep the module to do operation on arrays</span>
+<span class="n">ARRAY_OPERATION</span> <span class="o">=</span> <span class="kc">None</span>
+
+<span class="c1"># Current backend (by default use CPU)</span>
+<span class="n">BACKEND</span> <span class="o">=</span> <span class="kc">None</span>
+
+<span class="n">NOT_IMPLEMENTED</span> <span class="o">=</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+    <span class="n">f</span><span class="s1">&#39;Function not implemented for backend &quot;</span><span class="si">{BACKEND}</span><span class="s1">&quot;&#39;</span><span class="p">)</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">calling_base_class_method</span><span class="p">(</span><span class="n">method</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Decorator to always call a base class method.</span>
+<span class="sd">    The execution will take place before the call to the derived class method.</span>
+
+<span class="sd">    :param method: method to decorate.</span>
+<span class="sd">    :type method: function</span>
+<span class="sd">    :returns: wrapper</span>
+<span class="sd">    :rtype: function</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__wrapper</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Internal wrapper.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="nb">getattr</span><span class="p">(</span><span class="nb">super</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span> <span class="bp">self</span><span class="p">),</span> <span class="n">method</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">method</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">__wrapper</span>
+
+
+<span class="k">def</span> <span class="nf">with_backend</span><span class="p">(</span><span class="n">function</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Check whether a backend has been defined and raise an error if not.</span>
+
+<span class="sd">    :param function: function to decorate.</span>
+<span class="sd">    :type function: function</span>
+<span class="sd">    :raises RuntimeError: if a backend is not set.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">function</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__wrapper</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Internal wrapper around the decorated function.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="n">BACKEND</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                <span class="n">f</span><span class="s1">&#39;A backend must be specified before a call to &quot;</span><span class="si">{function.__name__}</span><span class="s1">&quot;&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">function</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">__wrapper</span>
+
+
+<span class="k">class</span> <span class="nc">meta_operation</span><span class="p">(</span><span class="nb">type</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Metaclass to hold the operations.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="nd">@with_backend</span>
+    <span class="k">def</span> <span class="nf">__getattr__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Get an operation with name &quot;name&quot;.</span>
+
+<span class="sd">        :param name: name of the operation.</span>
+<span class="sd">        :type name: str</span>
+<span class="sd">        :returns: operation</span>
+<span class="sd">        :rtype: function</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">ARRAY_OPERATION</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="aop"><a class="viewcode-back" href="../../api/minkit.aop.html#minkit.aop">[docs]</a><span class="k">class</span> <span class="nc">aop</span><span class="p">(</span><span class="n">metaclass</span><span class="o">=</span><span class="n">meta_operation</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Access the operations on arrays for the current backend.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="initialize"><a class="viewcode-back" href="../../api/minkit.initialize.html#minkit.initialize">[docs]</a><span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">backend</span><span class="o">=</span><span class="n">CPU</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Initialize the package, setting the backend and determining what packages to</span>
+<span class="sd">    use accordingly.</span>
+<span class="sd">    The argument &quot;kwargs&quot; is meant to be used in the CUDA backend, and may contain</span>
+<span class="sd">    any of the following values:</span>
+<span class="sd">    - interactive: (bool) whether to select the device manually (defaults to False)</span>
+<span class="sd">    - device: (int) number of the device to use (defaults to None).</span>
+
+<span class="sd">    .. note:: The backend can be also specified as an environmental variable \</span>
+<span class="sd">    MINKIT_BACKEND, overriding that specified in any :func:`initialize` call.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">global</span> <span class="n">BACKEND</span>
+    <span class="k">global</span> <span class="n">ARRAY_OPERATION</span>
+
+    <span class="c1"># Override the backend from the environmental variable &quot;MINKIT_BACKEND&quot;</span>
+    <span class="n">backend</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;MINKIT_BACKEND&#39;</span><span class="p">,</span> <span class="n">backend</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">BACKEND</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">backend</span> <span class="o">!=</span> <span class="n">BACKEND</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+            <span class="n">f</span><span class="s1">&#39;Unable to set backend to &quot;</span><span class="si">{backend}</span><span class="s1">&quot;; already set (</span><span class="si">{BACKEND}</span><span class="s1">)&#39;</span><span class="p">)</span>
+        <span class="k">return</span>
+    <span class="k">elif</span> <span class="n">backend</span> <span class="o">==</span> <span class="n">BACKEND</span><span class="p">:</span>
+        <span class="c1"># It is asking to initialize the same backend again; skip</span>
+        <span class="k">return</span>
+
+    <span class="n">BACKEND</span> <span class="o">=</span> <span class="n">backend</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;Using backend &quot;</span><span class="si">{BACKEND}</span><span class="s1">&quot;&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">BACKEND</span> <span class="o">==</span> <span class="n">CPU</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">.operations</span> <span class="k">import</span> <span class="n">cpu</span>
+        <span class="n">ARRAY_OPERATION</span> <span class="o">=</span> <span class="n">cpu</span>
+    <span class="k">elif</span> <span class="n">BACKEND</span> <span class="o">==</span> <span class="n">CUDA</span> <span class="ow">or</span> <span class="n">BACKEND</span> <span class="o">==</span> <span class="n">OPENCL</span><span class="p">:</span>
+
+        <span class="c1"># Must be called only once</span>
+        <span class="n">gpu_core</span><span class="o">.</span><span class="n">initialize_gpu</span><span class="p">(</span><span class="n">BACKEND</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="kn">from</span> <span class="nn">.operations</span> <span class="k">import</span> <span class="n">gpu</span>
+        <span class="n">ARRAY_OPERATION</span> <span class="o">=</span> <span class="n">gpu</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;Unknown backend &quot;</span><span class="si">{BACKEND}</span><span class="s1">&quot;&#39;</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Miguel Ramos Pernas
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

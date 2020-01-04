@@ -1,0 +1,25 @@
+ProdPDFs
+========
+
+.. currentmodule:: minkit
+
+.. autoclass:: ProdPDFs
+   :show-inheritance:
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+
+      ~ProdPDFs.__call__
+      ~ProdPDFs.from_json_object
+      ~ProdPDFs.norm
+      ~ProdPDFs.numerical_normalization
+      ~ProdPDFs.to_json_object
+
+   .. rubric:: Methods Documentation
+
+   .. automethod:: __call__
+   .. automethod:: from_json_object
+   .. automethod:: norm
+   .. automethod:: numerical_normalization
+   .. automethod:: to_json_object

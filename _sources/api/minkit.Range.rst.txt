@@ -1,0 +1,21 @@
+Range
+=====
+
+.. currentmodule:: minkit
+
+.. autoclass:: Range
+   :show-inheritance:
+
+   .. rubric:: Attributes Summary
+
+   .. autosummary::
+
+      ~Range.bounds
+      ~Range.disjoint
+      ~Range.size
+
+   .. rubric:: Attributes Documentation
+
+   .. autoattribute:: bounds
+   .. autoattribute:: disjoint
+   .. autoattribute:: size

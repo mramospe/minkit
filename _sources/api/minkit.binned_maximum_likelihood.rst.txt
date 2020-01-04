@@ -1,0 +1,6 @@
+binned_maximum_likelihood
+=========================
+
+.. currentmodule:: minkit
+
+.. autofunction:: binned_maximum_likelihood

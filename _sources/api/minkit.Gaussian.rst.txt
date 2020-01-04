@@ -1,0 +1,7 @@
+Gaussian
+========
+
+.. currentmodule:: minkit
+
+.. autoclass:: Gaussian
+   :show-inheritance:

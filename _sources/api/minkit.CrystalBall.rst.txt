@@ -1,0 +1,7 @@
+CrystalBall
+===========
+
+.. currentmodule:: minkit
+
+.. autoclass:: CrystalBall
+   :show-inheritance:

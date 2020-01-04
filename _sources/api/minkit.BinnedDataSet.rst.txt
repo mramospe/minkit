@@ -1,0 +1,29 @@
+BinnedDataSet
+=============
+
+.. currentmodule:: minkit
+
+.. autoclass:: BinnedDataSet
+   :show-inheritance:
+
+   .. rubric:: Attributes Summary
+
+   .. autosummary::
+
+      ~BinnedDataSet.data_pars
+      ~BinnedDataSet.values
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+
+      ~BinnedDataSet.from_array
+
+   .. rubric:: Attributes Documentation
+
+   .. autoattribute:: data_pars
+   .. autoattribute:: values
+
+   .. rubric:: Methods Documentation
+
+   .. automethod:: from_array

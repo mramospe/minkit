@@ -1,0 +1,1417 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>minkit.pdf_core &mdash; minkit 0.0.0.dev0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> minkit
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.0.0.dev0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../main.html">Functions and classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples.html">Examples</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">minkit</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>minkit.pdf_core</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for minkit.pdf_core</h1><div class="highlight"><pre>
+<span></span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Base classes to define PDF types.</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">accessors</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">bindings</span>
+<span class="kn">from</span> <span class="nn">.core</span> <span class="k">import</span> <span class="n">aop</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">dataset</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">parameters</span>
+<span class="kn">from</span> <span class="nn">.operations</span> <span class="k">import</span> <span class="n">types</span>
+
+<span class="kn">import</span> <span class="nn">contextlib</span>
+<span class="kn">import</span> <span class="nn">functools</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;AddPDFs&#39;</span><span class="p">,</span> <span class="s1">&#39;Category&#39;</span><span class="p">,</span> <span class="s1">&#39;ConvPDFs&#39;</span><span class="p">,</span>
+           <span class="s1">&#39;PDF&#39;</span><span class="p">,</span> <span class="s1">&#39;ProdPDFs&#39;</span><span class="p">,</span> <span class="s1">&#39;register_pdf&#39;</span><span class="p">,</span> <span class="s1">&#39;SourcePDF&#39;</span><span class="p">]</span>
+
+<span class="c1"># Default size of the samples to be used during numerical normalization</span>
+<span class="c1"># and calculation of integrals</span>
+<span class="n">NORM_SIZE</span> <span class="o">=</span> <span class="mi">1000000</span>
+
+<span class="c1"># Default size of the grid for the convolution PDFs</span>
+<span class="n">CONV_SIZE</span> <span class="o">=</span> <span class="mi">10000</span>
+
+<span class="c1"># Registry of PDF classes so they can be built by name</span>
+<span class="n">PDF_REGISTRY</span> <span class="o">=</span> <span class="p">{}</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="register_pdf"><a class="viewcode-back" href="../../api/minkit.register_pdf.html#minkit.register_pdf">[docs]</a><span class="k">def</span> <span class="nf">register_pdf</span><span class="p">(</span><span class="n">cl</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Decorator to register PDF classes in the PDF_REGISTRY registry.</span>
+
+<span class="sd">    :param cl: decorated class.</span>
+<span class="sd">    :type cl: class</span>
+<span class="sd">    :returns: class descriptor.</span>
+<span class="sd">    :rtype: class</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">cl</span><span class="o">.</span><span class="vm">__name__</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">PDF_REGISTRY</span><span class="p">:</span>
+        <span class="n">PDF_REGISTRY</span><span class="p">[</span><span class="n">cl</span><span class="o">.</span><span class="vm">__name__</span><span class="p">]</span> <span class="o">=</span> <span class="n">cl</span>
+    <span class="k">return</span> <span class="n">cl</span></div>
+
+
+<span class="k">def</span> <span class="nf">process_cache</span><span class="p">(</span><span class="n">cache</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Update a cache (as a dictionary) by evaluating the given method.</span>
+
+<span class="sd">    :param cache: output cache</span>
+<span class="sd">    :type cache: dict</span>
+<span class="sd">    :param method: method to call.</span>
+<span class="sd">    :type method: function</span>
+<span class="sd">    :param self: class where to evaluate the method.</span>
+<span class="sd">    :type self: class</span>
+<span class="sd">    :param args: arguments to forward to the method call.</span>
+<span class="sd">    :type args: tuple</span>
+<span class="sd">    :param kwargs: keyword arguments to forward to the method call.</span>
+<span class="sd">    :type kwargs: dict</span>
+<span class="sd">    :returns: whatever &quot;method&quot; returns.</span>
+<span class="sd">    :rtype: type of whatever &quot;method&quot; returns.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="n">method</span><span class="o">.</span><span class="vm">__name__</span>
+    <span class="n">v</span> <span class="o">=</span> <span class="n">cache</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="n">method</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">cache</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+    <span class="k">return</span> <span class="n">v</span>
+
+
+<span class="k">def</span> <span class="nf">allows_bind_cache</span><span class="p">(</span><span class="n">method</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Wrap the method of a class.</span>
+
+<span class="sd">    :param method: method of the class.</span>
+<span class="sd">    :type method: function</span>
+<span class="sd">    :returns: wrapper around the method.</span>
+<span class="sd">    :rtype: function</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">method</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__wrapper</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Internal wrapper.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache_type</span> <span class="o">==</span> <span class="n">PDF</span><span class="o">.</span><span class="n">BIND</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">process_cache</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">method</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">__wrapper</span>
+
+
+<span class="k">def</span> <span class="nf">allows_const_cache</span><span class="p">(</span><span class="n">method</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Wrap the method of a class, using a cache if the class is marked as constant.</span>
+
+<span class="sd">    :param method: method of the class.</span>
+<span class="sd">    :type method: function</span>
+<span class="sd">    :returns: wrapper around the method.</span>
+<span class="sd">    :rtype: function</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">method</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__wrapper</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Internal wrapper.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache_type</span> <span class="o">==</span> <span class="n">PDF</span><span class="o">.</span><span class="n">CONST</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">constant</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">process_cache</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">method</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">__wrapper</span>
+
+
+<span class="k">def</span> <span class="nf">allows_bind_or_const_cache</span><span class="p">(</span><span class="n">method</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Wrap the method of a class, using a cache if the class is marked as constant.</span>
+
+<span class="sd">    :param method: method of the class.</span>
+<span class="sd">    :type method: function</span>
+<span class="sd">    :returns: wrapper around the method.</span>
+<span class="sd">    :rtype: function</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">method</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__wrapper</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Internal wrapper.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache_type</span> <span class="o">==</span> <span class="n">PDF</span><span class="o">.</span><span class="n">BIND</span> <span class="ow">or</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cache_type</span> <span class="o">==</span> <span class="n">PDF</span><span class="o">.</span><span class="n">CONST</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">constant</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">process_cache</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">method</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">__wrapper</span>
+
+
+<div class="viewcode-block" id="PDF"><a class="viewcode-back" href="../../api/minkit.PDF.html#minkit.PDF">[docs]</a><span class="k">class</span> <span class="nc">PDF</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Object defining the properties of a PDF.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="c1"># Cache types</span>
+    <span class="n">BIND</span> <span class="o">=</span> <span class="s1">&#39;bind&#39;</span>
+    <span class="n">CONST</span> <span class="o">=</span> <span class="s1">&#39;const&#39;</span>
+
+    <span class="n">CACHE_TYPES</span> <span class="o">=</span> <span class="p">(</span><span class="n">BIND</span><span class="p">,</span> <span class="n">CONST</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">data_pars</span><span class="p">,</span> <span class="n">args_pars</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Build the class from a name, a set of data parameters and argument parameters.</span>
+<span class="sd">        The first correspond to those that must be present on any :class:`DataSet` or</span>
+<span class="sd">        :class:`BinnedDataSet` classes where this object is evaluated.</span>
+<span class="sd">        The second corresponds to the parameters defining the shape of the PDF.</span>
+
+<span class="sd">        :param name: name of the object.</span>
+<span class="sd">        :type name: str</span>
+<span class="sd">        :param data_pars: data parameters.</span>
+<span class="sd">        :type data_pars: Registry(str, Parameter)</span>
+<span class="sd">        :param arg_pars: argument parameters.</span>
+<span class="sd">        :type arg_pars: Registry(str, Parameter)</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__data_pars</span> <span class="o">=</span> <span class="n">data_pars</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__arg_pars</span> <span class="o">=</span> <span class="n">args_pars</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">norm_size</span> <span class="o">=</span> <span class="n">NORM_SIZE</span>
+
+        <span class="c1"># The cache is saved on a dictionary, and inherited classes must avoid colliding names</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__cache</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__cache_type</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">PDF</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+<div class="viewcode-block" id="PDF.__call__"><a class="viewcode-back" href="../../api/minkit.PDF.html#minkit.PDF.__call__">[docs]</a>    <span class="nd">@allows_const_cache</span>
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">FULL</span><span class="p">,</span> <span class="n">normalized</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Call the PDF in the given set of data.</span>
+
+<span class="sd">        :param data: data to evaluate.</span>
+<span class="sd">        :type data: DataSet or BinnedDataSet</span>
+<span class="sd">        :param values: values for the argument parameters to use.</span>
+<span class="sd">        :type values: Registry(str, float)</span>
+<span class="sd">        :param range: normalization range.</span>
+<span class="sd">        :type range: str</span>
+<span class="sd">        :param normalized: whether to return a normalized output.</span>
+<span class="sd">        :type normalized: bool</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+            <span class="s1">&#39;Classes inheriting from &quot;minkit.PDF&quot; must define the &quot;__call__&quot; operator&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PDF.from_json_object"><a class="viewcode-back" href="../../api/minkit.PDF.html#minkit.PDF.from_json_object">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_json_object</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Build a PDF from a JSON object.</span>
+<span class="sd">        This object must represent the internal structure of the PDF.</span>
+
+<span class="sd">        :param obj: JSON object.</span>
+<span class="sd">        :type obj: dict</span>
+<span class="sd">        :returns: newly constructed PDF and parameters.</span>
+<span class="sd">        :rtype: PDF</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">class_name</span> <span class="o">=</span> <span class="n">obj</span><span class="p">[</span><span class="s1">&#39;class&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">class_name</span> <span class="o">==</span> <span class="s1">&#39;PDF&#39;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                <span class="s1">&#39;Classes inheriting from &quot;minkit.PDF&quot; must define the &quot;to_json_object&quot; method&#39;</span><span class="p">)</span>
+        <span class="n">cl</span> <span class="o">=</span> <span class="n">PDF_REGISTRY</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">class_name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">cl</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                <span class="n">f</span><span class="s1">&#39;Class &quot;</span><span class="si">{class_name}</span><span class="s1">&quot; does not appear in the registry&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">cl</span><span class="o">.</span><span class="n">from_json_object</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>  <span class="c1"># Use the correct constructor</span></div>
+
+    <span class="k">def</span> <span class="nf">_generate_single_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">mapsize</span><span class="p">,</span> <span class="n">gensize</span><span class="p">,</span> <span class="n">safe_factor</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Generate data in a single range given the bounds of the different data parameters.</span>
+
+<span class="sd">        :param size: size (or minimum size) of the output sample.</span>
+<span class="sd">        :type size: int</span>
+<span class="sd">        :param values: values of the argument parameters to be used.</span>
+<span class="sd">        :type values: Registry(str, float)</span>
+<span class="sd">        :param mapsize: number of points to consider per dimension (data parameter) \</span>
+<span class="sd">        in order to calculate the maximum value of the PDF.</span>
+<span class="sd">        :type mapsize: int</span>
+<span class="sd">        :param gensize: number of entries to generate per iteration.</span>
+<span class="sd">        :type gensize: int</span>
+<span class="sd">        :param safe_factor: additional factor to multiply the numerically calculated \</span>
+<span class="sd">        maximum of the function. In general this must be modified if the function is \</span>
+<span class="sd">        not well-behaved.</span>
+<span class="sd">        :type safe_factor: float</span>
+<span class="sd">        :param bounds: bounds of the different data parameters (must be sorted).</span>
+<span class="sd">        :type bounds: numpy.ndarray</span>
+<span class="sd">        :returns: output sample.</span>
+<span class="sd">        :rtype: DataSet</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">grid</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">evaluation_grid</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_pars</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">mapsize</span><span class="p">)</span>
+
+        <span class="n">m</span> <span class="o">=</span> <span class="n">safe_factor</span> <span class="o">*</span> \
+            <span class="n">aop</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="fm">__call__</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">normalized</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">while</span> <span class="n">result</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">size</span><span class="p">:</span>
+
+            <span class="n">d</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">uniform_sample</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_pars</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">gensize</span><span class="p">)</span>
+            <span class="n">f</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__call__</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">normalized</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">u</span> <span class="o">=</span> <span class="n">aop</span><span class="o">.</span><span class="n">random_uniform</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">d</span><span class="p">))</span>
+
+            <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">subset</span><span class="p">(</span><span class="n">u</span> <span class="o">&lt;</span> <span class="n">f</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">result</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">subset</span><span class="p">(</span><span class="n">u</span> <span class="o">&lt;</span> <span class="n">f</span><span class="p">),</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># Can not use &quot;slice&quot; since __getitem__ does not support it for GPUArrays</span>
+        <span class="k">return</span> <span class="n">result</span><span class="o">.</span><span class="n">subset</span><span class="p">(</span><span class="n">cond</span><span class="o">=</span><span class="n">aop</span><span class="o">.</span><span class="n">true_till</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="p">),</span> <span class="n">size</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_integral_bin_area</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">size</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Calculate the area of a bin used to calculate the numerical normalization.</span>
+
+<span class="sd">        :param bounds: bounds defining the range.</span>
+<span class="sd">        :type bounds: numpy.ndarray</span>
+<span class="sd">        :returns: area of the normalization bin.</span>
+<span class="sd">        :rtype: float</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">::</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">::</span><span class="mi">2</span><span class="p">])</span> <span class="o">*</span> <span class="mf">1.</span> <span class="o">/</span> <span class="n">size</span>
+
+    <span class="k">def</span> <span class="nf">_integral_single_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="nb">range</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Calculate the integral of the PDF on a single set of bounds.</span>
+
+<span class="sd">        :param values: values to use in the evaluation.</span>
+<span class="sd">        :type values: Registry</span>
+<span class="sd">        :param bounds: bounds of the data parameters.</span>
+<span class="sd">        :type bounds: numpy.ndarray</span>
+<span class="sd">        :param range: normalization range to consider.</span>
+<span class="sd">        :type range: str</span>
+<span class="sd">        :returns: integral of the PDF in the range defined by &quot;bounds&quot; normalized to &quot;range&quot;.</span>
+<span class="sd">        :rtype: float</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">evaluation_grid</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_pars</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm_size</span><span class="p">)</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_integral_bin_area</span><span class="p">(</span><span class="n">bounds</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">g</span><span class="p">))</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__call__</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="nb">range</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">aop</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">*</span> <span class="n">a</span>
+
+    <span class="k">def</span> <span class="nf">_numerical_normalization_single_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Calculate the normalization value for a set of bounds.</span>
+
+<span class="sd">        :param values: values to use in the evaluation of the PDF.</span>
+<span class="sd">        :type values: Registry</span>
+<span class="sd">        :param bounds: bounds of the data parameters.</span>
+<span class="sd">        :type bounds: numpy.ndarray</span>
+<span class="sd">        :returns: normalization value.</span>
+<span class="sd">        :rtype: float</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">evaluation_grid</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_pars</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm_size</span><span class="p">)</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_integral_bin_area</span><span class="p">(</span><span class="n">bounds</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">g</span><span class="p">))</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__call__</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">normalized</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">aop</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">*</span> <span class="n">a</span>
+
+    <span class="k">def</span> <span class="nf">_process_values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Process the input values.</span>
+<span class="sd">        If &quot;values&quot; is set to None, then the values from the argument </span>
+<span class="sd">        parameters are used.</span>
+
+<span class="sd">        :param values: possible values for the parameters to use.</span>
+<span class="sd">        :type values: Registry(str, float)</span>
+<span class="sd">        :returns: processed values, sorted following the argument parameters.</span>
+<span class="sd">        :rtype: tuple(float)</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">parsed_values</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">values</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">parsed_values</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">):</span>
+                <span class="n">v</span> <span class="o">=</span> <span class="n">values</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">parsed_values</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+            <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">parsed_values</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">all_args</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Get all the argument parameters associated to this class.</span>
+<span class="sd">        If this object is composed by many :class:`PDF`, a recursion is done in order</span>
+<span class="sd">        to get all of them.</span>
+
+<span class="sd">        :returns: all the argument parameters associated to this class.</span>
+<span class="sd">        :rtype: Registry(str, Parameter)</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">args</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">args</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Get the argument parameters this object directly depends on.</span>
+
+<span class="sd">        :returns: parameters this object directly depends on.</span>
+<span class="sd">        :rtype: Registry(str, Parameter)</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__arg_pars</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Return the cached values for this PDF.</span>
+
+<span class="sd">        :returns: cache</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cache</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">cache_type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Get whether there are elements in the cache or not.</span>
+
+<span class="sd">        :returns: whether there are elements in the cache or not.</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cache_type</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">constant</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Get whether this is a constant :class:`PDF`.</span>
+
+<span class="sd">        :returns: whether this object can be marked as constant.</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="nb">all</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">constant</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">all_args</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">data_pars</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Get the data parameters this object directly depends on.</span>
+
+<span class="sd">        :returns: parameters this object directly depends on.</span>
+<span class="sd">        :rtype: Registry(str, Parameter)</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__data_pars</span>
+
+<div class="viewcode-block" id="PDF.bind"><a class="viewcode-back" href="../../api/minkit.PDF.html#minkit.PDF.bind">[docs]</a>    <span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
+    <span class="k">def</span> <span class="nf">bind</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">FULL</span><span class="p">,</span> <span class="n">normalized</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Prepare an object that will be called many times with the same set of</span>
+<span class="sd">        values.</span>
+<span class="sd">        This is usefull for PDFs using a cache, to avoid creating it many times</span>
+<span class="sd">        in sucessive calls to :meth:`PDF.__call__`.</span>
+
+<span class="sd">        :param values: values for the argument parameters to use.</span>
+<span class="sd">        :type values: Registry(str, float)</span>
+<span class="sd">        :param range: normalization range.</span>
+<span class="sd">        :type range: str</span>
+<span class="sd">        :param normalized: whether to return a normalized output.</span>
+<span class="sd">        :type normalized: bool</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">enable_cache</span><span class="p">(</span><span class="n">PDF</span><span class="o">.</span><span class="n">BIND</span><span class="p">)</span>
+        <span class="k">yield</span> <span class="n">bindings</span><span class="o">.</span><span class="n">bind_class_arguments</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="n">values</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="nb">range</span><span class="p">,</span> <span class="n">normalized</span><span class="o">=</span><span class="n">normalized</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">free_cache</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="PDF.enable_cache"><a class="viewcode-back" href="../../api/minkit.PDF.html#minkit.PDF.enable_cache">[docs]</a>    <span class="k">def</span> <span class="nf">enable_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctype</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Method to enable the cache for values of this PDF.</span>
+
+<span class="sd">        :param ctype: cache type, it can be any of (&#39;bind&#39;, &#39;const&#39;).</span>
+<span class="sd">        :type ctype: str</span>
+
+<span class="sd">        .. warning:: This method is not meant to be utilized by users since \</span>
+<span class="sd">        it can turn really harmful if not handled properly.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="n">ctype</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">PDF</span><span class="o">.</span><span class="n">CACHE_TYPES</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="n">f</span><span class="s1">&#39;Unknown cache type &quot;</span><span class="si">{ctype}</span><span class="s1">&quot;; select from: </span><span class="si">{PDF.CACHE_TYPES}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__cache</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__cache_type</span> <span class="o">=</span> <span class="n">ctype</span></div>
+
+<div class="viewcode-block" id="PDF.free_cache"><a class="viewcode-back" href="../../api/minkit.PDF.html#minkit.PDF.free_cache">[docs]</a>    <span class="k">def</span> <span class="nf">free_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Free the cache from memory.</span>
+
+<span class="sd">        .. warning:: This method is not meant to be utilized by users since \</span>
+<span class="sd">        it can turn really harmful if not handled properly.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__cache</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__cache_type</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="PDF.generate"><a class="viewcode-back" href="../../api/minkit.PDF.html#minkit.PDF.generate">[docs]</a>    <span class="k">def</span> <span class="nf">generate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mapsize</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">gensize</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span> <span class="n">safe_factor</span><span class="o">=</span><span class="mf">1.1</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">FULL</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Generate random data.</span>
+<span class="sd">        A call to :meth:`PDF.bind` is implicit, since several calls will be done</span>
+<span class="sd">        to the PDF with the same sets of values.</span>
+
+<span class="sd">        :param size: size (or minimum size) of the output sample.</span>
+<span class="sd">        :type size: int</span>
+<span class="sd">        :param values: values of the argument parameters to be used.</span>
+<span class="sd">        :type values: Registry(str, float)</span>
+<span class="sd">        :param mapsize: number of points to consider per dimension (data parameter) \</span>
+<span class="sd">        in order to calculate the maximum value of the PDF.</span>
+<span class="sd">        :type mapsize: int</span>
+<span class="sd">        :param gensize: number of entries to generate per iteration.</span>
+<span class="sd">        :type gensize: int</span>
+<span class="sd">        :param safe_factor: additional factor to multiply the numerically calculated \</span>
+<span class="sd">        maximum of the function. In general this must be modified if the function is \</span>
+<span class="sd">        not well-behaved.</span>
+<span class="sd">        :type safe_factor: float</span>
+<span class="sd">        :param range: range of the data parameters where to generate data.</span>
+<span class="sd">        :type range: str</span>
+<span class="sd">        :returns: output sample.</span>
+<span class="sd">        :rtype: DataSet</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="nb">range</span><span class="p">,</span> <span class="n">normalized</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="k">as</span> <span class="n">proxy</span><span class="p">:</span>
+
+            <span class="n">bounds</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">bounds_for_range</span><span class="p">(</span><span class="n">proxy</span><span class="o">.</span><span class="n">data_pars</span><span class="p">,</span> <span class="nb">range</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">bounds</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="n">proxy</span><span class="o">.</span><span class="n">_generate_single_bounds</span><span class="p">(</span>
+                    <span class="n">size</span><span class="p">,</span> <span class="n">mapsize</span><span class="p">,</span> <span class="n">gensize</span><span class="p">,</span> <span class="n">safe_factor</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">values</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Get the associated number of entries per bounds</span>
+                <span class="n">fracs</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">bounds</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>  <span class="c1"># The last does not need to be calculated</span>
+                    <span class="n">fracs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_integral_single_bounds</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="nb">range</span><span class="p">,</span> <span class="n">values</span><span class="p">))</span>
+
+                <span class="n">u</span> <span class="o">=</span> <span class="n">aop</span><span class="o">.</span><span class="n">random_uniform</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="p">)</span>
+
+                <span class="n">entries</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fracs</span><span class="p">:</span>
+                    <span class="c1"># TODO: MUST DEFINE PROPERLY FOR BOOLEANS</span>
+                    <span class="n">entries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">aop</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">u</span> <span class="o">&lt;</span> <span class="n">f</span><span class="p">)))</span>
+                <span class="c1"># The last is calculated from the required number of entries</span>
+                <span class="n">entries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">size</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">entries</span><span class="p">))</span>
+
+                <span class="c1"># Iterate over the bounds and add data accordingly</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">for</span> <span class="n">e</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">entries</span><span class="p">,</span> <span class="n">bounds</span><span class="p">):</span>
+
+                    <span class="n">new</span> <span class="o">=</span> <span class="n">proxy</span><span class="o">.</span><span class="n">_generate_single_bounds</span><span class="p">(</span>
+                        <span class="n">e</span><span class="p">,</span> <span class="n">mapsize</span><span class="p">,</span> <span class="n">gensize</span><span class="p">,</span> <span class="n">safe_factor</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">values</span><span class="p">)</span>
+
+                    <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="n">result</span> <span class="o">=</span> <span class="n">new</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">result</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">new</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+                <span class="c1"># Need to shuffle the data to avoid dropping elements from the last bounds only</span>
+                <span class="n">result</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">result</span></div>
+
+<div class="viewcode-block" id="PDF.integral"><a class="viewcode-back" href="../../api/minkit.PDF.html#minkit.PDF.integral">[docs]</a>    <span class="k">def</span> <span class="nf">integral</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">integral_range</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">FULL</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">FULL</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Calculate the integral of a :class:`PDF`.</span>
+
+<span class="sd">        :param values: values to use in the evaluation.</span>
+<span class="sd">        :type values: Registry</span>
+<span class="sd">        :param integral_range: range of the integral to compute.</span>
+<span class="sd">        :type integral_range: str</span>
+<span class="sd">        :param range: normalization range to consider.</span>
+<span class="sd">        :type range: str</span>
+<span class="sd">        :returns: integral of the PDF in the range defined by &quot;integral_range&quot; normalized to &quot;range&quot;.</span>
+<span class="sd">        :rtype: float</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">bounds</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">bounds_for_range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_pars</span><span class="p">,</span> <span class="n">integral_range</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">bounds</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_integral_single_bounds</span><span class="p">(</span><span class="n">bounds</span><span class="p">,</span> <span class="nb">range</span><span class="p">,</span> <span class="n">values</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">fromiter</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">_integral_single_bounds</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="nb">range</span><span class="p">,</span> <span class="n">values</span><span class="p">)</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">bounds</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">types</span><span class="o">.</span><span class="n">cpu_type</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="PDF.norm"><a class="viewcode-back" href="../../api/minkit.PDF.html#minkit.PDF.norm">[docs]</a>    <span class="nd">@allows_bind_or_const_cache</span>
+    <span class="k">def</span> <span class="nf">norm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">FULL</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Calculate the normalization of the PDF.</span>
+
+<span class="sd">        :param values: values of the parameters to use.</span>
+<span class="sd">        :type values: Registry(str, float)</span>
+<span class="sd">        :param range: normalization range to consider.</span>
+<span class="sd">        :type range: str</span>
+<span class="sd">        :returns: value of the normalization.</span>
+<span class="sd">        :rtype: float</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+            <span class="s1">&#39;Classes inheriting from &quot;minkit.PDF&quot; must define the &quot;norm&quot; method&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PDF.numerical_normalization"><a class="viewcode-back" href="../../api/minkit.PDF.html#minkit.PDF.numerical_normalization">[docs]</a>    <span class="nd">@allows_bind_or_const_cache</span>
+    <span class="k">def</span> <span class="nf">numerical_normalization</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">FULL</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Calculate a numerical normalization.</span>
+
+<span class="sd">        :param values: values to use.</span>
+<span class="sd">        :type values: Registry(str, float)</span>
+<span class="sd">        :param range: normalization range.</span>
+<span class="sd">        :type range: str</span>
+<span class="sd">        :returns: normalization.</span>
+<span class="sd">        :rtype: float</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">bounds</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">bounds_for_range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_pars</span><span class="p">,</span> <span class="nb">range</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">bounds</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_numerical_normalization_single_bounds</span><span class="p">(</span><span class="n">bounds</span><span class="p">,</span> <span class="n">values</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">fromiter</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">_numerical_normalization_single_bounds</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">values</span><span class="p">)</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">bounds</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">types</span><span class="o">.</span><span class="n">cpu_type</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="PDF.to_json_object"><a class="viewcode-back" href="../../api/minkit.PDF.html#minkit.PDF.to_json_object">[docs]</a>    <span class="k">def</span> <span class="nf">to_json_object</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Dump the PDF information into a JSON object.</span>
+<span class="sd">        The PDF can be constructed at any time by calling :meth:`PDF.from_json_object`.</span>
+
+<span class="sd">        :returns: object that can be saved into a JSON file.</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+            <span class="s1">&#39;Classes inheriting from &quot;minkit.PDF&quot; must define the &quot;to_json_object&quot; method&#39;</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="SourcePDF"><a class="viewcode-back" href="../../api/minkit.SourcePDF.html#minkit.SourcePDF">[docs]</a><span class="k">class</span> <span class="nc">SourcePDF</span><span class="p">(</span><span class="n">PDF</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    A PDF created from source files.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">data_pars</span><span class="p">,</span> <span class="n">arg_pars</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">var_arg_pars</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        This object defines a PDF built from source files (C++, PyOpenCL or CUDA), which depend</span>
+<span class="sd">        on the backend to use.</span>
+<span class="sd">        The name of the PDF is inferred from the class name, so a file with name &quot;name.cpp&quot; (CPU) or</span>
+<span class="sd">        &quot;name.c&quot; (CUDA an OpenCL) is expected to be in PDF_PATH.</span>
+
+<span class="sd">        :param name: name of the PDF.</span>
+<span class="sd">        :type name: str</span>
+<span class="sd">        :param data_pars: data parameters.</span>
+<span class="sd">        :type data_pars: Registry(str, Parameter)</span>
+<span class="sd">        :param arg_pars: argument parameters.</span>
+<span class="sd">        :type arg_pars: Registry(str, Parameter)</span>
+<span class="sd">        :param var_arg_pars: argument parameters whose number can vary.</span>
+<span class="sd">        :type var_arg_pars: Registry(str, Parameter)</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">arg_pars</span> <span class="o">=</span> <span class="n">arg_pars</span> <span class="ow">or</span> <span class="p">[]</span>
+
+        <span class="c1"># Must parse it correctly, since &quot;None&quot; means the function can not be built with</span>
+        <span class="c1"># a variable number of arguments</span>
+        <span class="k">if</span> <span class="n">var_arg_pars</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">nvar_arg_pars</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">var_arg_pars</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__var_args</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">nvar_arg_pars</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">var_arg_pars</span><span class="p">)</span>
+            <span class="n">var_arg_pars</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">var_arg_pars</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__var_args</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">Registry</span><span class="o">.</span><span class="n">from_list</span><span class="p">(</span><span class="n">var_arg_pars</span><span class="p">)</span>
+
+        <span class="c1"># Access the PDF</span>
+        <span class="n">function</span><span class="p">,</span> <span class="n">pdf</span><span class="p">,</span> <span class="n">normalization</span> <span class="o">=</span> <span class="n">accessors</span><span class="o">.</span><span class="n">access_pdf</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">ndata_pars</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">data_pars</span><span class="p">),</span> <span class="n">narg_pars</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">arg_pars</span><span class="p">),</span> <span class="n">nvar_arg_pars</span><span class="o">=</span><span class="n">nvar_arg_pars</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__function</span> <span class="o">=</span> <span class="n">function</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__pdf</span> <span class="o">=</span> <span class="n">pdf</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__norm</span> <span class="o">=</span> <span class="n">normalization</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">SourcePDF</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parameters</span><span class="o">.</span><span class="n">Registry</span><span class="o">.</span><span class="n">from_list</span><span class="p">(</span>
+            <span class="n">data_pars</span><span class="p">),</span> <span class="n">parameters</span><span class="o">.</span><span class="n">Registry</span><span class="o">.</span><span class="n">from_list</span><span class="p">(</span><span class="n">arg_pars</span> <span class="o">+</span> <span class="n">var_arg_pars</span><span class="p">))</span>
+
+<div class="viewcode-block" id="SourcePDF.__call__"><a class="viewcode-back" href="../../api/minkit.SourcePDF.html#minkit.SourcePDF.__call__">[docs]</a>    <span class="nd">@allows_const_cache</span>
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">FULL</span><span class="p">,</span> <span class="n">normalized</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Call the PDF in the given set of data.</span>
+
+<span class="sd">        :param data: data to evaluate.</span>
+<span class="sd">        :type data: DataSet or BinnedDataSet</span>
+<span class="sd">        :param values: values for the argument parameters to use.</span>
+<span class="sd">        :type values: Registry(str, float)</span>
+<span class="sd">        :param range: normalization range.</span>
+<span class="sd">        :type range: str</span>
+<span class="sd">        :param normalized: whether to return a normalized output.</span>
+<span class="sd">        :type normalized: bool</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="c1"># Determine the values to use</span>
+        <span class="n">fvals</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_values</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+
+        <span class="c1"># If there is a variable number of arguments, must be at the end</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__var_args</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">nvar_args</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__var_args</span><span class="p">)</span>
+            <span class="n">var_args_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">fvals</span><span class="p">[</span><span class="o">-</span><span class="n">nvar_args</span><span class="p">:],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">types</span><span class="o">.</span><span class="n">c_double</span><span class="p">)</span>
+            <span class="n">fvals</span> <span class="o">=</span> <span class="n">fvals</span><span class="p">[:</span><span class="o">-</span><span class="n">nvar_args</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">var_args_array</span><span class="p">,)</span>
+
+        <span class="c1"># Prepare the data arrays I/O</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">aop</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+        <span class="n">data_arrs</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_pars</span><span class="p">)</span>
+
+        <span class="c1"># Call the real function</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__pdf</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="o">*</span><span class="n">data_arrs</span><span class="p">,</span> <span class="o">*</span><span class="n">fvals</span><span class="p">)</span>
+
+        <span class="c1"># Calculate the normalization</span>
+        <span class="k">if</span> <span class="n">normalized</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__norm</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="c1"># There is an analytical approach to calculate the normalization</span>
+                <span class="n">nr</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">bounds_for_range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_pars</span><span class="p">,</span> <span class="nb">range</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">nr</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__norm</span><span class="p">(</span><span class="o">*</span><span class="n">fvals</span><span class="p">,</span> <span class="o">*</span><span class="n">nr</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">fromiter</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">__norm</span><span class="p">(</span><span class="o">*</span><span class="n">fvals</span><span class="p">,</span> <span class="o">*</span><span class="n">inr</span><span class="p">)</span>
+                                            <span class="k">for</span> <span class="n">inr</span> <span class="ow">in</span> <span class="n">nr</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">types</span><span class="o">.</span><span class="n">cpu_type</span><span class="p">))</span>
+                <span class="k">return</span> <span class="n">out</span> <span class="o">/</span> <span class="n">n</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Must use a numerical normalization</span>
+                <span class="k">return</span> <span class="n">out</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">numerical_normalization</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="nb">range</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">out</span></div>
+
+<div class="viewcode-block" id="SourcePDF.from_json_object"><a class="viewcode-back" href="../../api/minkit.SourcePDF.html#minkit.SourcePDF.from_json_object">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_json_object</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Build a PDF from a JSON object.</span>
+<span class="sd">        This object must represent the internal structure of the PDF.</span>
+
+<span class="sd">        :param obj: JSON object.</span>
+<span class="sd">        :type obj: dict</span>
+<span class="sd">        :returns: newly constructed PDF and parameters.</span>
+<span class="sd">        :rtype: PDF</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;SourcePDF&#39;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                <span class="s1">&#39;SourcePDF is an abstract class; do not use it directly&#39;</span><span class="p">)</span>
+
+        <span class="n">data_pars</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+            <span class="nb">map</span><span class="p">(</span><span class="n">parameters</span><span class="o">.</span><span class="n">Parameter</span><span class="o">.</span><span class="n">from_json_object</span><span class="p">,</span> <span class="n">obj</span><span class="p">[</span><span class="s1">&#39;data_pars&#39;</span><span class="p">]))</span>
+        <span class="n">arg_pars</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+            <span class="nb">map</span><span class="p">(</span><span class="n">parameters</span><span class="o">.</span><span class="n">Parameter</span><span class="o">.</span><span class="n">from_json_object</span><span class="p">,</span> <span class="n">obj</span><span class="p">[</span><span class="s1">&#39;arg_pars&#39;</span><span class="p">]))</span>
+
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">obj</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span> <span class="o">*</span><span class="n">data_pars</span><span class="p">,</span> <span class="o">*</span><span class="n">arg_pars</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="SourcePDF.function"><a class="viewcode-back" href="../../api/minkit.SourcePDF.html#minkit.SourcePDF.function">[docs]</a>    <span class="k">def</span> <span class="nf">function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">data_values</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">FULL</span><span class="p">,</span> <span class="n">normalized</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Evaluate the function, where the data values are provided by the user as single numbers.</span>
+
+<span class="sd">        :param data_values: values of the data parameters.</span>
+<span class="sd">        :type dat_values: tuple(float)</span>
+<span class="sd">        :param values: values of the argument parameters.</span>
+<span class="sd">        :type values: Registry(str, float)</span>
+<span class="sd">        :param range: normalization range.</span>
+<span class="sd">        :type range: str</span>
+<span class="sd">        :param normalized: whether to return a normalized value.</span>
+<span class="sd">        :type normalized: bool</span>
+<span class="sd">        :returns: value of the PDF.</span>
+<span class="sd">        :rtype: float</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">fvals</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_values</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__function</span><span class="p">(</span><span class="o">*</span><span class="n">data_values</span><span class="p">,</span> <span class="o">*</span><span class="n">fvals</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">normalized</span><span class="p">:</span>
+            <span class="n">nr</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">bounds_for_range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_pars</span><span class="p">,</span> <span class="nb">range</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">nr</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__norm</span><span class="p">(</span><span class="o">*</span><span class="n">fvals</span><span class="p">,</span> <span class="o">*</span><span class="n">nr</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">fromiter</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">__norm</span><span class="p">(</span><span class="o">*</span><span class="n">fvals</span><span class="p">,</span> <span class="o">*</span><span class="n">inr</span><span class="p">)</span>
+                                        <span class="k">for</span> <span class="n">inr</span> <span class="ow">in</span> <span class="n">nr</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">types</span><span class="o">.</span><span class="n">cpu_type</span><span class="p">))</span>
+            <span class="k">return</span> <span class="n">v</span> <span class="o">/</span> <span class="n">n</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">v</span></div>
+
+<div class="viewcode-block" id="SourcePDF.norm"><a class="viewcode-back" href="../../api/minkit.SourcePDF.html#minkit.SourcePDF.norm">[docs]</a>    <span class="nd">@allows_bind_or_const_cache</span>
+    <span class="k">def</span> <span class="nf">norm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">FULL</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Calculate the normalization of the PDF.</span>
+<span class="sd">        If the normalization is not defined in the source file, then a</span>
+<span class="sd">        numerical integration is done in order to calculate it.</span>
+
+<span class="sd">        :param values: values of the parameters to use.</span>
+<span class="sd">        :type values: Registry(str, float)</span>
+<span class="sd">        :param range: normalization range to consider.</span>
+<span class="sd">        :type range: str</span>
+<span class="sd">        :returns: value of the normalization.</span>
+<span class="sd">        :rtype: float</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__norm</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">fvals</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_values</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+            <span class="n">nr</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">bounds_for_range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_pars</span><span class="p">,</span> <span class="nb">range</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">nr</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__norm</span><span class="p">(</span><span class="o">*</span><span class="n">fvals</span><span class="p">,</span> <span class="o">*</span><span class="n">nr</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">fromiter</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">__norm</span><span class="p">(</span><span class="o">*</span><span class="n">fvals</span><span class="p">,</span> <span class="o">*</span><span class="n">inr</span><span class="p">)</span> <span class="k">for</span> <span class="n">inr</span> <span class="ow">in</span> <span class="n">nr</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">types</span><span class="o">.</span><span class="n">cpu_type</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">numerical_normalization</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="nb">range</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="SourcePDF.to_json_object"><a class="viewcode-back" href="../../api/minkit.SourcePDF.html#minkit.SourcePDF.to_json_object">[docs]</a>    <span class="k">def</span> <span class="nf">to_json_object</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Dump the PDF information into a JSON object.</span>
+<span class="sd">        The PDF can be constructed at any time by calling :meth:`PDF.from_json_object`.</span>
+
+<span class="sd">        :returns: object that can be saved into a JSON file.</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;class&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>  <span class="c1"># Save also the class name of the PDF</span>
+                <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                <span class="s1">&#39;data_pars&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">to_json_object</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_pars</span><span class="o">.</span><span class="n">values</span><span class="p">()],</span>
+                <span class="s1">&#39;arg_pars&#39;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">parameters</span><span class="o">.</span><span class="n">Parameter</span><span class="o">.</span><span class="n">to_json_object</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">values</span><span class="p">()))}</span></div></div>
+
+
+<span class="k">class</span> <span class="nc">MultiPDF</span><span class="p">(</span><span class="n">PDF</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Base class for subclasses managing multiple PDFs.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">pdfs</span><span class="p">,</span> <span class="n">arg_pars</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Base class owing many PDFs.</span>
+
+<span class="sd">        :param name: name of the PDF.</span>
+<span class="sd">        :type name: str</span>
+<span class="sd">        :param pdfs: :class:`PDF` objects to hold.</span>
+<span class="sd">        :type pdfs: list(PDF)</span>
+<span class="sd">        :param arg_pars: possible argument parameters.</span>
+<span class="sd">        :type arg_pars: Registry(str, Parameter)</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="n">arg_pars</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">arg_pars</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">Registry</span><span class="o">.</span><span class="n">from_list</span><span class="p">(</span><span class="n">arg_pars</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">arg_pars</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">Registry</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__pdfs</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">Registry</span><span class="o">.</span><span class="n">from_list</span><span class="p">(</span><span class="n">pdfs</span><span class="p">)</span>
+
+        <span class="n">data_pars</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">Registry</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">pdf</span> <span class="ow">in</span> <span class="n">pdfs</span><span class="p">:</span>
+            <span class="n">data_pars</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">pdf</span><span class="o">.</span><span class="n">data_pars</span><span class="p">)</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">MultiPDF</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">data_pars</span><span class="p">,</span> <span class="n">arg_pars</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">all_args</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Get all the argument parameters associated to this class.</span>
+<span class="sd">        If this object is composed by many :class:`PDF`, a recursion is done in order</span>
+<span class="sd">        to get all of them.</span>
+
+<span class="sd">        :returns: all the argument parameters associated to this class.</span>
+<span class="sd">        :rtype: Registry(str, Parameter)</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">Registry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__pdfs</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">args</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">all_args</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">args</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">pdfs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Get the registry of PDFs within this class.</span>
+
+<span class="sd">        :returns: PDFs owned by this class.</span>
+<span class="sd">        :rtype: Registry(str, PDF)</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__pdfs</span>
+
+    <span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
+    <span class="k">def</span> <span class="nf">bind</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">FULL</span><span class="p">,</span> <span class="n">normalized</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Prepare an object that will be called many times with the same set of</span>
+<span class="sd">        values.</span>
+<span class="sd">        This is usefull for PDFs using a cache, to avoid creating it many times</span>
+<span class="sd">        in sucessive calls to :meth:`PDF.__call__`.</span>
+
+<span class="sd">        :param values: values for the argument parameters to use.</span>
+<span class="sd">        :type values: Registry(str, float)</span>
+<span class="sd">        :param range: normalization range.</span>
+<span class="sd">        :type range: str</span>
+<span class="sd">        :param normalized: whether to return a normalized output.</span>
+<span class="sd">        :type normalized: bool</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">pdf</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pdfs</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">pdf</span><span class="o">.</span><span class="n">enable_cache</span><span class="p">(</span><span class="n">PDF</span><span class="o">.</span><span class="n">BIND</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">super</span><span class="p">(</span><span class="n">MultiPDF</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="nb">range</span><span class="p">,</span> <span class="n">normalized</span><span class="p">)</span> <span class="k">as</span> <span class="n">base</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="n">base</span>
+
+    <span class="k">def</span> <span class="nf">component</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Get the :class:`PDF` object with the given name.</span>
+
+<span class="sd">        :param name: name of the :class:`PDF`.</span>
+<span class="sd">        :type name: str</span>
+<span class="sd">        :returns: component with the given name.</span>
+<span class="sd">        :rtype: PDF</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">pdf</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__pdfs</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">pdf</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">name</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">pdf</span>
+        <span class="k">raise</span> <span class="ne">LookupError</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;No PDF with name &quot;</span><span class="si">{name}</span><span class="s1">&quot; hass been found&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">enable_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctype</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Method to enable the cache for values of this PDF.</span>
+
+<span class="sd">        :param ctype: cache type, it can be any of (&#39;bind&#39;, &#39;const&#39;).</span>
+<span class="sd">        :type ctype: str</span>
+
+<span class="sd">        .. warning:: This method is not meant to be utilized by users since \</span>
+<span class="sd">        it can turn really harmful if not handled properly.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">MultiPDF</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">enable_cache</span><span class="p">(</span><span class="n">ctype</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">pdf</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pdfs</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">pdf</span><span class="o">.</span><span class="n">enable_cache</span><span class="p">(</span><span class="n">ctype</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">free_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Free the cache from memory.</span>
+
+<span class="sd">        .. warning:: This method is not meant to be utilized by users since \</span>
+<span class="sd">        it can turn really harmful if not handled properly.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">MultiPDF</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">free_cache</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">pdf</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pdfs</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">pdf</span><span class="o">.</span><span class="n">free_cache</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="AddPDFs"><a class="viewcode-back" href="../../api/minkit.AddPDFs.html#minkit.AddPDFs">[docs]</a><span class="nd">@register_pdf</span>
+<span class="k">class</span> <span class="nc">AddPDFs</span><span class="p">(</span><span class="n">MultiPDF</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Definition of the addition of many PDFs.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">pdfs</span><span class="p">,</span> <span class="n">yields</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        This special PDF defines the sum of many different PDFs, where each</span>
+<span class="sd">        of them is multiplied by a factor.</span>
+<span class="sd">        The number of factors must be equal to that of the PDFs, if one</span>
+<span class="sd">        wants an &quot;extended&quot; PDF, or one smaller.</span>
+<span class="sd">        In the latter case, the last factor is calculated from the normalization</span>
+<span class="sd">        condition.</span>
+
+<span class="sd">        :param name: name of the PDF.</span>
+<span class="sd">        :type name: str</span>
+<span class="sd">        :param pdfs: PDFs to add.</span>
+<span class="sd">        :type pdfs: list(PDF)</span>
+<span class="sd">        :param yields: factors to multiply the PDFs.</span>
+<span class="sd">        :type yields: list(Parameter)</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">pdfs</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">yields</span><span class="p">)</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">AddPDFs</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">pdfs</span><span class="p">,</span> <span class="n">yields</span><span class="p">)</span>
+
+<div class="viewcode-block" id="AddPDFs.__call__"><a class="viewcode-back" href="../../api/minkit.AddPDFs.html#minkit.AddPDFs.__call__">[docs]</a>    <span class="nd">@allows_const_cache</span>
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">FULL</span><span class="p">,</span> <span class="n">normalized</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Call the PDF in the given set of data.</span>
+
+<span class="sd">        :param data: data to evaluate.</span>
+<span class="sd">        :type data: DataSet or BinnedDataSet</span>
+<span class="sd">        :param values: values for the argument parameters to use.</span>
+<span class="sd">        :type values: Registry(str, float)</span>
+<span class="sd">        :param range: normalization range.</span>
+<span class="sd">        :type range: str</span>
+<span class="sd">        :param normalized: whether to return a normalized output.</span>
+<span class="sd">        :type normalized: bool</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">yields</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_process_values</span><span class="p">(</span><span class="n">values</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">extended</span><span class="p">:</span>
+            <span class="n">yields</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">1.</span> <span class="o">-</span> <span class="nb">sum</span><span class="p">(</span><span class="n">yields</span><span class="p">))</span>
+
+        <span class="n">out</span> <span class="o">=</span> <span class="n">aop</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">y</span><span class="p">,</span> <span class="n">pdf</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">yields</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pdfs</span><span class="o">.</span><span class="n">values</span><span class="p">()):</span>
+            <span class="n">out</span> <span class="o">+=</span> <span class="n">y</span> <span class="o">*</span> <span class="n">pdf</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="nb">range</span><span class="p">,</span> <span class="n">normalized</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">extended</span> <span class="ow">and</span> <span class="n">normalized</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">out</span> <span class="o">/</span> <span class="nb">sum</span><span class="p">(</span><span class="n">yields</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">out</span></div>
+
+<div class="viewcode-block" id="AddPDFs.from_json_object"><a class="viewcode-back" href="../../api/minkit.AddPDFs.html#minkit.AddPDFs.from_json_object">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_json_object</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Build a PDF from a JSON object.</span>
+<span class="sd">        This object must represent the internal structure of the PDF.</span>
+
+<span class="sd">        :param obj: JSON object.</span>
+<span class="sd">        :type obj: dict</span>
+<span class="sd">        :returns: newly constructed PDF and parameters.</span>
+<span class="sd">        :rtype: PDF</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">pdfs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">PDF</span><span class="o">.</span><span class="n">from_json_object</span><span class="p">,</span> <span class="n">obj</span><span class="p">[</span><span class="s1">&#39;pdfs&#39;</span><span class="p">]))</span>
+        <span class="n">yields</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+            <span class="nb">map</span><span class="p">(</span><span class="n">parameters</span><span class="o">.</span><span class="n">Parameter</span><span class="o">.</span><span class="n">from_json_object</span><span class="p">,</span> <span class="n">obj</span><span class="p">[</span><span class="s1">&#39;yields&#39;</span><span class="p">]))</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">obj</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span> <span class="n">pdfs</span><span class="p">,</span> <span class="n">yields</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="AddPDFs.two_components"><a class="viewcode-back" href="../../api/minkit.AddPDFs.html#minkit.AddPDFs.two_components">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">two_components</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">first</span><span class="p">,</span> <span class="n">second</span><span class="p">,</span> <span class="n">yf</span><span class="p">,</span> <span class="n">ys</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Build the class from two components.</span>
+
+<span class="sd">        :param name: name of the class.</span>
+<span class="sd">        :type name: str</span>
+<span class="sd">        :param first: first PDF to use.</span>
+<span class="sd">        :type first: PDF</span>
+<span class="sd">        :param second: second PDF to use.</span>
+<span class="sd">        :type second: PDF</span>
+<span class="sd">        :param yf: yield associated to the first PDF, if both &quot;yf&quot; and &quot;ys&quot; \</span>
+<span class="sd">        are provided. If &quot;ys&quot; is not provided, then &quot;yf&quot; is the faction \</span>
+<span class="sd">        associated to the first PDF.</span>
+<span class="sd">        :type yf: Parameter</span>
+<span class="sd">        :param ys: possible yield for the second PDF.</span>
+<span class="sd">        :type ys: Parameter</span>
+<span class="sd">        :returns: the built class.</span>
+<span class="sd">        :rtype: AddPDFs</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="p">[</span><span class="n">first</span><span class="p">,</span> <span class="n">second</span><span class="p">],</span> <span class="p">[</span><span class="n">yf</span><span class="p">]</span> <span class="k">if</span> <span class="n">ys</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">[</span><span class="n">yf</span><span class="p">,</span> <span class="n">ys</span><span class="p">])</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">extended</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Get whether this PDF is of &quot;extended&quot; type.</span>
+
+<span class="sd">        :returns: whether this PDF is of &quot;extended&quot; type.</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pdfs</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">)</span>
+
+<div class="viewcode-block" id="AddPDFs.norm"><a class="viewcode-back" href="../../api/minkit.AddPDFs.html#minkit.AddPDFs.norm">[docs]</a>    <span class="nd">@allows_bind_or_const_cache</span>
+    <span class="k">def</span> <span class="nf">norm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">FULL</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Calculate the normalization of the PDF.</span>
+
+<span class="sd">        :param values: values of the parameters to use.</span>
+<span class="sd">        :type values: Registry(str, float)</span>
+<span class="sd">        :param range: normalization range to consider.</span>
+<span class="sd">        :type range: str</span>
+<span class="sd">        :returns: value of the normalization.</span>
+<span class="sd">        :rtype: float</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">extended</span><span class="p">:</span>
+            <span class="c1"># An extended PDF has as normalization the sum of yields</span>
+            <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_process_values</span><span class="p">(</span><span class="n">values</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># A non-extended PDF is always normalized</span>
+            <span class="k">return</span> <span class="mf">1.</span></div>
+
+<div class="viewcode-block" id="AddPDFs.to_json_object"><a class="viewcode-back" href="../../api/minkit.AddPDFs.html#minkit.AddPDFs.to_json_object">[docs]</a>    <span class="k">def</span> <span class="nf">to_json_object</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Dump the PDF information into a JSON object.</span>
+<span class="sd">        The PDF can be constructed at any time by calling :meth:`PDF.from_json_object`.</span>
+
+<span class="sd">        :returns: object that can be saved into a JSON file.</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;class&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>  <span class="c1"># Save also the class name of the PDF</span>
+                <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                <span class="s1">&#39;pdfs&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">to_json_object</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pdfs</span><span class="o">.</span><span class="n">values</span><span class="p">()],</span>
+                <span class="s1">&#39;yields&#39;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">parameters</span><span class="o">.</span><span class="n">Parameter</span><span class="o">.</span><span class="n">to_json_object</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">values</span><span class="p">()))}</span></div></div>
+
+
+<div class="viewcode-block" id="ConvPDFs"><a class="viewcode-back" href="../../api/minkit.ConvPDFs.html#minkit.ConvPDFs">[docs]</a><span class="nd">@register_pdf</span>
+<span class="k">class</span> <span class="nc">ConvPDFs</span><span class="p">(</span><span class="n">MultiPDF</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Definition of a convolution of two PDFs.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">first</span><span class="p">,</span> <span class="n">second</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Represent the convolution of two different PDFs.</span>
+
+<span class="sd">        :param name: name of the PDF.</span>
+<span class="sd">        :type name: str</span>
+<span class="sd">        :param first: first PDF.</span>
+<span class="sd">        :type first: PDF</span>
+<span class="sd">        :param second: second PDF.</span>
+<span class="sd">        :type second: PDF</span>
+<span class="sd">        :param range: range of the convolution. This is needed in case part of the \</span>
+<span class="sd">        PDFs lie outside the evaluation range. It is set to &quot;full&quot; by default.</span>
+<span class="sd">        :type range: str</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="n">f</span><span class="s1">&#39;Convolution is only supported in 1-dimensional PDFs&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">first</span><span class="o">.</span><span class="n">data_pars</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">error</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">second</span><span class="o">.</span><span class="n">data_pars</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">error</span>
+
+        <span class="c1"># The convolution size and range can be changed by the user</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">range</span> <span class="o">=</span> <span class="nb">range</span> <span class="ow">or</span> <span class="n">parameters</span><span class="o">.</span><span class="n">FULL</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">conv_size</span> <span class="o">=</span> <span class="n">CONV_SIZE</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">ConvPDFs</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="p">[</span><span class="n">first</span><span class="p">,</span> <span class="n">second</span><span class="p">])</span>
+
+<div class="viewcode-block" id="ConvPDFs.__call__"><a class="viewcode-back" href="../../api/minkit.ConvPDFs.html#minkit.ConvPDFs.__call__">[docs]</a>    <span class="nd">@allows_const_cache</span>
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">FULL</span><span class="p">,</span> <span class="n">normalized</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Call the PDF in the given set of data.</span>
+
+<span class="sd">        :param data: data to evaluate.</span>
+<span class="sd">        :type data: DataSet or BinnedDataSet</span>
+<span class="sd">        :param values: values for the argument parameters to use.</span>
+<span class="sd">        :type values: Registry(str, float)</span>
+<span class="sd">        :param range: normalization range.</span>
+<span class="sd">        :type range: str</span>
+<span class="sd">        :param normalized: whether to return a normalized output.</span>
+<span class="sd">        :type normalized: bool</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">dv</span><span class="p">,</span> <span class="n">cv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">convolve</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="nb">range</span><span class="p">,</span> <span class="n">normalized</span><span class="p">)</span>
+
+        <span class="n">par</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_pars</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">pdf_values</span> <span class="o">=</span> <span class="n">aop</span><span class="o">.</span><span class="n">interpolate_linear</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">par</span><span class="o">.</span><span class="n">name</span><span class="p">],</span> <span class="n">dv</span><span class="p">,</span> <span class="n">cv</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">pdf_values</span></div>
+
+<div class="viewcode-block" id="ConvPDFs.from_json_object"><a class="viewcode-back" href="../../api/minkit.ConvPDFs.html#minkit.ConvPDFs.from_json_object">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_json_object</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Build a PDF from a JSON object.</span>
+<span class="sd">        This object must represent the internal structure of the PDF.</span>
+
+<span class="sd">        :param obj: JSON object.</span>
+<span class="sd">        :type obj: dict</span>
+<span class="sd">        :returns: newly constructed PDF and parameters.</span>
+<span class="sd">        :rtype: PDF</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">first</span> <span class="o">=</span> <span class="n">PDF</span><span class="o">.</span><span class="n">from_json_object</span><span class="p">(</span><span class="n">obj</span><span class="p">[</span><span class="s1">&#39;first&#39;</span><span class="p">])</span>
+        <span class="n">second</span> <span class="o">=</span> <span class="n">PDF</span><span class="o">.</span><span class="n">from_json_object</span><span class="p">(</span><span class="n">obj</span><span class="p">[</span><span class="s1">&#39;second&#39;</span><span class="p">])</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">obj</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span> <span class="n">first</span><span class="p">,</span> <span class="n">second</span><span class="p">,</span> <span class="n">obj</span><span class="p">[</span><span class="s1">&#39;range&#39;</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="ConvPDFs.convolve"><a class="viewcode-back" href="../../api/minkit.ConvPDFs.html#minkit.ConvPDFs.convolve">[docs]</a>    <span class="nd">@allows_bind_or_const_cache</span>
+    <span class="k">def</span> <span class="nf">convolve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">FULL</span><span class="p">,</span> <span class="n">normalized</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Calculate the convolution.</span>
+
+<span class="sd">        :param values: values for the argument parameters to use.</span>
+<span class="sd">        :type values: Registry(str, float)</span>
+<span class="sd">        :param range: normalization range.</span>
+<span class="sd">        :type range: str</span>
+<span class="sd">        :param normalized: whether to return a normalized output.</span>
+<span class="sd">        :type normalized: bool</span>
+<span class="sd">        :returns: data and result of the evaluation.</span>
+<span class="sd">        :rtype: numpy.ndarray, numpy.ndarray</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">first</span><span class="p">,</span> <span class="n">second</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pdfs</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+
+        <span class="n">bounds</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">bounds_for_range</span><span class="p">(</span><span class="n">first</span><span class="o">.</span><span class="n">data_pars</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">range</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">bounds</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="p">(</span><span class="mi">2</span><span class="p">,):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                <span class="n">f</span><span class="s1">&#39;The convolution bounds must not be disjointed&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Only works for the 1-dimensional case</span>
+        <span class="n">par</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">first</span><span class="o">.</span><span class="n">data_pars</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">grid</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">evaluation_grid</span><span class="p">(</span>
+            <span class="n">first</span><span class="o">.</span><span class="n">data_pars</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">conv_size</span><span class="p">)</span>
+
+        <span class="n">fv</span> <span class="o">=</span> <span class="n">first</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="nb">range</span><span class="p">,</span> <span class="n">normalized</span><span class="p">)</span>
+        <span class="n">sv</span> <span class="o">=</span> <span class="n">second</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="nb">range</span><span class="p">,</span> <span class="n">normalized</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">grid</span><span class="p">[</span><span class="n">par</span><span class="o">.</span><span class="n">name</span><span class="p">],</span> <span class="n">aop</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">aop</span><span class="o">.</span><span class="n">fftconvolve</span><span class="p">(</span><span class="n">fv</span><span class="p">,</span> <span class="n">sv</span><span class="p">,</span> <span class="n">grid</span><span class="p">[</span><span class="n">par</span><span class="o">.</span><span class="n">name</span><span class="p">]))</span></div>
+
+<div class="viewcode-block" id="ConvPDFs.norm"><a class="viewcode-back" href="../../api/minkit.ConvPDFs.html#minkit.ConvPDFs.norm">[docs]</a>    <span class="nd">@allows_bind_or_const_cache</span>
+    <span class="k">def</span> <span class="nf">norm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">FULL</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Calculate the normalization of the PDF.</span>
+<span class="sd">        In this case, a numerical normalization is used, so the effect</span>
+<span class="sd">        is equivalent to :meth:`ConvPDFs.numerical_normalization`.</span>
+
+<span class="sd">        :param values: values of the parameters to use.</span>
+<span class="sd">        :type values: Registry(str, float)</span>
+<span class="sd">        :param range: normalization range to consider.</span>
+<span class="sd">        :type range: str</span>
+<span class="sd">        :returns: value of the normalization.</span>
+<span class="sd">        :rtype: float</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">numerical_normalization</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="nb">range</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ConvPDFs.numerical_normalization"><a class="viewcode-back" href="../../api/minkit.ConvPDFs.html#minkit.ConvPDFs.numerical_normalization">[docs]</a>    <span class="nd">@allows_bind_or_const_cache</span>
+    <span class="k">def</span> <span class="nf">numerical_normalization</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">FULL</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Calculate a numerical normalization.</span>
+
+<span class="sd">        :param values: values to use.</span>
+<span class="sd">        :type values: Registry(str, float)</span>
+<span class="sd">        :param range: normalization range.</span>
+<span class="sd">        :type range: str</span>
+<span class="sd">        :returns: normalization.</span>
+<span class="sd">        :rtype: float</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="c1"># A convolutions is always normalized</span>
+        <span class="k">return</span> <span class="mf">1.</span></div>
+
+<div class="viewcode-block" id="ConvPDFs.to_json_object"><a class="viewcode-back" href="../../api/minkit.ConvPDFs.html#minkit.ConvPDFs.to_json_object">[docs]</a>    <span class="k">def</span> <span class="nf">to_json_object</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Dump the PDF information into a JSON object.</span>
+<span class="sd">        The PDF can be constructed at any time by calling :meth:`PDF.from_json_object`.</span>
+
+<span class="sd">        :returns: object that can be saved into a JSON file.</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">first</span><span class="p">,</span> <span class="n">second</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pdfs</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;class&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>  <span class="c1"># Save also the class name of the PDF</span>
+                <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                <span class="s1">&#39;first&#39;</span><span class="p">:</span> <span class="n">first</span><span class="o">.</span><span class="n">to_json_object</span><span class="p">(),</span>
+                <span class="s1">&#39;second&#39;</span><span class="p">:</span> <span class="n">second</span><span class="o">.</span><span class="n">to_json_object</span><span class="p">(),</span>
+                <span class="s1">&#39;range&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">range</span><span class="p">}</span></div></div>
+
+
+<div class="viewcode-block" id="ProdPDFs"><a class="viewcode-back" href="../../api/minkit.ProdPDFs.html#minkit.ProdPDFs">[docs]</a><span class="nd">@register_pdf</span>
+<span class="k">class</span> <span class="nc">ProdPDFs</span><span class="p">(</span><span class="n">MultiPDF</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Definition of the product of two different PDFs with different data parameters.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">pdfs</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        This object represents the product of many PDFs where the data parameters are</span>
+<span class="sd">        not shared among them.</span>
+
+<span class="sd">        :param name: name of the PDF.</span>
+<span class="sd">        :type name: str</span>
+<span class="sd">        :param pdfs: list of PDFs</span>
+<span class="sd">        :type pdfs: list(PDF)</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ProdPDFs</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">pdfs</span><span class="p">,</span> <span class="p">[])</span>
+
+<div class="viewcode-block" id="ProdPDFs.__call__"><a class="viewcode-back" href="../../api/minkit.ProdPDFs.html#minkit.ProdPDFs.__call__">[docs]</a>    <span class="nd">@allows_const_cache</span>
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">FULL</span><span class="p">,</span> <span class="n">normalized</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Call the PDF in the given set of data.</span>
+
+<span class="sd">        :param data: data to evaluate.</span>
+<span class="sd">        :type data: DataSet or BinnedDataSet</span>
+<span class="sd">        :param values: values for the argument parameters to use.</span>
+<span class="sd">        :type values: Registry(str, float)</span>
+<span class="sd">        :param range: normalization range.</span>
+<span class="sd">        :type range: str</span>
+<span class="sd">        :param normalized: whether to return a normalized output.</span>
+<span class="sd">        :type normalized: bool</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">aop</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">pdf</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pdfs</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">out</span> <span class="o">*=</span> <span class="n">pdf</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="nb">range</span><span class="p">,</span> <span class="n">normalized</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">out</span></div>
+
+<div class="viewcode-block" id="ProdPDFs.from_json_object"><a class="viewcode-back" href="../../api/minkit.ProdPDFs.html#minkit.ProdPDFs.from_json_object">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_json_object</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Build a PDF from a JSON object.</span>
+<span class="sd">        This object must represent the internal structure of the PDF.</span>
+
+<span class="sd">        :param obj: JSON object.</span>
+<span class="sd">        :type obj: dict</span>
+<span class="sd">        :returns: newly constructed PDF and parameters.</span>
+<span class="sd">        :rtype: PDF</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">pdfs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">PDF</span><span class="o">.</span><span class="n">from_json_object</span><span class="p">,</span> <span class="n">obj</span><span class="p">[</span><span class="s1">&#39;pdfs&#39;</span><span class="p">]))</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">obj</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span> <span class="n">pdfs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ProdPDFs.norm"><a class="viewcode-back" href="../../api/minkit.ProdPDFs.html#minkit.ProdPDFs.norm">[docs]</a>    <span class="nd">@allows_bind_or_const_cache</span>
+    <span class="k">def</span> <span class="nf">norm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">FULL</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Calculate the normalization of the PDF.</span>
+
+<span class="sd">        :param values: values of the parameters to use.</span>
+<span class="sd">        :type values: Registry(str, float)</span>
+<span class="sd">        :param range: normalization range to consider.</span>
+<span class="sd">        :type range: str</span>
+<span class="sd">        :returns: value of the normalization.</span>
+<span class="sd">        :rtype: float</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="mf">1.</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pdfs</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">n</span> <span class="o">*=</span> <span class="n">p</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="nb">range</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">n</span></div>
+
+<div class="viewcode-block" id="ProdPDFs.numerical_normalization"><a class="viewcode-back" href="../../api/minkit.ProdPDFs.html#minkit.ProdPDFs.numerical_normalization">[docs]</a>    <span class="nd">@allows_bind_or_const_cache</span>
+    <span class="k">def</span> <span class="nf">numerical_normalization</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">FULL</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Calculate a numerical normalization.</span>
+
+<span class="sd">        :param values: values to use.</span>
+<span class="sd">        :type values: Registry(str, float)</span>
+<span class="sd">        :param range: normalization range.</span>
+<span class="sd">        :type range: str</span>
+<span class="sd">        :returns: normalization.</span>
+<span class="sd">        :rtype: float</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">fromiter</span><span class="p">((</span><span class="n">pdf</span><span class="o">.</span><span class="n">numerical_normalization</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="nb">range</span><span class="p">)</span> <span class="k">for</span> <span class="n">pdf</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pdfs</span><span class="o">.</span><span class="n">values</span><span class="p">()),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">types</span><span class="o">.</span><span class="n">cpu_type</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="ProdPDFs.to_json_object"><a class="viewcode-back" href="../../api/minkit.ProdPDFs.html#minkit.ProdPDFs.to_json_object">[docs]</a>    <span class="k">def</span> <span class="nf">to_json_object</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Dump the PDF information into a JSON object.</span>
+<span class="sd">        The PDF can be constructed at any time by calling :meth:`PDF.from_json_object`.</span>
+
+<span class="sd">        :returns: object that can be saved into a JSON file.</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;class&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>  <span class="c1"># Save also the class name of the PDF</span>
+                <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                <span class="s1">&#39;pdfs&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">to_json_object</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pdfs</span><span class="o">.</span><span class="n">values</span><span class="p">()]}</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Miguel Ramos Pernas
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,7 @@
+Category
+========
+
+.. currentmodule:: minkit
+
+.. autoclass:: Category
+   :show-inheritance:

@@ -1,0 +1,495 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>minkit.accessors &mdash; minkit 0.0.0.dev0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> minkit
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.0.0.dev0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../main.html">Functions and classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples.html">Examples</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">minkit</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>minkit.accessors</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for minkit.accessors</h1><div class="highlight"><pre>
+<span></span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Accessors to PDF in code.</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">PACKAGE_PATH</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">core</span>
+<span class="kn">from</span> <span class="nn">.operations</span> <span class="k">import</span> <span class="n">gpu_core</span>
+<span class="kn">from</span> <span class="nn">.operations</span> <span class="k">import</span> <span class="n">types</span>
+<span class="kn">from</span> <span class="nn">distutils</span> <span class="k">import</span> <span class="n">ccompiler</span>
+
+<span class="kn">from</span> <span class="nn">ctypes</span> <span class="k">import</span> <span class="n">cdll</span>
+<span class="kn">import</span> <span class="nn">functools</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">tempfile</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;add_pdf_src&#39;</span><span class="p">]</span>
+
+<span class="n">TMPDIR</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">TemporaryDirectory</span><span class="p">()</span>
+
+<span class="c1"># Caches for the C++ PDFs</span>
+<span class="n">CPU_PDF_MODULE_CACHE</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="n">CPU_PDF_CACHE</span> <span class="o">=</span> <span class="p">{}</span>
+
+<span class="c1"># Caches for the OpenCL and CUDA PDFs</span>
+<span class="n">GPU_PDF_MODULE_CACHE</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="n">GPU_PDF_CACHE</span> <span class="o">=</span> <span class="p">{}</span>
+
+<span class="c1"># Path to directories where to search for PDFs</span>
+<span class="n">PDF_PATHS</span> <span class="o">=</span> <span class="p">[]</span>
+
+<span class="c1"># Save the C-related flags to compile</span>
+<span class="n">CFLAGS</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;CFLAGS&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+
+
+<span class="k">def</span> <span class="nf">access_cpu_module</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Access a C++ module, compiling it if it has not been done yet.</span>
+
+<span class="sd">    :param name: name of the module.</span>
+<span class="sd">    :type name: str</span>
+<span class="sd">    :returns: compiled module.</span>
+<span class="sd">    :rtype: module</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">global</span> <span class="n">CPU_PDF_MODULE_CACHE</span>
+
+    <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">CPU_PDF_MODULE_CACHE</span><span class="p">:</span>
+        <span class="c1"># Do not compile again the PDF source if it has already been done</span>
+        <span class="n">module</span> <span class="o">=</span> <span class="n">CPU_PDF_MODULE_CACHE</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># By default take it from this package</span>
+        <span class="n">source</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">PACKAGE_PATH</span><span class="p">,</span> <span class="n">f</span><span class="s1">&#39;cpu/</span><span class="si">{name}</span><span class="s1">.cpp&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Check if it exists in any of the provided paths</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">PDF_PATHS</span><span class="p">:</span>
+            <span class="n">fp</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">f</span><span class="s1">&#39;</span><span class="si">{name}</span><span class="s1">.cpp&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">fp</span><span class="p">):</span>
+                <span class="n">source</span> <span class="o">=</span> <span class="n">fp</span>
+                <span class="k">break</span>
+
+        <span class="c1"># Compile the C++ code and load the library</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">source</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                <span class="n">f</span><span class="s1">&#39;Function </span><span class="si">{name}</span><span class="s1"> does not exist in &quot;</span><span class="si">{source}</span><span class="s1">&quot; or any of the provided paths&#39;</span><span class="p">)</span>
+
+        <span class="n">compiler</span> <span class="o">=</span> <span class="n">ccompiler</span><span class="o">.</span><span class="n">new_compiler</span><span class="p">(</span><span class="n">plat</span><span class="o">=</span><span class="s1">&#39;x86_64-centos7-gcc8-opt&#39;</span><span class="p">)</span>
+        <span class="n">objects</span> <span class="o">=</span> <span class="n">compiler</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">source</span><span class="p">],</span> <span class="n">output_dir</span><span class="o">=</span><span class="n">TMPDIR</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">extra_preargs</span><span class="o">=</span><span class="n">CFLAGS</span><span class="p">)</span>
+        <span class="n">libname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">TMPDIR</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">f</span><span class="s1">&#39;lib</span><span class="si">{name}</span><span class="s1">.so&#39;</span><span class="p">)</span>
+        <span class="n">compiler</span><span class="o">.</span><span class="n">link</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;</span><span class="si">{name}</span><span class="s1"> library&#39;</span><span class="p">,</span> <span class="n">objects</span><span class="p">,</span> <span class="n">libname</span><span class="p">,</span>
+                      <span class="n">extra_preargs</span><span class="o">=</span><span class="n">CFLAGS</span><span class="p">,</span> <span class="n">libraries</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;stdc++&#39;</span><span class="p">])</span>
+
+        <span class="n">module</span> <span class="o">=</span> <span class="n">cdll</span><span class="o">.</span><span class="n">LoadLibrary</span><span class="p">(</span><span class="n">libname</span><span class="p">)</span>
+
+        <span class="n">CPU_PDF_MODULE_CACHE</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">module</span>
+
+    <span class="k">return</span> <span class="n">module</span>
+
+
+<div class="viewcode-block" id="add_pdf_src"><a class="viewcode-back" href="../../api/minkit.add_pdf_src.html#minkit.add_pdf_src">[docs]</a><span class="k">def</span> <span class="nf">add_pdf_src</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    This function adds a new path where to look for user-defined PDFs.</span>
+<span class="sd">    PDFs are searched for in paths opposite to the order they are appended</span>
+<span class="sd">    (PDFs are taken from the last appended paths first).</span>
+
+<span class="sd">    :param path: new path to be considered.</span>
+<span class="sd">    :type path: str</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">PDF_PATHS</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span></div>
+
+
+<span class="k">def</span> <span class="nf">create_cpu_function_proxies</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">ndata_pars</span><span class="p">,</span> <span class="n">narg_pars</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">nvar_arg_pars</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Create proxies for C++ that handle correctly the input and output data</span>
+<span class="sd">    types of a fucntion.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="c1"># Get the functions</span>
+    <span class="n">function</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="n">function</span>
+    <span class="n">evaluate</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="n">evaluate</span>
+
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="s1">&#39;normalization&#39;</span><span class="p">):</span>
+        <span class="n">normalization</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="n">normalization</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">normalization</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="c1"># Define the types of the input arguments</span>
+    <span class="n">partypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">types</span><span class="o">.</span><span class="n">c_double</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">narg_pars</span><span class="p">)]</span>
+
+    <span class="k">if</span> <span class="n">nvar_arg_pars</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">partypes</span> <span class="o">+=</span> <span class="p">[</span><span class="n">types</span><span class="o">.</span><span class="n">c_int</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">c_double_p</span><span class="p">]</span>
+
+    <span class="c1"># Define the types passed to the function</span>
+    <span class="n">functiontypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">types</span><span class="o">.</span><span class="n">c_double</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ndata_pars</span><span class="p">)]</span>
+    <span class="n">functiontypes</span> <span class="o">+=</span> <span class="n">partypes</span>
+    <span class="n">function</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="n">functiontypes</span>
+    <span class="n">function</span><span class="o">.</span><span class="n">restype</span> <span class="o">=</span> <span class="n">types</span><span class="o">.</span><span class="n">c_double</span>
+
+    <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">function</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__function</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Internal wrapper.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="n">nvar_arg_pars</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">var_arg_pars</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">vals</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">c_double</span><span class="p">,</span> <span class="n">args</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span> <span class="o">+</span> <span class="p">(</span>
+                <span class="n">types</span><span class="o">.</span><span class="n">c_int</span><span class="p">(</span><span class="n">nvar_arg_pars</span><span class="p">),</span> <span class="n">var_arg_pars</span><span class="o">.</span><span class="n">ctypes</span><span class="o">.</span><span class="n">data_as</span><span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">c_double_p</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">vals</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">c_double</span><span class="p">,</span> <span class="n">args</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">function</span><span class="p">(</span><span class="o">*</span><span class="n">vals</span><span class="p">)</span>
+
+    <span class="c1"># Define the types for the arguments passed to the evaluate function</span>
+    <span class="n">argtypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">types</span><span class="o">.</span><span class="n">c_int</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">c_double_p</span><span class="p">]</span>
+    <span class="n">argtypes</span> <span class="o">+=</span> <span class="p">[</span><span class="n">types</span><span class="o">.</span><span class="n">c_double_p</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ndata_pars</span><span class="p">)]</span>
+    <span class="n">argtypes</span> <span class="o">+=</span> <span class="n">partypes</span>
+    <span class="n">evaluate</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="n">argtypes</span>
+
+    <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">evaluate</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__evaluate</span><span class="p">(</span><span class="n">output_array</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Internal wrapper.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">op</span> <span class="o">=</span> <span class="n">output_array</span><span class="o">.</span><span class="n">ctypes</span><span class="o">.</span><span class="n">data_as</span><span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">c_double_p</span><span class="p">)</span>
+        <span class="n">ips</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">ctypes</span><span class="o">.</span><span class="n">data_as</span><span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">c_double_p</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">args</span><span class="p">[:</span><span class="n">ndata_pars</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="n">nvar_arg_pars</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+
+            <span class="c1"># Variable arguments must be the last in the list</span>
+            <span class="n">var_arg_pars</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+            <span class="n">vals</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">c_double</span><span class="p">,</span> <span class="n">args</span><span class="p">[</span><span class="n">ndata_pars</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span> <span class="o">+</span> <span class="p">(</span>
+                <span class="n">nvar_arg_pars</span><span class="p">,</span> <span class="n">var_arg_pars</span><span class="o">.</span><span class="n">ctypes</span><span class="o">.</span><span class="n">data_as</span><span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">c_double_p</span><span class="p">))</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">vals</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">c_double</span><span class="p">,</span> <span class="n">args</span><span class="p">[</span><span class="n">ndata_pars</span><span class="p">:]))</span>
+
+        <span class="k">return</span> <span class="n">evaluate</span><span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">c_int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">output_array</span><span class="p">)),</span> <span class="n">op</span><span class="p">,</span> <span class="o">*</span><span class="n">ips</span><span class="p">,</span> <span class="o">*</span><span class="n">vals</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">normalization</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+
+        <span class="c1"># Define the types passed to the normalization function</span>
+        <span class="n">normtypes</span> <span class="o">=</span> <span class="n">partypes</span>
+        <span class="n">normtypes</span> <span class="o">+=</span> <span class="p">[</span><span class="n">types</span><span class="o">.</span><span class="n">c_double</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">ndata_pars</span><span class="p">)]</span>
+        <span class="n">normalization</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="n">normtypes</span>
+        <span class="n">normalization</span><span class="o">.</span><span class="n">restype</span> <span class="o">=</span> <span class="n">types</span><span class="o">.</span><span class="n">c_double</span>
+
+        <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">normalization</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">__normalization</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
+            <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">            Internal wrapper.</span>
+<span class="sd">            &#39;&#39;&#39;</span>
+            <span class="k">if</span> <span class="n">nvar_arg_pars</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">nvar_arg_pars</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="c1"># This is special case, must handle index carefully</span>
+                    <span class="n">var_arg_pars</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">types</span><span class="o">.</span><span class="n">c_double</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">var_arg_pars</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">ndata_pars</span><span class="p">]</span>
+                <span class="c1"># Normal arguments are parse first</span>
+                <span class="n">vals</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">c_double</span><span class="p">,</span> <span class="n">args</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">ndata_pars</span><span class="p">]))</span>
+                <span class="c1"># Variable number of arguments follow</span>
+                <span class="n">vals</span> <span class="o">+=</span> <span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">c_int</span><span class="p">(</span><span class="n">nvar_arg_pars</span><span class="p">),</span>
+                         <span class="n">var_arg_pars</span><span class="o">.</span><span class="n">ctypes</span><span class="o">.</span><span class="n">data_as</span><span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">c_double_p</span><span class="p">))</span>
+                <span class="c1"># Finally, the integration limits must be specified</span>
+                <span class="n">vals</span> <span class="o">+=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">c_double</span><span class="p">,</span> <span class="n">args</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span> <span class="o">*</span> <span class="n">ndata_pars</span><span class="p">:]))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">vals</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">c_double</span><span class="p">,</span> <span class="n">args</span><span class="p">))</span>
+
+            <span class="k">return</span> <span class="n">normalization</span><span class="p">(</span><span class="o">*</span><span class="n">vals</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">__normalization</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">return</span> <span class="n">__function</span><span class="p">,</span> <span class="n">__evaluate</span><span class="p">,</span> <span class="n">__normalization</span>
+
+
+<span class="k">def</span> <span class="nf">create_gpu_function_proxy</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">ndata_pars</span><span class="p">,</span> <span class="n">narg_pars</span><span class="p">,</span> <span class="n">nvar_arg_pars</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Creates a proxy for a function writen in GPU.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">global</span> <span class="n">GPU_PDF_MODULE_CACHE</span>
+
+    <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">GPU_PDF_MODULE_CACHE</span><span class="p">:</span>
+        <span class="c1"># Return the existing module if it is in the cache</span>
+        <span class="k">return</span> <span class="n">GPU_PDF_MODULE_CACHE</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># By default take it from this package</span>
+        <span class="n">source</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">PACKAGE_PATH</span><span class="p">,</span> <span class="n">f</span><span class="s1">&#39;gpu/</span><span class="si">{name}</span><span class="s1">.c&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Check if it exists in any of the provided paths</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">PDF_PATHS</span><span class="p">:</span>
+            <span class="n">fp</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">f</span><span class="s1">&#39;</span><span class="si">{name}</span><span class="s1">.c&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">fp</span><span class="p">):</span>
+                <span class="n">source</span> <span class="o">=</span> <span class="n">fp</span>
+                <span class="k">break</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">source</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                <span class="n">f</span><span class="s1">&#39;Function </span><span class="si">{name}</span><span class="s1"> does not exist in &quot;</span><span class="si">{source}</span><span class="s1">&quot; or any of the provided paths&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Compile the code</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">source</span><span class="p">)</span> <span class="k">as</span> <span class="n">fi</span><span class="p">:</span>
+            <span class="n">module</span> <span class="o">=</span> <span class="n">gpu_core</span><span class="o">.</span><span class="n">THREAD</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">fi</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+
+        <span class="n">GPU_PDF_MODULE_CACHE</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">module</span>
+
+        <span class="c1"># Access the function in the module</span>
+        <span class="n">evaluate</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="n">evaluate</span>
+
+        <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">evaluate</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">__evaluate</span><span class="p">(</span><span class="n">output_array</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+            <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">            Internal wrapper.</span>
+<span class="sd">            &#39;&#39;&#39;</span>
+            <span class="n">ips</span> <span class="o">=</span> <span class="n">args</span><span class="p">[:</span><span class="n">ndata_pars</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">nvar_arg_pars</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+
+                <span class="c1"># Variable arguments must be the last in the list</span>
+                <span class="n">var_arg_pars</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+                <span class="n">vals</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">cpu_type</span><span class="p">,</span> <span class="n">args</span><span class="p">[</span><span class="n">ndata_pars</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span> <span class="o">+</span> <span class="p">(</span>
+                    <span class="n">types</span><span class="o">.</span><span class="n">cpu_int</span><span class="p">(</span><span class="n">nvar_arg_pars</span><span class="p">),</span> <span class="n">var_arg_pars</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">vals</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">cpu_type</span><span class="p">,</span> <span class="n">args</span><span class="p">[</span><span class="n">ndata_pars</span><span class="p">:]))</span>
+
+            <span class="n">global_size</span><span class="p">,</span> <span class="n">local_size</span> <span class="o">=</span> <span class="n">gpu_core</span><span class="o">.</span><span class="n">get_sizes</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">output_array</span><span class="p">))</span>
+
+            <span class="k">return</span> <span class="n">evaluate</span><span class="p">(</span><span class="n">output_array</span><span class="p">,</span> <span class="o">*</span><span class="n">ips</span><span class="p">,</span> <span class="o">*</span><span class="n">vals</span><span class="p">,</span> <span class="n">global_size</span><span class="o">=</span><span class="n">global_size</span><span class="p">,</span> <span class="n">local_size</span><span class="o">=</span><span class="n">local_size</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">__evaluate</span>
+
+
+<span class="nd">@core</span><span class="o">.</span><span class="n">with_backend</span>
+<span class="k">def</span> <span class="nf">access_pdf</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">ndata_pars</span><span class="p">,</span> <span class="n">narg_pars</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">nvar_arg_pars</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Access a PDF with the given name and number of data and parameter arguments.</span>
+
+<span class="sd">    :returns: PDF and normalization function.</span>
+<span class="sd">    :rtype: tuple(function, function)</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">global</span> <span class="n">CPU_PDF_MODULE_CACHE</span>
+    <span class="k">global</span> <span class="n">CPU_PDF_CACHE</span>
+
+    <span class="c1"># Access the C++ module</span>
+    <span class="n">cpu_module</span> <span class="o">=</span> <span class="n">access_cpu_module</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="c1"># Get the functions</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">modname</span> <span class="o">=</span> <span class="n">name</span> <span class="k">if</span> <span class="n">nvar_arg_pars</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">f</span><span class="s1">&#39;</span><span class="si">{name}{nvar_arg_pars}</span><span class="s1">&#39;</span>
+
+        <span class="k">if</span> <span class="n">modname</span> <span class="ow">in</span> <span class="n">CPU_PDF_CACHE</span><span class="p">:</span>
+            <span class="n">cpu_output</span> <span class="o">=</span> <span class="n">CPU_PDF_CACHE</span><span class="p">[</span><span class="n">modname</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">cpu_output</span> <span class="o">=</span> <span class="n">create_cpu_function_proxies</span><span class="p">(</span>
+                <span class="n">cpu_module</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">ndata_pars</span><span class="p">,</span> <span class="n">narg_pars</span><span class="p">,</span> <span class="n">nvar_arg_pars</span><span class="p">)</span>
+            <span class="n">CPU_PDF_CACHE</span><span class="p">[</span><span class="n">modname</span><span class="p">]</span> <span class="o">=</span> <span class="n">cpu_output</span>
+
+    <span class="k">except</span> <span class="ne">AttributeError</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+            <span class="n">f</span><span class="s1">&#39;Error loading function &quot;</span><span class="si">{name}</span><span class="s1">&quot;; make sure that both &quot;</span><span class="si">{name}</span><span class="s1">&quot; and &quot;normalization&quot; are defined inside &quot;</span><span class="si">{source}</span><span class="s1">&quot;&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">core</span><span class="o">.</span><span class="n">BACKEND</span> <span class="o">==</span> <span class="n">core</span><span class="o">.</span><span class="n">CPU</span><span class="p">:</span>
+        <span class="c1"># Return the CPU version directly</span>
+        <span class="k">return</span> <span class="n">cpu_output</span>
+
+    <span class="k">elif</span> <span class="n">core</span><span class="o">.</span><span class="n">BACKEND</span> <span class="o">==</span> <span class="n">core</span><span class="o">.</span><span class="n">CUDA</span> <span class="ow">or</span> <span class="n">core</span><span class="o">.</span><span class="n">BACKEND</span> <span class="o">==</span> <span class="n">core</span><span class="o">.</span><span class="n">OPENCL</span><span class="p">:</span>
+
+        <span class="c1"># Function and normalization are taken from the C++ version</span>
+        <span class="n">function</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">normalization</span> <span class="o">=</span> <span class="n">cpu_output</span>
+
+        <span class="c1"># Get the &quot;evaluate&quot; function from source</span>
+        <span class="k">if</span> <span class="n">modname</span> <span class="ow">in</span> <span class="n">GPU_PDF_CACHE</span><span class="p">:</span>
+            <span class="n">evaluate</span> <span class="o">=</span> <span class="n">GPU_PDF_CACHE</span><span class="p">[</span><span class="n">modname</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">evaluate</span> <span class="o">=</span> <span class="n">create_gpu_function_proxy</span><span class="p">(</span>
+                <span class="n">name</span><span class="p">,</span> <span class="n">ndata_pars</span><span class="p">,</span> <span class="n">narg_pars</span><span class="p">,</span> <span class="n">nvar_arg_pars</span><span class="p">)</span>
+            <span class="n">GPU_PDF_CACHE</span><span class="p">[</span><span class="n">modname</span><span class="p">]</span> <span class="o">=</span> <span class="n">evaluate</span>
+
+        <span class="k">return</span> <span class="n">function</span><span class="p">,</span> <span class="n">evaluate</span><span class="p">,</span> <span class="n">normalization</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+            <span class="n">f</span><span class="s1">&#39;Function not implemented for backend &quot;</span><span class="si">{core.BACKEND}</span><span class="s1">&quot;&#39;</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Miguel Ramos Pernas
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

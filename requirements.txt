@@ -1,3 +1,0 @@
-# Dependency on packages
-numpy
-iminuit

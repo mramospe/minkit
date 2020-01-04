@@ -1,0 +1,6 @@
+migrad_output_to_registry
+=========================
+
+.. currentmodule:: minkit
+
+.. autofunction:: migrad_output_to_registry

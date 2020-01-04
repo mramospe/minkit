@@ -1,0 +1,25 @@
+SourcePDF
+=========
+
+.. currentmodule:: minkit
+
+.. autoclass:: SourcePDF
+   :show-inheritance:
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+
+      ~SourcePDF.__call__
+      ~SourcePDF.from_json_object
+      ~SourcePDF.function
+      ~SourcePDF.norm
+      ~SourcePDF.to_json_object
+
+   .. rubric:: Methods Documentation
+
+   .. automethod:: __call__
+   .. automethod:: from_json_object
+   .. automethod:: function
+   .. automethod:: norm
+   .. automethod:: to_json_object

@@ -1,0 +1,6 @@
+binned_minimizer
+================
+
+.. currentmodule:: minkit
+
+.. autofunction:: binned_minimizer

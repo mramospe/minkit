@@ -1,0 +1,39 @@
+DataSet
+=======
+
+.. currentmodule:: minkit
+
+.. autoclass:: DataSet
+   :show-inheritance:
+
+   .. rubric:: Attributes Summary
+
+   .. autosummary::
+
+      ~DataSet.data_pars
+      ~DataSet.weights
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+
+      ~DataSet.add
+      ~DataSet.from_array
+      ~DataSet.from_records
+      ~DataSet.shuffle
+      ~DataSet.subset
+      ~DataSet.to_records
+
+   .. rubric:: Attributes Documentation
+
+   .. autoattribute:: data_pars
+   .. autoattribute:: weights
+
+   .. rubric:: Methods Documentation
+
+   .. automethod:: add
+   .. automethod:: from_array
+   .. automethod:: from_records
+   .. automethod:: shuffle
+   .. automethod:: subset
+   .. automethod:: to_records

@@ -1,0 +1,392 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>ProdPDFs &mdash; minkit 0.0.0.dev0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Range" href="minkit.Range.html" />
+    <link rel="prev" title="PowerLaw" href="minkit.PowerLaw.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> minkit
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.0.0.dev0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../main.html">Functions and classes</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../main.html#functions">Functions</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../main.html#classes">Classes</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="minkit.AddPDFs.html">AddPDFs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.Amoroso.html">Amoroso</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.BinnedDataSet.html">BinnedDataSet</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.Category.html">Category</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.Category.html">Category</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.Chebyshev.html">Chebyshev</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.ConvPDFs.html">ConvPDFs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.CrystalBall.html">CrystalBall</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.DataSet.html">DataSet</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.Exponential.html">Exponential</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.Gaussian.html">Gaussian</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.PDF.html">PDF</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.Parameter.html">Parameter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.Polynomial.html">Polynomial</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.PowerLaw.html">PowerLaw</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">ProdPDFs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.Range.html">Range</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.Registry.html">Registry</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.SourcePDF.html">SourcePDF</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.aop.html">aop</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../main.html#class-inheritance-diagram">Class Inheritance Diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">minkit</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../main.html">Functions and classes</a> &raquo;</li>
+        
+      <li>ProdPDFs</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/api/minkit.ProdPDFs.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="prodpdfs">
+<h1>ProdPDFs<a class="headerlink" href="#prodpdfs" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="minkit.ProdPDFs">
+<em class="property">class </em><code class="sig-prename descclassname">minkit.</code><code class="sig-name descname">ProdPDFs</code><span class="sig-paren">(</span><em class="sig-param">name</em>, <em class="sig-param">pdfs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/pdf_core.html#ProdPDFs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.ProdPDFs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">minkit.pdf_core.MultiPDF</span></code></p>
+<p>This object represents the product of many PDFs where the data parameters are
+not shared among them.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – name of the PDF.</p></li>
+<li><p><strong>pdfs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a><em>(</em><a class="reference internal" href="minkit.PDF.html#minkit.PDF" title="minkit.PDF"><em>PDF</em></a><em>)</em>) – list of PDFs</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Methods Summary</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.ProdPDFs.__call__" title="minkit.ProdPDFs.__call__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__call__</span></code></a>(data[, values, range, normalized])</p></td>
+<td><p>Call the PDF in the given set of data.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#minkit.ProdPDFs.from_json_object" title="minkit.ProdPDFs.from_json_object"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_json_object</span></code></a>(obj)</p></td>
+<td><p>Build a PDF from a JSON object.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.ProdPDFs.norm" title="minkit.ProdPDFs.norm"><code class="xref py py-obj docutils literal notranslate"><span class="pre">norm</span></code></a>([values, range])</p></td>
+<td><p>Calculate the normalization of the PDF.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#minkit.ProdPDFs.numerical_normalization" title="minkit.ProdPDFs.numerical_normalization"><code class="xref py py-obj docutils literal notranslate"><span class="pre">numerical_normalization</span></code></a>([values, range])</p></td>
+<td><p>Calculate a numerical normalization.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.ProdPDFs.to_json_object" title="minkit.ProdPDFs.to_json_object"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_json_object</span></code></a>()</p></td>
+<td><p>Dump the PDF information into a JSON object.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Methods Documentation</p>
+<dl class="method">
+<dt id="minkit.ProdPDFs.__call__">
+<code class="sig-name descname">__call__</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">values=None</em>, <em class="sig-param">range='full'</em>, <em class="sig-param">normalized=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/pdf_core.html#ProdPDFs.__call__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.ProdPDFs.__call__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Call the PDF in the given set of data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<a class="reference internal" href="minkit.DataSet.html#minkit.DataSet" title="minkit.DataSet"><em>DataSet</em></a><em> or </em><a class="reference internal" href="minkit.BinnedDataSet.html#minkit.BinnedDataSet" title="minkit.BinnedDataSet"><em>BinnedDataSet</em></a>) – data to evaluate.</p></li>
+<li><p><strong>values</strong> (<a class="reference internal" href="minkit.Registry.html#minkit.Registry" title="minkit.Registry"><em>Registry</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a><em>)</em>) – values for the argument parameters to use.</p></li>
+<li><p><strong>range</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – normalization range.</p></li>
+<li><p><strong>normalized</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – whether to return a normalized output.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.ProdPDFs.from_json_object">
+<em class="property">classmethod </em><code class="sig-name descname">from_json_object</code><span class="sig-paren">(</span><em class="sig-param">obj</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/pdf_core.html#ProdPDFs.from_json_object"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.ProdPDFs.from_json_object" title="Permalink to this definition">¶</a></dt>
+<dd><p>Build a PDF from a JSON object.
+This object must represent the internal structure of the PDF.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>obj</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – JSON object.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>newly constructed PDF and parameters.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="minkit.PDF.html#minkit.PDF" title="minkit.PDF">PDF</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.ProdPDFs.norm">
+<code class="sig-name descname">norm</code><span class="sig-paren">(</span><em class="sig-param">values=None</em>, <em class="sig-param">range='full'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/pdf_core.html#ProdPDFs.norm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.ProdPDFs.norm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the normalization of the PDF.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>values</strong> (<a class="reference internal" href="minkit.Registry.html#minkit.Registry" title="minkit.Registry"><em>Registry</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a><em>)</em>) – values of the parameters to use.</p></li>
+<li><p><strong>range</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – normalization range to consider.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>value of the normalization.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.ProdPDFs.numerical_normalization">
+<code class="sig-name descname">numerical_normalization</code><span class="sig-paren">(</span><em class="sig-param">values=None</em>, <em class="sig-param">range='full'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/pdf_core.html#ProdPDFs.numerical_normalization"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.ProdPDFs.numerical_normalization" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate a numerical normalization.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>values</strong> (<a class="reference internal" href="minkit.Registry.html#minkit.Registry" title="minkit.Registry"><em>Registry</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a><em>)</em>) – values to use.</p></li>
+<li><p><strong>range</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – normalization range.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>normalization.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.ProdPDFs.to_json_object">
+<code class="sig-name descname">to_json_object</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/pdf_core.html#ProdPDFs.to_json_object"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.ProdPDFs.to_json_object" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dump the PDF information into a JSON object.
+The PDF can be constructed at any time by calling <a class="reference internal" href="minkit.PDF.html#minkit.PDF.from_json_object" title="minkit.PDF.from_json_object"><code class="xref py py-meth docutils literal notranslate"><span class="pre">PDF.from_json_object()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>object that can be saved into a JSON file.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="minkit.Range.html" class="btn btn-neutral float-right" title="Range" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="minkit.PowerLaw.html" class="btn btn-neutral float-left" title="PowerLaw" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Miguel Ramos Pernas
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

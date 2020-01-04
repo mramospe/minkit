@@ -1,0 +1,6 @@
+scale_pdf_values
+================
+
+.. currentmodule:: minkit
+
+.. autofunction:: scale_pdf_values

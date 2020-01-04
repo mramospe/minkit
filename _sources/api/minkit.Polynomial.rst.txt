@@ -1,0 +1,7 @@
+Polynomial
+==========
+
+.. currentmodule:: minkit
+
+.. autoclass:: Polynomial
+   :show-inheritance:

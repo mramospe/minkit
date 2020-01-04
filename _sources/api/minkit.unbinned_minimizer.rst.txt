@@ -1,0 +1,6 @@
+unbinned_minimizer
+==================
+
+.. currentmodule:: minkit
+
+.. autofunction:: unbinned_minimizer

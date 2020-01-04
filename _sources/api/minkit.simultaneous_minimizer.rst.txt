@@ -1,0 +1,6 @@
+simultaneous_minimizer
+======================
+
+.. currentmodule:: minkit
+
+.. autofunction:: simultaneous_minimizer

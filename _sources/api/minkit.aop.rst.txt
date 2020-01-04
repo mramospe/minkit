@@ -1,0 +1,7 @@
+aop
+===
+
+.. currentmodule:: minkit
+
+.. autoclass:: aop
+   :show-inheritance:

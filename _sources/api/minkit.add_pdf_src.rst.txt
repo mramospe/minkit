@@ -1,0 +1,6 @@
+add_pdf_src
+===========
+
+.. currentmodule:: minkit
+
+.. autofunction:: add_pdf_src
