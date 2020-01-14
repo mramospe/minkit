@@ -39,7 +39,6 @@ class Parameter(object):
         :param constant: whether to initialize this parameter as constant.
         :type constant: bool
         :ivar name: name of the parameter.
-        :ivar value: value of the parameter.
         :ivar error: error of the parameter.
         '''
         self.name = name
