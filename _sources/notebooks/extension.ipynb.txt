@@ -1,0 +1,223 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Adding custom PDFs\n",
+    "The \"minkit\" package allows to easily register new PDFs.\n",
+    "Depending on the backend to be used, the PDF code must be implemented in C++ or in both C++ and CUDA.\n",
+    "The latter is needed since the single-value evaluation function and the normalization are taken from the C++ source file of the PDFs. In the following lines, it will be shown how to register a new PDF in both CPU and GPU backends."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Adding a custom PDF in the CPU backend\n",
+    "In order to add a new PDF for CPU, we must create a source C++ file, and tell the \"minkit\" package to add its directory to the list of directories to search for PDFs. For this example, we will create a C++ file from python on a temporary directory."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import minkit\n",
+    "import os\n",
+    "import tempfile\n",
+    "\n",
+    "minkit.initialize(backend='cpu')\n",
+    "\n",
+    "tmpdir = tempfile.TemporaryDirectory()\n",
+    "\n",
+    "with open(os.path.join(tmpdir.name, 'CustomPDF.cpp'), 'wt') as f:\n",
+    "    f.write('''\n",
+    "        #include <cmath>\n",
+    "\n",
+    "        extern \"C\" {\n",
+    "\n",
+    "          static inline double shared_function( double x, double k ) {\n",
+    "            return std::exp(k * x);\n",
+    "          }\n",
+    "\n",
+    "          double function( double x, double k ) {\n",
+    "            return shared_function(x, k);\n",
+    "          }\n",
+    "\n",
+    "          void evaluate( int len, double *out, double* in, double k ) {\n",
+    "            for ( int i = 0; i < len; ++i )\n",
+    "              out[i] = shared_function(in[i], k);\n",
+    "          }\n",
+    "\n",
+    "          double normalization( double k, double xmin, double xmax ) {\n",
+    "            return 1. / k * (std::exp(k * xmax) - std::exp(k * xmin));\n",
+    "          }\n",
+    "    \n",
+    "        }\n",
+    "        ''')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Note that we have created four functions, although only two of them are usually needed:\n",
+    "\n",
+    "* \"shared_function\" is an static function that will contain the actual function to evaluate (an exponential in this case).\n",
+    "* \"function\": is a version of the function to evaluate on a single value.\n",
+    "* \"evaluate\": is the function to be used on arrays, so the first element must be the length of the input arrays. The next argument corresponds to the pointer to the output array, followed by those of the input (data) arrays, and finally the arguments for the PDF.\n",
+    "* \"normalization\": this defines the way to integrate the PDF. If it is not provided, a numerical integration will be used.\n",
+    "\n",
+    "In conclusion, only \"function\" and \"evaluate\" are actually needed, but one should always try to define \"normalization\", since calculating integrals numerically is very resource-consuming.\n",
+    "\n",
+    "Now we have to register the PDF. In order to be used in python, we must tell minkit to look for PDFs in the temporary directory."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "minkit.add_pdf_src(tmpdir.name)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Now we have to build a python object to represent the PDF. This is directly done when inheriting from \"minkit.SourcePDF\", which will automatically set our PDF."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "@minkit.register_pdf\n",
+    "class CustomPDF(minkit.SourcePDF):\n",
+    "    def __init__( self, name, x, k ):\n",
+    "        super(CustomPDF, self).__init__(name, [x], [k])"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "The \"register_pdf\" decorator is necessary if we want to save/load the PDF to/from JSON files. It is completely necessary that we call the function the same way we call the source file. The arguments to the \"minkit.SourcePDF\" constructor are the name of the PDF, the data parameters and the argument parameters. Now we can declare and use our function."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "image/png": "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\n",
+      "text/plain": [
+       "<Figure size 432x288 with 1 Axes>"
+      ]
+     },
+     "metadata": {
+      "needs_background": "light"
+     },
+     "output_type": "display_data"
+    }
+   ],
+   "source": [
+    "x = minkit.Parameter('x', bounds=(0, 10))\n",
+    "k = minkit.Parameter('k', -0.5)\n",
+    "pdf = CustomPDF('pdf', x, k)\n",
+    "data = pdf.generate(10000)\n",
+    "%matplotlib inline\n",
+    "import matplotlib.pyplot as plt\n",
+    "plt.hist(minkit.aop.extract_ndarray(data['x']), bins=100);"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## New PDFs with a variable number of arguments\n",
+    "It might happen that one wants to define a general function, which depends on a list of parameters that can vary (for example, a polynomial) from one construction to another.\n",
+    "This can be done on a similar way to that of the previous section, providing as a third argument to \"minkit.SourcePDF\" the list of extra arguments."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "@minkit.register_pdf\n",
+    "class VarArgsCustomPDF(minkit.SourcePDF):\n",
+    "    def __init__( self, name, x, *coeffs ):\n",
+    "        super(VarArgsCustomPDF, self).__init__(name, [x], None, coeffs)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Note that one can also define PDFs with a set of fixed parameters and a set of variable parameters."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Adding a custom PDF in the GPU backend\n",
+    "In order to add PDFs for GPU backends, one needs to define first the C++ version of it, presented in the previous sections. The source file for the GPU backend can be in any registered source path via the \"minkit.add_pdf_src\" function. The \"minkit\" package relies on \"reikna\" in order to define functions to run on GPUs, so the syntax must be the same as for any \"reikna\" function. Let's define the GPU version of the exponential."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "with open(os.path.join(tmpdir.name, 'CustomPDF.c'), 'wt') as f:\n",
+    "    f.write('''\n",
+    "        KERNEL void evaluate( GLOBAL_MEM double *out, GLOBAL_MEM double *in, double k )\n",
+    "        {\n",
+    "            SIZE_T idx  = get_global_id(0);\n",
+    "            double x = in[idx];\n",
+    "            out[idx] = exp(k * x);\n",
+    "        }\n",
+    "        ''')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Not thate the arguments are the same as for the C++ version, but we have only defined the \"evaluate\" function here. For the GPU implementation we do not need to define the length of the element, since this is taken from the global ID of the running thread. To run on GPU we simply need to include these lines together before the construction of any CustomPDF class with the backend set to any GPU type, and we are ready to go.\n"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.6.8"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 2
+}

@@ -19,6 +19,7 @@ following sections:
    :maxdepth: 2
 
    main
+   performance
    examples
 
 

@@ -89,6 +89,7 @@
             
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="main.html">Functions and classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="performance.html">Performance of the minkit package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
 </ul>
 
@@ -181,10 +182,12 @@
 <div class="section" id="introduction">
 <h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h1>
 <p>This package provides tools to fit probability density functions (PDFs) to both unbinned and binned data, using different minimizers (like <a class="reference external" href="https://iminuit.readthedocs.io/en/latest/reference.html">Minuit</a>).
-It has support for both CPU and GPU backends, providing an easy API in order to manage both backends, being transparent for the user.
-PDFs are implemented in C++ and CUDA, allowing a fast evaluation of the functions.</p>
-<p>The package is built on top of the <a class="reference external" href="https://numpy.org/">numpy</a> and <a class="reference external" href="https://iminuit.readthedocs.io/en/latest/">iminuit</a> packages.
-The interface with CUDA is handled using <a class="reference external" href="https://documen.tician.de/pycuda">PyCUDA</a>.</p>
+The <a class="reference external" href="https://mramospe.github.io/minkit">minkit</a> package appears as an alternative to existing minimization packages, like <a class="reference external" href="https://root.cern.ch/roofit">RooFit</a>.
+The idea is to provide a friendly pure python API to do minimization and calculations with PDFs.
+It has support for both CPU and GPU backends, being very easy for the user to change from one to the other.
+PDFs are implemented in C++, OpenCL and CUDA, allowing a fast evaluation of the functions.</p>
+<p>The package is built on top of the <a class="reference external" href="https://numpy.org">numpy</a> and <a class="reference external" href="https://iminuit.readthedocs.io/en/latest">iminuit</a> packages.
+The interface with CUDA and OpenCL is handled using <a class="reference external" href="http://reikna.publicfields.net">reikna</a>, which is itself an API for <a class="reference external" href="https://documen.tician.de/pycuda">PyCUDA</a> and <a class="reference external" href="https://documen.tician.de/pyopencl">PyOpenCL</a>.</p>
 </div>
 <div class="section" id="basic-example">
 <h1>Basic example<a class="headerlink" href="#basic-example" title="Permalink to this headline">¶</a></h1>
@@ -261,8 +264,10 @@ following sections:</p>
 <li class="toctree-l2"><a class="reference internal" href="main.html#class-inheritance-diagram">Class Inheritance Diagram</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="performance.html">Performance of the minkit package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="notebooks/basic.html">Basic example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/extension.html">Adding custom PDFs</a></li>
 </ul>
 </li>
 </ul>
