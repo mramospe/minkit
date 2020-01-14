@@ -5,5 +5,5 @@ KERNEL void evaluate( GLOBAL_MEM double *out, GLOBAL_MEM double *in, double c, d
   SIZE_T idx  = get_global_id(0);
   double x = in[idx];
 
-  out[idx] = 1. / pow(abs(x - c), n);
+  out[idx] = 1. / pow(fabs(x - c), n);
 }

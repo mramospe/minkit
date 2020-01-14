@@ -1,7 +1,7 @@
 '''
 Test the "pdf_core" module.
 '''
-from helpers import check_parameters, check_pdfs, check_multi_pdfs
+from helpers import check_parameters, check_pdfs, check_multi_pdfs, fit_test
 import json
 import helpers
 import numpy as np
@@ -33,10 +33,6 @@ def test_pdf():
     assert np.allclose(p.integral(integral_range='full', range='full'), 1.)
     assert np.allclose(p.integral(integral_range='sides', range='full'), 0.8)
     assert np.allclose(p.integral(integral_range='sides', range='sides'), 1.)
-
-    # We can call the PDF over a set of data providing only some of the values
-    data = p.generate(1000, values={'p1': 1.})
-    p(data, values={'p1': 1.})
 
 
 @pytest.mark.pdfs
@@ -81,16 +77,16 @@ def test_addpdfs(tmpdir):
     assert e.constant and not pdf.constant
     g2e.constant = True
     assert not pdf.constant
-    for p in pdf.all_args.values():
+    for p in pdf.all_args:
         p.constant = True
     assert pdf.constant
 
     # Test the JSON conversion
     with open(os.path.join(tmpdir, 'pdf.json'), 'wt') as fi:
-        json.dump(pdf.to_json_object(), fi)
+        json.dump(minkit.pdf_to_json(pdf), fi)
 
     with open(os.path.join(tmpdir, 'pdf.json'), 'rt') as fi:
-        s = minkit.PDF.from_json_object(json.load(fi))
+        s = minkit.pdf_from_json(json.load(fi))
 
     check_multi_pdfs(s, pdf)
 
@@ -125,25 +121,24 @@ def test_constpdf(tmpdir):
     g2e = minkit.Parameter('g2e', 0.5, bounds=(0, 1))
     pdf = minkit.AddPDFs.two_components('model', g, e, g2e)
 
+    # Check for "get_values" and "set_values"
+    p = pdf.norm()
+    pdf.set_values(**pdf.get_values())
+    assert np.allclose(p, pdf.norm())
+
+    # Test a simple fit
     data = pdf.generate(10000)
 
-    with minkit.unbinned_minimizer('uml', pdf, data, minimizer='minuit') as minuit:
-        r = minuit.migrad()
-        print(r)
-
-    assert not r.fmin.hesse_failed
-
-    results = minkit.migrad_output_to_registry(r)
-
-    for n, p in results.items():
-        assert np.allclose(pdf.all_args[n].value, p.value, rtol=0.05)
+    with fit_test(pdf, rtol=0.05) as test:
+        with minkit.unbinned_minimizer('uml', pdf, data, minimizer='minuit') as minuit:
+            test.result = minuit.migrad()
 
     # Test the JSON conversion
     with open(os.path.join(tmpdir, 'pdf.json'), 'wt') as fi:
-        json.dump(pdf.to_json_object(), fi)
+        json.dump(minkit.pdf_to_json(pdf), fi)
 
     with open(os.path.join(tmpdir, 'pdf.json'), 'rt') as fi:
-        s = minkit.PDF.from_json_object(json.load(fi))
+        s = minkit.pdf_from_json(json.load(fi))
 
     check_multi_pdfs(s, pdf)
 
@@ -157,17 +152,17 @@ def test_convpdfs(tmpdir):
     m = minkit.Parameter('m', bounds=(-20, +20))
 
     # Create two Gaussians
-    c1 = minkit.Parameter('c1', 0., bounds=(-2, +2))
-    s1 = minkit.Parameter('s1', 3., bounds=(0.1, +10))
+    c1 = minkit.Parameter('c1', 0, bounds=(-2, +2))
+    s1 = minkit.Parameter('s1', 3, bounds=(0.1, +10))
     g1 = minkit.Gaussian('g1', m, c1, s1)
 
-    c2 = minkit.Parameter('c2', 0., bounds=(-2, +2))
-    s2 = minkit.Parameter('s2', 4., bounds=(0.1, +10))
+    c2 = minkit.Parameter('c2', 0, bounds=(-2, +2))
+    s2 = minkit.Parameter('s2', 4, bounds=(0.1, +10))
     g2 = minkit.Gaussian('g2', m, c2, s2)
 
     pdf = minkit.ConvPDFs('convolution', g1, g2)
 
-    data = pdf.generate(size=10000)
+    data = pdf.generate(1000)
 
     # Check that the output is another Gaussian with bigger standard deviation
     mean = minkit.aop.sum(data[m.name]) / len(data)
@@ -194,18 +189,16 @@ def test_convpdfs(tmpdir):
     assert np.allclose(np.sum(pdf_values), np.sum(values), rtol=0.01)
 
     # Test a fit
-    with minkit.unbinned_minimizer('uml', pdf, data, minimizer='minuit') as minuit:
-        r = minuit.migrad()
-        print(r)
-
-    assert not r.fmin.hesse_failed
+    with fit_test(pdf, atol=0.1, rtol=0.05) as test:
+        with minkit.unbinned_minimizer('uml', pdf, data, minimizer='minuit') as minuit:
+            test.result = minuit.migrad()
 
     # Test the JSON conversion
     with open(os.path.join(tmpdir, 'pdf.json'), 'wt') as fi:
-        json.dump(pdf.to_json_object(), fi)
+        json.dump(minkit.pdf_to_json(pdf), fi)
 
     with open(os.path.join(tmpdir, 'pdf.json'), 'rt') as fi:
-        s = minkit.PDF.from_json_object(json.load(fi))
+        s = minkit.pdf_from_json(json.load(fi))
 
     check_multi_pdfs(s, pdf)
 
@@ -233,19 +226,19 @@ def test_prodpdfs(tmpdir):
     assert np.allclose(pdf.norm(), pdf.numerical_normalization())
 
     # Test consteness of the PDFs
-    for p in gx.all_args.values():
+    for p in gx.all_args:
         p.constant = True
     assert gx.constant and not pdf.constant
-    for p in gy.all_args.values():
+    for p in gy.all_args:
         p.constant = True
     assert pdf.constant
 
     # Test the JSON conversion
     with open(os.path.join(tmpdir, 'pdf.json'), 'wt') as fi:
-        json.dump(pdf.to_json_object(), fi)
+        json.dump(minkit.pdf_to_json(pdf), fi)
 
     with open(os.path.join(tmpdir, 'pdf.json'), 'rt') as fi:
-        s = minkit.PDF.from_json_object(json.load(fi))
+        s = minkit.pdf_from_json(json.load(fi))
 
     check_multi_pdfs(s, pdf)
 
@@ -272,9 +265,9 @@ def test_sourcepdf(tmpdir):
 
     # Test the JSON conversion
     with open(os.path.join(tmpdir, 'pdf.json'), 'wt') as fi:
-        json.dump(pol0.to_json_object(), fi)
+        json.dump(minkit.pdf_to_json(pol0), fi)
 
     with open(os.path.join(tmpdir, 'pdf.json'), 'rt') as fi:
-        s = minkit.PDF.from_json_object(json.load(fi))
+        s = minkit.pdf_from_json(json.load(fi))
 
     check_pdfs(s, pol0)

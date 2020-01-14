@@ -1,7 +1,7 @@
 '''
 Test the "parameters" module.
 '''
-from helpers import check_parameters
+from helpers import check_parameters, compare_with_numpy
 import json
 import helpers
 import minkit
@@ -34,6 +34,48 @@ def test_parameter(tmpdir):
 
 
 @pytest.mark.core
+def test_formula(tmpdir):
+    '''
+    Test the "Formula" class.
+    '''
+    a = minkit.Parameter('a', 1)
+    b = minkit.Parameter('b', 2)
+    c = minkit.Formula('c', 'a * b', [a, b])
+
+    assert np.allclose(c.value, a.value * b.value)
+
+    # Test its use on a PDF
+    m = minkit.Parameter('m', bounds=(10, 20))
+    c = minkit.Parameter('c', 15, bounds=(10, 20))
+    s = minkit.Formula('s', '0.1 + c / 10', [c])
+    g = minkit.Gaussian('gaussian', m, c, s)
+
+    data = g.generate(10000)
+
+    nd = np.random.normal(c.value, s.value, 10000)
+
+    compare_with_numpy(g, nd, m)
+
+    with helpers.fit_test(g, rtol=0.05) as test:
+        with minkit.unbinned_minimizer('uml', g, data, minimizer='minuit') as minuit:
+            test.result = minuit.migrad()
+
+    # Test the JSON (only for formula)
+    with open(os.path.join(tmpdir, 'r.json'), 'wt') as fi:
+        json.dump(s.to_json_object(), fi)
+
+    with open(os.path.join(tmpdir, 'r.json'), 'rt') as fi:
+        s = minkit.Formula.from_json_object(json.load(fi), g.all_real_args)
+
+    # Test the JSON (whole PDF)
+    with open(os.path.join(tmpdir, 'pdf.json'), 'wt') as fi:
+        json.dump(minkit.pdf_to_json(g), fi)
+
+    with open(os.path.join(tmpdir, 'pdf.json'), 'rt') as fi:
+        s = minkit.pdf_from_json(json.load(fi))
+
+
+@pytest.mark.core
 def test_range():
     '''
     Test the "Range" class.
@@ -56,30 +98,16 @@ def test_range():
 
     data = e.generate(10000)
 
-    with minkit.unbinned_minimizer('uml', e, data, minimizer='minuit', range='sides') as minuit:
-        r = minuit.migrad()
-        print(r)
-
-    assert not r.fmin.hesse_failed
-
-    results = minkit.migrad_output_to_registry(r)
-
-    for n, p in results.items():
-        assert np.allclose(p.value, e.all_args[n].value, rtol=0.05)
+    with helpers.fit_test(e, rtol=0.05) as test:
+        with minkit.unbinned_minimizer('uml', e, data, minimizer='minuit', range='sides') as minuit:
+            test.result = minuit.migrad()
 
     # Test generation of data only in the range
     data = e.generate(10000, range='sides')
 
-    with minkit.unbinned_minimizer('uml', e, data, minimizer='minuit', range='sides') as minuit:
-        r = minuit.migrad()
-        print(r)
-
-    assert not r.fmin.hesse_failed
-
-    results = minkit.migrad_output_to_registry(r)
-
-    for n, p in results.items():
-        assert np.allclose(p.value, e.all_args[n].value, rtol=0.05)
+    with helpers.fit_test(e, rtol=0.05) as test:
+        with minkit.unbinned_minimizer('uml', e, data, minimizer='minuit', range='sides') as minuit:
+            test.result = minuit.migrad()
 
 
 @pytest.mark.core
@@ -90,7 +118,7 @@ def test_registry(tmpdir):
     a = minkit.Parameter('a', 1., (-5, +5), None, 0.1, False)
     b = minkit.Parameter('b', 0., (-10, +10), None, 2., True)
 
-    f = minkit.Registry.from_list([a, b])
+    f = minkit.Registry([a, b])
 
     with open(os.path.join(tmpdir, 'r.json'), 'wt') as fi:
         json.dump(f.to_json_object(), fi)
@@ -98,7 +126,30 @@ def test_registry(tmpdir):
     with open(os.path.join(tmpdir, 'r.json'), 'rt') as fi:
         s = minkit.Registry.from_json_object(json.load(fi))
 
-    assert f.keys() == s.keys()
+    assert f.names == s.names
 
-    for fv, sv in zip(f.values(), s.values()):
+    for fv, sv in zip(f, s):
         check_parameters(fv, sv)
+
+    # Must raise errors if different objects with the same names are added to the registry
+    a2 = minkit.Parameter('a', 1., (-5, +5), None, 0.1, False)
+
+    with pytest.raises(ValueError):
+        f.append(a2)
+
+    with pytest.raises(ValueError):
+        f.insert(0, a2)
+
+    with pytest.raises(ValueError):
+        _ = f + [a2, a2]
+
+    with pytest.raises(ValueError):
+        f += [a2, a2]
+
+    # These operations do not raise an error, and the registry is not modified
+    pl = len(f)
+    f.append(a)
+    f.insert(0, a)
+    f += [a, a]
+    _ = f + [a, b]
+    assert len(f) == pl

@@ -7,7 +7,7 @@ KERNEL void evaluate( GLOBAL_MEM double *out, GLOBAL_MEM double *in, double c, d
 
   double t = ( a < 0 ? -1 : +1 ) * ( x - c ) / s;
 
-  double aa = abs(a);
+  double aa = fabs(a);
 
   if ( t >= -aa )
     out[idx] = exp(-0.5 * t * t);

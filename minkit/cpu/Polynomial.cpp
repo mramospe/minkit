@@ -8,11 +8,11 @@ extern "C" {
     if ( n == 0 )
       return 1.;
 
-    double out = p[n - 1];
+    double out = x * p[n - 1];
     for ( int i = 1; i < n; ++i )
-      out += x * out + p[n - i - 1];
+      out = x * (out + p[n - i - 1]);
 
-    return out * x + 1.;
+    return out + 1.;
   }
 
   /** Definition of a Polynomial PDF.
@@ -37,14 +37,14 @@ extern "C" {
       return xmax - xmin;
 
     // Right integral
-    double r = p[n - 1] / (n + 1);
+    double r = xmax * p[n - 1] / (n + 1);
     for ( int i = 1; i < n; ++i )
-      r += xmax * r + p[n - i - 1] / (n - i);
+      r = xmax * (r + p[n - i - 1] / (n + 1 - i));
 
     // Left integral
-    double l = p[n - 1] / (n + 1);
+    double l = xmin * p[n - 1] / (n + 1);
     for ( int i = 1; i < n; ++i )
-      l += xmin * l + p[n - i - 1] / (n - i);
+      l = xmin * (l + p[n - i - 1] / (n + 1 - i));
 
     return (1. + r) * xmax - (1. + l) * xmin;
   }

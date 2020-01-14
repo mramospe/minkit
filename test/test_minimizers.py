@@ -30,43 +30,36 @@ def test_unbinned_minimizer():
     s = minkit.Parameter('s', 5, bounds=(1, 10))
     g = minkit.Gaussian('gaussian', m, c, s)
 
-    arr = np.random.normal(50, 5, 10000)
+    initials = g.get_values()
+
+    arr = np.random.normal(c.value, s.value, 10000)
 
     data = minkit.DataSet.from_array(arr, m)
 
-    with minkit.unbinned_minimizer('uml', g, data, minimizer='minuit') as minuit:
-        pytest.shared_result = minuit.migrad()
+    with helpers.fit_test(g, rtol=0.05) as test:
+        with minkit.unbinned_minimizer('uml', g, data, minimizer='minuit') as minuit:
+            test.result = pytest.shared_result = minuit.migrad()
 
-    print(pytest.shared_result)
-
-    assert not pytest.shared_result.fmin.hesse_failed
-
-    pytest.shared_names = [s for s in g.all_args]
+    pytest.shared_names = [p.name for p in g.all_args]
 
     # Unweighted fit to uniform distribution fails
-    arr = np.random.uniform(*m.bounds, 10000)
+    arr = np.random.uniform(*m.bounds, 100000)
     data = minkit.DataSet.from_array(arr, m)
 
     with minkit.unbinned_minimizer('uml', g, data, minimizer='minuit') as minuit:
         r = minuit.migrad()
         print(r)
 
-    results = minkit.migrad_output_to_registry(r)
+    reg = minkit.minuit_to_registry(r)
 
-    assert not all(np.allclose(
-        p.value, g.all_args[n].value, rtol=0.05) for n, p in results.items())
+    assert not np.allclose(reg.get(s.name).value, initials[s.name])
 
     # With weights fits correctly
-    data.weights = g(data)
+    data.weights = minkit.aop.extract_ndarray(g(data))
 
-    with minkit.unbinned_minimizer('uml', g, data, minimizer='minuit') as minuit:
-        r = minuit.migrad()
-        print(r)
-
-    results = minkit.migrad_output_to_registry(r)
-
-    assert all(np.allclose(
-        p.value, g.all_args[n].value, rtol=0.05) for n, p in results.items())
+    with helpers.fit_test(g, rtol=0.05) as test:
+        with minkit.unbinned_minimizer('uml', g, data, minimizer='minuit') as minuit:
+            test.result = minuit.migrad()
 
 
 @pytest.mark.minimization
@@ -74,36 +67,35 @@ def test_simultaneous_minimizer():
     '''
     Test the "simultaneous_minimizer" function.
     '''
-    m = minkit.Parameter('m', bounds=(-5, +5))
+    m = minkit.Parameter('m', bounds=(10, 20))
+
+    # Common mean
+    s = minkit.Parameter('s', 1, bounds=(0.1, +3))
 
     # First Gaussian
-    c1 = minkit.Parameter('c1', 0., bounds=(-2, +2))
-    s1 = minkit.Parameter('s1', 1., bounds=(-3, +3))
-    g1 = minkit.Gaussian('g1', m, c1, s1)
+    c1 = minkit.Parameter('c1', 15, bounds=(10, 20))
+    g1 = minkit.Gaussian('g1', m, c1, s)
 
     data1 = g1.generate(size=1000)
 
     # Second Gaussian
-    c2 = minkit.Parameter('c2', 0., bounds=(-2, +2))
-    s2 = minkit.Parameter('s2', 1., bounds=(-3, +3))
-    g2 = minkit.Gaussian('g2', m, c2, s2)
+    c2 = minkit.Parameter('c2', 15, bounds=(10, 20))
+    g2 = minkit.Gaussian('g2', m, c2, s)
 
     data2 = g2.generate(size=10000)
 
     categories = [minkit.Category('uml', g1, data1),
                   minkit.Category('uml', g2, data2)]
 
-    with minkit.simultaneous_minimizer(categories, minimizer='minuit') as minuit:
-        r = minuit.migrad()
-        print(r)
-
-    assert not r.fmin.hesse_failed
+    with helpers.fit_test(categories, rtol=0.05, simultaneous=True) as test:
+        with minkit.simultaneous_minimizer(categories, minimizer='minuit') as minuit:
+            test.result = minuit.migrad()
 
 
 @pytest.mark.minimization
-def test_migrad_output_to_registry():
+def test_minuit_to_registry():
     '''
-    Test the "migrad_output_to_registry" function.
+    Test the "minuit_to_registry" function.
     '''
-    r = minkit.migrad_output_to_registry(pytest.shared_result)
-    assert all(s in r for s in pytest.shared_names)
+    r = minkit.minuit_to_registry(pytest.shared_result)
+    assert all(n in r.names for n in pytest.shared_names)

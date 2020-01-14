@@ -15,7 +15,7 @@ import logging
 import numpy as np
 
 __all__ = ['Category', 'binned_minimizer', 'unbinned_minimizer',
-           'migrad_output_to_registry', 'simultaneous_minimizer']
+           'minuit_to_registry', 'simultaneous_minimizer']
 
 logger = logging.getLogger(__name__)
 
@@ -66,7 +66,6 @@ class BinnedEvaluatorProxy(object):
         :param constraints: set of constraints to consider in the minimization.
         :type constraints: list(PDF)
         '''
-        pdf.enable_cache(pdf_core.PDF.CONST)
         self.__data = data
         self.__fcn = fcn
         self.__pdf = pdf
@@ -84,16 +83,9 @@ class BinnedEvaluatorProxy(object):
         :returns: value of the FCN.
         :rtype: float
         '''
-        r = parameters.Registry()
-        for i, n in enumerate(self.__pdf.all_args):
-            r[n] = values[i]
-        return self.call_from_dict(r)
-
-    def __del__(self):
-        '''
-        Free the cache of the PDFs.
-        '''
-        self.__pdf.free_cache()
+        for i, p in enumerate(self.args):
+            p.value = values[i]
+        return self.__fcn(self.__pdf, self.__data, self.__constraints)
 
     @property
     def args(self):
@@ -103,18 +95,7 @@ class BinnedEvaluatorProxy(object):
         :returns: all the arguments of the PDF.
         :rtype: Registry
         '''
-        return self.__pdf.all_args
-
-    def call_from_dict(self, values):
-        '''
-        Call to the FCN given a set of values as a dictionary.
-
-        :param values: dictionary of values.
-        :type values: dict(str, float)
-        :returns: result of evaluating the FCN with the given set of values.
-        :rtype: float
-        '''
-        return self.__fcn(self.__pdf, self.__data, values, self.__constraints)
+        return self.__pdf.all_real_args
 
 
 class UnbinnedEvaluatorProxy(object):
@@ -137,15 +118,13 @@ class UnbinnedEvaluatorProxy(object):
         :param rescale_weights: whether to rescale the weights, so the statistical power remains constant.
         :type rescale_weights: bool
         '''
-        pdf.enable_cache(pdf_core.PDF.CONST)
-
         if data.weights is not None:
             if rescale_weights:
                 logger.info('Rescaling weights for the fit')
                 self.__data = data.subset(
-                    range=range, copy=False, rescale_weights=rescale_weights)
+                    range=range, copy=False, rescale_weights=rescale_weights, trim=True)
         else:
-            self.__data = data.subset(range=range, copy=False)
+            self.__data = data.subset(range=range, copy=False, trim=True)
 
         self.__fcn = fcn
         self.__pdf = pdf
@@ -153,12 +132,6 @@ class UnbinnedEvaluatorProxy(object):
         self.__constraints = constraints or []
 
         super(UnbinnedEvaluatorProxy, self).__init__()
-
-    def __del__(self):
-        '''
-        Free the cache of the PDFs.
-        '''
-        self.__pdf.free_cache()
 
     def __call__(self, *values):
         '''
@@ -170,10 +143,9 @@ class UnbinnedEvaluatorProxy(object):
         :returns: value of the FCN.
         :rtype: float
         '''
-        r = parameters.Registry()
-        for i, n in enumerate(self.__pdf.all_args):
-            r[n] = values[i]
-        return self.call_from_dict(r)
+        for i, p in enumerate(self.args):
+            p.value = values[i]
+        return self.__fcn(self.__pdf, self.__data, self.__range, self.__constraints)
 
     @property
     def args(self):
@@ -183,18 +155,7 @@ class UnbinnedEvaluatorProxy(object):
         :returns: all the arguments of the PDF.
         :rtype: Registry
         '''
-        return self.__pdf.all_args
-
-    def call_from_dict(self, values):
-        '''
-        Call to the FCN given a set of values as a dictionary.
-
-        :param values: dictionary of values.
-        :type values: dict(str, float)
-        :returns: result of evaluating the FCN with the given set of values.
-        :rtype: float
-        '''
-        return self.__fcn(self.__pdf, self.__data, values, self.__range, self.__constraints)
+        return self.__pdf.all_real_args
 
 
 class SimultaneousEvaluator(object):
@@ -225,10 +186,11 @@ class SimultaneousEvaluator(object):
         :param kwargs: forwarded to :meth:`PDF.__call__`
         :type kwargs: dict
         '''
-        r = parameters.Registry()
-        for i, n in enumerate(self.args):
-            r[n] = values[i]
-        return np.sum(np.fromiter((e.call_from_dict(r) for e in self.__evaluators), dtype=types.cpu_type))
+        args = self.args
+        sfcn = 0.
+        for e in self.__evaluators:
+            sfcn += e.__call__(*(values[args.index(a.name)] for a in e.args))
+        return sfcn
 
     @property
     def args(self):
@@ -237,25 +199,25 @@ class SimultaneousEvaluator(object):
         '''
         args = parameters.Registry(self.__evaluators[0].args)
         for e in self.__evaluators[1:]:
-            args.update(e.args)
+            args += e.args
         return args
 
 
-def migrad_output_to_registry(result):
+def minuit_to_registry(result):
     '''
-    Transform the output from a call to Migrade into a :class:`Registry`.
+    Transform the output from a call to Minuit into a :class:`Registry`.
 
     :param result: result from a migrad call.
     :type result: iminuit.Minuit
     :returns: registry of parameters with the result from Migrad.
     :rtype: Registry(str, Parameter)
     '''
-    r = parameters.Registry()
+    r = []
     for p in result.params:
         limits = (p.lower_limit, p.upper_limit) if p.has_limits else None
-        r[p.name] = parameters.Parameter(
-            p.name, p.value, bounds=limits, error=p.error, constant=p.is_fixed)
-    return r
+        r.append(parameters.Parameter(
+            p.name, p.value, bounds=limits, error=p.error, constant=p.is_fixed))
+    return parameters.Registry(r)
 
 
 def registry_to_minuit_input(registry, errordef=1.):
@@ -263,21 +225,21 @@ def registry_to_minuit_input(registry, errordef=1.):
     Transform a registry of parameters into a dictionary to be parsed by Minuit.
 
     :param registry: registry of parameters.
-    :type registry: Registry(str, Parameter)
+    :type registry: Registry(Parameter)
     :param errordef: error definition for Minuit.
     :type errorder: float
     :returns: Minuit configuration dictionary.
     :rtype: dict
     '''
-    values = {v.name: v.value for v in registry.values()}
-    errors = {f'error_{v.name}': v.error for v in registry.values()}
-    limits = {f'limit_{v.name}': v.bounds for v in registry.values()}
-    const = {f'fix_{v.name}': v.constant for v in registry.values()}
+    values = {v.name: v.value for v in registry}
+    errors = {f'error_{v.name}': v.error for v in registry}
+    limits = {f'limit_{v.name}': v.bounds for v in registry}
+    const = {f'fix_{v.name}': v.constant for v in registry}
     return dict(errordef=errordef, **values, **errors, **limits, **const)
 
 
 @contextlib.contextmanager
-@parse_fcn('unbinned')
+@parse_fcn(dataset.UNBINNED)
 def unbinned_minimizer(fcn, pdf, data, minimizer=MINUIT, minimizer_config=None, rescale_weights=True, **kwargs):
     '''
     Create a new instance of :class:`iminuit.Minuit`.
@@ -288,22 +250,26 @@ def unbinned_minimizer(fcn, pdf, data, minimizer=MINUIT, minimizer_config=None, 
     PDFs, since it will not be properly reflected during the minimization \
     calls.
     '''
+    pdf.enable_cache(pdf_core.PDF.CONST)  # Enable the cache
+
     evaluator = UnbinnedEvaluatorProxy(fcn, pdf, data, **kwargs)
 
     minimizer_config = minimizer_config or {}
 
     if minimizer == MINUIT:
         yield iminuit.Minuit(evaluator,
-                             forced_parameters=tuple(pdf.all_args.keys()),
+                             forced_parameters=pdf.all_real_args.names,
                              pedantic=False,
                              **minimizer_config,
-                             **registry_to_minuit_input(pdf.all_args))
+                             **registry_to_minuit_input(pdf.all_real_args))
     else:
         raise ValueError(f'Unknown minimizer "{minimizer}"')
 
+    pdf.free_cache()  # Very important
+
 
 @contextlib.contextmanager
-@parse_fcn('binned')
+@parse_fcn(dataset.BINNED)
 def binned_minimizer(fcn, pdf, data, minimizer=MINUIT, minimizer_config=None, **kwargs):
     '''
     Create a new instance of :class:`iminuit.Minuit`.
@@ -314,18 +280,22 @@ def binned_minimizer(fcn, pdf, data, minimizer=MINUIT, minimizer_config=None, **
     PDFs, since it will not be properly reflected during the minimization \
     calls.
     '''
+    pdf.enable_cache(pdf_core.PDF.CONST)  # Enable the cache
+
     evaluator = BinnedEvaluatorProxy(fcn, pdf, data, **kwargs)
 
     minimizer_config = minimizer_config or {}
 
     if minimizer == MINUIT:
         yield iminuit.Minuit(evaluator,
-                             forced_parameters=tuple(pdf.all_args.keys()),
+                             forced_parameters=pdf.all_real_args.names,
                              pedantic=False,
                              **minimizer_config,
-                             **registry_to_minuit_input(pdf.all_args))
+                             **registry_to_minuit_input(pdf.all_real_args))
     else:
         raise ValueError(f'Unknown minimizer "{minimizer}"')
+
+    pdf.free_cache()  # Very important
 
 
 @contextlib.contextmanager
@@ -354,6 +324,8 @@ def simultaneous_minimizer(categories, minimizer=MINUIT, minimizer_config=None, 
     evaluators = []
     for cat in categories:
 
+        cat.pdf.enable_cache(pdf_core.PDF.CONST)  # Enable the cache
+
         fcn = fcns.fcn_from_name(cat.fcn)
 
         if fcns.data_type_for_fcn(cat.fcn) == dataset.BINNED:
@@ -371,9 +343,12 @@ def simultaneous_minimizer(categories, minimizer=MINUIT, minimizer_config=None, 
     # Return the minimizer
     if minimizer == MINUIT:
         yield iminuit.Minuit(evaluator,
-                             forced_parameters=tuple(evaluator.args.keys()),
+                             forced_parameters=evaluator.args.names,
                              pedantic=False,
                              **minimizer_config,
                              **registry_to_minuit_input(evaluator.args))
     else:
         raise ValueError(f'Unknown minimizer "{minimizer}"')
+
+    for c in categories:
+        c.pdf.free_cache()  # Very important

@@ -1,6 +1,6 @@
 /** Definition of a Chebyshev polynomial PDF.
  */
-KERNEL void evaluate( GLOBAL_MEM double *out, GLOBAL_MEM double *in, int n, double *p ) {
+KERNEL void evaluate( GLOBAL_MEM double *out, GLOBAL_MEM double *in, int n, GLOBAL_MEM double *p ) {
 
   SIZE_T idx  = get_global_id(0);
   double x = in[idx];

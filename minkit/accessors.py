@@ -62,7 +62,7 @@ def access_cpu_module(name):
             raise RuntimeError(
                 f'Function {name} does not exist in "{source}" or any of the provided paths')
 
-        compiler = ccompiler.new_compiler(plat='x86_64-centos7-gcc8-opt')
+        compiler = ccompiler.new_compiler()
         objects = compiler.compile(
             [source], output_dir=TMPDIR.name, extra_preargs=CFLAGS)
         libname = os.path.join(TMPDIR.name, f'lib{name}.so')
@@ -72,6 +72,45 @@ def access_cpu_module(name):
         module = cdll.LoadLibrary(libname)
 
         CPU_PDF_MODULE_CACHE[name] = module
+
+    return module
+
+
+def access_gpu_module(name):
+    '''
+    Access a GPU module, compiling it if it has not been done yet.
+
+    :param name: name of the module.
+    :type name: str
+    :returns: compiled module.
+    :rtype: module
+    '''
+    global GPU_PDF_MODULE_CACHE
+
+    if name in GPU_PDF_MODULE_CACHE:
+        # Do not compile again the PDF source if it has already been done
+        module = GPU_PDF_MODULE_CACHE[name]
+    else:
+        # By default take it from this package
+        source = os.path.join(PACKAGE_PATH, f'gpu/{name}.c')
+
+        # Check if it exists in any of the provided paths
+        for p in PDF_PATHS:
+            fp = os.path.join(p, f'{name}.c')
+            if os.path.isfile(fp):
+                source = fp
+                break
+
+        # Compile the C++ code and load the library
+        if not os.path.isfile(source):
+            raise RuntimeError(
+                f'Function {name} does not exist in "{source}" or any of the provided paths')
+
+        # Compile the code
+        with open(source) as fi:
+            module = gpu_core.THREAD.compile(fi.read())
+
+        GPU_PDF_MODULE_CACHE[name] = module
 
     return module
 
@@ -88,10 +127,21 @@ def add_pdf_src(path):
     PDF_PATHS.insert(0, path)
 
 
-def create_cpu_function_proxies(module, name, ndata_pars, narg_pars=0, nvar_arg_pars=None):
+def create_cpu_function_proxies(module, ndata_pars, narg_pars=0, nvar_arg_pars=None):
     '''
     Create proxies for C++ that handle correctly the input and output data
-    types of a fucntion.
+    types of a function.
+
+    :param module: module where to load the functions from.
+    :type module: module
+    :param ndata_pars: number of data parameters.
+    :type ndata_pars: int
+    :param narg_pars: number of fixed argument parameters.
+    :type narg_pars: int
+    :param nvar_arg_pars: number of variable argument parameters.
+    :type nvar_arg_pars: int
+    :returns: proxies for the function, the array-like function and normalization.
+    :rtype: function, function, function
     '''
     # Get the functions
     function = module.function
@@ -120,9 +170,16 @@ def create_cpu_function_proxies(module, name, ndata_pars, narg_pars=0, nvar_arg_
         Internal wrapper.
         '''
         if nvar_arg_pars is not None:
-            var_arg_pars = args[-1]
-            vals = tuple(map(types.c_double, args[:-1])) + (
-                types.c_int(nvar_arg_pars), var_arg_pars.ctypes.data_as(types.c_double_p))
+            if nvar_arg_pars != 0:
+                var_arg_pars = types.cpu_type(args[-nvar_arg_pars:])
+                pos_args = tuple(
+                    map(types.c_double, args[ndata_pars:-nvar_arg_pars]))
+            else:
+                var_arg_pars = types.cpu_type([])
+                pos_args = tuple(map(types.c_double, args[ndata_pars:]))
+
+            vals = pos_args + (types.c_int(nvar_arg_pars),
+                               var_arg_pars.ctypes.data_as(types.c_double_p))
         else:
             vals = tuple(map(types.c_double, args))
 
@@ -145,11 +202,16 @@ def create_cpu_function_proxies(module, name, ndata_pars, narg_pars=0, nvar_arg_
 
         if nvar_arg_pars is not None:
 
-            # Variable arguments must be the last in the list
-            var_arg_pars = args[-1]
+            if nvar_arg_pars != 0:
+                var_arg_pars = types.cpu_type(args[-nvar_arg_pars:])
+                pos_args = tuple(
+                    map(types.c_double, args[ndata_pars:-nvar_arg_pars]))
+            else:
+                var_arg_pars = types.cpu_type([])
+                pos_args = tuple(map(types.c_double, args[ndata_pars:]))
 
-            vals = tuple(map(types.c_double, args[ndata_pars:-1])) + (
-                nvar_arg_pars, var_arg_pars.ctypes.data_as(types.c_double_p))
+            vals = pos_args + (types.c_int(nvar_arg_pars),
+                               var_arg_pars.ctypes.data_as(types.c_double_p))
 
         else:
             vals = tuple(map(types.c_double, args[ndata_pars:]))
@@ -170,18 +232,18 @@ def create_cpu_function_proxies(module, name, ndata_pars, narg_pars=0, nvar_arg_
             Internal wrapper.
             '''
             if nvar_arg_pars is not None:
-                if nvar_arg_pars == 0:
-                    # This is special case, must handle index carefully
-                    var_arg_pars = np.array([], dtype=types.c_double)
-                else:
-                    var_arg_pars = args[-1 - 2 * ndata_pars]
+
+                bs = 2 * ndata_pars
+
+                var_arg_pars = types.cpu_type(args[-bs - nvar_arg_pars: -bs])
+
                 # Normal arguments are parse first
-                vals = tuple(map(types.c_double, args[:-1 - 2 * ndata_pars]))
+                vals = tuple(map(types.c_double, args[:-nvar_arg_pars - bs]))
                 # Variable number of arguments follow
                 vals += (types.c_int(nvar_arg_pars),
                          var_arg_pars.ctypes.data_as(types.c_double_p))
                 # Finally, the integration limits must be specified
-                vals += tuple(map(types.c_double, args[-2 * ndata_pars:]))
+                vals += tuple(map(types.c_double, args[-bs:]))
             else:
                 vals = tuple(map(types.c_double, args))
 
@@ -192,61 +254,54 @@ def create_cpu_function_proxies(module, name, ndata_pars, narg_pars=0, nvar_arg_
     return __function, __evaluate, __normalization
 
 
-def create_gpu_function_proxy(name, ndata_pars, narg_pars, nvar_arg_pars):
+def create_gpu_function_proxy(module, ndata_pars, narg_pars, nvar_arg_pars):
     '''
     Creates a proxy for a function writen in GPU.
+
+    :param module: module containing the function to wrap.
+    :type module: module
+    :param ndata_pars: number of data parameters.
+    :type ndata_pars: int
+    :param narg_pars: number of fixed argument parameters.
+    :type narg_pars: int
+    :param nvar_arg_pars: number of variable argument parameters.
+    :type nvar_arg_pars: int
+    :returns: proxy for the array-like function.
+    :rtype: function
     '''
-    global GPU_PDF_MODULE_CACHE
+    # Access the function in the module
+    evaluate = module.evaluate
 
-    if name in GPU_PDF_MODULE_CACHE:
-        # Return the existing module if it is in the cache
-        return GPU_PDF_MODULE_CACHE[name]
-    else:
-        # By default take it from this package
-        source = os.path.join(PACKAGE_PATH, f'gpu/{name}.c')
+    @functools.wraps(evaluate)
+    def __evaluate(output_array, *args):
+        '''
+        Internal wrapper.
+        '''
+        ips = args[:ndata_pars]
 
-        # Check if it exists in any of the provided paths
-        for p in PDF_PATHS:
-            fp = os.path.join(p, f'{name}.c')
-            if os.path.isfile(fp):
-                source = fp
-                break
+        if nvar_arg_pars is not None:
 
-        if not os.path.isfile(source):
-            raise RuntimeError(
-                f'Function {name} does not exist in "{source}" or any of the provided paths')
-
-        # Compile the code
-        with open(source) as fi:
-            module = gpu_core.THREAD.compile(fi.read())
-
-        GPU_PDF_MODULE_CACHE[name] = module
-
-        # Access the function in the module
-        evaluate = module.evaluate
-
-        @functools.wraps(evaluate)
-        def __evaluate(output_array, *args):
-            '''
-            Internal wrapper.
-            '''
-            ips = args[:ndata_pars]
-
-            if nvar_arg_pars is not None:
-
-                # Variable arguments must be the last in the list
-                var_arg_pars = args[-1]
-
-                vals = tuple(map(types.cpu_type, args[ndata_pars:-1])) + (
-                    types.cpu_int(nvar_arg_pars), var_arg_pars)
+            # Variable arguments must be the last in the list
+            if nvar_arg_pars != 0:
+                var_arg_pars = types.cpu_type(args[-nvar_arg_pars:])
+                pos_args = tuple(
+                    map(types.cpu_type, args[ndata_pars:-nvar_arg_pars]))
             else:
-                vals = tuple(map(types.cpu_type, args[ndata_pars:]))
+                # This is necessary because arrays with zero size are not allowed
+                # in reikna
+                var_arg_pars = types.cpu_type([0])
+                pos_args = tuple(map(types.cpu_type, args[ndata_pars:]))
 
-            global_size, local_size = gpu_core.get_sizes(len(output_array))
+            vals = pos_args + (types.cpu_int(nvar_arg_pars),
+                               core.aop.array(var_arg_pars))
+        else:
+            vals = tuple(map(types.cpu_type, args[ndata_pars:]))
 
-            return evaluate(output_array, *ips, *vals, global_size=global_size, local_size=local_size)
+        global_size, local_size = gpu_core.get_sizes(len(output_array))
 
-        return __evaluate
+        return evaluate(output_array, *ips, *vals, global_size=global_size, local_size=local_size)
+
+    return __evaluate
 
 
 @core.with_backend
@@ -254,6 +309,14 @@ def access_pdf(name, ndata_pars, narg_pars=0, nvar_arg_pars=None):
     '''
     Access a PDF with the given name and number of data and parameter arguments.
 
+    :param name: name of the PDF.
+    :type name: str
+    :param ndata_pars: number of data parameters.
+    :type ndata_pars: int
+    :param narg_pars: number of fixed argument parameters.
+    :type narg_pars: int
+    :param nvar_arg_pars: number of variable argument parameters.
+    :type nvar_arg_pars: int
     :returns: PDF and normalization function.
     :rtype: tuple(function, function)
     '''
@@ -271,7 +334,7 @@ def access_pdf(name, ndata_pars, narg_pars=0, nvar_arg_pars=None):
             cpu_output = CPU_PDF_CACHE[modname]
         else:
             cpu_output = create_cpu_function_proxies(
-                cpu_module, name, ndata_pars, narg_pars, nvar_arg_pars)
+                cpu_module, ndata_pars, narg_pars, nvar_arg_pars)
             CPU_PDF_CACHE[modname] = cpu_output
 
     except AttributeError as ex:
@@ -291,8 +354,11 @@ def access_pdf(name, ndata_pars, narg_pars=0, nvar_arg_pars=None):
         if modname in GPU_PDF_CACHE:
             evaluate = GPU_PDF_CACHE[modname]
         else:
+            # Access the GPU module
+            gpu_module = access_gpu_module(name)
+
             evaluate = create_gpu_function_proxy(
-                name, ndata_pars, narg_pars, nvar_arg_pars)
+                gpu_module, ndata_pars, narg_pars, nvar_arg_pars)
             GPU_PDF_CACHE[modname] = evaluate
 
         return function, evaluate, normalization

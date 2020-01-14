@@ -6,6 +6,8 @@ import numpy as np
 import os
 import pytest
 
+minkit.initialize()
+
 
 @pytest.mark.pdfs
 @pytest.mark.source_pdf
@@ -39,6 +41,16 @@ def test_add_pdf_src(tmpdir):
         }
         }
         ''')
+
+    if minkit.core.BACKEND != minkit.core.CPU:
+        with open(os.path.join(tmpdir, 'ExistingPDF.c'), 'wt') as fi:
+            fi.write('''
+            KERNEL void evaluate( GLOBAL_MEM double *out, GLOBAL_MEM double *in )
+            {
+            SIZE_T idx  = get_global_id(0);
+            out[idx] = 1.;
+            }
+            ''')
 
     # Add the temporary directory to the places where to look for PDFs
     minkit.add_pdf_src(tmpdir)

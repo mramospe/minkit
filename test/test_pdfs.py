@@ -146,16 +146,26 @@ def test_polynomial():
 
     rndm = pol0.generate(1000)
 
+    assert np.allclose(pol0.integral(), 1)
     assert np.allclose(pol0.numerical_normalization(), pol0.norm())
 
     # Test straight line
     pol1 = minkit.Polynomial('pol1', m, p1)
 
+    assert np.allclose(pol1.integral(), 1)
+    assert np.allclose(pol1.numerical_normalization(), pol1.norm())
+
     # Test a parabola
     pol2 = minkit.Polynomial('pol2', m, p1, p2)
 
+    assert np.allclose(pol2.integral(), 1)
+    assert np.allclose(pol2.numerical_normalization(), pol2.norm())
+
     # Test a three-degree polynomial
-    pol2 = minkit.Polynomial('pol2', m, p1, p2, p3)
+    pol3 = minkit.Polynomial('pol3', m, p1, p2, p3)
+
+    assert np.allclose(pol3.integral(), 1)
+    assert np.allclose(pol3.numerical_normalization(), pol3.norm())
 
 
 @pytest.mark.pdfs

@@ -30,32 +30,18 @@ def test_binned_maximum_likelihood():
     data = minkit.BinnedDataSet.from_array(
         0.5 * (edges[1:] + edges[:-1]), m, values)
 
-    with minkit.binned_minimizer('bml', g, data, minimizer='minuit') as minuit:
-        r = minuit.migrad()
-        print(r)
-
-    assert not r.fmin.hesse_failed
-
-    results = minkit.migrad_output_to_registry(r)
-
-    for n, p in results.items():
-        assert np.allclose(p.value, g.all_args[n].value, rtol=0.05)
+    with helpers.fit_test(g, rtol=0.05) as test:
+        with minkit.binned_minimizer('bml', g, data, minimizer='minuit') as minuit:
+            test.result = minuit.migrad()
 
     # Add constraints
     cc = minkit.Parameter('cc', 10)
     sc = minkit.Parameter('sc', 0.1)
     gc = minkit.Gaussian('constraint', c, cc, sc)
 
-    with minkit.binned_minimizer('bml', g, data, minimizer='minuit', constraints=[gc]) as minuit:
-        r = minuit.migrad()
-        print(r)
-
-    assert not r.fmin.hesse_failed
-
-    results = minkit.migrad_output_to_registry(r)
-
-    for n, p in results.items():
-        assert np.allclose(g.all_args[n].value, p.value, rtol=0.05)
+    with helpers.fit_test(g, rtol=0.05) as test:
+        with minkit.binned_minimizer('bml', g, data, minimizer='minuit', constraints=[gc]) as minuit:
+            test.result = minuit.migrad()
 
 
 @pytest.mark.minimization
@@ -79,34 +65,20 @@ def test_unbinned_extended_maximum_likelihood():
     ne = minkit.Parameter('ne', 1000, bounds=(0, 100000))
     pdf = minkit.AddPDFs.two_components('model', g, e, ng, ne)
 
-    data = pdf.generate(ng.value + ne.value)
+    data = pdf.generate(int(ng.value + ne.value))
 
-    with minkit.unbinned_minimizer('ueml', pdf, data, minimizer='minuit') as minuit:
-        r = minuit.migrad()
-        print(r)
-
-    assert not r.fmin.hesse_failed
-
-    results = minkit.migrad_output_to_registry(r)
-
-    for n, p in results.items():
-        assert np.allclose(pdf.all_args[n].value, p.value, rtol=0.1)
+    with helpers.fit_test(pdf, rtol=0.1) as test:
+        with minkit.unbinned_minimizer('ueml', pdf, data, minimizer='minuit') as minuit:
+            test.result = minuit.migrad()
 
     # Add constraints
     cc = minkit.Parameter('cc', 10)
     sc = minkit.Parameter('sc', 0.1)
     gc = minkit.Gaussian('constraint', c, cc, sc)
 
-    with minkit.unbinned_minimizer('ueml', pdf, data, minimizer='minuit', constraints=[gc]) as minuit:
-        r = minuit.migrad()
-        print(r)
-
-    assert not r.fmin.hesse_failed
-
-    results = minkit.migrad_output_to_registry(r)
-
-    for n, p in results.items():
-        assert np.allclose(pdf.all_args[n].value, p.value, rtol=0.1)
+    with helpers.fit_test(pdf, rtol=0.1) as test:
+        with minkit.unbinned_minimizer('ueml', pdf, data, minimizer='minuit', constraints=[gc]) as minuit:
+            test.result = minuit.migrad()
 
 
 @pytest.mark.minimization
@@ -122,29 +94,15 @@ def test_unbinned_maximum_likelihood():
 
     data = g.generate(10000)
 
-    with minkit.unbinned_minimizer('uml', g, data, minimizer='minuit') as minuit:
-        r = minuit.migrad()
-        print(r)
-
-    assert not r.fmin.hesse_failed
-
-    results = minkit.migrad_output_to_registry(r)
-
-    for n, p in results.items():
-        assert np.allclose(p.value, g.all_args[n].value, rtol=0.05)
+    with helpers.fit_test(g, rtol=0.05) as test:
+        with minkit.unbinned_minimizer('uml', g, data, minimizer='minuit') as minuit:
+            test.result = minuit.migrad()
 
     # Add constraints
     cc = minkit.Parameter('cc', 10)
     sc = minkit.Parameter('sc', 0.1)
     gc = minkit.Gaussian('constraint', c, cc, sc)
 
-    with minkit.unbinned_minimizer('uml', g, data, minimizer='minuit', constraints=[gc]) as minuit:
-        r = minuit.migrad()
-        print(r)
-
-    assert not r.fmin.hesse_failed
-
-    results = minkit.migrad_output_to_registry(r)
-
-    for n, p in results.items():
-        assert np.allclose(p.value, g.all_args[n].value, rtol=0.05)
+    with helpers.fit_test(g, rtol=0.05) as test:
+        with minkit.unbinned_minimizer('uml', g, data, minimizer='minuit', constraints=[gc]) as minuit:
+            test.result = minuit.migrad()

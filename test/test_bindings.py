@@ -23,6 +23,8 @@ def test_bind_class_arguments():
     s = minkit.Parameter('s', 1., bounds=(-3, +3))
     g = minkit.Gaussian('gaussian', m, c, s)
 
+    m.set_range('sides', ((-5, -2), (+2, +5)))
+
     data = g.generate(10000)
 
     # Single call
@@ -30,22 +32,22 @@ def test_bind_class_arguments():
         proxy(data)
 
     # Call with arguments
-    with g.bind(values=None) as proxy:
+    with g.bind(range='sides') as proxy:
         proxy(data)
 
     # Use same arguments as in bind
-    with g.bind(values=None) as proxy:
-        proxy(data, values=None)
+    with g.bind(range='sides') as proxy:
+        proxy(data, range='sides')
 
     # Use different arguments as in bind (raises error)
-    with g.bind(values=None) as proxy:
+    with g.bind(range='sides') as proxy:
         with pytest.raises(ValueError):
-            proxy(data, values={'c': 1.})
+            proxy(data, range='full')
 
     # Same tests with positionals
-    with g.bind(values=None) as proxy:
-        proxy(data, None)
+    with g.bind(range='sides') as proxy:
+        proxy(data, 'sides')
 
-    with g.bind(values=None) as proxy:
+    with g.bind(range='sides') as proxy:
         with pytest.raises(ValueError):
-            proxy(data, {'c': 1.})
+            proxy(data, 'full')

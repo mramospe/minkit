@@ -8,8 +8,19 @@ import numpy as np
 
 
 @docstrings.set_docstring
-def arange(*args, **kwargs):
-    return np.arange(*args, **kwargs)
+def arange(n, dtype=types.cpu_int):
+    if dtype == types.cpu_int:
+        return np.arange(n, dtype=dtype)
+    elif dtype == types.cpu_complex:
+        return np.arange(n, dtype=dtype).astype(types.cpu_complex)
+    else:
+        raise NotImplementedError(
+            f'Function not implemented for data type "{dtype}"')
+
+
+@docstrings.set_docstring
+def ale(a1, a2):
+    return a1 < a2
 
 
 @docstrings.set_docstring
@@ -21,8 +32,21 @@ def array(a, copy=True, convert=True):
 
 
 @docstrings.set_docstring
-def concatenate(*arrays):
-    return np.concatenate(arrays)
+def concatenate(arrays, maximum=None):
+    if maximum is not None:
+        return np.concatenate(arrays)[:maximum]
+    else:
+        return np.concatenate(arrays)
+
+
+@docstrings.set_docstring
+def count_nonzero(a):
+    return np.count_nonzero(a)
+
+
+@docstrings.set_docstring
+def empty(size, dtype=types.cpu_type):
+    return np.empty(size, dtype=dtype)
 
 
 @docstrings.set_docstring
@@ -78,6 +102,11 @@ def interpolate_linear(x, xp, yp):
 
 
 @docstrings.set_docstring
+def le(a, v):
+    return a < v
+
+
+@docstrings.set_docstring
 def leq(a, v):
     return a <= v
 
@@ -119,7 +148,11 @@ def min(a):
 
 @docstrings.set_docstring
 def ones(n, dtype=types.cpu_type):
-    return np.ones(n, dtype=dtype)
+    if dtype == types.cpu_bool:
+        # Hack due to lack of "bool" in PyOpenCL
+        return np.ones(n, dtype=types.cpu_real_bool)
+    else:
+        return np.ones(n, dtype=dtype)
 
 
 @docstrings.set_docstring
@@ -140,8 +173,11 @@ def shuffling_index(n):
 
 
 @docstrings.set_docstring
-def sum(a):
-    return np.sum(a)
+def sum(a, *args):
+    if len(args) == 0:
+        return np.sum(a)
+    else:
+        return np.sum((a, *args), axis=0)
 
 
 @docstrings.set_docstring
@@ -156,11 +192,15 @@ def slice_from_integer(a, indices):
 
 @docstrings.set_docstring
 def true_till(N, n):
-    a = np.ones(N, dtype=types.cpu_bool)
+    a = np.ones(N, dtype=types.cpu_real_bool)
     a[n:] = False
     return a
 
 
 @docstrings.set_docstring
 def zeros(n, dtype=types.cpu_type):
-    return np.zeros(n, dtype=dtype)
+    if dtype == types.cpu_bool:
+        # Hack due to lack of "bool" in PyOpenCL
+        return np.zeros(n, dtype=types.cpu_real_bool)
+    else:
+        return np.zeros(n, dtype=dtype)

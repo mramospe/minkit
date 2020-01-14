@@ -25,10 +25,10 @@ def test_evaluation_grid():
     n = 100
 
     # Test single range
-    g = dataset.evaluation_grid(minkit.Registry(x=x), x.bounds, n)
+    g = dataset.evaluation_grid(minkit.Registry([x]), x.bounds, n)
     assert len(g) == n
 
     # Test multi-range
     g = dataset.evaluation_grid(minkit.Registry(
-        x=x, y=y), np.concatenate([x.bounds, y.bounds]), n)
+        [x, y]), np.concatenate([x.bounds, y.bounds]), n)
     assert len(g) == n**2

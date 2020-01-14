@@ -6,6 +6,8 @@ is imported by the "core.py" module.
 '''
 import atexit
 import logging
+import math
+import numpy as np
 
 # GPU variables
 DEVICE = None
@@ -21,6 +23,9 @@ OPENCL = 'opencl'
 # CUDA backend
 CUDA = 'cuda'
 
+# Maximum value for the local size
+MAX_LOCAL_SIZE = 100
+
 
 logger = logging.getLogger(__name__)
 
@@ -34,16 +39,31 @@ def get_sizes(size):
     :returns: global and local sizes.
     :rtype: int, int or tuple(int, ...), tuple(int, ...)
     '''
-    frac = (size // 1000) or 1
-    while size % frac != 0:
-        frac -= 1
-
-    return size, frac  # TODO: OPTIMIZE
+    a = size % MAX_LOCAL_SIZE
+    if a == 0:
+        gs, ls = size, MAX_LOCAL_SIZE
+    elif size < MAX_LOCAL_SIZE:
+        gs, ls = size, 1
+    else:
+        a = np.arange(1, min(MAX_LOCAL_SIZE, math.ceil(math.sqrt(size))))
+        a = a[size % a == 0]
+        ls = int(a[np.argmin(np.abs(a - MAX_LOCAL_SIZE))])
+        gs = size
+    return int(gs), int(ls)
 
 
 def device_lookup(devices, device=None, interactive=False):
     '''
     Function to look for GPU devices.
+
+    :param devices: list of available devices
+    :type devices: list(Device)
+    :param device: index of the possible device to use.
+    :type device: int
+    :param interactive: whether to ask the user for input.
+    :type interactive: bool
+    :returns: the selected device.
+    :rtype: Device
     '''
     if len(devices) == 0:
         raise LookupError('No devices have been found')
@@ -86,10 +106,14 @@ def device_lookup(devices, device=None, interactive=False):
 
 def initialize_gpu(backend, **kwargs):
     '''
-    Initialize a new pycuda context.
-    The argument "kwargs" may contain any of the following values:
-    - interactive: (bool) whether to select the device manually (defaults to False)
+    Initialize a new GPU context.
+
+    :param backend: backend to use. It must be any of "cuda" or "opencl".
+    :type backend: str
+    :param kwargs: it may contain any of the following values: \
+    - interactive: (bool) whether to select the device manually (defaults to False) \
     - device: (int) number of the device to use (defaults to None).
+    :type kwargs: dict
     '''
     global BACKEND
     global DEVICE
