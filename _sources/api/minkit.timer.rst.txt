@@ -1,0 +1,6 @@
+timer
+=====
+
+.. currentmodule:: minkit
+
+.. autofunction:: timer

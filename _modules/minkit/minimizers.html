@@ -26,6 +26,8 @@
         <script type="text/javascript" src="../../_static/doctools.js"></script>
         <script type="text/javascript" src="../../_static/language_data.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
@@ -167,7 +169,7 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Category&#39;</span><span class="p">,</span> <span class="s1">&#39;binned_minimizer&#39;</span><span class="p">,</span> <span class="s1">&#39;unbinned_minimizer&#39;</span><span class="p">,</span>
-           <span class="s1">&#39;migrad_output_to_registry&#39;</span><span class="p">,</span> <span class="s1">&#39;simultaneous_minimizer&#39;</span><span class="p">]</span>
+           <span class="s1">&#39;minuit_to_registry&#39;</span><span class="p">,</span> <span class="s1">&#39;simultaneous_minimizer&#39;</span><span class="p">]</span>
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
@@ -218,7 +220,6 @@
 <span class="sd">        :param constraints: set of constraints to consider in the minimization.</span>
 <span class="sd">        :type constraints: list(PDF)</span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="n">pdf</span><span class="o">.</span><span class="n">enable_cache</span><span class="p">(</span><span class="n">pdf_core</span><span class="o">.</span><span class="n">PDF</span><span class="o">.</span><span class="n">CONST</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__data</span> <span class="o">=</span> <span class="n">data</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__fcn</span> <span class="o">=</span> <span class="n">fcn</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__pdf</span> <span class="o">=</span> <span class="n">pdf</span>
@@ -236,16 +237,9 @@
 <span class="sd">        :returns: value of the FCN.</span>
 <span class="sd">        :rtype: float</span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="n">r</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">Registry</span><span class="p">()</span>
-        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__pdf</span><span class="o">.</span><span class="n">all_args</span><span class="p">):</span>
-            <span class="n">r</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">call_from_dict</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Free the cache of the PDFs.</span>
-<span class="sd">        &#39;&#39;&#39;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__pdf</span><span class="o">.</span><span class="n">free_cache</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">):</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__fcn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__pdf</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__constraints</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">args</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -255,18 +249,7 @@
 <span class="sd">        :returns: all the arguments of the PDF.</span>
 <span class="sd">        :rtype: Registry</span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__pdf</span><span class="o">.</span><span class="n">all_args</span>
-
-    <span class="k">def</span> <span class="nf">call_from_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Call to the FCN given a set of values as a dictionary.</span>
-
-<span class="sd">        :param values: dictionary of values.</span>
-<span class="sd">        :type values: dict(str, float)</span>
-<span class="sd">        :returns: result of evaluating the FCN with the given set of values.</span>
-<span class="sd">        :rtype: float</span>
-<span class="sd">        &#39;&#39;&#39;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__fcn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__pdf</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__data</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__constraints</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__pdf</span><span class="o">.</span><span class="n">all_real_args</span>
 
 
 <span class="k">class</span> <span class="nc">UnbinnedEvaluatorProxy</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -289,15 +272,13 @@
 <span class="sd">        :param rescale_weights: whether to rescale the weights, so the statistical power remains constant.</span>
 <span class="sd">        :type rescale_weights: bool</span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="n">pdf</span><span class="o">.</span><span class="n">enable_cache</span><span class="p">(</span><span class="n">pdf_core</span><span class="o">.</span><span class="n">PDF</span><span class="o">.</span><span class="n">CONST</span><span class="p">)</span>
-
         <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">rescale_weights</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Rescaling weights for the fit&#39;</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">__data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">subset</span><span class="p">(</span>
-                    <span class="nb">range</span><span class="o">=</span><span class="nb">range</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">rescale_weights</span><span class="o">=</span><span class="n">rescale_weights</span><span class="p">)</span>
+                    <span class="nb">range</span><span class="o">=</span><span class="nb">range</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">rescale_weights</span><span class="o">=</span><span class="n">rescale_weights</span><span class="p">,</span> <span class="n">trim</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">__data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">subset</span><span class="p">(</span><span class="nb">range</span><span class="o">=</span><span class="nb">range</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">subset</span><span class="p">(</span><span class="nb">range</span><span class="o">=</span><span class="nb">range</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">trim</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">__fcn</span> <span class="o">=</span> <span class="n">fcn</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__pdf</span> <span class="o">=</span> <span class="n">pdf</span>
@@ -305,12 +286,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">__constraints</span> <span class="o">=</span> <span class="n">constraints</span> <span class="ow">or</span> <span class="p">[]</span>
 
         <span class="nb">super</span><span class="p">(</span><span class="n">UnbinnedEvaluatorProxy</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-
-    <span class="k">def</span> <span class="nf">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Free the cache of the PDFs.</span>
-<span class="sd">        &#39;&#39;&#39;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__pdf</span><span class="o">.</span><span class="n">free_cache</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">values</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
@@ -322,10 +297,9 @@
 <span class="sd">        :returns: value of the FCN.</span>
 <span class="sd">        :rtype: float</span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="n">r</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">Registry</span><span class="p">()</span>
-        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__pdf</span><span class="o">.</span><span class="n">all_args</span><span class="p">):</span>
-            <span class="n">r</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">call_from_dict</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">):</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__fcn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__pdf</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__range</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__constraints</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">args</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -335,18 +309,7 @@
 <span class="sd">        :returns: all the arguments of the PDF.</span>
 <span class="sd">        :rtype: Registry</span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__pdf</span><span class="o">.</span><span class="n">all_args</span>
-
-    <span class="k">def</span> <span class="nf">call_from_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Call to the FCN given a set of values as a dictionary.</span>
-
-<span class="sd">        :param values: dictionary of values.</span>
-<span class="sd">        :type values: dict(str, float)</span>
-<span class="sd">        :returns: result of evaluating the FCN with the given set of values.</span>
-<span class="sd">        :rtype: float</span>
-<span class="sd">        &#39;&#39;&#39;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__fcn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__pdf</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__data</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__range</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__constraints</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__pdf</span><span class="o">.</span><span class="n">all_real_args</span>
 
 
 <span class="k">class</span> <span class="nc">SimultaneousEvaluator</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -377,10 +340,11 @@
 <span class="sd">        :param kwargs: forwarded to :meth:`PDF.__call__`</span>
 <span class="sd">        :type kwargs: dict</span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="n">r</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">Registry</span><span class="p">()</span>
-        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">):</span>
-            <span class="n">r</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">fromiter</span><span class="p">((</span><span class="n">e</span><span class="o">.</span><span class="n">call_from_dict</span><span class="p">(</span><span class="n">r</span><span class="p">)</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__evaluators</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">types</span><span class="o">.</span><span class="n">cpu_type</span><span class="p">))</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">args</span>
+        <span class="n">sfcn</span> <span class="o">=</span> <span class="mf">0.</span>
+        <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__evaluators</span><span class="p">:</span>
+            <span class="n">sfcn</span> <span class="o">+=</span> <span class="n">e</span><span class="o">.</span><span class="fm">__call__</span><span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="n">args</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">name</span><span class="p">)]</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">sfcn</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">args</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -389,25 +353,25 @@
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="n">args</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">Registry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__evaluators</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">args</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__evaluators</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
-            <span class="n">args</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">)</span>
+            <span class="n">args</span> <span class="o">+=</span> <span class="n">e</span><span class="o">.</span><span class="n">args</span>
         <span class="k">return</span> <span class="n">args</span>
 
 
-<div class="viewcode-block" id="migrad_output_to_registry"><a class="viewcode-back" href="../../api/minkit.migrad_output_to_registry.html#minkit.migrad_output_to_registry">[docs]</a><span class="k">def</span> <span class="nf">migrad_output_to_registry</span><span class="p">(</span><span class="n">result</span><span class="p">):</span>
+<div class="viewcode-block" id="minuit_to_registry"><a class="viewcode-back" href="../../api/minkit.minuit_to_registry.html#minkit.minuit_to_registry">[docs]</a><span class="k">def</span> <span class="nf">minuit_to_registry</span><span class="p">(</span><span class="n">result</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    Transform the output from a call to Migrade into a :class:`Registry`.</span>
+<span class="sd">    Transform the output from a call to Minuit into a :class:`Registry`.</span>
 
 <span class="sd">    :param result: result from a migrad call.</span>
 <span class="sd">    :type result: iminuit.Minuit</span>
 <span class="sd">    :returns: registry of parameters with the result from Migrad.</span>
 <span class="sd">    :rtype: Registry(str, Parameter)</span>
 <span class="sd">    &#39;&#39;&#39;</span>
-    <span class="n">r</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">Registry</span><span class="p">()</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">params</span><span class="p">:</span>
         <span class="n">limits</span> <span class="o">=</span> <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">lower_limit</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">upper_limit</span><span class="p">)</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">has_limits</span> <span class="k">else</span> <span class="kc">None</span>
-        <span class="n">r</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span>
-            <span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="n">limits</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">error</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">is_fixed</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">r</span></div>
+        <span class="n">r</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">parameters</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="n">limits</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">error</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">is_fixed</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">parameters</span><span class="o">.</span><span class="n">Registry</span><span class="p">(</span><span class="n">r</span><span class="p">)</span></div>
 
 
 <span class="k">def</span> <span class="nf">registry_to_minuit_input</span><span class="p">(</span><span class="n">registry</span><span class="p">,</span> <span class="n">errordef</span><span class="o">=</span><span class="mf">1.</span><span class="p">):</span>
@@ -415,21 +379,21 @@
 <span class="sd">    Transform a registry of parameters into a dictionary to be parsed by Minuit.</span>
 
 <span class="sd">    :param registry: registry of parameters.</span>
-<span class="sd">    :type registry: Registry(str, Parameter)</span>
+<span class="sd">    :type registry: Registry(Parameter)</span>
 <span class="sd">    :param errordef: error definition for Minuit.</span>
 <span class="sd">    :type errorder: float</span>
 <span class="sd">    :returns: Minuit configuration dictionary.</span>
 <span class="sd">    :rtype: dict</span>
 <span class="sd">    &#39;&#39;&#39;</span>
-    <span class="n">values</span> <span class="o">=</span> <span class="p">{</span><span class="n">v</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">v</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">registry</span><span class="o">.</span><span class="n">values</span><span class="p">()}</span>
-    <span class="n">errors</span> <span class="o">=</span> <span class="p">{</span><span class="n">f</span><span class="s1">&#39;error_</span><span class="si">{v.name}</span><span class="s1">&#39;</span><span class="p">:</span> <span class="n">v</span><span class="o">.</span><span class="n">error</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">registry</span><span class="o">.</span><span class="n">values</span><span class="p">()}</span>
-    <span class="n">limits</span> <span class="o">=</span> <span class="p">{</span><span class="n">f</span><span class="s1">&#39;limit_</span><span class="si">{v.name}</span><span class="s1">&#39;</span><span class="p">:</span> <span class="n">v</span><span class="o">.</span><span class="n">bounds</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">registry</span><span class="o">.</span><span class="n">values</span><span class="p">()}</span>
-    <span class="n">const</span> <span class="o">=</span> <span class="p">{</span><span class="n">f</span><span class="s1">&#39;fix_</span><span class="si">{v.name}</span><span class="s1">&#39;</span><span class="p">:</span> <span class="n">v</span><span class="o">.</span><span class="n">constant</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">registry</span><span class="o">.</span><span class="n">values</span><span class="p">()}</span>
+    <span class="n">values</span> <span class="o">=</span> <span class="p">{</span><span class="n">v</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">v</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">registry</span><span class="p">}</span>
+    <span class="n">errors</span> <span class="o">=</span> <span class="p">{</span><span class="n">f</span><span class="s1">&#39;error_</span><span class="si">{v.name}</span><span class="s1">&#39;</span><span class="p">:</span> <span class="n">v</span><span class="o">.</span><span class="n">error</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">registry</span><span class="p">}</span>
+    <span class="n">limits</span> <span class="o">=</span> <span class="p">{</span><span class="n">f</span><span class="s1">&#39;limit_</span><span class="si">{v.name}</span><span class="s1">&#39;</span><span class="p">:</span> <span class="n">v</span><span class="o">.</span><span class="n">bounds</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">registry</span><span class="p">}</span>
+    <span class="n">const</span> <span class="o">=</span> <span class="p">{</span><span class="n">f</span><span class="s1">&#39;fix_</span><span class="si">{v.name}</span><span class="s1">&#39;</span><span class="p">:</span> <span class="n">v</span><span class="o">.</span><span class="n">constant</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">registry</span><span class="p">}</span>
     <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">errordef</span><span class="o">=</span><span class="n">errordef</span><span class="p">,</span> <span class="o">**</span><span class="n">values</span><span class="p">,</span> <span class="o">**</span><span class="n">errors</span><span class="p">,</span> <span class="o">**</span><span class="n">limits</span><span class="p">,</span> <span class="o">**</span><span class="n">const</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="unbinned_minimizer"><a class="viewcode-back" href="../../api/minkit.unbinned_minimizer.html#minkit.unbinned_minimizer">[docs]</a><span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
-<span class="nd">@parse_fcn</span><span class="p">(</span><span class="s1">&#39;unbinned&#39;</span><span class="p">)</span>
+<span class="nd">@parse_fcn</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">UNBINNED</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">unbinned_minimizer</span><span class="p">(</span><span class="n">fcn</span><span class="p">,</span> <span class="n">pdf</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">minimizer</span><span class="o">=</span><span class="n">MINUIT</span><span class="p">,</span> <span class="n">minimizer_config</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">rescale_weights</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Create a new instance of :class:`iminuit.Minuit`.</span>
@@ -440,22 +404,26 @@
 <span class="sd">    PDFs, since it will not be properly reflected during the minimization \</span>
 <span class="sd">    calls.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">pdf</span><span class="o">.</span><span class="n">enable_cache</span><span class="p">(</span><span class="n">pdf_core</span><span class="o">.</span><span class="n">PDF</span><span class="o">.</span><span class="n">CONST</span><span class="p">)</span>  <span class="c1"># Enable the cache</span>
+
     <span class="n">evaluator</span> <span class="o">=</span> <span class="n">UnbinnedEvaluatorProxy</span><span class="p">(</span><span class="n">fcn</span><span class="p">,</span> <span class="n">pdf</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="n">minimizer_config</span> <span class="o">=</span> <span class="n">minimizer_config</span> <span class="ow">or</span> <span class="p">{}</span>
 
     <span class="k">if</span> <span class="n">minimizer</span> <span class="o">==</span> <span class="n">MINUIT</span><span class="p">:</span>
         <span class="k">yield</span> <span class="n">iminuit</span><span class="o">.</span><span class="n">Minuit</span><span class="p">(</span><span class="n">evaluator</span><span class="p">,</span>
-                             <span class="n">forced_parameters</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">pdf</span><span class="o">.</span><span class="n">all_args</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span>
+                             <span class="n">forced_parameters</span><span class="o">=</span><span class="n">pdf</span><span class="o">.</span><span class="n">all_real_args</span><span class="o">.</span><span class="n">names</span><span class="p">,</span>
                              <span class="n">pedantic</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                              <span class="o">**</span><span class="n">minimizer_config</span><span class="p">,</span>
-                             <span class="o">**</span><span class="n">registry_to_minuit_input</span><span class="p">(</span><span class="n">pdf</span><span class="o">.</span><span class="n">all_args</span><span class="p">))</span>
+                             <span class="o">**</span><span class="n">registry_to_minuit_input</span><span class="p">(</span><span class="n">pdf</span><span class="o">.</span><span class="n">all_real_args</span><span class="p">))</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;Unknown minimizer &quot;</span><span class="si">{minimizer}</span><span class="s1">&quot;&#39;</span><span class="p">)</span></div>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;Unknown minimizer &quot;</span><span class="si">{minimizer}</span><span class="s1">&quot;&#39;</span><span class="p">)</span>
+
+    <span class="n">pdf</span><span class="o">.</span><span class="n">free_cache</span><span class="p">()</span>  <span class="c1"># Very important</span></div>
 
 
 <div class="viewcode-block" id="binned_minimizer"><a class="viewcode-back" href="../../api/minkit.binned_minimizer.html#minkit.binned_minimizer">[docs]</a><span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
-<span class="nd">@parse_fcn</span><span class="p">(</span><span class="s1">&#39;binned&#39;</span><span class="p">)</span>
+<span class="nd">@parse_fcn</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">BINNED</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">binned_minimizer</span><span class="p">(</span><span class="n">fcn</span><span class="p">,</span> <span class="n">pdf</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">minimizer</span><span class="o">=</span><span class="n">MINUIT</span><span class="p">,</span> <span class="n">minimizer_config</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Create a new instance of :class:`iminuit.Minuit`.</span>
@@ -466,18 +434,22 @@
 <span class="sd">    PDFs, since it will not be properly reflected during the minimization \</span>
 <span class="sd">    calls.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">pdf</span><span class="o">.</span><span class="n">enable_cache</span><span class="p">(</span><span class="n">pdf_core</span><span class="o">.</span><span class="n">PDF</span><span class="o">.</span><span class="n">CONST</span><span class="p">)</span>  <span class="c1"># Enable the cache</span>
+
     <span class="n">evaluator</span> <span class="o">=</span> <span class="n">BinnedEvaluatorProxy</span><span class="p">(</span><span class="n">fcn</span><span class="p">,</span> <span class="n">pdf</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="n">minimizer_config</span> <span class="o">=</span> <span class="n">minimizer_config</span> <span class="ow">or</span> <span class="p">{}</span>
 
     <span class="k">if</span> <span class="n">minimizer</span> <span class="o">==</span> <span class="n">MINUIT</span><span class="p">:</span>
         <span class="k">yield</span> <span class="n">iminuit</span><span class="o">.</span><span class="n">Minuit</span><span class="p">(</span><span class="n">evaluator</span><span class="p">,</span>
-                             <span class="n">forced_parameters</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">pdf</span><span class="o">.</span><span class="n">all_args</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span>
+                             <span class="n">forced_parameters</span><span class="o">=</span><span class="n">pdf</span><span class="o">.</span><span class="n">all_real_args</span><span class="o">.</span><span class="n">names</span><span class="p">,</span>
                              <span class="n">pedantic</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                              <span class="o">**</span><span class="n">minimizer_config</span><span class="p">,</span>
-                             <span class="o">**</span><span class="n">registry_to_minuit_input</span><span class="p">(</span><span class="n">pdf</span><span class="o">.</span><span class="n">all_args</span><span class="p">))</span>
+                             <span class="o">**</span><span class="n">registry_to_minuit_input</span><span class="p">(</span><span class="n">pdf</span><span class="o">.</span><span class="n">all_real_args</span><span class="p">))</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;Unknown minimizer &quot;</span><span class="si">{minimizer}</span><span class="s1">&quot;&#39;</span><span class="p">)</span></div>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;Unknown minimizer &quot;</span><span class="si">{minimizer}</span><span class="s1">&quot;&#39;</span><span class="p">)</span>
+
+    <span class="n">pdf</span><span class="o">.</span><span class="n">free_cache</span><span class="p">()</span>  <span class="c1"># Very important</span></div>
 
 
 <div class="viewcode-block" id="simultaneous_minimizer"><a class="viewcode-back" href="../../api/minkit.simultaneous_minimizer.html#minkit.simultaneous_minimizer">[docs]</a><span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
@@ -506,6 +478,8 @@
     <span class="n">evaluators</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">cat</span> <span class="ow">in</span> <span class="n">categories</span><span class="p">:</span>
 
+        <span class="n">cat</span><span class="o">.</span><span class="n">pdf</span><span class="o">.</span><span class="n">enable_cache</span><span class="p">(</span><span class="n">pdf_core</span><span class="o">.</span><span class="n">PDF</span><span class="o">.</span><span class="n">CONST</span><span class="p">)</span>  <span class="c1"># Enable the cache</span>
+
         <span class="n">fcn</span> <span class="o">=</span> <span class="n">fcns</span><span class="o">.</span><span class="n">fcn_from_name</span><span class="p">(</span><span class="n">cat</span><span class="o">.</span><span class="n">fcn</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">fcns</span><span class="o">.</span><span class="n">data_type_for_fcn</span><span class="p">(</span><span class="n">cat</span><span class="o">.</span><span class="n">fcn</span><span class="p">)</span> <span class="o">==</span> <span class="n">dataset</span><span class="o">.</span><span class="n">BINNED</span><span class="p">:</span>
@@ -523,12 +497,15 @@
     <span class="c1"># Return the minimizer</span>
     <span class="k">if</span> <span class="n">minimizer</span> <span class="o">==</span> <span class="n">MINUIT</span><span class="p">:</span>
         <span class="k">yield</span> <span class="n">iminuit</span><span class="o">.</span><span class="n">Minuit</span><span class="p">(</span><span class="n">evaluator</span><span class="p">,</span>
-                             <span class="n">forced_parameters</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">evaluator</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span>
+                             <span class="n">forced_parameters</span><span class="o">=</span><span class="n">evaluator</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">names</span><span class="p">,</span>
                              <span class="n">pedantic</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                              <span class="o">**</span><span class="n">minimizer_config</span><span class="p">,</span>
                              <span class="o">**</span><span class="n">registry_to_minuit_input</span><span class="p">(</span><span class="n">evaluator</span><span class="o">.</span><span class="n">args</span><span class="p">))</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;Unknown minimizer &quot;</span><span class="si">{minimizer}</span><span class="s1">&quot;&#39;</span><span class="p">)</span></div>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;Unknown minimizer &quot;</span><span class="si">{minimizer}</span><span class="s1">&quot;&#39;</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">categories</span><span class="p">:</span>
+        <span class="n">c</span><span class="o">.</span><span class="n">pdf</span><span class="o">.</span><span class="n">free_cache</span><span class="p">()</span>  <span class="c1"># Very important</span></div>
 </pre></div>
 
            </div>

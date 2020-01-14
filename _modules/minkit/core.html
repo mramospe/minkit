@@ -26,6 +26,8 @@
         <script type="text/javascript" src="../../_static/doctools.js"></script>
         <script type="text/javascript" src="../../_static/language_data.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
@@ -154,15 +156,17 @@
 <span class="sd">Definition of the backend where to store the data and run the jobs.</span>
 <span class="sd">&#39;&#39;&#39;</span>
 <span class="kn">import</span> <span class="nn">atexit</span>
+<span class="kn">import</span> <span class="nn">contextlib</span>
 <span class="kn">import</span> <span class="nn">functools</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">time</span>
 
 <span class="kn">from</span> <span class="nn">.operations</span> <span class="k">import</span> <span class="n">types</span>
 <span class="kn">from</span> <span class="nn">.operations</span> <span class="k">import</span> <span class="n">gpu_core</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;aop&#39;</span><span class="p">,</span> <span class="s1">&#39;initialize&#39;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;aop&#39;</span><span class="p">,</span> <span class="s1">&#39;free_cache&#39;</span><span class="p">,</span> <span class="s1">&#39;initialize&#39;</span><span class="p">,</span> <span class="s1">&#39;timer&#39;</span><span class="p">]</span>
 
 
 <span class="c1"># CPU backend</span>
@@ -248,14 +252,32 @@
     <span class="k">pass</span></div>
 
 
+<div class="viewcode-block" id="free_cache"><a class="viewcode-back" href="../../api/minkit.free_cache.html#minkit.free_cache">[docs]</a><span class="k">def</span> <span class="nf">free_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Free the cache of arrays. Only works in GPU mode, with</span>
+<span class="sd">    backend &quot;cuda&quot; or &quot;opencl&quot;.</span>
+<span class="sd">    In :py:mod:`minkit`, when the backend is set to GPU, arrays will</span>
+<span class="sd">    tend to be reused and kept in the device till a call to :func:`free_cache`</span>
+<span class="sd">    is done.</span>
+<span class="sd">    This call will eliminate all arrays that are not being used, what will</span>
+<span class="sd">    free space in memory.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">BACKEND</span> <span class="o">!=</span> <span class="n">CPU</span><span class="p">:</span>
+        <span class="n">aop</span><span class="o">.</span><span class="n">free_cache</span><span class="p">()</span></div>
+
+
 <div class="viewcode-block" id="initialize"><a class="viewcode-back" href="../../api/minkit.initialize.html#minkit.initialize">[docs]</a><span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">backend</span><span class="o">=</span><span class="n">CPU</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Initialize the package, setting the backend and determining what packages to</span>
 <span class="sd">    use accordingly.</span>
-<span class="sd">    The argument &quot;kwargs&quot; is meant to be used in the CUDA backend, and may contain</span>
-<span class="sd">    any of the following values:</span>
-<span class="sd">    - interactive: (bool) whether to select the device manually (defaults to False)</span>
+
+<span class="sd">    :param backend: backend to use. It must be any of &quot;cpu&quot;, &quot;cuda&quot; or &quot;opencl&quot;.</span>
+<span class="sd">    :type backend: str</span>
+<span class="sd">    :param kwargs: meant to be used in the CUDA or OpenCL backend, it may contain \</span>
+<span class="sd">    any of the following values: \</span>
+<span class="sd">    - interactive: (bool) whether to select the device manually (defaults to False) \</span>
 <span class="sd">    - device: (int) number of the device to use (defaults to None).</span>
+<span class="sd">    :type kwargs: dict</span>
 
 <span class="sd">    .. note:: The backend can be also specified as an environmental variable \</span>
 <span class="sd">    MINKIT_BACKEND, overriding that specified in any :func:`initialize` call.</span>
@@ -291,6 +313,21 @@
 
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;Unknown backend &quot;</span><span class="si">{BACKEND}</span><span class="s1">&quot;&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="timer"><a class="viewcode-back" href="../../api/minkit.timer.html#minkit.timer">[docs]</a><span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
+<span class="k">def</span> <span class="nf">timer</span><span class="p">():</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Create an object that, on exit, displays the time elapsed.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="k">yield</span>
+    <span class="n">end</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+    <span class="n">hours</span><span class="p">,</span> <span class="n">rem</span> <span class="o">=</span> <span class="nb">divmod</span><span class="p">(</span><span class="n">end</span> <span class="o">-</span> <span class="n">start</span><span class="p">,</span> <span class="mi">3600</span><span class="p">)</span>
+    <span class="n">minutes</span><span class="p">,</span> <span class="n">seconds</span> <span class="o">=</span> <span class="nb">divmod</span><span class="p">(</span><span class="n">rem</span><span class="p">,</span> <span class="mi">60</span><span class="p">)</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;Time elapsed: </span><span class="si">{hours}</span><span class="s1">h </span><span class="si">{minutes}</span><span class="s1">m </span><span class="si">{seconds}</span><span class="s1">s&#39;</span><span class="p">)</span></div>
 </pre></div>
 
            </div>

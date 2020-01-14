@@ -1,0 +1,35 @@
+Formula
+=======
+
+.. currentmodule:: minkit
+
+.. autoclass:: Formula
+   :show-inheritance:
+
+   .. rubric:: Attributes Summary
+
+   .. autosummary::
+
+      ~Formula.all_args
+      ~Formula.args
+      ~Formula.dependent
+      ~Formula.value
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+
+      ~Formula.from_json_object
+      ~Formula.to_json_object
+
+   .. rubric:: Attributes Documentation
+
+   .. autoattribute:: all_args
+   .. autoattribute:: args
+   .. autoattribute:: dependent
+   .. autoattribute:: value
+
+   .. rubric:: Methods Documentation
+
+   .. automethod:: from_json_object
+   .. automethod:: to_json_object

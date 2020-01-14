@@ -26,6 +26,8 @@
         <script type="text/javascript" src="../_static/doctools.js"></script>
         <script type="text/javascript" src="../_static/language_data.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -94,12 +96,12 @@
 <li class="toctree-l3 current"><a class="current reference internal" href="#">Amoroso</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.BinnedDataSet.html">BinnedDataSet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.Category.html">Category</a></li>
-<li class="toctree-l3"><a class="reference internal" href="minkit.Category.html">Category</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.Chebyshev.html">Chebyshev</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.ConvPDFs.html">ConvPDFs</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.CrystalBall.html">CrystalBall</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.DataSet.html">DataSet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.Exponential.html">Exponential</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.Formula.html">Formula</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.Gaussian.html">Gaussian</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.PDF.html">PDF</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.Parameter.html">Parameter</a></li>
@@ -212,7 +214,22 @@
 <dt id="minkit.Amoroso">
 <em class="property">class </em><code class="sig-prename descclassname">minkit.</code><code class="sig-name descname">Amoroso</code><span class="sig-paren">(</span><em class="sig-param">name</em>, <em class="sig-param">x</em>, <em class="sig-param">a</em>, <em class="sig-param">theta</em>, <em class="sig-param">alpha</em>, <em class="sig-param">beta</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/pdfs.html#Amoroso"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.Amoroso" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="minkit.SourcePDF.html#minkit.SourcePDF" title="minkit.pdf_core.SourcePDF"><code class="docutils literal notranslate"><span class="pre">minkit.SourcePDF</span></code></a></p>
-<p>Create a new PDF with the name, parameter related to the data and the argument parameters.</p>
+<p>Create a new PDF with the name, parameter related to the data and the argument parameters.
+The amoroso distribution is defined as</p>
+<div class="math notranslate nohighlight">
+\[f\left(x;a,\theta,\alpha,\beta\right) = \left(\frac{x - a}{\theta}\right)^{\alpha\beta - 1} e^{-\left(\frac{x - a}{\theta}\right)^\beta}\]</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – name of the PDF.</p></li>
+<li><p><strong>x</strong> (<a class="reference internal" href="minkit.Parameter.html#minkit.Parameter" title="minkit.Parameter"><em>Parameter</em></a>) – data parameter.</p></li>
+<li><p><strong>a</strong> (<a class="reference internal" href="minkit.Parameter.html#minkit.Parameter" title="minkit.Parameter"><em>Parameter</em></a>) – center of the distribution.</p></li>
+<li><p><strong>theta</strong> (<a class="reference internal" href="minkit.Parameter.html#minkit.Parameter" title="minkit.Parameter"><em>Parameter</em></a>) – parameter related to the width of the distribution.</p></li>
+<li><p><strong>alpha</strong> (<a class="reference internal" href="minkit.Parameter.html#minkit.Parameter" title="minkit.Parameter"><em>Parameter</em></a>) – power for the distance with respect to the center. Must be greater than zero.</p></li>
+<li><p><strong>beta</strong> (<a class="reference internal" href="minkit.Parameter.html#minkit.Parameter" title="minkit.Parameter"><em>Parameter</em></a>) – power of the exponential.</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 </div>

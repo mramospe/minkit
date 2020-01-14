@@ -1,0 +1,6 @@
+minuit_to_registry
+==================
+
+.. currentmodule:: minkit
+
+.. autofunction:: minuit_to_registry

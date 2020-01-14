@@ -1,0 +1,284 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>sweights &mdash; minkit 0.0.0.dev0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="sweights_u" href="minkit.sweights_u.html" />
+    <link rel="prev" title="simultaneous_minimizer" href="minkit.simultaneous_minimizer.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> minkit
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.0.0.dev0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../main.html">Functions and classes</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../main.html#functions">Functions</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="minkit.add_pdf_src.html">add_pdf_src</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.binned_maximum_likelihood.html">binned_maximum_likelihood</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.binned_minimizer.html">binned_minimizer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.free_cache.html">free_cache</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.initialize.html">initialize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.minuit_to_registry.html">minuit_to_registry</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.pdf_from_json.html">pdf_from_json</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.pdf_to_json.html">pdf_to_json</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.register_pdf.html">register_pdf</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.scale_pdf_values.html">scale_pdf_values</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.simultaneous_minimizer.html">simultaneous_minimizer</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">sweights</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.sweights_u.html">sweights_u</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.timer.html">timer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.unbinned_extended_maximum_likelihood.html">unbinned_extended_maximum_likelihood</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.unbinned_maximum_likelihood.html">unbinned_maximum_likelihood</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.unbinned_minimizer.html">unbinned_minimizer</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../main.html#classes">Classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../main.html#class-inheritance-diagram">Class Inheritance Diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">minkit</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../main.html">Functions and classes</a> &raquo;</li>
+        
+      <li>sweights</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/api/minkit.sweights.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="sweights">
+<h1>sweights<a class="headerlink" href="#sweights" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="minkit.sweights">
+<code class="sig-prename descclassname">minkit.</code><code class="sig-name descname">sweights</code><span class="sig-paren">(</span><em class="sig-param">pdfs</em>, <em class="sig-param">yields</em>, <em class="sig-param">data</em>, <em class="sig-param">range='full'</em>, <em class="sig-param">return_covariance=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/splot.html#sweights"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.sweights" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the s-weights for the different provided species.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pdfs</strong> (<a class="reference internal" href="minkit.Registry.html#minkit.Registry" title="minkit.Registry"><em>Registry</em></a>) – registry of PDFs to use.</p></li>
+<li><p><strong>yields</strong> (<a class="reference internal" href="minkit.Registry.html#minkit.Registry" title="minkit.Registry"><em>Registry</em></a>) – yields of the PDFs.</p></li>
+<li><p><strong>data</strong> (<a class="reference internal" href="minkit.DataSet.html#minkit.DataSet" title="minkit.DataSet"><em>DataSet</em></a>) – data to evaluate.</p></li>
+<li><p><strong>range</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – range to consider for evaluating the PDFs.</p></li>
+<li><p><strong>return_covariance</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – if set to True, it also returns the covariance matrix.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>s-weights for each specie and possible covariance matrix.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)">list</a>(<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)">numpy.ndarray</a>), (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)">numpy.ndarray</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="minkit.sweights_u.html" class="btn btn-neutral float-right" title="sweights_u" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="minkit.simultaneous_minimizer.html" class="btn btn-neutral float-left" title="simultaneous_minimizer" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Miguel Ramos Pernas
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

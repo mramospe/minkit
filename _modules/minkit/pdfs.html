@@ -26,6 +26,8 @@
         <script type="text/javascript" src="../../_static/doctools.js"></script>
         <script type="text/javascript" src="../../_static/language_data.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
@@ -172,8 +174,24 @@
 <span class="sd">    &#39;&#39;&#39;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">beta</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;</span>
+        <span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Create a new PDF with the name, parameter related to the data and the argument parameters.</span>
+<span class="sd">        The amoroso distribution is defined as</span>
+
+<span class="sd">        .. math:: f\left(x;a,\theta,\alpha,\beta\right) = \left(\frac{x - a}{\theta}\right)^{\alpha\beta - 1} e^{-\left(\frac{x - a}{\theta}\right)^\beta}</span>
+
+<span class="sd">        :param name: name of the PDF.</span>
+<span class="sd">        :type name: str</span>
+<span class="sd">        :param x: data parameter.</span>
+<span class="sd">        :type x: Parameter</span>
+<span class="sd">        :param a: center of the distribution.</span>
+<span class="sd">        :type a: Parameter</span>
+<span class="sd">        :param theta: parameter related to the width of the distribution.</span>
+<span class="sd">        :type theta: Parameter</span>
+<span class="sd">        :param alpha: power for the distance with respect to the center. Must be greater than zero.</span>
+<span class="sd">        :type alpha: Parameter</span>
+<span class="sd">        :param beta: power of the exponential.</span>
+<span class="sd">        :type beta: Parameter</span>
 
 <span class="sd">        .. warning: This function is unstable and the evaluation can explode easily for certain combination of parameters, as the normalization is currently done numerically.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
@@ -195,15 +213,22 @@
 <span class="sd">    &#39;&#39;&#39;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="o">*</span><span class="n">coeffs</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;</span>
+        <span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Build the class given the name, parameter related to data and coefficients.</span>
 <span class="sd">        Coefficients must be sorted from lower to higher order.</span>
 <span class="sd">        Due to the normalization requirement, the first coefficient corresponds to the</span>
 <span class="sd">        Chebyshev polynomial of n = 1, thus a straight line.</span>
+<span class="sd">        The Chebyshev polynomials are related through</span>
+
+<span class="sd">        .. math:: T_0(x) = 1</span>
+
+<span class="sd">        .. math:: T_1(x) = x</span>
+
+<span class="sd">        .. math:: T_{n + 1}(x) = 2xT_n(x) - T_{n - 1}(x)</span>
 
 <span class="sd">        :param name: name of the PDF.</span>
 <span class="sd">        :type name: str</span>
-<span class="sd">        :param x: parameter related to the data.</span>
+<span class="sd">        :param x: data parameter.</span>
 <span class="sd">        :type x: Parameter</span>
 <span class="sd">        :param coeffs: coefficients for the polynomial</span>
 <span class="sd">        :type coeffs: tuple(Parameter)</span>
@@ -218,8 +243,38 @@
 <span class="sd">    &#39;&#39;&#39;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;</span>
+        <span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Create a new PDF with the name, parameter related to the data and the argument parameters.</span>
+<span class="sd">        This PDF is expressed as</span>
+
+<span class="sd">        .. math:: f\left(x;c,\sigma,\alpha,n\right) = e^{- \frac{\left(x - c\right)^2}{2\sigma^2}}</span>
+
+<span class="sd">        for values of</span>
+
+<span class="sd">        .. math:: \frac{x - c}{\sigma} \geq - |\alpha|</span>
+
+<span class="sd">        otherwise, the power law</span>
+
+<span class="sd">        .. math:: \frac{A}{\left(B - \frac{x - c}{\sigma}\right)^n}</span>
+
+<span class="sd">        is used, where</span>
+
+<span class="sd">        .. math:: A = \left(\frac{n}{|\alpha|}\right)^n e^{- \frac{1}{2} |\alpha|^2}</span>
+
+<span class="sd">        .. math:: B = \frac{n}{|\alpha|} - |\alpha|</span>
+
+<span class="sd">        :param name: name of the PDF.</span>
+<span class="sd">        :type name: str</span>
+<span class="sd">        :param x: data parameter.</span>
+<span class="sd">        :type x: Parameter</span>
+<span class="sd">        :param c: center of the Gaussian core.</span>
+<span class="sd">        :type c: Parameter</span>
+<span class="sd">        :param s: standard deviation of the Gaussian core.</span>
+<span class="sd">        :type s: Parameter</span>
+<span class="sd">        :param a: number of standard deviations till the start of the power-law behaviour. A negative value implies the tail is on the right.</span>
+<span class="sd">        :type a: Parameter</span>
+<span class="sd">        :param n: power of the power-law.</span>
+<span class="sd">        :type n: Parameter</span>
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">CrystalBall</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="p">[</span><span class="n">x</span><span class="p">],</span> <span class="p">[</span><span class="n">c</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">n</span><span class="p">])</span></div>
 
@@ -231,8 +286,18 @@
 <span class="sd">    &#39;&#39;&#39;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">k</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;</span>
+        <span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Create a new PDF with the parameters related to the data and the slope parameter.</span>
+<span class="sd">        The PDF is defined as.</span>
+
+<span class="sd">        .. math:: f\left(x;k\right) = e^{k x}</span>
+
+<span class="sd">        :param name: name of the PDF.</span>
+<span class="sd">        :type name: str</span>
+<span class="sd">        :param x: data parameter.</span>
+<span class="sd">        :type x: Parameter</span>
+<span class="sd">        :param k: parameter of the exponential.</span>
+<span class="sd">        :type k: Parameter</span>
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">Exponential</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="p">[</span><span class="n">x</span><span class="p">],</span> <span class="p">[</span><span class="n">k</span><span class="p">])</span></div>
 
@@ -244,15 +309,20 @@
 <span class="sd">    &#39;&#39;&#39;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">center</span><span class="p">,</span> <span class="n">sigma</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;</span>
+        <span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Create a new PDF with the parameters related to the data, center and standard</span>
 <span class="sd">        deviation.</span>
+<span class="sd">        The PDF is defined as</span>
 
+<span class="sd">        .. math:: f\left(x;c,\sigma\right) = e^{-\frac{\left(x - c\right)^2}{2\sigma^2}}</span>
+
+<span class="sd">        :param name: name of the PDF.</span>
+<span class="sd">        :type name: str</span>
 <span class="sd">        :param x: Parameter</span>
-<span class="sd">        :type x: running variable</span>
-<span class="sd">        :param center: center</span>
+<span class="sd">        :type x: data parameter.</span>
+<span class="sd">        :param center: center of the Gaussian.</span>
 <span class="sd">        :type center: Parameter</span>
-<span class="sd">        :param sigma: standard deviation</span>
+<span class="sd">        :param sigma: standard deviation.</span>
 <span class="sd">        :type sigma: Parameter</span>
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">Gaussian</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="p">[</span><span class="n">x</span><span class="p">],</span> <span class="p">[</span><span class="n">center</span><span class="p">,</span> <span class="n">sigma</span><span class="p">])</span></div>
@@ -265,13 +335,18 @@
 <span class="sd">    &#39;&#39;&#39;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="o">*</span><span class="n">coeffs</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;</span>
+        <span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Build the class given the name, parameter related to data and the coefficients.</span>
 <span class="sd">        Coefficients must be sorted from lower to higher order.</span>
+<span class="sd">        Due to the normalization condition, the first parameter is fixed to zero, if no</span>
+<span class="sd">        coefficients are provided the result is a constant function.</span>
+<span class="sd">        The PDF is expressed as</span>
+
+<span class="sd">        .. math:: f\left(x;a_1,a_2,...\right) = 1 + \sum_{i = 1}^n a_i x^i</span>
 
 <span class="sd">        :param name: name of the PDF.</span>
 <span class="sd">        :type name: str</span>
-<span class="sd">        :param x: parameter related to the data.</span>
+<span class="sd">        :param x: data parameter.</span>
 <span class="sd">        :type x: Parameter</span>
 <span class="sd">        :param coeffs: coefficients for the polynomial</span>
 <span class="sd">        :type coeffs: tuple(Parameter)</span>
@@ -286,12 +361,15 @@
 <span class="sd">    &#39;&#39;&#39;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;</span>
+        <span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Build the class given the name, parameter related to data and the coefficients.</span>
+<span class="sd">        This PDF is expressed as</span>
+
+<span class="sd">        .. math:: f\left(x;c,n\right) = \frac{1}{\left(x - c\right)^n}</span>
 
 <span class="sd">        :param name: name of the PDF.</span>
 <span class="sd">        :type name: str</span>
-<span class="sd">        :param x: parameter related to the data.</span>
+<span class="sd">        :param x: data parameter.</span>
 <span class="sd">        :type x: Parameter</span>
 <span class="sd">        :param c: asymptote of the power-law.</span>
 <span class="sd">        :type c: Parameter</span>

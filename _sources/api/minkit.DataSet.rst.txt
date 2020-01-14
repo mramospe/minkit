@@ -20,6 +20,7 @@ DataSet
       ~DataSet.add
       ~DataSet.from_array
       ~DataSet.from_records
+      ~DataSet.merge
       ~DataSet.shuffle
       ~DataSet.subset
       ~DataSet.to_records
@@ -34,6 +35,7 @@ DataSet
    .. automethod:: add
    .. automethod:: from_array
    .. automethod:: from_records
+   .. automethod:: merge
    .. automethod:: shuffle
    .. automethod:: subset
    .. automethod:: to_records

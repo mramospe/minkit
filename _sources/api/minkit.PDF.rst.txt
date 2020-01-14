@@ -14,11 +14,14 @@ PDF
       ~PDF.CACHE_TYPES
       ~PDF.CONST
       ~PDF.all_args
+      ~PDF.all_pars
+      ~PDF.all_real_args
       ~PDF.args
       ~PDF.cache
       ~PDF.cache_type
       ~PDF.constant
       ~PDF.data_pars
+      ~PDF.dependent
 
    .. rubric:: Methods Summary
 
@@ -30,9 +33,11 @@ PDF
       ~PDF.free_cache
       ~PDF.from_json_object
       ~PDF.generate
+      ~PDF.get_values
       ~PDF.integral
       ~PDF.norm
       ~PDF.numerical_normalization
+      ~PDF.set_values
       ~PDF.to_json_object
 
    .. rubric:: Attributes Documentation
@@ -41,11 +46,14 @@ PDF
    .. autoattribute:: CACHE_TYPES
    .. autoattribute:: CONST
    .. autoattribute:: all_args
+   .. autoattribute:: all_pars
+   .. autoattribute:: all_real_args
    .. autoattribute:: args
    .. autoattribute:: cache
    .. autoattribute:: cache_type
    .. autoattribute:: constant
    .. autoattribute:: data_pars
+   .. autoattribute:: dependent
 
    .. rubric:: Methods Documentation
 
@@ -55,7 +63,9 @@ PDF
    .. automethod:: free_cache
    .. automethod:: from_json_object
    .. automethod:: generate
+   .. automethod:: get_values
    .. automethod:: integral
    .. automethod:: norm
    .. automethod:: numerical_normalization
+   .. automethod:: set_values
    .. automethod:: to_json_object

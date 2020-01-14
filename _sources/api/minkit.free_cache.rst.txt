@@ -1,0 +1,6 @@
+free_cache
+==========
+
+.. currentmodule:: minkit
+
+.. autofunction:: free_cache

@@ -26,6 +26,8 @@
         <script type="text/javascript" src="../_static/doctools.js"></script>
         <script type="text/javascript" src="../_static/language_data.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -38,7 +40,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="unbinned_maximum_likelihood" href="minkit.unbinned_maximum_likelihood.html" />
-    <link rel="prev" title="simultaneous_minimizer" href="minkit.simultaneous_minimizer.html" /> 
+    <link rel="prev" title="timer" href="minkit.timer.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -92,11 +94,17 @@
 <li class="toctree-l3"><a class="reference internal" href="minkit.add_pdf_src.html">add_pdf_src</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.binned_maximum_likelihood.html">binned_maximum_likelihood</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.binned_minimizer.html">binned_minimizer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.free_cache.html">free_cache</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.initialize.html">initialize</a></li>
-<li class="toctree-l3"><a class="reference internal" href="minkit.migrad_output_to_registry.html">migrad_output_to_registry</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.minuit_to_registry.html">minuit_to_registry</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.pdf_from_json.html">pdf_from_json</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.pdf_to_json.html">pdf_to_json</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.register_pdf.html">register_pdf</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.scale_pdf_values.html">scale_pdf_values</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.simultaneous_minimizer.html">simultaneous_minimizer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.sweights.html">sweights</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.sweights_u.html">sweights_u</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.timer.html">timer</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">unbinned_extended_maximum_likelihood</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.unbinned_maximum_likelihood.html">unbinned_maximum_likelihood</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.unbinned_minimizer.html">unbinned_minimizer</a></li>
@@ -201,7 +209,7 @@
 <h1>unbinned_extended_maximum_likelihood<a class="headerlink" href="#unbinned-extended-maximum-likelihood" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
 <dt id="minkit.unbinned_extended_maximum_likelihood">
-<code class="sig-prename descclassname">minkit.</code><code class="sig-name descname">unbinned_extended_maximum_likelihood</code><span class="sig-paren">(</span><em class="sig-param">pdf</em>, <em class="sig-param">data</em>, <em class="sig-param">values=None</em>, <em class="sig-param">range='full'</em>, <em class="sig-param">constraints=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/fcns.html#unbinned_extended_maximum_likelihood"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.unbinned_extended_maximum_likelihood" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">minkit.</code><code class="sig-name descname">unbinned_extended_maximum_likelihood</code><span class="sig-paren">(</span><em class="sig-param">pdf</em>, <em class="sig-param">data</em>, <em class="sig-param">range='full'</em>, <em class="sig-param">constraints=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/fcns.html#unbinned_extended_maximum_likelihood"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.unbinned_extended_maximum_likelihood" title="Permalink to this definition">¶</a></dt>
 <dd><p>Definition of the unbinned extended maximum likelihood FCN.
 In this case, entries in data are assumed to follow a Poissonian distribution.
 The given <a class="reference internal" href="minkit.PDF.html#minkit.PDF" title="minkit.PDF"><code class="xref py py-class docutils literal notranslate"><span class="pre">PDF</span></code></a> must be of “extended” type.</p>
@@ -210,7 +218,6 @@ The given <a class="reference internal" href="minkit.PDF.html#minkit.PDF" title=
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>pdf</strong> (<a class="reference internal" href="minkit.PDF.html#minkit.PDF" title="minkit.PDF"><em>PDF</em></a>) – function to evaluate.</p></li>
 <li><p><strong>data</strong> (<a class="reference internal" href="minkit.DataSet.html#minkit.DataSet" title="minkit.DataSet"><em>DataSet</em></a>) – data to evaluate.</p></li>
-<li><p><strong>values</strong> (<a class="reference internal" href="minkit.Registry.html#minkit.Registry" title="minkit.Registry"><em>Registry</em></a>) – values to be passed to the <a class="reference internal" href="minkit.PDF.html#minkit.PDF.__call__" title="minkit.PDF.__call__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">PDF.__call__()</span></code></a> method.</p></li>
 <li><p><strong>range</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – normalization range of the PDF.</p></li>
 <li><p><strong>constraints</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a><em>(</em><a class="reference internal" href="minkit.PDF.html#minkit.PDF" title="minkit.PDF"><em>PDF</em></a><em>)</em>) – PDFs with the constraints for paramters in “pdf”.</p></li>
 </ul>
@@ -237,7 +244,7 @@ The given <a class="reference internal" href="minkit.PDF.html#minkit.PDF" title=
         <a href="minkit.unbinned_maximum_likelihood.html" class="btn btn-neutral float-right" title="unbinned_maximum_likelihood" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="minkit.simultaneous_minimizer.html" class="btn btn-neutral float-left" title="simultaneous_minimizer" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="minkit.timer.html" class="btn btn-neutral float-left" title="timer" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

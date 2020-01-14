@@ -26,6 +26,8 @@
         <script type="text/javascript" src="../_static/doctools.js"></script>
         <script type="text/javascript" src="../_static/language_data.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -94,12 +96,12 @@
 <li class="toctree-l3"><a class="reference internal" href="minkit.Amoroso.html">Amoroso</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">BinnedDataSet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.Category.html">Category</a></li>
-<li class="toctree-l3"><a class="reference internal" href="minkit.Category.html">Category</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.Chebyshev.html">Chebyshev</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.ConvPDFs.html">ConvPDFs</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.CrystalBall.html">CrystalBall</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.DataSet.html">DataSet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.Exponential.html">Exponential</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.Formula.html">Formula</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.Gaussian.html">Gaussian</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.PDF.html">PDF</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.Parameter.html">Parameter</a></li>
@@ -217,7 +219,7 @@
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>centers</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a>) – centers of the bins.</p></li>
-<li><p><strong>data_pars</strong> (<a class="reference internal" href="minkit.Registry.html#minkit.Registry" title="minkit.Registry"><em>Registry</em></a><em>(</em><em>name</em><em>, </em><a class="reference internal" href="minkit.Parameter.html#minkit.Parameter" title="minkit.Parameter"><em>Parameter</em></a><em>)</em>) – data parameters.</p></li>
+<li><p><strong>data_pars</strong> (<a class="reference internal" href="minkit.Registry.html#minkit.Registry" title="minkit.Registry"><em>Registry</em></a><em>(</em><a class="reference internal" href="minkit.Parameter.html#minkit.Parameter" title="minkit.Parameter"><em>Parameter</em></a><em>)</em>) – data parameters.</p></li>
 <li><p><strong>values</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a>) – values of the data for each center.</p></li>
 </ul>
 </dd>
@@ -259,7 +261,7 @@
 <dd class="field-odd"><p>data parameters of this sample.</p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference internal" href="minkit.Registry.html#minkit.Registry" title="minkit.Registry">Registry</a>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>, <a class="reference internal" href="minkit.Parameter.html#minkit.Parameter" title="minkit.Parameter">Parameter</a>)</p>
+<dd class="field-even"><p><a class="reference internal" href="minkit.Registry.html#minkit.Registry" title="minkit.Registry">Registry</a>(<a class="reference internal" href="minkit.Parameter.html#minkit.Parameter" title="minkit.Parameter">Parameter</a>)</p>
 </dd>
 </dl>
 </dd></dl>

@@ -26,6 +26,8 @@
         <script type="text/javascript" src="../_static/doctools.js"></script>
         <script type="text/javascript" src="../_static/language_data.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -94,12 +96,12 @@
 <li class="toctree-l3"><a class="reference internal" href="minkit.Amoroso.html">Amoroso</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.BinnedDataSet.html">BinnedDataSet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.Category.html">Category</a></li>
-<li class="toctree-l3"><a class="reference internal" href="minkit.Category.html">Category</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.Chebyshev.html">Chebyshev</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.ConvPDFs.html">ConvPDFs</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.CrystalBall.html">CrystalBall</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.DataSet.html">DataSet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.Exponential.html">Exponential</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.Formula.html">Formula</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.Gaussian.html">Gaussian</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.PDF.html">PDF</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.Parameter.html">Parameter</a></li>
@@ -211,7 +213,26 @@
 <dl class="class">
 <dt id="minkit.Registry">
 <em class="property">class </em><code class="sig-prename descclassname">minkit.</code><code class="sig-name descname">Registry</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/parameters.html#Registry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.Registry" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/collections.html#collections.OrderedDict" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">collections.OrderedDict</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a></p>
+<p>Extension of list to hold information used in <a class="reference internal" href="../main.html#module-minkit" title="minkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">minkit</span></code></a>.
+It represents a collection of objects with the attribute “name”, providing a unique
+identifier (each object is assumed to be identified by its name).
+Any attempt to add a new element to the registry with the same name as one already
+existing will skip the process, as long as the two objects are the same.
+If they are not, then an error is raised.
+Constructor is directly forwarded to <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>.</p>
+<p class="rubric">Attributes Summary</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.Registry.names" title="minkit.Registry.names"><code class="xref py py-obj docutils literal notranslate"><span class="pre">names</span></code></a></p></td>
+<td><p>Get the names in the current registry.</p></td>
+</tr>
+</tbody>
+</table>
 <p class="rubric">Methods Summary</p>
 <table class="longtable docutils align-default">
 <colgroup>
@@ -219,40 +240,155 @@
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.Registry.from_json_object" title="minkit.Registry.from_json_object"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_json_object</span></code></a>(obj)</p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.Registry.append" title="minkit.Registry.append"><code class="xref py py-obj docutils literal notranslate"><span class="pre">append</span></code></a>(el)</p></td>
+<td><p>Append a new element to the registry.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#minkit.Registry.from_list" title="minkit.Registry.from_list"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_list</span></code></a>(args)</p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#minkit.Registry.from_json_object" title="minkit.Registry.from_json_object"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_json_object</span></code></a>(obj)</p></td>
+<td><p>Build the parameter from a JSON object (a dictionary).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.Registry.get" title="minkit.Registry.get"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get</span></code></a>(name)</p></td>
+<td><p>Return the object with name “name” in this registry.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#minkit.Registry.index" title="minkit.Registry.index"><code class="xref py py-obj docutils literal notranslate"><span class="pre">index</span></code></a>(name)</p></td>
+<td><p>Get the position in the registry of the parameter with the given name.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.Registry.insert" title="minkit.Registry.insert"><code class="xref py py-obj docutils literal notranslate"><span class="pre">insert</span></code></a>(i, p)</p></td>
+<td><p>Insert an object before index “i”.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#minkit.Registry.reduce" title="minkit.Registry.reduce"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reduce</span></code></a>(names)</p></td>
+<td><p>Create a new <a class="reference internal" href="#minkit.Registry" title="minkit.Registry"><code class="xref py py-class docutils literal notranslate"><span class="pre">Registry</span></code></a> object keeping only the given names.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#minkit.Registry.to_json_object" title="minkit.Registry.to_json_object"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_json_object</span></code></a>()</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#minkit.Registry.to_list" title="minkit.Registry.to_list"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_list</span></code></a>()</p></td>
-<td><p></p></td>
+<td><p>Represent this class as a JSON-like object.</p></td>
 </tr>
 </tbody>
 </table>
+<p class="rubric">Attributes Documentation</p>
+<dl class="attribute">
+<dt id="minkit.Registry.names">
+<code class="sig-name descname">names</code><a class="headerlink" href="#minkit.Registry.names" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the names in the current registry.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>names in the current registry.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)">list</a>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
 <p class="rubric">Methods Documentation</p>
+<dl class="method">
+<dt id="minkit.Registry.append">
+<code class="sig-name descname">append</code><span class="sig-paren">(</span><em class="sig-param">el</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/parameters.html#Registry.append"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.Registry.append" title="Permalink to this definition">¶</a></dt>
+<dd><p>Append a new element to the registry.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>el</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><em>object</em></a>) – new element to add.</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="method">
 <dt id="minkit.Registry.from_json_object">
 <em class="property">classmethod </em><code class="sig-name descname">from_json_object</code><span class="sig-paren">(</span><em class="sig-param">obj</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/parameters.html#Registry.from_json_object"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.Registry.from_json_object" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Build the parameter from a JSON object (a dictionary).
+This is meant to be used together with the <a class="reference external" href="https://docs.python.org/3/library/json.html#module-json" title="(in Python v3.8)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">json</span></code></a> module.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>obj</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – object to use to construct the class.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>parameter created from the JSON object.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#minkit.Registry" title="minkit.Registry">Registry</a></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="method">
-<dt id="minkit.Registry.from_list">
-<em class="property">classmethod </em><code class="sig-name descname">from_list</code><span class="sig-paren">(</span><em class="sig-param">args</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/parameters.html#Registry.from_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.Registry.from_list" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dt id="minkit.Registry.get">
+<code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param">name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/parameters.html#Registry.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.Registry.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the object with name “name” in this registry.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – name of the object.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>object with the specified name.</p>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#LookupError" title="(in Python v3.8)"><strong>LookupError</strong></a> – If no object is found with the given name.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.Registry.index">
+<code class="sig-name descname">index</code><span class="sig-paren">(</span><em class="sig-param">name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/parameters.html#Registry.index"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.Registry.index" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the position in the registry of the parameter with the given name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – name of the parameter.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>position.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#LookupError" title="(in Python v3.8)"><strong>LookupError</strong></a> – If no object is found with the given name.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.Registry.insert">
+<code class="sig-name descname">insert</code><span class="sig-paren">(</span><em class="sig-param">i</em>, <em class="sig-param">p</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/parameters.html#Registry.insert"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.Registry.insert" title="Permalink to this definition">¶</a></dt>
+<dd><p>Insert an object before index “i”.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>i</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – index where to insert the object.</p></li>
+<li><p><strong>p</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><em>object</em></a>) – object to insert.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.Registry.reduce">
+<code class="sig-name descname">reduce</code><span class="sig-paren">(</span><em class="sig-param">names</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/parameters.html#Registry.reduce"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.Registry.reduce" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new <a class="reference internal" href="#minkit.Registry" title="minkit.Registry"><code class="xref py py-class docutils literal notranslate"><span class="pre">Registry</span></code></a> object keeping only the given names.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>names</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)"><em>tuple</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>)</em>) – names</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>new registry keeping only the provided names.</p>
+</dd>
+<dt class="field-odd">Rype</dt>
+<dd class="field-odd"><p>Registry</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="method">
 <dt id="minkit.Registry.to_json_object">
 <code class="sig-name descname">to_json_object</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/parameters.html#Registry.to_json_object"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.Registry.to_json_object" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="minkit.Registry.to_list">
-<code class="sig-name descname">to_list</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/parameters.html#Registry.to_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.Registry.to_list" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Represent this class as a JSON-like object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>this class as a JSON-like object.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
 
 </dd></dl>
 

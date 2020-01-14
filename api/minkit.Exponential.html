@@ -26,6 +26,8 @@
         <script type="text/javascript" src="../_static/doctools.js"></script>
         <script type="text/javascript" src="../_static/language_data.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -37,7 +39,7 @@
   <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Gaussian" href="minkit.Gaussian.html" />
+    <link rel="next" title="Formula" href="minkit.Formula.html" />
     <link rel="prev" title="DataSet" href="minkit.DataSet.html" /> 
 </head>
 
@@ -94,12 +96,12 @@
 <li class="toctree-l3"><a class="reference internal" href="minkit.Amoroso.html">Amoroso</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.BinnedDataSet.html">BinnedDataSet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.Category.html">Category</a></li>
-<li class="toctree-l3"><a class="reference internal" href="minkit.Category.html">Category</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.Chebyshev.html">Chebyshev</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.ConvPDFs.html">ConvPDFs</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.CrystalBall.html">CrystalBall</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.DataSet.html">DataSet</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">Exponential</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.Formula.html">Formula</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.Gaussian.html">Gaussian</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.PDF.html">PDF</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.Parameter.html">Parameter</a></li>
@@ -212,7 +214,19 @@
 <dt id="minkit.Exponential">
 <em class="property">class </em><code class="sig-prename descclassname">minkit.</code><code class="sig-name descname">Exponential</code><span class="sig-paren">(</span><em class="sig-param">name</em>, <em class="sig-param">x</em>, <em class="sig-param">k</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/pdfs.html#Exponential"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.Exponential" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="minkit.SourcePDF.html#minkit.SourcePDF" title="minkit.pdf_core.SourcePDF"><code class="docutils literal notranslate"><span class="pre">minkit.SourcePDF</span></code></a></p>
-<p>Create a new PDF with the parameters related to the data and the slope parameter.</p>
+<p>Create a new PDF with the parameters related to the data and the slope parameter.
+The PDF is defined as.</p>
+<div class="math notranslate nohighlight">
+\[f\left(x;k\right) = e^{k x}\]</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – name of the PDF.</p></li>
+<li><p><strong>x</strong> (<a class="reference internal" href="minkit.Parameter.html#minkit.Parameter" title="minkit.Parameter"><em>Parameter</em></a>) – data parameter.</p></li>
+<li><p><strong>k</strong> (<a class="reference internal" href="minkit.Parameter.html#minkit.Parameter" title="minkit.Parameter"><em>Parameter</em></a>) – parameter of the exponential.</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 </div>
@@ -225,7 +239,7 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="minkit.Gaussian.html" class="btn btn-neutral float-right" title="Gaussian" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="minkit.Formula.html" class="btn btn-neutral float-right" title="Formula" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="minkit.DataSet.html" class="btn btn-neutral float-left" title="DataSet" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

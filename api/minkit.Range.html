@@ -26,6 +26,8 @@
         <script type="text/javascript" src="../_static/doctools.js"></script>
         <script type="text/javascript" src="../_static/language_data.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -94,12 +96,12 @@
 <li class="toctree-l3"><a class="reference internal" href="minkit.Amoroso.html">Amoroso</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.BinnedDataSet.html">BinnedDataSet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.Category.html">Category</a></li>
-<li class="toctree-l3"><a class="reference internal" href="minkit.Category.html">Category</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.Chebyshev.html">Chebyshev</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.ConvPDFs.html">ConvPDFs</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.CrystalBall.html">CrystalBall</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.DataSet.html">DataSet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.Exponential.html">Exponential</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.Formula.html">Formula</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.Gaussian.html">Gaussian</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.PDF.html">PDF</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.Parameter.html">Parameter</a></li>
@@ -212,6 +214,12 @@
 <dt id="minkit.Range">
 <em class="property">class </em><code class="sig-prename descclassname">minkit.</code><code class="sig-name descname">Range</code><span class="sig-paren">(</span><em class="sig-param">bounds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/parameters.html#Range"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.Range" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Object to define bounds for a parameter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>bounds</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)"><em>tuple</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)"><em>tuple</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)"><em>tuple</em></a><em>, </em><em>..</em><em>)</em>) – bounds of the range.</p>
+</dd>
+</dl>
 <p class="rubric">Attributes Summary</p>
 <table class="longtable docutils align-default">
 <colgroup>
@@ -220,13 +228,13 @@
 </colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#minkit.Range.bounds" title="minkit.Range.bounds"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bounds</span></code></a></p></td>
-<td><p></p></td>
+<td><p>Bounds of the range.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#minkit.Range.disjoint" title="minkit.Range.disjoint"><code class="xref py py-obj docutils literal notranslate"><span class="pre">disjoint</span></code></a></p></td>
-<td><p></p></td>
+<td><p>Return whether this range is composed by more than one subrange (with no common borders.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#minkit.Range.size" title="minkit.Range.size"><code class="xref py py-obj docutils literal notranslate"><span class="pre">size</span></code></a></p></td>
-<td><p></p></td>
+<td><p>Return the size of the range.</p></td>
 </tr>
 </tbody>
 </table>
@@ -234,17 +242,46 @@
 <dl class="attribute">
 <dt id="minkit.Range.bounds">
 <code class="sig-name descname">bounds</code><a class="headerlink" href="#minkit.Range.bounds" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Bounds of the range.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>bounds of the range.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)">numpy.ndarray</a></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="attribute">
 <dt id="minkit.Range.disjoint">
 <code class="sig-name descname">disjoint</code><a class="headerlink" href="#minkit.Range.disjoint" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Return whether this range is composed by more than one subrange (with no
+common borders.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>whether the range is disjoint.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="attribute">
 <dt id="minkit.Range.size">
 <code class="sig-name descname">size</code><a class="headerlink" href="#minkit.Range.size" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Return the size of the range.
+This corresponds to the sum of the areas of any subrange.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>size of the range.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
 
 </dd></dl>
 

@@ -1,0 +1,6 @@
+sweights_u
+==========
+
+.. currentmodule:: minkit
+
+.. autofunction:: sweights_u

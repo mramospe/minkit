@@ -1,0 +1,6 @@
+pdf_to_json
+===========
+
+.. currentmodule:: minkit
+
+.. autofunction:: pdf_to_json

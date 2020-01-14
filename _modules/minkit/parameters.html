@@ -26,6 +26,8 @@
         <script type="text/javascript" src="../../_static/doctools.js"></script>
         <script type="text/javascript" src="../../_static/language_data.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
@@ -159,7 +161,7 @@
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Parameter&#39;</span><span class="p">,</span> <span class="s1">&#39;Range&#39;</span><span class="p">,</span> <span class="s1">&#39;Registry&#39;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Parameter&#39;</span><span class="p">,</span> <span class="s1">&#39;Formula&#39;</span><span class="p">,</span> <span class="s1">&#39;Range&#39;</span><span class="p">,</span> <span class="s1">&#39;Registry&#39;</span><span class="p">]</span>
 
 <span class="c1"># Default range</span>
 <span class="n">FULL</span> <span class="o">=</span> <span class="s1">&#39;full&#39;</span>
@@ -169,8 +171,29 @@
 
 <div class="viewcode-block" id="Parameter"><a class="viewcode-back" href="../../api/minkit.Parameter.html#minkit.Parameter">[docs]</a><span class="k">class</span> <span class="nc">Parameter</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 
+    <span class="c1"># Flag to determine if this parameter class depends on other parameters</span>
+    <span class="c1"># or not. Any object with dependent = True must have the property &quot;args&quot;</span>
+    <span class="c1"># defined.</span>
+    <span class="n">dependent</span> <span class="o">=</span> <span class="kc">False</span>
+
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ranges</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Object to represent a parameter for a PDF.</span>
+
+<span class="sd">        :param name: name of the parameter.</span>
+<span class="sd">        :type name: str</span>
+<span class="sd">        :param value: initial value.</span>
+<span class="sd">        :type value: float</span>
+<span class="sd">        :param bounds: bounds for the parameter. This defines the &quot;full&quot; range.</span>
+<span class="sd">        :type bounds: tuple or tuple(tuple, ...)</span>
+<span class="sd">        :param ranges: possible ranges</span>
+<span class="sd">        :type ranges: dict(str, tuple) or dict(str, tuple(tuple, ...))</span>
+<span class="sd">        :param error: error of the parameter.</span>
+<span class="sd">        :type error: float</span>
+<span class="sd">        :param constant: whether to initialize this parameter as constant.</span>
+<span class="sd">        :type constant: bool</span>
+<span class="sd">        :ivar name: name of the parameter.</span>
+<span class="sd">        :ivar error: error of the parameter.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
@@ -185,38 +208,93 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">__ranges</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">Range</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Rerpresent this class as a string, showing its attributes.</span>
+
+<span class="sd">        :returns: this class as a string.</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &#39;&#39;&#39;</span>
         <span class="k">return</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">(name=</span><span class="si">{}</span><span class="s1">, value=</span><span class="si">{}</span><span class="s1">, bounds=</span><span class="si">{}</span><span class="s1">, error=</span><span class="si">{}</span><span class="s1">, constant=</span><span class="si">{}</span><span class="s1">)&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">error</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">constant</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Bounds of the parameter, defining the &quot;full&quot; range.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__bounds</span>
 
     <span class="nd">@bounds</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__bounds</span> <span class="o">=</span> <span class="n">values</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Set the bounds of the parameter, which also modifies the &quot;full&quot; range.</span>
+
+<span class="sd">        :param values: bounds to set.</span>
+<span class="sd">        :type values: tuple or tuple(tuple, ...)</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="n">values</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__bounds</span> <span class="o">=</span> <span class="n">values</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__bounds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">types</span><span class="o">.</span><span class="n">cpu_type</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__ranges</span><span class="p">[</span><span class="n">FULL</span><span class="p">]</span> <span class="o">=</span> <span class="n">Range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__bounds</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">constant</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Return whether this parameter is marked as constant.</span>
+<span class="sd">        Any parameter forced to constant or with no bounds is considered to be constant.</span>
+
+<span class="sd">        :returns: whether this parameter is constant or not.</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &#39;&#39;&#39;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__constant</span> <span class="ow">or</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__bounds</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span>
 
     <span class="nd">@constant</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">constant</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Define the &quot;constant&quot; status of the class.</span>
+
+<span class="sd">        :param v: value determining whether this object must be considered as constant or not.</span>
+<span class="sd">        :type v: bool</span>
+<span class="sd">        &#39;&#39;&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__constant</span> <span class="o">=</span> <span class="n">v</span>
 
 <div class="viewcode-block" id="Parameter.from_json_object"><a class="viewcode-back" href="../../api/minkit.Parameter.html#minkit.Parameter.from_json_object">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_json_object</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Build the parameter from a JSON object (a dictionary).</span>
+<span class="sd">        This is meant to be used together with the :mod:`json` module.</span>
+
+<span class="sd">        :param obj: object to use to construct the class.</span>
+<span class="sd">        :type obj: dict</span>
+<span class="sd">        :returns: parameter created from the JSON object.</span>
+<span class="sd">        :rtype: Parameter</span>
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="n">obj</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
-        <span class="n">obj</span><span class="p">[</span><span class="s1">&#39;ranges&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">n</span><span class="p">:</span> <span class="n">Range</span><span class="p">(</span><span class="n">o</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">obj</span><span class="p">[</span><span class="s1">&#39;ranges&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+        <span class="n">obj</span><span class="p">[</span><span class="s1">&#39;ranges&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">n</span><span class="p">:</span> <span class="n">o</span> <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">obj</span><span class="p">[</span><span class="s1">&#39;ranges&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="o">**</span><span class="n">obj</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Parameter.get_range"><a class="viewcode-back" href="../../api/minkit.Parameter.html#minkit.Parameter.get_range">[docs]</a>    <span class="k">def</span> <span class="nf">get_range</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Get the range with the given name.</span>
+
+<span class="sd">        :param name: name of the range.</span>
+<span class="sd">        :type name: str</span>
+<span class="sd">        :returns: attached range.</span>
+<span class="sd">        :rtype: Range</span>
+<span class="sd">        &#39;&#39;&#39;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__ranges</span><span class="p">[</span><span class="n">name</span><span class="p">]</span></div>
 
 <div class="viewcode-block" id="Parameter.set_range"><a class="viewcode-back" href="../../api/minkit.Parameter.html#minkit.Parameter.set_range">[docs]</a>    <span class="k">def</span> <span class="nf">set_range</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Define the range with name &quot;name&quot;.</span>
+<span class="sd">        Must not be &quot;full&quot;.</span>
+
+<span class="sd">        :param name: name of the range.</span>
+<span class="sd">        :type name: str</span>
+<span class="sd">        :param values: bounds of the range.</span>
+<span class="sd">        :type values: tuple or tuple(tuple, ...)</span>
+<span class="sd">        &#39;&#39;&#39;</span>
         <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="n">FULL</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                 <span class="n">f</span><span class="s1">&#39;Range name &quot;</span><span class="si">{name}</span><span class="s1">&quot; is protected; can not be used&#39;</span><span class="p">)</span>
@@ -224,71 +302,342 @@
 
 <div class="viewcode-block" id="Parameter.to_json_object"><a class="viewcode-back" href="../../api/minkit.Parameter.html#minkit.Parameter.to_json_object">[docs]</a>    <span class="k">def</span> <span class="nf">to_json_object</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Represent this class as a JSON-like object.</span>
+
+<span class="sd">        :returns: this class as a JSON-like object.</span>
+<span class="sd">        :rtype: dict</span>
 <span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">bounds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">bounds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
         <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
                 <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
-                <span class="s1">&#39;bounds&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span><span class="p">,</span>
-                <span class="s1">&#39;ranges&#39;</span><span class="p">:</span> <span class="p">{</span><span class="n">n</span><span class="p">:</span> <span class="n">r</span><span class="o">.</span><span class="n">bounds</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span> <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">r</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__ranges</span><span class="o">.</span><span class="n">items</span><span class="p">()},</span>
+                <span class="s1">&#39;bounds&#39;</span><span class="p">:</span> <span class="n">bounds</span><span class="p">,</span>
+                <span class="s1">&#39;ranges&#39;</span><span class="p">:</span> <span class="p">{</span><span class="n">n</span><span class="p">:</span> <span class="n">r</span><span class="o">.</span><span class="n">bounds</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span> <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">r</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__ranges</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">n</span> <span class="o">!=</span> <span class="n">FULL</span><span class="p">},</span>
                 <span class="s1">&#39;error&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">error</span><span class="p">,</span>
-                <span class="s1">&#39;constant&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">constant</span><span class="p">}</span></div></div>
+                <span class="s1">&#39;constant&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">constant</span><span class="p">}</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Get the value of the parameter.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__value</span>
+
+    <span class="nd">@value</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Set the value of the parameter.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__value</span> <span class="o">=</span> <span class="n">types</span><span class="o">.</span><span class="n">cpu_type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__value</span> <span class="o">=</span> <span class="n">value</span></div>
+
+
+<div class="viewcode-block" id="Formula"><a class="viewcode-back" href="../../api/minkit.Formula.html#minkit.Formula">[docs]</a><span class="k">class</span> <span class="nc">Formula</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="c1"># Flag to determine if this parameter class depends on other parameters</span>
+    <span class="c1"># or not. Any object with dependent = True must have the property &quot;args&quot;</span>
+    <span class="c1"># defined.</span>
+    <span class="n">dependent</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">formula</span><span class="p">,</span> <span class="n">pars</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Parameter representing an operation of many parameters.</span>
+
+<span class="sd">        :param name: name of the parameter.</span>
+<span class="sd">        :type name: str</span>
+<span class="sd">        :param formula: formula to apply. Any function defined in :py:mod:`math` is allowed.</span>
+<span class="sd">        :type formula: str</span>
+<span class="sd">        :param pars: input parameters.</span>
+<span class="sd">        :type pars: Registry</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__pars</span> <span class="o">=</span> <span class="n">Registry</span><span class="p">(</span><span class="n">pars</span><span class="p">)</span>
+
+        <span class="c1"># Replace the names of the parameters with brackets</span>
+        <span class="n">names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+            <span class="nb">reversed</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">len</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__pars</span><span class="o">.</span><span class="n">names</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">__pars</span><span class="o">.</span><span class="n">names</span><span class="p">))))</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">names</span><span class="p">):</span>
+            <span class="n">formula</span> <span class="o">=</span> <span class="n">formula</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="s1">&#39;{&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;}&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Avoid partially replacing similar names</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">names</span><span class="p">):</span>
+            <span class="n">formula</span> <span class="o">=</span> <span class="n">formula</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;{&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;}&#39;</span><span class="p">,</span> <span class="s1">&#39;{&#39;</span> <span class="o">+</span> <span class="n">n</span> <span class="o">+</span> <span class="s1">&#39;}&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__formula</span> <span class="o">=</span> <span class="n">formula</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">Formula</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Rerpresent this class as a string, showing its attributes.</span>
+
+<span class="sd">        :returns: this class as a string.</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">(name=</span><span class="si">{}</span><span class="s1">, formula=</span><span class="se">\&#39;</span><span class="si">{}</span><span class="se">\&#39;</span><span class="s1">, parameters=</span><span class="si">{}</span><span class="s1">)&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__formula</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__pars</span><span class="o">.</span><span class="n">names</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">all_args</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Get the parameters this object depends on.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">pars</span> <span class="o">=</span> <span class="n">Registry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__pars</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="n">p</span><span class="o">.</span><span class="n">dependent</span><span class="p">,</span> <span class="n">pars</span><span class="p">):</span>
+            <span class="n">pars</span> <span class="o">+=</span> <span class="n">p</span><span class="o">.</span><span class="n">all_args</span>
+        <span class="k">return</span> <span class="n">pars</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">args</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Get the parameters this object depends on.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__pars</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Value, evaluated from the values of the other parameters.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="kn">import</span> <span class="nn">math</span>
+        <span class="n">values</span> <span class="o">=</span> <span class="p">{</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">p</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">}</span>
+        <span class="k">return</span> <span class="nb">eval</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__formula</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">**</span><span class="n">values</span><span class="p">))</span>
+
+<div class="viewcode-block" id="Formula.from_json_object"><a class="viewcode-back" href="../../api/minkit.Formula.html#minkit.Formula.from_json_object">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_json_object</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">pars</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Build the parameter from a JSON object (a dictionary).</span>
+<span class="sd">        This is meant to be used together with the :mod:`json` module.</span>
+
+<span class="sd">        :param obj: object to use to construct the class.</span>
+<span class="sd">        :type obj: dict</span>
+<span class="sd">        :returns: parameter created from the JSON object.</span>
+<span class="sd">        :rtype: Parameter</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">pars</span> <span class="o">=</span> <span class="n">Registry</span><span class="p">(</span><span class="n">pars</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">obj</span><span class="p">[</span><span class="s1">&#39;pars&#39;</span><span class="p">])</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">obj</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span> <span class="n">obj</span><span class="p">[</span><span class="s1">&#39;formula&#39;</span><span class="p">],</span> <span class="n">pars</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Formula.to_json_object"><a class="viewcode-back" href="../../api/minkit.Formula.html#minkit.Formula.to_json_object">[docs]</a>    <span class="k">def</span> <span class="nf">to_json_object</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Represent this class as a JSON-like object.</span>
+
+<span class="sd">        :returns: this class as a JSON-like object.</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;formula&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__formula</span><span class="p">,</span> <span class="s1">&#39;pars&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">names</span><span class="p">}</span></div></div>
 
 
 <div class="viewcode-block" id="Range"><a class="viewcode-back" href="../../api/minkit.Range.html#minkit.Range">[docs]</a><span class="k">class</span> <span class="nc">Range</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bounds</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Object to define bounds for a parameter.</span>
+
+<span class="sd">        :param bounds: bounds of the range.</span>
+<span class="sd">        :type bounds: tuple or tuple(tuple, ...)</span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__bounds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">bounds</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__bounds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">bounds</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">types</span><span class="o">.</span><span class="n">cpu_type</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Return the number of bounds.</span>
+
+<span class="sd">        :return: number of bounds.</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &#39;&#39;&#39;</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__bounds</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Bounds of the range.</span>
+
+<span class="sd">        :returns: bounds of the range.</span>
+<span class="sd">        :rtype: numpy.ndarray</span>
+<span class="sd">        &#39;&#39;&#39;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__bounds</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">disjoint</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Return whether this range is composed by more than one subrange (with no</span>
+<span class="sd">        common borders.</span>
+
+<span class="sd">        :returns: whether the range is disjoint.</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &#39;&#39;&#39;</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__bounds</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Return the size of the range.</span>
+<span class="sd">        This corresponds to the sum of the areas of any subrange.</span>
+
+<span class="sd">        :returns: size of the range.</span>
+<span class="sd">        :rtype: float</span>
+<span class="sd">        &#39;&#39;&#39;</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__bounds</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">__bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">fromiter</span><span class="p">(((</span><span class="n">s</span> <span class="o">-</span> <span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__bounds</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">types</span><span class="o">.</span><span class="n">cpu_type</span><span class="p">))</span></div>
 
 
-<div class="viewcode-block" id="Registry"><a class="viewcode-back" href="../../api/minkit.Registry.html#minkit.Registry">[docs]</a><span class="k">class</span> <span class="nc">Registry</span><span class="p">(</span><span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">):</span>
+<div class="viewcode-block" id="Registry"><a class="viewcode-back" href="../../api/minkit.Registry.html#minkit.Registry">[docs]</a><span class="k">class</span> <span class="nc">Registry</span><span class="p">(</span><span class="nb">list</span><span class="p">):</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Extension of list to hold information used in :py:mod:`minkit`.</span>
+<span class="sd">        It represents a collection of objects with the attribute &quot;name&quot;, providing a unique</span>
+<span class="sd">        identifier (each object is assumed to be identified by its name).</span>
+<span class="sd">        Any attempt to add a new element to the registry with the same name as one already</span>
+<span class="sd">        existing will skip the process, as long as the two objects are the same.</span>
+<span class="sd">        If they are not, then an error is raised.</span>
+<span class="sd">        Constructor is directly forwarded to :class:`list`.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">Registry</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Registry.from_list"><a class="viewcode-back" href="../../api/minkit.Registry.html#minkit.Registry.from_list">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">from_list</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
-        <span class="n">c</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">()</span>
-        <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">args</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">a</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">c</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span>
-                    <span class="n">f</span><span class="s1">&#39;A parameter with name &quot;</span><span class="si">{a.name}</span><span class="s1">&quot; already exists in the registry&#39;</span><span class="p">)</span>
-            <span class="n">c</span><span class="p">[</span><span class="n">a</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">a</span>
-        <span class="k">return</span> <span class="n">c</span></div>
+    <span class="k">def</span> <span class="nf">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Add elements from another registry inplace.</span>
+<span class="sd">        Only elements with different names to those in the registry are added.</span>
 
-<div class="viewcode-block" id="Registry.to_list"><a class="viewcode-back" href="../../api/minkit.Registry.html#minkit.Registry.to_list">[docs]</a>    <span class="k">def</span> <span class="nf">to_list</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">())</span></div>
+<span class="sd">        :param other: registry to take elements from.</span>
+<span class="sd">        :type other: Registry</span>
+<span class="sd">        :returns: a registry with the new elements added.</span>
+<span class="sd">        :rtype: Registry</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">res</span><span class="o">.</span><span class="fm">__iadd__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__iadd__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Add elements from another registry inplace.</span>
+<span class="sd">        Only elements with different names to those in the registry are added.</span>
+
+<span class="sd">        :param other: registry to take elements from.</span>
+<span class="sd">        :type other: Registry</span>
+<span class="sd">        :returns: this object with the new elements added.</span>
+<span class="sd">        :rtype: Registry</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">names</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_raise_if_not_same</span><span class="p">(</span><span class="n">el</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">Registry</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__iadd__</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">names</span><span class="p">,</span> <span class="n">other</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_raise_if_not_same</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">el</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Raise an error saying that an object that is trying to be added with given name</span>
+<span class="sd">        is not the same as that in the registry.</span>
+<span class="sd">        The name of the element is assumed to be already in the registry.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">curr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">el</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">curr</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">el</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="n">f</span><span class="s1">&#39;Attempt to add an element with name &quot;</span><span class="si">{el.name}</span><span class="s1">&quot; ({hex(id(el))}) to a registry with a different object associated to that name ({hex(id(curr))})&#39;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">names</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Get the names in the current registry.</span>
+
+<span class="sd">        :returns: names in the current registry.</span>
+<span class="sd">        :rtype: list(str)</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">]</span>
 
 <div class="viewcode-block" id="Registry.from_json_object"><a class="viewcode-back" href="../../api/minkit.Registry.html#minkit.Registry.from_json_object">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_json_object</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Build the parameter from a JSON object (a dictionary).</span>
+<span class="sd">        This is meant to be used together with the :py:mod:`json` module.</span>
+
+<span class="sd">        :param obj: object to use to construct the class.</span>
+<span class="sd">        :type obj: dict</span>
+<span class="sd">        :returns: parameter created from the JSON object.</span>
+<span class="sd">        :rtype: Registry</span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">Parameter</span><span class="o">.</span><span class="n">from_json_object</span><span class="p">,</span> <span class="n">obj</span><span class="p">))</span></div>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">Parameter</span><span class="o">.</span><span class="n">from_json_object</span><span class="p">,</span> <span class="n">obj</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="Registry.append"><a class="viewcode-back" href="../../api/minkit.Registry.html#minkit.Registry.append">[docs]</a>    <span class="k">def</span> <span class="nf">append</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">el</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Append a new element to the registry.</span>
+
+<span class="sd">        :param el: new element to add.</span>
+<span class="sd">        :type el: object</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="n">el</span><span class="o">.</span><span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">names</span><span class="p">:</span>
+            <span class="nb">super</span><span class="p">(</span><span class="n">Registry</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">el</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_raise_if_not_same</span><span class="p">(</span><span class="n">el</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Registry.get"><a class="viewcode-back" href="../../api/minkit.Registry.html#minkit.Registry.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Return the object with name &quot;name&quot; in this registry.</span>
+
+<span class="sd">        :param name: name of the object.</span>
+<span class="sd">        :type name: str</span>
+<span class="sd">        :returns: object with the specified name.</span>
+<span class="sd">        :raises LookupError: If no object is found with the given name.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">name</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">e</span>
+        <span class="k">raise</span> <span class="ne">LookupError</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;Object with name &quot;</span><span class="si">{name}</span><span class="s1">&quot; has not been found&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Registry.index"><a class="viewcode-back" href="../../api/minkit.Registry.html#minkit.Registry.index">[docs]</a>    <span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Get the position in the registry of the parameter with the given name.</span>
+
+<span class="sd">        :param name: name of the parameter.</span>
+<span class="sd">        :type name: str</span>
+<span class="sd">        :returns: position.</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        :raises LookupError: If no object is found with the given name.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">name</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">i</span>
+        <span class="k">raise</span> <span class="ne">LookupError</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;Object with name &quot;</span><span class="si">{name}</span><span class="s1">&quot; has not been found&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Registry.insert"><a class="viewcode-back" href="../../api/minkit.Registry.html#minkit.Registry.insert">[docs]</a>    <span class="k">def</span> <span class="nf">insert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Insert an object before index &quot;i&quot;.</span>
+
+<span class="sd">        :param i: index where to insert the object.</span>
+<span class="sd">        :type i: int</span>
+<span class="sd">        :param p: object to insert.</span>
+<span class="sd">        :type p: object</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">names</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_raise_if_not_same</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">Registry</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Registry.reduce"><a class="viewcode-back" href="../../api/minkit.Registry.html#minkit.Registry.reduce">[docs]</a>    <span class="k">def</span> <span class="nf">reduce</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">names</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Create a new :class:`Registry` object keeping only the given names.</span>
+
+<span class="sd">        :param names: names</span>
+<span class="sd">        :type names: tuple(str)</span>
+<span class="sd">        :returns: new registry keeping only the provided names.</span>
+<span class="sd">        :rype: Registry</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span></div>
 
 <div class="viewcode-block" id="Registry.to_json_object"><a class="viewcode-back" href="../../api/minkit.Registry.html#minkit.Registry.to_json_object">[docs]</a>    <span class="k">def</span> <span class="nf">to_json_object</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Represent this class as a JSON-like object.</span>
+
+<span class="sd">        :returns: this class as a JSON-like object.</span>
+<span class="sd">        :rtype: dict</span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="k">return</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">to_json_object</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span></div></div>
+        <span class="k">return</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">to_json_object</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">]</span></div></div>
 
 
 <span class="k">def</span> <span class="nf">bounds_for_range</span><span class="p">(</span><span class="n">data_pars</span><span class="p">,</span> <span class="nb">range</span><span class="p">):</span>
@@ -296,15 +645,15 @@
 <span class="sd">    Get the bounds associated to a given range, and return it as a single array.</span>
 
 <span class="sd">    :param data_pars: data parameters.</span>
-<span class="sd">    :type data_pars: Registry(str, Parameter)</span>
+<span class="sd">    :type data_pars: Registry(Parameter)</span>
 <span class="sd">    :param range: range to evaluate.</span>
 <span class="sd">    :type range: str</span>
 <span class="sd">    :returns: bounds for the given range.</span>
 <span class="sd">    :rtype: numpy.ndarray</span>
 <span class="sd">    &#39;&#39;&#39;</span>
-    <span class="n">single_bounds</span> <span class="o">=</span> <span class="n">Registry</span><span class="p">()</span>
-    <span class="n">multi_bounds</span> <span class="o">=</span> <span class="n">Registry</span><span class="p">()</span>
-    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">data_pars</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+    <span class="n">single_bounds</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">()</span>
+    <span class="n">multi_bounds</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">data_pars</span><span class="p">:</span>
         <span class="n">r</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">get_range</span><span class="p">(</span><span class="nb">range</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">disjoint</span><span class="p">:</span>
             <span class="n">multi_bounds</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">r</span>
@@ -318,9 +667,9 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="c1"># Must calculate all the combinations of normalization ranges</span>
         <span class="c1"># for every data parameter.</span>
-        <span class="n">mins</span> <span class="o">=</span> <span class="n">Registry</span><span class="p">()</span>
-        <span class="n">maxs</span> <span class="o">=</span> <span class="n">Registry</span><span class="p">()</span>
-        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">data_pars</span><span class="p">:</span>
+        <span class="n">mins</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">()</span>
+        <span class="n">maxs</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">data_pars</span><span class="o">.</span><span class="n">names</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">single_bounds</span><span class="p">:</span>
                 <span class="n">mins</span><span class="p">[</span><span class="n">n</span><span class="p">],</span> <span class="n">maxs</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">single_bounds</span><span class="p">[</span><span class="n">n</span><span class="p">]</span><span class="o">.</span><span class="n">bounds</span><span class="o">.</span><span class="n">T</span>
             <span class="k">elif</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">multi_bounds</span><span class="p">:</span>

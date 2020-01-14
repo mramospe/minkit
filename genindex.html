@@ -27,6 +27,8 @@
         <script type="text/javascript" src="_static/doctools.js"></script>
         <script type="text/javascript" src="_static/language_data.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -201,16 +203,30 @@
 </li>
       <li><a href="api/minkit.AddPDFs.html#minkit.AddPDFs">AddPDFs (class in minkit)</a>
 </li>
+      <li><a href="api/minkit.Formula.html#minkit.Formula.all_args">all_args (minkit.Formula attribute)</a>
+
+      <ul>
+        <li><a href="api/minkit.PDF.html#minkit.PDF.all_args">(minkit.PDF attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="api/minkit.PDF.html#minkit.PDF.all_pars">all_pars (minkit.PDF attribute)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/minkit.PDF.html#minkit.PDF.all_args">all_args (minkit.PDF attribute)</a>
+      <li><a href="api/minkit.PDF.html#minkit.PDF.all_real_args">all_real_args (minkit.PDF attribute)</a>
 </li>
       <li><a href="api/minkit.Amoroso.html#minkit.Amoroso">Amoroso (class in minkit)</a>
 </li>
       <li><a href="api/minkit.aop.html#minkit.aop">aop (class in minkit)</a>
 </li>
-      <li><a href="api/minkit.PDF.html#minkit.PDF.args">args (minkit.PDF attribute)</a>
+      <li><a href="api/minkit.Registry.html#minkit.Registry.append">append() (minkit.Registry method)</a>
 </li>
+      <li><a href="api/minkit.Formula.html#minkit.Formula.args">args (minkit.Formula attribute)</a>
+
+      <ul>
+        <li><a href="api/minkit.PDF.html#minkit.PDF.args">(minkit.PDF attribute)</a>
+</li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
@@ -281,10 +297,18 @@
         <li><a href="api/minkit.PDF.html#minkit.PDF.data_pars">(minkit.PDF attribute)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/minkit.DataSet.html#minkit.DataSet">DataSet (class in minkit)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/minkit.Formula.html#minkit.Formula.dependent">dependent (minkit.Formula attribute)</a>
+
+      <ul>
+        <li><a href="api/minkit.Parameter.html#minkit.Parameter.dependent">(minkit.Parameter attribute)</a>
+</li>
+        <li><a href="api/minkit.PDF.html#minkit.PDF.dependent">(minkit.PDF attribute)</a>
+</li>
+      </ul></li>
       <li><a href="api/minkit.Range.html#minkit.Range.disjoint">disjoint (minkit.Range attribute)</a>
 </li>
   </ul></td>
@@ -307,8 +331,14 @@
 <h2 id="F">F</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/minkit.PDF.html#minkit.PDF.free_cache">free_cache() (minkit.PDF method)</a>
+      <li><a href="api/minkit.Formula.html#minkit.Formula">Formula (class in minkit)</a>
 </li>
+      <li><a href="api/minkit.free_cache.html#minkit.free_cache">free_cache() (in module minkit)</a>
+
+      <ul>
+        <li><a href="api/minkit.PDF.html#minkit.PDF.free_cache">(minkit.PDF method)</a>
+</li>
+      </ul></li>
       <li><a href="api/minkit.BinnedDataSet.html#minkit.BinnedDataSet.from_array">from_array() (minkit.BinnedDataSet class method)</a>
 
       <ul>
@@ -319,6 +349,8 @@
 
       <ul>
         <li><a href="api/minkit.ConvPDFs.html#minkit.ConvPDFs.from_json_object">(minkit.ConvPDFs class method)</a>
+</li>
+        <li><a href="api/minkit.Formula.html#minkit.Formula.from_json_object">(minkit.Formula class method)</a>
 </li>
         <li><a href="api/minkit.Parameter.html#minkit.Parameter.from_json_object">(minkit.Parameter class method)</a>
 </li>
@@ -333,8 +365,6 @@
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/minkit.Registry.html#minkit.Registry.from_list">from_list() (minkit.Registry class method)</a>
-</li>
       <li><a href="api/minkit.DataSet.html#minkit.DataSet.from_records">from_records() (minkit.DataSet class method)</a>
 </li>
       <li><a href="api/minkit.SourcePDF.html#minkit.SourcePDF.function">function() (minkit.SourcePDF method)</a>
@@ -347,11 +377,15 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/minkit.Gaussian.html#minkit.Gaussian">Gaussian (class in minkit)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/minkit.PDF.html#minkit.PDF.generate">generate() (minkit.PDF method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/minkit.Registry.html#minkit.Registry.get">get() (minkit.Registry method)</a>
+</li>
       <li><a href="api/minkit.Parameter.html#minkit.Parameter.get_range">get_range() (minkit.Parameter method)</a>
+</li>
+      <li><a href="api/minkit.PDF.html#minkit.PDF.get_values">get_values() (minkit.PDF method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -359,10 +393,14 @@
 <h2 id="I">I</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/minkit.Registry.html#minkit.Registry.index">index() (minkit.Registry method)</a>
+</li>
       <li><a href="api/minkit.initialize.html#minkit.initialize">initialize() (in module minkit)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/minkit.Registry.html#minkit.Registry.insert">insert() (minkit.Registry method)</a>
+</li>
       <li><a href="api/minkit.PDF.html#minkit.PDF.integral">integral() (minkit.PDF method)</a>
 </li>
   </ul></td>
@@ -371,11 +409,13 @@
 <h2 id="M">M</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/minkit.migrad_output_to_registry.html#minkit.migrad_output_to_registry">migrad_output_to_registry() (in module minkit)</a>
+      <li><a href="api/minkit.DataSet.html#minkit.DataSet.merge">merge() (minkit.DataSet class method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="main.html#module-minkit">minkit (module)</a>
+</li>
+      <li><a href="api/minkit.minuit_to_registry.html#minkit.minuit_to_registry">minuit_to_registry() (in module minkit)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -383,6 +423,8 @@
 <h2 id="N">N</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/minkit.Registry.html#minkit.Registry.names">names (minkit.Registry attribute)</a>
+</li>
       <li><a href="api/minkit.AddPDFs.html#minkit.AddPDFs.norm">norm() (minkit.AddPDFs method)</a>
 
       <ul>
@@ -415,8 +457,12 @@
 </li>
       <li><a href="api/minkit.PDF.html#minkit.PDF">PDF (class in minkit)</a>
 </li>
+      <li><a href="api/minkit.pdf_from_json.html#minkit.pdf_from_json">pdf_from_json() (in module minkit)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/minkit.pdf_to_json.html#minkit.pdf_to_json">pdf_to_json() (in module minkit)</a>
+</li>
       <li><a href="api/minkit.Polynomial.html#minkit.Polynomial">Polynomial (class in minkit)</a>
 </li>
       <li><a href="api/minkit.PowerLaw.html#minkit.PowerLaw">PowerLaw (class in minkit)</a>
@@ -430,6 +476,8 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/minkit.Range.html#minkit.Range">Range (class in minkit)</a>
+</li>
+      <li><a href="api/minkit.Registry.html#minkit.Registry.reduce">reduce() (minkit.Registry method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -447,17 +495,23 @@
 </li>
       <li><a href="api/minkit.Parameter.html#minkit.Parameter.set_range">set_range() (minkit.Parameter method)</a>
 </li>
+      <li><a href="api/minkit.PDF.html#minkit.PDF.set_values">set_values() (minkit.PDF method)</a>
+</li>
       <li><a href="api/minkit.DataSet.html#minkit.DataSet.shuffle">shuffle() (minkit.DataSet method)</a>
+</li>
+      <li><a href="api/minkit.simultaneous_minimizer.html#minkit.simultaneous_minimizer">simultaneous_minimizer() (in module minkit)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/minkit.simultaneous_minimizer.html#minkit.simultaneous_minimizer">simultaneous_minimizer() (in module minkit)</a>
-</li>
       <li><a href="api/minkit.Range.html#minkit.Range.size">size (minkit.Range attribute)</a>
 </li>
       <li><a href="api/minkit.SourcePDF.html#minkit.SourcePDF">SourcePDF (class in minkit)</a>
 </li>
       <li><a href="api/minkit.DataSet.html#minkit.DataSet.subset">subset() (minkit.DataSet method)</a>
+</li>
+      <li><a href="api/minkit.sweights.html#minkit.sweights">sweights() (in module minkit)</a>
+</li>
+      <li><a href="api/minkit.sweights_u.html#minkit.sweights_u">sweights_u() (in module minkit)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -465,10 +519,14 @@
 <h2 id="T">T</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/minkit.timer.html#minkit.timer">timer() (in module minkit)</a>
+</li>
       <li><a href="api/minkit.AddPDFs.html#minkit.AddPDFs.to_json_object">to_json_object() (minkit.AddPDFs method)</a>
 
       <ul>
         <li><a href="api/minkit.ConvPDFs.html#minkit.ConvPDFs.to_json_object">(minkit.ConvPDFs method)</a>
+</li>
+        <li><a href="api/minkit.Formula.html#minkit.Formula.to_json_object">(minkit.Formula method)</a>
 </li>
         <li><a href="api/minkit.Parameter.html#minkit.Parameter.to_json_object">(minkit.Parameter method)</a>
 </li>
@@ -483,8 +541,6 @@
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/minkit.Registry.html#minkit.Registry.to_list">to_list() (minkit.Registry method)</a>
-</li>
       <li><a href="api/minkit.DataSet.html#minkit.DataSet.to_records">to_records() (minkit.DataSet method)</a>
 </li>
       <li><a href="api/minkit.AddPDFs.html#minkit.AddPDFs.two_components">two_components() (minkit.AddPDFs class method)</a>
@@ -508,6 +564,14 @@
 
 <h2 id="V">V</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/minkit.Formula.html#minkit.Formula.value">value (minkit.Formula attribute)</a>
+
+      <ul>
+        <li><a href="api/minkit.Parameter.html#minkit.Parameter.value">(minkit.Parameter attribute)</a>
+</li>
+      </ul></li>
+  </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/minkit.BinnedDataSet.html#minkit.BinnedDataSet.values">values (minkit.BinnedDataSet attribute)</a>
 </li>
