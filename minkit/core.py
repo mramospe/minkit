@@ -12,7 +12,7 @@ import time
 from .operations import types
 from .operations import gpu_core
 
-__all__ = ['aop', 'free_cache', 'initialize', 'timer']
+__all__ = ['as_ndarray', 'free_cache', 'initialize', 'timer']
 
 
 # CPU backend
@@ -98,6 +98,19 @@ class aop(metaclass=meta_operation):
     pass
 
 
+def as_ndarray(a):
+    '''
+    Ensure that "a" is expressed as a :class:`numpy.ndarray` object.
+    If its already an :class:`numpy.ndarray`, it is not copied.
+
+    :param a: input array.
+    :type a: numpy.ndarray or reikna.cluda.Array
+    :returns: converted array.
+    :rtype: numpy.ndarray
+    '''
+    return aop.extract_ndarray(a)
+
+
 def free_cache(self):
     '''
     Free the cache of arrays. Only works in GPU mode, with
@@ -125,13 +138,15 @@ def initialize(backend=CPU, **kwargs):
     - device: (int) number of the device to use (defaults to None).
     :type kwargs: dict
 
-    .. note:: The backend can be also specified as an environmental variable \
-    MINKIT_BACKEND, overriding that specified in any :func:`initialize` call.
+    .. note:: The backend can be also specified as an environment variable \
+    MINKIT_BACKEND, overriding that specified in any :func:`initialize` call. \
+    The device can be selected using the MINKIT_DEVICE variable as well, with \
+    an identical behaviour.
     '''
     global BACKEND
     global ARRAY_OPERATION
 
-    # Override the backend from the environmental variable "MINKIT_BACKEND"
+    # Override the backend from the environment variable "MINKIT_BACKEND"
     backend = os.environ.get('MINKIT_BACKEND', backend).lower()
 
     if BACKEND is not None and backend != BACKEND:

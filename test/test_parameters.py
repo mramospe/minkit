@@ -12,9 +12,6 @@ import pytest
 helpers.configure_logging()
 minkit.initialize()
 
-# For reproducibility
-np.random.seed(98953)
-
 
 @pytest.mark.core
 def test_parameter(tmpdir):
@@ -34,6 +31,7 @@ def test_parameter(tmpdir):
 
 
 @pytest.mark.core
+@helpers.setting_numpy_seed
 def test_formula(tmpdir):
     '''
     Test the "Formula" class.
@@ -76,6 +74,7 @@ def test_formula(tmpdir):
 
 
 @pytest.mark.core
+@helpers.setting_numpy_seed
 def test_range():
     '''
     Test the "Range" class.

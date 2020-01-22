@@ -9,9 +9,6 @@ import pytest
 helpers.configure_logging()
 minkit.initialize()
 
-# For reproducibility
-np.random.seed(98953)
-
 
 def pytest_namespace():
     '''
@@ -21,6 +18,7 @@ def pytest_namespace():
 
 
 @pytest.mark.minimization
+@helpers.setting_numpy_seed
 def test_unbinned_minimizer():
     '''
     Test the "unbinned_minimizer" function.
@@ -55,7 +53,7 @@ def test_unbinned_minimizer():
     assert not np.allclose(reg.get(s.name).value, initials[s.name])
 
     # With weights fits correctly
-    data.weights = minkit.aop.extract_ndarray(g(data))
+    data.weights = minkit.as_ndarray(g(data))
 
     with helpers.fit_test(g, rtol=0.05) as test:
         with minkit.unbinned_minimizer('uml', g, data, minimizer='minuit') as minuit:
@@ -63,6 +61,7 @@ def test_unbinned_minimizer():
 
 
 @pytest.mark.minimization
+@helpers.setting_numpy_seed
 def test_simultaneous_minimizer():
     '''
     Test the "simultaneous_minimizer" function.

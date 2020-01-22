@@ -55,7 +55,6 @@ Thumbs.db
 .eggs/
 build/
 minkit.egg-info/
-minkit/version.py
 
 # Other files #
 ###############

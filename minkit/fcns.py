@@ -8,10 +8,11 @@ from . import parameters
 import functools
 import numpy as np
 
-__all__ = ['binned_maximum_likelihood',
+__all__ = ['binned_maximum_likelihood', 'binned_chisquare',
            'unbinned_extended_maximum_likelihood', 'unbinned_maximum_likelihood']
 
 # Names of different FCNs
+BINNED_CHISQUARE = 'chi2'
 BINNED_MAXIMUM_LIKELIHOOD = 'bml'
 UNBINNED_MAXIMUM_LIKELIHOOD = 'uml'
 UNBINNED_EXTENDED_MAXIMUM_LIKELIHOOD = 'ueml'
@@ -27,7 +28,7 @@ def data_type_for_fcn(fcn):
     :rtype: str
     :raises ValueError: if the FCN is unknown.
     '''
-    if fcn in (BINNED_MAXIMUM_LIKELIHOOD,):
+    if fcn in (BINNED_CHISQUARE, BINNED_MAXIMUM_LIKELIHOOD):
         return dataset.BINNED
     elif fcn in (UNBINNED_MAXIMUM_LIKELIHOOD,
                  UNBINNED_EXTENDED_MAXIMUM_LIKELIHOOD):
@@ -81,7 +82,9 @@ def binned_chisquare(pdf, data, range=parameters.FULL, constraints=None):
     :returns: value of the FCN.
     :rtype: float
     '''
-    raise NotImplementedError('Function not implemented yet')
+    c = evaluate_constraints(constraints)
+    f = c * pdf.evaluate_binned(data)
+    return aop.sum((data.values - f)**2 / f)
 
 
 @nll_to_chi2
@@ -99,7 +102,7 @@ def binned_maximum_likelihood(pdf, data, constraints=None):
     :rtype: float
     '''
     c = evaluate_constraints(constraints)
-    return pdf.norm() - aop.sum(data.values * aop.log(c * pdf(data)))
+    return pdf.norm() - aop.sum(data.values * aop.log(c * pdf.evaluate_binned(data)))
 
 
 @nll_to_chi2
@@ -160,7 +163,9 @@ def fcn_from_name(name):
     :returns: associated function.
     :rtype: function
     '''
-    if name == BINNED_MAXIMUM_LIKELIHOOD:
+    if name == BINNED_CHISQUARE:
+        return binned_chisquare
+    elif name == BINNED_MAXIMUM_LIKELIHOOD:
         return binned_maximum_likelihood
     elif name == UNBINNED_MAXIMUM_LIKELIHOOD:
         return unbinned_maximum_likelihood

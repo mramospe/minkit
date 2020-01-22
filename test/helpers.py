@@ -2,6 +2,7 @@
 Helper functions to test the minkit package.
 '''
 import contextlib
+import functools
 import logging
 import minkit
 import numpy as np
@@ -62,11 +63,26 @@ def compare_with_numpy(pdf, numpy_data, data_par, rtol=0.01):
     centers = minkit.DataSet.from_array(
         0.5 * (edges[1:] + edges[:-1]), data_par)
 
-    pv = minkit.aop.extract_ndarray(pdf(centers))
-
-    pdf_values = minkit.scale_pdf_values(pv, values, edges)
+    pdf_values = minkit.scale_pdf_values(pdf, centers, values, edges)
 
     assert np.allclose(np.sum(pdf_values), np.sum(values), rtol=rtol)
+
+
+def setting_numpy_seed(function=None, seed=98953):
+    '''
+    Decorator to set the NumPy random seed before executing a function.
+    '''
+    def __wrapper(function):
+        @functools.wraps(function)
+        def __wrapper(*args, **kwargs):
+            np.random.seed(seed)
+            return function(*args, **kwargs)
+        return __wrapper
+
+    if function is not None:
+        return __wrapper(function)
+    else:
+        return __wrapper
 
 
 class fit_test(object):
@@ -103,10 +119,13 @@ class fit_test(object):
         '''
         return self
 
-    def __exit__(self, *args, **kwargs):
+    def __exit__(self, exc_type, exc_value, traceback):
         '''
         Check the results.
         '''
+        if any(map(lambda e: e is not None, (exc_type, exc_value, traceback))):
+            return
+
         if self.result is not None:
 
             # Print the result

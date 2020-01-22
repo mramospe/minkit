@@ -1,7 +1,7 @@
 '''
 Test the "pdfs" module.
 '''
-from helpers import compare_with_numpy
+from helpers import compare_with_numpy, setting_numpy_seed
 import helpers
 import minkit
 import numpy as np
@@ -10,12 +10,10 @@ import pytest
 helpers.configure_logging()
 minkit.initialize()
 
-# For reproducibility
-np.random.seed(98953)
-
 
 @pytest.mark.pdfs
 @pytest.mark.source_pdf
+@setting_numpy_seed
 def test_amoroso():
     '''
     Test the "Amoroso" PDF.
@@ -28,6 +26,8 @@ def test_amoroso():
     beta = minkit.Parameter('beta', 2)
     pdf = minkit.Amoroso('amoroso', m, a, theta, alpha, beta)
 
+    assert np.allclose(pdf.integral(), 1)
+
     data = np.random.chisquare(2, 100000)
 
     compare_with_numpy(pdf, data, m)
@@ -35,6 +35,7 @@ def test_amoroso():
 
 @pytest.mark.pdfs
 @pytest.mark.source_pdf
+@setting_numpy_seed
 def test_chebyshev():
     '''
     Test the "Chebyshev" PDF.
@@ -63,6 +64,7 @@ def test_chebyshev():
 
 @pytest.mark.pdfs
 @pytest.mark.source_pdf
+@setting_numpy_seed
 def test_crystalball():
     '''
     Test the "Crystal-Ball" PDF.
@@ -93,6 +95,7 @@ def test_crystalball():
 
 @pytest.mark.pdfs
 @pytest.mark.source_pdf
+@setting_numpy_seed
 def test_exponential():
     '''
     Test the "Exponential" PDF
@@ -110,6 +113,7 @@ def test_exponential():
 
 @pytest.mark.pdfs
 @pytest.mark.source_pdf
+@setting_numpy_seed
 def test_gaussian():
     '''
     Test the "Gaussian" PDF.
@@ -128,6 +132,7 @@ def test_gaussian():
 
 @pytest.mark.pdfs
 @pytest.mark.source_pdf
+@setting_numpy_seed
 def test_polynomial():
     '''
     Test the "Polynomial" PDF.
@@ -170,6 +175,7 @@ def test_polynomial():
 
 @pytest.mark.pdfs
 @pytest.mark.source_pdf
+@setting_numpy_seed
 def test_powerlaw():
     '''
     Test the "PowerLaw" PDF.

@@ -24,14 +24,6 @@ def ale(a1, a2):
 
 
 @docstrings.set_docstring
-def array(a, copy=True, convert=True):
-    if copy:
-        return np.array(a, dtype=types.cpu_type)
-    else:
-        return a
-
-
-@docstrings.set_docstring
 def concatenate(arrays, maximum=None):
     if maximum is not None:
         return np.concatenate(arrays)[:maximum]
@@ -42,6 +34,16 @@ def concatenate(arrays, maximum=None):
 @docstrings.set_docstring
 def count_nonzero(a):
     return np.count_nonzero(a)
+
+
+@docstrings.set_docstring
+def data_array(a, copy=True, convert=True):
+    if copy:
+        return np.array(a, dtype=types.cpu_type)
+    else:
+        if a.dtype != types.cpu_type:
+            return a.astype(types.cpu_type)
+        return a
 
 
 @docstrings.set_docstring
@@ -56,6 +58,13 @@ def exp(a):
 
 @docstrings.set_docstring
 def extract_ndarray(a):
+    return a
+
+
+@docstrings.set_docstring
+def false_till(N, n):
+    a = np.zeros(N, dtype=types.cpu_real_bool)
+    a[n:] = True
     return a
 
 
@@ -178,6 +187,12 @@ def sum(a, *args):
         return np.sum(a)
     else:
         return np.sum((a, *args), axis=0)
+
+
+@docstrings.set_docstring
+def sum_inside(centers, edges, values=None):
+    out, _ = np.histogramdd(centers, bins=edges, weights=values)
+    return out.flatten()
 
 
 @docstrings.set_docstring

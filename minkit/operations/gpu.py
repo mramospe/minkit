@@ -3,6 +3,7 @@ Operations with GPU objects
 '''
 from . import PACKAGE_PATH
 from . import docstrings
+from . import multi_par
 from . import rfuncs
 from . import types
 from .gpu_core import get_sizes, THREAD
@@ -206,7 +207,7 @@ for function in ('arange_int',):
         getattr(FUNCS_BY_ELEMENT, function)))
 
 # These functions create e new array of bool
-for function in ('true_till', 'ones_bool', 'zeros_bool'):
+for function in ('false_till', 'true_till', 'ones_bool', 'zeros_bool'):
     setattr(FUNCS_BY_ELEMENT, function, CREATE_BOOL(
         getattr(FUNCS_BY_ELEMENT, function)))
 
@@ -250,17 +251,6 @@ def ale(a1, a2):
 
 
 @docstrings.set_docstring
-def array(a, copy=True, convert=True):
-    if convert:
-        return THREAD.to_device(a)
-    # Is assumed to be a GPU-array
-    if copy:
-        return a.copy()
-    else:
-        return a
-
-
-@docstrings.set_docstring
 def concatenate(arrays, maximum=None):
 
     maximum = maximum if maximum is not None else np.sum(
@@ -296,6 +286,19 @@ def count_nonzero(a):
 
 
 @docstrings.set_docstring
+def data_array(a, copy=True, convert=True):
+    if convert:
+        if a.dtype != types.cpu_type:
+            a = a.astype(types.cpu_type)
+        return THREAD.to_device(a)
+    # Is assumed to be a GPU-array
+    if copy:
+        return a.copy()
+    else:
+        return a
+
+
+@docstrings.set_docstring
 def empty(size, dtype=types.cpu_type):
     return get_array_cache(dtype).get_array(size)
 
@@ -314,6 +317,11 @@ def exp(a):
 @docstrings.set_docstring
 def extract_ndarray(a):
     return a.get()
+
+
+@docstrings.set_docstring
+def false_till(N, n):
+    return FUNCS_BY_ELEMENT.false_till(N, types.cpu_int(n))
 
 
 @docstrings.set_docstring
@@ -448,6 +456,33 @@ def sum(a, *args):
         for a in args:
             r += a
         return r
+
+
+@docstrings.set_docstring
+def sum_inside(centers, edges, values=None):
+
+    borders = meshgrid(*tuple(false_till(len(e) - 1, len(e) - 2)
+                              for e in edges))
+
+    gaps = tuple(map(lambda e: types.cpu_int(len(e)), edges))
+
+    out = zeros(
+        np.prod(np.fromiter((len(e) - 1 for e in edges), dtype=types.cpu_int)))
+
+    gs, ls = get_sizes(len(out))
+
+    gs = (len(centers[0]), gs)
+    ls = (1, ls)
+
+    if values is None:
+        f = multi_par.sum_inside_bins(len(edges))
+        f(out, *centers, *gaps, *edges, *borders, global_size=gs, local_size=ls)
+    else:
+        f = multi_par.sum_inside_bins_with_values(len(edges))
+        f(out, *centers, *gaps, *edges, *borders,
+          values, global_size=gs, local_size=ls)
+
+    return out
 
 
 @docstrings.set_docstring

@@ -1,7 +1,7 @@
 '''
 Test the "pdf_core" module.
 '''
-from helpers import check_parameters, check_pdfs, check_multi_pdfs, fit_test
+from helpers import check_parameters, check_pdfs, check_multi_pdfs, fit_test, setting_numpy_seed
 import json
 import helpers
 import numpy as np
@@ -12,11 +12,9 @@ import pytest
 helpers.configure_logging()
 minkit.initialize()
 
-# For reproducibility
-np.random.seed(98953)
-
 
 @pytest.mark.pdfs
+@setting_numpy_seed
 def test_pdf():
     '''
     General tests for the PDF class.
@@ -37,6 +35,7 @@ def test_pdf():
 
 @pytest.mark.pdfs
 @pytest.mark.multipdf
+@setting_numpy_seed
 def test_addpdfs(tmpdir):
     '''
     Test the "AddPDFs" class.
@@ -66,9 +65,7 @@ def test_addpdfs(tmpdir):
 
     centers = minkit.DataSet.from_array(0.5 * (edges[1:] + edges[:-1]), m)
 
-    pv = minkit.aop.extract_ndarray(pdf(centers))
-
-    pdf_values = minkit.scale_pdf_values(pv, values, edges)
+    pdf_values = minkit.scale_pdf_values(pdf, centers, values, edges)
 
     assert np.allclose(np.sum(pdf_values), np.sum(values))
 
@@ -102,6 +99,7 @@ def test_category():
 
 @pytest.mark.pdfs
 @pytest.mark.multipdf
+@setting_numpy_seed
 def test_constpdf(tmpdir):
     '''
     Test a fit with a constant PDF.
@@ -145,6 +143,7 @@ def test_constpdf(tmpdir):
 
 @pytest.mark.pdfs
 @pytest.mark.multipdf
+@setting_numpy_seed(seed=431582)
 def test_convpdfs(tmpdir):
     '''
     Test the "ConvPDFs" class.
@@ -162,11 +161,11 @@ def test_convpdfs(tmpdir):
 
     pdf = minkit.ConvPDFs('convolution', g1, g2)
 
-    data = pdf.generate(1000)
+    data = pdf.generate(10000)
 
     # Check that the output is another Gaussian with bigger standard deviation
-    mean = minkit.aop.sum(data[m.name]) / len(data)
-    var = minkit.aop.sum((data[m.name] - mean)**2) / len(data)
+    mean = minkit.core.aop.sum(data[m.name]) / len(data)
+    var = minkit.core.aop.sum((data[m.name] - mean)**2) / len(data)
 
     assert np.allclose(var, s1.value**2 + s2.value**2, rtol=0.1)
 
@@ -177,14 +176,12 @@ def test_convpdfs(tmpdir):
         assert np.allclose(proxy.numerical_normalization(), 1.)
 
     # Ordinary check for PDFs
-    values, edges = np.histogram(minkit.aop.extract_ndarray(
+    values, edges = np.histogram(minkit.as_ndarray(
         data[m.name]), bins=100, range=m.bounds)
 
     centers = minkit.DataSet.from_array(0.5 * (edges[1:] + edges[:-1]), m)
 
-    pv = minkit.aop.extract_ndarray(pdf(centers))
-
-    pdf_values = minkit.scale_pdf_values(pv, values, edges)
+    pdf_values = minkit.scale_pdf_values(pdf, centers, values, edges)
 
     assert np.allclose(np.sum(pdf_values), np.sum(values), rtol=0.01)
 
@@ -205,6 +202,7 @@ def test_convpdfs(tmpdir):
 
 @pytest.mark.pdfs
 @pytest.mark.multipdf
+@setting_numpy_seed
 def test_prodpdfs(tmpdir):
     '''
     Test the "ProdPDFs" class.
@@ -245,6 +243,7 @@ def test_prodpdfs(tmpdir):
 
 @pytest.mark.pdfs
 @pytest.mark.source_pdf
+@setting_numpy_seed
 def test_sourcepdf(tmpdir):
     '''
     Test the "SourcePDF" class.

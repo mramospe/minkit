@@ -163,6 +163,13 @@ KERNEL void slice_from_integer( GLOBAL_MEM double *out, GLOBAL_MEM double *in, G
   out[idx] = in[indices[idx]];
 }
 
+/// Create an array filled with "false" till the given index
+KERNEL void false_till( GLOBAL_MEM unsigned *out, int n )
+{
+  SIZE_T idx = get_global_id(0);
+  out[idx] = (idx >= n);
+}
+
 /// Create an array filled with "true" till the given index
 KERNEL void true_till( GLOBAL_MEM unsigned *out, int n )
 {

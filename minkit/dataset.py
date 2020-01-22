@@ -8,7 +8,7 @@ from .operations import types
 import logging
 import numpy as np
 
-__all__ = ['DataSet', 'BinnedDataSet']
+__all__ = ['evaluation_grid', 'DataSet', 'BinnedDataSet']
 
 # Names of different data types
 BINNED = 'binned'
@@ -41,10 +41,10 @@ class DataSet(object):
         and remove the data points out of them.
         :type trim: bool
         '''
-        self.__data = {p.name: aop.array(
+        self.__data = {p.name: aop.data_array(
             data[p.name], copy=copy, convert=convert) for p in pars}
         self.__data_pars = pars
-        self.__weights = weights if weights is None else aop.array(
+        self.__weights = weights if weights is None else aop.data_array(
             weights, copy=copy, convert=convert)
 
         if trim:
@@ -160,7 +160,7 @@ class DataSet(object):
         if len(weights) != len(self):
             raise ValueError(
                 'Length of the provided weights does not match that of the DataSet')
-        self.__weights = aop.array(weights)
+        self.__weights = aop.data_array(weights)
 
     @classmethod
     def from_array(cls, arr, data_par, weights=None, copy=True, convert=True):
@@ -195,6 +195,26 @@ class DataSet(object):
                     f'No data for parameter "{p.name}" has been found in the input array')
             dct[p] = arr[p]
         return cls(dct, data_pars, weights=weights)
+
+    def make_binned(self, bins=100):
+        '''
+        Make a binned version of this sample.
+
+        :param bins: number of bins per data parameter.
+        :type bins: int
+        :returns: binned data sample.
+        :rtype: BinnedDataSet
+        '''
+        edges = {p.name: aop.linspace(*p.bounds, bins + 1)
+                 for p in self.data_pars}
+
+        centers = [self[p.name] for p in self.data_pars]
+
+        e = [edges[p.name] for p in self.data_pars]
+
+        values = aop.sum_inside(centers, e)
+
+        return BinnedDataSet(edges, self.data_pars, values, copy=False, convert=False)
 
     @classmethod
     def merge(cls, samples, maximum=None, shuffle=False, trim=False):
@@ -361,12 +381,12 @@ class BinnedDataSet(object):
     A binned data set.
     '''
 
-    def __init__(self, centers, data_pars, values, copy=True, convert=True):
+    def __init__(self, edges, data_pars, values, copy=True, convert=True):
         '''
         A binned data set.
 
-        :param centers: centers of the bins.
-        :type centers: numpy.ndarray
+        :param edges: centers of the bins.
+        :type edges: dict
         :param data_pars: data parameters.
         :type data_pars: Registry(Parameter)
         :param values: values of the data for each center.
@@ -374,13 +394,13 @@ class BinnedDataSet(object):
         '''
         super(BinnedDataSet, self).__init__()
 
-        self.__centers = {name: aop.array(arr, copy=copy, convert=convert)
-                          for name, arr in dict(centers).items()}
         self.__data_pars = data_pars
-        self.__values = aop.array(
-            values, copy=copy, convert=convert)
 
-        assert centers.keys() == self.__centers.keys()
+        self.__edges = {name: aop.data_array(arr, copy=copy, convert=convert)
+                        for name, arr in dict(edges).items()}
+
+        self.__values = aop.data_array(
+            values, copy=copy, convert=convert)
 
     def __getitem__(self, var):
         '''
@@ -389,7 +409,7 @@ class BinnedDataSet(object):
         :returns: centers of the bins.
         :rtype: numpy.ndarray
         '''
-        return self.__centers[var]
+        return self.__edges[var]
 
     def __len__(self):
         '''
@@ -398,7 +418,19 @@ class BinnedDataSet(object):
         :returns: size of the sample.
         :rtype: int
         '''
-        return len(self.__centers[tuple(self.__centers.keys())[0]])
+        return len(self.__values)
+
+    @property
+    def bounds(self):
+        '''
+        Bounds of each data parameter.
+        '''
+        bounds = np.empty(2*len(self.__data_pars), dtype=types.cpu_type)
+        bounds[0::2] = [aop.extract_ndarray(
+            self.__edges[p.name][0]) for p in self.__data_pars]
+        bounds[1::2] = [aop.extract_ndarray(
+            self.__edges[p.name][-1]) for p in self.__data_pars]
+        return bounds
 
     @property
     def data_pars(self):
@@ -411,12 +443,12 @@ class BinnedDataSet(object):
         return self.__data_pars
 
     @classmethod
-    def from_array(cls, centers, data_par, values, copy=True, convert=True):
+    def from_array(cls, edges, data_par, values, copy=True, convert=True):
         '''
-        Build the class from the array of centers and values.
+        Build the class from the array of edges and values.
 
-        :param centers: centers of the bins.
-        :type centers: numpy.ndarray
+        :param edges: edges of the bins.
+        :type edges: numpy.ndarray
         :param data_par: data parameter.
         :type data_par: Parameter
         :param values: values at each bin.
@@ -424,7 +456,7 @@ class BinnedDataSet(object):
         :returns: binned data set.
         :rtype: BinnedDataSet
         '''
-        return cls({data_par.name: centers}, parameters.Registry([data_par]), values, copy=copy, convert=convert)
+        return cls({data_par.name: edges}, parameters.Registry([data_par]), values, copy=copy, convert=convert)
 
     @property
     def values(self):
@@ -442,7 +474,7 @@ def evaluation_grid(data_pars, bounds, size):
     Create a grid of points to evaluate a :class:`PDF` object.
 
     :param data_pars: data parameters.
-    :type data_pars: Registry(Parameter)
+    :type data_pars: list(Parameter)
     :param size: number of entries in the output sample per set of bounds. \
     This means that "size" entries will be generated for each pair of (min, max) \
     provided, that is, per data parameter.

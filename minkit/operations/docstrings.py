@@ -31,13 +31,6 @@ Create an array with integers or complex numbers (depending on "dtype") from 0 t
 :returns: array with values starting from zero and increasing by one.
 :rtype: numpy.ndarray or reikna.cluda.Array
 '''
-array = '''
-Create an array using the current backend.
-Arguments are directly forwarded to the constructor.
-
-:returns: input data converted to the correct type for the current backend.
-:rtype: numpy.ndarray, reikna.cluda.Array
-'''
 concatenate = '''
 Concatenate many arrays into one, trimming the output so its length is "maximum",
 if specified.
@@ -48,6 +41,13 @@ if specified.
 :type maximum: int or None
 :returns: concatenated array.
 :rtype: numpy.ndarray or reikna.cluda.Array
+'''
+data_array = '''
+Create an array using the current backend.
+Arguments are directly forwarded to the constructor.
+
+:returns: input data converted to the correct type for the current backend.
+:rtype: numpy.ndarray, reikna.cluda.Array
 '''
 count_nonzero = '''
 Count the number of True occurrences on a boolean array.
@@ -84,6 +84,16 @@ Get an :class:`numpy.ndarray` class from the input object.
 :type obj: numpy.ndarray, pyopencl.Buffer or pycuda.gpuarray
 :returns: data as :class:`numpy.ndarray`
 :rtype: numpy.ndarray
+'''
+false_till = '''
+Create an array of False values till a given index.
+
+:param N: size of the array.
+:type N: int
+:param n: value where to stop putting False.
+:type n: int
+:returns: output array.
+:rtype: numpy.ndarray(bool) or reikna.cluda.Array(bool)
 '''
 fft = '''
 Calculate the fast-Fourier transform of an array.
@@ -265,6 +275,18 @@ Sum the elements of an array, or sum many arrays into one.
 :param args: possible additional arrays.
 :type args: tuple(numpy.ndarray, ...) or tuple(reikna.cluda.Array, ...)
 :returns: sum of the elements of "a" if no more arrays are provided, or sum of "a" with "args".
+:rtype: numpy.ndarray or reikna.cluda.Array
+'''
+sum_inside = '''
+Sum the occurrences of values inside the provided edges.
+
+:param centers: centers of the points.
+:type centers: numpy.ndarray or reikna.cluda.Array
+:param values: values to add.
+:type values: numpy.ndarray or reikna.cluda.Array
+:param edges: edges defining the bins.
+:type edges: numpy.ndarray or reikna.cluda.Array
+:returns: sum of "values" inside each bin.
 :rtype: numpy.ndarray or reikna.cluda.Array
 '''
 slice_from_boolean = '''

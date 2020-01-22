@@ -485,6 +485,15 @@ class Registry(list):
         '''
         return [p.to_json_object() for p in self]
 
+    def values(self):
+        '''
+        Get a dictionary with the values of the different parameters.
+
+        :returns: dictionary with the values.
+        :rtype: dict(str, float)
+        '''
+        return {p.name: p.value for p in self}
+
 
 def bounds_for_range(data_pars, range):
     '''

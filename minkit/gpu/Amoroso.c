@@ -1,5 +1,4 @@
-/** Definition of an Amoroso PDF.
- */
+/// Evaluate on an unbinned data set
 KERNEL void evaluate( GLOBAL_MEM double *out, GLOBAL_MEM double *in, double a, double theta, double alpha, double beta ) {
 
   SIZE_T idx = get_global_id(0);

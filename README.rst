@@ -1,5 +1,5 @@
 ======
-minkit
+MinKit
 ======
 
 .. image:: https://img.shields.io/travis/mramospe/minkit.svg
@@ -14,11 +14,13 @@ minkit
 .. inclusion-marker-do-not-remove
 
 This package provides tools to fit probability density functions (PDFs) to both unbinned and binned data, using different minimizers (like `Minuit <https://iminuit.readthedocs.io/en/latest/reference.html>`__).
-It has support for both CPU and GPU backends, providing an easy API in order to manage both backends, being transparent for the user.
-PDFs are implemented in C++ and CUDA, allowing a fast evaluation of the functions.
+The MinKit package appears as an alternative to existing minimization packages, like `RooFit <https://root.cern.ch/roofit>`__.
+The idea is to provide a friendly pure python API to do minimization and calculations with PDFs.
+It has support for both CPU and GPU backends, being very easy for the user to change from one to the other.
+PDFs are implemented in C++, OpenCL and CUDA, allowing a fast evaluation of the functions.
 
-The package is built on top of the `numpy <https://numpy.org/>`__ and `iminuit <https://iminuit.readthedocs.io/en/latest/>`__ packages.
-The interface with CUDA is handled using `PyCUDA <https://documen.tician.de/pycuda>`__.
+The package is built on top of the `numpy <https://numpy.org>`__ and `iminuit <https://iminuit.readthedocs.io/en/latest>`__ packages.
+The interface with CUDA and OpenCL is handled using `reikna <http://reikna.publicfields.net>`__, which is itself an API for `PyCUDA <https://documen.tician.de/pycuda>`__ and `PyOpenCL <https://documen.tician.de/pyopencl>`__.
 
 Basic example
 =============

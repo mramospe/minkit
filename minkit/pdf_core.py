@@ -131,6 +131,23 @@ def allows_bind_or_const_cache(method):
     return __wrapper
 
 
+def safe_division(first, second):
+    '''
+    Do a safe division by a number of array that can be or contain zeros.
+
+    :param first: input array or value.
+    :type first: float, numpy.ndarray or reikna.cluda.Array
+    :param second: array or value to divide by.
+    :type second: float, numpy.ndarray or reikna.cluda.Array
+    :returns: result of the division.
+    :rtype: numpy.ndarray or reikna.cluda.Array
+    '''
+    try:
+        return first / second
+    except ZeroDivisionError:
+        return first / np.nextafter(0, np.infty)
+
+
 class PDF(object):
     '''
     Object defining the properties of a PDF.
@@ -184,6 +201,24 @@ class PDF(object):
         '''
         raise NotImplementedError(
             'Classes inheriting from "minkit.PDF" must define the "__call__" operator')
+
+    @allows_const_cache
+    def evaluate_binned(self, data, norm_to_data=True):
+        '''
+        Evaluate the PDF over a binned sample.
+        If "norm_to_data" is provided, then the number of entries is normalized
+        to the sum of values in the data sample.
+        Otherwise it is normalized to the sum of the data values.
+
+        :param data: input data.
+        :type data: BinnedDataSet
+        :param norm_to_data: possible normalization value.
+        :type norm_to_data: bool
+        :returns: values from the evaluation.
+        :rtype: numpy.ndarray or reikna.cluda.Array
+        '''
+        raise NotImplementedError(
+            'Classes inheriting from "minkit.PDF" must define the "evaluate_binned" operator')
 
     @classmethod
     def from_json_object(cls, obj, pars):
@@ -572,15 +607,39 @@ class SourcePDF(PDF):
             var_arg_pars = list(var_arg_pars)
 
         # Access the PDF
-        function, pdf, normalization = accessors.access_pdf(
+        function, pdf, evb, normalization = accessors.access_pdf(
             self.__class__.__name__, ndata_pars=len(data_pars), narg_pars=len(arg_pars), nvar_arg_pars=nvar_arg_pars)
 
         self.__function = function
         self.__pdf = pdf
+        self.__evaluate_binned = evb
         self.__norm = normalization
 
         super(SourcePDF, self).__init__(name, parameters.Registry(
             data_pars), parameters.Registry(arg_pars + var_arg_pars))
+
+    def _norm(self, values, range=parameters.FULL):
+        '''
+        Calculate the normalization for a set of values and a range.
+
+        :param values: values of the parameters.
+        :type values: tuple(float)
+        :param range: range for the normalization.
+        :type range: str
+        :returns: normalization value.
+        :rtype: float
+        '''
+        if self.__norm is not None:
+
+            # There is an analytical approach to calculate the normalization
+            nr = parameters.bounds_for_range(self.data_pars, range)
+            if len(nr.shape) == 1:
+                return self.__norm(*values, *nr)
+            else:
+                return np.sum(np.fromiter((self.__norm(*values, *inr)
+                                           for inr in nr), dtype=types.cpu_type))
+        else:
+            return self.numerical_normalization(range)
 
     @allows_const_cache
     def __call__(self, data, range=parameters.FULL, normalized=True):
@@ -607,18 +666,63 @@ class SourcePDF(PDF):
 
         # Calculate the normalization
         if normalized:
-            if self.__norm is not None:
-                # There is an analytical approach to calculate the normalization
-                nr = parameters.bounds_for_range(self.data_pars, range)
-                if len(nr.shape) == 1:
-                    n = self.__norm(*fvals, *nr)
-                else:
-                    n = np.sum(np.fromiter((self.__norm(*fvals, *inr)
-                                            for inr in nr), dtype=types.cpu_type))
-                return out / n
-            else:
-                # Must use a numerical normalization
-                return out / self.numerical_normalization(range)
+            return safe_division(out, self._norm(fvals, range))
+        else:
+            return out
+
+    @allows_const_cache
+    def evaluate_binned(self, data, norm_to_data=True):
+        '''
+        Evaluate the PDF over a binned sample.
+        If "norm_to_data" is provided, then the number of entries is normalized
+        to the sum of values in the data sample.
+        Otherwise it is normalized to the sum of the data values.
+
+        :param data: input data.
+        :type data: BinnedDataSet
+        :param norm_to_data: possible normalization value.
+        :type norm_to_data: bool
+        :returns: values from the evaluation.
+        :rtype: numpy.ndarray or reikna.cluda.Array
+        '''
+        fvals = tuple(v.value for v in self.args)
+
+        if self.__evaluate_binned is not None:
+
+            edges = tuple(data[p.name] for p in self.data_pars)
+
+            # Must define the gaps for the edges
+            all_gaps = np.cumprod(
+                (1,) + tuple(len(data[p.name]) for p in data.data_pars))
+
+            nbins = tuple(len(data[p.name]) - 1 for p in self.data_pars)
+
+            gaps = tuple(all_gaps[data.data_pars.index(p.name)]
+                         for p in self.data_pars)
+
+            out = aop.zeros(len(data))
+
+            self.__evaluate_binned(out, *fvals, *nbins, *gaps, *edges)
+
+            n = self._norm(fvals)
+
+            out = safe_division(out, n)
+        else:
+
+            # Here we are manually evaluating the PDF
+            g = dataset.evaluation_grid(
+                self.data_pars, data.bounds, self.norm_size)
+            i = self.__call__(g, normalized=False)
+
+            pdf_values = i / aop.sum(i)
+
+            centers = [g[p.name] for p in self.data_pars]
+            edges = [data[p.name] for p in self.data_pars]
+
+            out = aop.sum_inside(centers, edges, pdf_values)
+
+        if norm_to_data:
+            return aop.sum(data.values) * out
         else:
             return out
 
@@ -663,7 +767,7 @@ class SourcePDF(PDF):
             else:
                 n = np.sum(np.fromiter((self.__norm(*fvals, *inr)
                                         for inr in nr), dtype=types.cpu_type))
-            return v / n
+            return safe_division(v, n)
         else:
             return v
 
@@ -679,15 +783,8 @@ class SourcePDF(PDF):
         :returns: value of the normalization.
         :rtype: float
         '''
-        if self.__norm is not None:
-            fvals = tuple(v.value for v in self.args)
-            nr = parameters.bounds_for_range(self.data_pars, range)
-            if len(nr.shape) == 1:
-                return self.__norm(*fvals, *nr)
-            else:
-                return np.sum(np.fromiter((self.__norm(*fvals, *inr) for inr in nr), dtype=types.cpu_type))
-        else:
-            return self.numerical_normalization(range)
+        fvals = tuple(v.value for v in self.args)
+        return self._norm(fvals, range)
 
     def to_json_object(self):
         '''
@@ -915,9 +1012,41 @@ class AddPDFs(MultiPDF):
             out += y * pdf(data, range, normalized=True)
 
         if self.extended and normalized:
-            return out / sum(yields)
+            return safe_division(out, sum(yields))
         else:
             return out
+
+    @allows_const_cache
+    def evaluate_binned(self, data, norm_to_data=True):
+        '''
+        Evaluate the PDF over a binned sample.
+        If "norm_to_data" is provided, then the number of entries is normalized
+        to the sum of values in the data sample.
+        Otherwise it is normalized to the sum of the data values.
+
+        :param data: input data.
+        :type data: BinnedDataSet
+        :param norm_to_data: possible normalization value.
+        :type norm_to_data: bool
+        :returns: values from the evaluation.
+        :rtype: numpy.ndarray or reikna.cluda.Array
+        '''
+        yields = list(v.value for v in self.args)
+
+        if not self.extended:
+            yields.append(1. - sum(yields))
+
+        out = aop.zeros(len(data))
+        for y, pdf in zip(yields, self.pdfs):
+            out += y * pdf.evaluate_binned(data, norm_to_data=False)
+
+        if self.extended:
+            return out
+        else:
+            if norm_to_data:
+                return aop.sum(data.values) * out
+            else:
+                return out
 
     @classmethod
     def from_json_object(cls, obj, pars, pdfs):
@@ -1052,6 +1181,32 @@ class ConvPDFs(MultiPDF):
 
         return pdf_values
 
+    @allows_const_cache
+    def evaluate_binned(self, data, norm_to_data=True):
+        '''
+        Evaluate the PDF over a binned sample.
+        If "norm_to_data" is provided, then the number of entries is normalized
+        to the sum of values in the data sample.
+        Otherwise it is normalized to the sum of the data values.
+
+        :param data: input data.
+        :type data: BinnedDataSet
+        :param norm_to_data: possible normalization value.
+        :type norm_to_data: bool
+        :returns: values from the evaluation.
+        :rtype: numpy.ndarray or reikna.cluda.Array
+        '''
+        dv, cv = self.convolve(parameters.FULL, normalized=True)
+
+        par = tuple(self.data_pars)[0]
+
+        out = aop.interpolate_linear(data[par.name], dv, cv)
+
+        if norm_to_data:
+            return aop.sum(data.values) * out
+        else:
+            return out
+
     @classmethod
     def from_json_object(cls, obj, pars, pdfs):
         '''
@@ -1174,8 +1329,30 @@ class ProdPDFs(MultiPDF):
         out = aop.ones(len(data))
         for pdf in self.pdfs:
             out *= pdf(data, range, normalized=True)
-
         return out
+
+    @allows_const_cache
+    def evaluate_binned(self, data, norm_to_data=True):
+        '''
+        Evaluate the PDF over a binned sample.
+        If "norm_to_data" is provided, then the number of entries is normalized
+        to the sum of values in the data sample.
+        Otherwise it is normalized to the sum of the data values.
+
+        :param data: input data.
+        :type data: BinnedDataSet
+        :param norm_to_data: possible normalization value.
+        :type norm_to_data: bool
+        :returns: values from the evaluation.
+        :rtype: numpy.ndarray or reikna.cluda.Array
+        '''
+        out = aop.ones(len(data))
+        for pdf in self.pdfs:
+            out *= pdf.evaluate_binned(data, norm_to_data=False)
+        if norm_to_data:
+            return aop.sum(data.values) * out
+        else:
+            return out
 
     @classmethod
     def from_json_object(cls, obj, pars, pdfs):

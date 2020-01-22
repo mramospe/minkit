@@ -1,8 +1,7 @@
 #include <cmath>
 
 extern "C" {
-  /** Swap two variables
-   */
+  /// Swap two variables
   static void swap( double &a, double &b ) {
 
     double tmp = a;
@@ -10,53 +9,8 @@ extern "C" {
     b = tmp;
   }
 
-  /** Definition of a Chebyshev polynomial PDF.
-   */
-  static inline double shared_function( double x, int n, double *p ) {
-
-    if ( n == 0 )
-      return 1.;
-    else if ( n == 1 )
-      return 1. + p[0] * x;
-    else {
-
-      double Tipp = 1.;
-      double Tip = x;
-
-      double res = p[0] * Tip + Tipp;
-
-      for ( int i = 1; i < n; ++i ) {
-
-	double Ti = 2. * x * Tip - Tipp;
-
-	res += p[i] * Ti;
-
-	swap(Tip, Tipp);
-
-	Tip = Ti;
-      }
-
-      return res;
-    }
-  }
-
-  /** Definition of a Chebyshev polynomial PDF.
-   */
-  double function( double x, int n, double *p ) {
-    return shared_function(x, n, p);
-  }
-
-  /** Definition of the evaluation of a Chebyshev polynomial PDF.
-   */
-  void evaluate( int len, double *out, double *in, int n, double *p ) {
-
-    for ( int i = 0; i < len; ++i )
-      out[i] = shared_function(in[i], n, p);
-  }
-
-  /** Normalization for a Chebyshev polynomial PDF.
-   */
-  double normalization( int n, double *p, double xmin, double xmax ) {
+  /// Function shared by "normalization" and "evaluate_binned"
+  double integral( int n, double *p, double xmin, double xmax ) {
 
     if ( n == 0 )
       return (xmax - xmin);
@@ -91,5 +45,63 @@ extern "C" {
 
       return res;
     }
+  }
+
+  /// Function shared by "function" and "evaluate"
+  static inline double shared_function( double x, int n, double *p ) {
+
+    if ( n == 0 )
+      return 1.;
+    else if ( n == 1 )
+      return 1. + p[0] * x;
+    else {
+
+      double Tipp = 1.;
+      double Tip = x;
+
+      double res = p[0] * Tip + Tipp;
+
+      for ( int i = 1; i < n; ++i ) {
+
+	double Ti = 2. * x * Tip - Tipp;
+
+	res += p[i] * Ti;
+
+	swap(Tip, Tipp);
+
+	Tip = Ti;
+      }
+
+      return res;
+    }
+  }
+
+  /// Function for single-value
+  double function( double x, int n, double *p ) {
+    return shared_function(x, n, p);
+  }
+
+  /// Evaluate on an unbinned data set
+  void evaluate( int len, double *out, double *in, int n, double *p ) {
+
+    for ( int i = 0; i < len; ++i )
+      out[i] = shared_function(in[i], n, p);
+  }
+
+  /// Evaluate on a binned data set
+  void evaluate_binned( int len, double *out, int n, double *p, int nedges, int gap, double *edges )
+  {
+
+    for ( int i = 0; i < len; ++i ) {
+
+      int ie = (i / gap) % nedges;
+
+      out[i] = integral(n, p, edges[ie], edges[ie + 1]);
+    }
+  }
+
+  /// Normalization
+  double normalization( int n, double *p, double xmin, double xmax ) {
+    return integral(n, p, xmin, xmax);
   }
 }

@@ -9,11 +9,9 @@ import pytest
 helpers.configure_logging()
 minkit.initialize()
 
-# For reproducibility
-np.random.seed(98953)
-
 
 @pytest.mark.core
+@helpers.setting_numpy_seed
 def test_bind_class_arguments():
     '''
     Test the "bind_class_arguments" function.

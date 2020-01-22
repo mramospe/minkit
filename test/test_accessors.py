@@ -36,6 +36,10 @@ def test_add_pdf_src(tmpdir):
         for ( int i = 0; i < len; ++i )
         out[i] = 1.;
         }
+        void evaluate_binned( int len, double *out, double *edges ) {
+        for ( int i = 0; i < len; ++i )
+        out[i] = edges[i + 1] - edges[i];
+        }
         double normalization( double xmin, double xmax ) {
         return xmax - xmin;
         }
@@ -49,6 +53,11 @@ def test_add_pdf_src(tmpdir):
             {
             SIZE_T idx  = get_global_id(0);
             out[idx] = 1.;
+            }
+            KERNEL void evaluate_binned( GLOBAL_MEM double *out, GLOBAL_MEM double *edges )
+            {
+            SIZE_T idx  = get_global_id(0);
+            out[idx] = edges[idx + 1] - edges[idx];
             }
             ''')
 

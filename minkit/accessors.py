@@ -9,6 +9,7 @@ from distutils import ccompiler
 
 from ctypes import cdll
 import functools
+import logging
 import numpy as np
 import os
 import tempfile
@@ -30,6 +31,8 @@ PDF_PATHS = []
 
 # Save the C-related flags to compile
 CFLAGS = os.environ.get('CFLAGS', '').split()
+
+logger = logging.getLogger(__name__)
 
 
 def access_cpu_module(name):
@@ -147,6 +150,11 @@ def create_cpu_function_proxies(module, ndata_pars, narg_pars=0, nvar_arg_pars=N
     function = module.function
     evaluate = module.evaluate
 
+    if hasattr(module, 'evaluate_binned'):
+        evaluate_binned = module.evaluate_binned
+    else:
+        evaluate_binned = None
+
     if hasattr(module, 'normalization'):
         normalization = module.normalization
     else:
@@ -218,6 +226,53 @@ def create_cpu_function_proxies(module, ndata_pars, narg_pars=0, nvar_arg_pars=N
 
         return evaluate(types.c_int(len(output_array)), op, *ips, *vals)
 
+    if normalization is not None and evaluate_binned is None:
+        logger.warning(
+            'If you are able to define a normalization function you can also provide an evaluation for binned data sets.')
+
+    if evaluate_binned is not None:
+
+        argtypes = [types.c_int, types.c_double_p]
+        argtypes += partypes
+        argtypes += [types.c_int for _ in range(2 * ndata_pars)]
+        argtypes += [types.c_double_p for _ in range(ndata_pars)]
+        evaluate_binned.argtypes = argtypes
+
+        @functools.wraps(evaluate_binned)
+        def __evaluate_binned(output_array, *args):
+            '''
+            Internal wrapper.
+            '''
+            op = output_array.ctypes.data_as(types.c_double_p)
+
+            bs = 3 * ndata_pars
+
+            if nvar_arg_pars is not None:
+
+                var_arg_pars = types.cpu_type(
+                    args[-bs - nvar_arg_pars: -bs])
+
+                # Normal arguments are parse first
+                vals = tuple(
+                    map(types.c_double, args[:-nvar_arg_pars - bs]))
+                # Variable number of arguments follow
+                vals += (types.c_int(nvar_arg_pars),
+                         var_arg_pars.ctypes.data_as(types.c_double_p))
+                # Add the number of edges and gap values
+                vals += tuple(map(types.c_int, args[-bs:-ndata_pars]))
+                # Finally, the integration limits must be specified
+                vals += tuple(a.ctypes.data_as(types.c_double_p)
+                              for a in args[-ndata_pars:])
+
+            else:
+                vals = tuple(map(types.c_double, args[:-bs])) + tuple(
+                    map(types.c_int, args[-bs:-ndata_pars])) + tuple(
+                    a.ctypes.data_as(types.c_double_p) for a in args[-ndata_pars:])
+
+            return evaluate_binned(types.c_int(len(output_array)), op, *vals)
+    else:
+        __evaluate_binned = None
+
     if normalization is not None:
 
         # Define the types passed to the normalization function
@@ -251,7 +306,7 @@ def create_cpu_function_proxies(module, ndata_pars, narg_pars=0, nvar_arg_pars=N
     else:
         __normalization = None
 
-    return __function, __evaluate, __normalization
+    return __function, __evaluate, __evaluate_binned, __normalization
 
 
 def create_gpu_function_proxy(module, ndata_pars, narg_pars, nvar_arg_pars):
@@ -271,6 +326,12 @@ def create_gpu_function_proxy(module, ndata_pars, narg_pars, nvar_arg_pars):
     '''
     # Access the function in the module
     evaluate = module.evaluate
+
+    try:
+        # Can not use "hasattr"
+        evaluate_binned = module.evaluate_binned
+    except:
+        evaluate_binned = None
 
     @functools.wraps(evaluate)
     def __evaluate(output_array, *args):
@@ -293,7 +354,7 @@ def create_gpu_function_proxy(module, ndata_pars, narg_pars, nvar_arg_pars):
                 pos_args = tuple(map(types.cpu_type, args[ndata_pars:]))
 
             vals = pos_args + (types.cpu_int(nvar_arg_pars),
-                               core.aop.array(var_arg_pars))
+                               core.aop.data_array(var_arg_pars))
         else:
             vals = tuple(map(types.cpu_type, args[ndata_pars:]))
 
@@ -301,7 +362,43 @@ def create_gpu_function_proxy(module, ndata_pars, narg_pars, nvar_arg_pars):
 
         return evaluate(output_array, *ips, *vals, global_size=global_size, local_size=local_size)
 
-    return __evaluate
+    if evaluate_binned is not None:
+
+        @functools.wraps(evaluate_binned)
+        def __evaluate_binned(output_array, *args):
+            '''
+            Internal wrapper.
+            '''
+            bs = 3 * ndata_pars
+
+            if nvar_arg_pars is not None:
+
+                var_arg_pars = types.cpu_type(
+                    args[-bs - nvar_arg_pars: -bs])
+
+                # Normal arguments are parse first
+                vals = tuple(
+                    map(types.cpu_type, args[:-nvar_arg_pars - bs]))
+                # Variable number of arguments follow
+                vals += (types.cpu_int(nvar_arg_pars),
+                         core.aop.data_array(var_arg_pars))
+                # Add the number of edges and gap values
+                vals += tuple(map(types.c_int, args[-bs:-ndata_pars]))
+                # Finally, the integration limits must be specified
+                vals += args[-ndata_pars:]
+
+            else:
+                vals = tuple(map(
+                    types.cpu_type, args[:-bs])) + tuple(map(
+                        types.cpu_int, args[-bs:-ndata_pars])) + args[-ndata_pars:]
+
+            global_size, local_size = gpu_core.get_sizes(len(output_array))
+
+            return evaluate_binned(output_array, *vals, global_size=global_size, local_size=local_size)
+    else:
+        __evaluate_binned = None
+
+    return __evaluate, __evaluate_binned
 
 
 @core.with_backend
@@ -339,7 +436,7 @@ def access_pdf(name, ndata_pars, narg_pars=0, nvar_arg_pars=None):
 
     except AttributeError as ex:
         raise RuntimeError(
-            f'Error loading function "{name}"; make sure that both "{name}" and "normalization" are defined inside "{source}"')
+            f'Error loading function "{name}"; make sure that at least "evaluate" and "function" are defined inside the source file')
 
     if core.BACKEND == core.CPU:
         # Return the CPU version directly
@@ -348,20 +445,20 @@ def access_pdf(name, ndata_pars, narg_pars=0, nvar_arg_pars=None):
     elif core.BACKEND == core.CUDA or core.BACKEND == core.OPENCL:
 
         # Function and normalization are taken from the C++ version
-        function, _, normalization = cpu_output
+        function, _, _, normalization = cpu_output
 
         # Get the "evaluate" function from source
         if modname in GPU_PDF_CACHE:
-            evaluate = GPU_PDF_CACHE[modname]
+            evaluate, evaluate_binned = GPU_PDF_CACHE[modname]
         else:
             # Access the GPU module
             gpu_module = access_gpu_module(name)
 
-            evaluate = create_gpu_function_proxy(
+            evaluate, evaluate_binned = create_gpu_function_proxy(
                 gpu_module, ndata_pars, narg_pars, nvar_arg_pars)
-            GPU_PDF_CACHE[modname] = evaluate
+            GPU_PDF_CACHE[modname] = evaluate, evaluate_binned
 
-        return function, evaluate, normalization
+        return function, evaluate, evaluate_binned, normalization
     else:
         raise NotImplementedError(
             f'Function not implemented for backend "{core.BACKEND}"')

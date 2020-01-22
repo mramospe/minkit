@@ -9,11 +9,9 @@ import pytest
 helpers.configure_logging()
 minkit.initialize()
 
-# For reproducibility
-np.random.seed(98953)
-
 
 @pytest.mark.minimization
+@helpers.setting_numpy_seed
 def test_binned_maximum_likelihood():
     '''
     Tets the "binned_maximum_likelihood" FCN.
@@ -27,8 +25,7 @@ def test_binned_maximum_likelihood():
     values, edges = np.histogram(
         np.random.normal(c.value, s.value, 10000), bins=100)
 
-    data = minkit.BinnedDataSet.from_array(
-        0.5 * (edges[1:] + edges[:-1]), m, values)
+    data = minkit.BinnedDataSet.from_array(edges, m, values)
 
     with helpers.fit_test(g, rtol=0.05) as test:
         with minkit.binned_minimizer('bml', g, data, minimizer='minuit') as minuit:
@@ -43,8 +40,91 @@ def test_binned_maximum_likelihood():
         with minkit.binned_minimizer('bml', g, data, minimizer='minuit', constraints=[gc]) as minuit:
             test.result = minuit.migrad()
 
+    # Test for a composed PDF
+    k = minkit.Parameter('k', -0.1, bounds=(-1, 0))
+    e = minkit.Exponential('e', m, k)
+
+    y = minkit.Parameter('y', 0.5, bounds=(0, 1))
+
+    pdf = minkit.AddPDFs.two_components('pdf', g, e, y)
+
+    data = pdf.generate(10000)
+
+    values, edges = np.histogram(
+        minkit.as_ndarray(data[m.name]), bins=100)
+
+    data = minkit.BinnedDataSet.from_array(edges, m, values)
+
+    with helpers.fit_test(pdf, rtol=0.1) as test:
+        with minkit.binned_minimizer('bml', pdf, data) as minimizer:
+            test.result = minimizer.migrad()
+
+    # Test for a PDF with no "evaluate_binned" function defined
+    m = minkit.Parameter('m', bounds=(0, 10))
+    a = minkit.Parameter('a', 0)
+    theta = minkit.Parameter('theta', 2, bounds=(0, 3))
+    alpha = minkit.Parameter('alpha', 0.5)
+    beta = minkit.Parameter('beta', 2)
+    pdf = minkit.Amoroso('amoroso', m, a, theta, alpha, beta)
+
+    data = pdf.generate(1000)
+
+    values, edges = np.histogram(
+        minkit.as_ndarray(data[m.name]), range=m.bounds, bins=100)
+
+    data = minkit.BinnedDataSet.from_array(edges, m, values)
+
+    with helpers.fit_test(pdf, rtol=0.1) as test:
+        with minkit.binned_minimizer('bml', pdf, data) as minimizer:
+            test.result = minimizer.migrad()
+
 
 @pytest.mark.minimization
+@helpers.setting_numpy_seed
+def test_binned_chisquare():
+    '''
+    Test the "binned_chisquare" FCN.
+    '''
+    # Single PDF
+    m = minkit.Parameter('m', bounds=(5, 15))
+    c = minkit.Parameter('c', 10., bounds=(5, 15))
+    s = minkit.Parameter('s', 1., bounds=(0.1, 2))
+    g = minkit.Gaussian('gaussian', m, c, s)
+
+    data = g.generate(10000)
+
+    values, edges = np.histogram(
+        minkit.as_ndarray(data[m.name]), bins=100)
+
+    data = minkit.BinnedDataSet.from_array(edges, m, values)
+
+    with helpers.fit_test(g, rtol=0.05) as test:
+        with minkit.binned_minimizer('chi2', g, data) as minimizer:
+            test.result = minimizer.migrad()
+
+    # Many PDfs
+    k = minkit.Parameter('k', -0.1, bounds=(-1, 0))
+    e = minkit.Exponential('exponential', m, k)
+
+    ng = minkit.Parameter('ng', 10000, bounds=(0, 100000))
+    ne = minkit.Parameter('ne', 1000, bounds=(0, 100000))
+
+    pdf = minkit.AddPDFs.two_components('pdf', g, e, ng, ne)
+
+    data = pdf.generate(int(ng.value + ne.value))
+
+    values, edges = np.histogram(
+        minkit.as_ndarray(data[m.name]), bins=100)
+
+    data = minkit.BinnedDataSet.from_array(edges, m, values)
+
+    with helpers.fit_test(pdf, rtol=0.1) as test:
+        with minkit.binned_minimizer('bml', pdf, data) as minimizer:
+            test.result = minimizer.migrad()
+
+
+@pytest.mark.minimization
+@helpers.setting_numpy_seed
 def test_unbinned_extended_maximum_likelihood():
     '''
     Test the "unbinned_extended_maximum_likelihood" FCN.
@@ -82,6 +162,7 @@ def test_unbinned_extended_maximum_likelihood():
 
 
 @pytest.mark.minimization
+@helpers.setting_numpy_seed
 def test_unbinned_maximum_likelihood():
     '''
     Test the "unbinned_maximum_likelihood" FCN.

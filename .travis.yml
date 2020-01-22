@@ -27,3 +27,16 @@ jobs:
         - python setup.py check_format --directory docs --file-type python
         - python setup.py check_format --directory minkit --file-type python
         - python setup.py check_format --directory test --file-type python
+      after_success: " "
+    - stage: documentation
+      python: 3.7
+      install:
+        - sudo apt-get install pandoc graphviz
+        - pip install -r requirements.txt
+        - pip install .
+        - pip install jupyter matplotlib pydot sphinx sphinx-automodapi sphinx-rtd-theme nbsphinx
+      script:
+        - mkdir html-docs
+        - cd docs
+        - BUILDDIR=../html-docs make html
+      after_success: " "

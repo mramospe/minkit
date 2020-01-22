@@ -8,6 +8,7 @@ import atexit
 import logging
 import math
 import numpy as np
+import os
 
 # GPU variables
 DEVICE = None
@@ -64,13 +65,21 @@ def device_lookup(devices, device=None, interactive=False):
     :type interactive: bool
     :returns: the selected device.
     :rtype: Device
+
+    .. note:: The device can be selected using the MINKIT_DEVICE environment variable.
     '''
     if len(devices) == 0:
         raise LookupError('No devices have been found')
 
     default = 0  # This is the default device to use
 
+    # Override the device from the environment variable "MINKIT_DEVICE"
+    device = os.environ.get('MINKIT_DEVICE', device)
+
     if device is not None:
+
+        device = int(device)
+
         # Use the specified device (if available)
         if device > len(devices) - 1:
             logger.warning(f'Specified a device number ({device}) '
@@ -114,6 +123,8 @@ def initialize_gpu(backend, **kwargs):
     - interactive: (bool) whether to select the device manually (defaults to False) \
     - device: (int) number of the device to use (defaults to None).
     :type kwargs: dict
+
+    .. note:: The device can be selected using the MINKIT_DEVICE environment variable.
     '''
     global BACKEND
     global DEVICE

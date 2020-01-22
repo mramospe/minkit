@@ -54,9 +54,11 @@ def test_sweights():
         'ng', 'ne']), data, return_covariance=True)
 
     # The s-weights are normalized
-    assert np.allclose(minkit.aop.sum(sweights[0]), result.get(ng.name).value)
-    assert np.allclose(minkit.aop.sum(sweights[1]), result.get(ne.name).value)
+    assert np.allclose(minkit.core.aop.sum(
+        sweights[0]), result.get(ng.name).value)
+    assert np.allclose(minkit.core.aop.sum(
+        sweights[1]), result.get(ne.name).value)
 
     # The uncertainty on the yields is reflected in the s-weights
-    assert np.allclose(minkit.aop.sum(sweights[0]**2), V[0][0])
-    assert np.allclose(minkit.aop.sum(sweights[1]**2), V[1][1])
+    assert np.allclose(minkit.core.aop.sum(sweights[0]**2), V[0][0])
+    assert np.allclose(minkit.core.aop.sum(sweights[1]**2), V[1][1])
