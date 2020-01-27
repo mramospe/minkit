@@ -1,3 +1,6 @@
 # Dependency on packages
-numpy
 iminuit
+numdifftools
+numpy
+scipy
+uncertainties

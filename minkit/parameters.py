@@ -41,12 +41,13 @@ class Parameter(object):
         :ivar name: name of the parameter.
         :ivar error: error of the parameter.
         '''
+        self.__constant = constant
+        self.__ranges = {}
+
         self.name = name
         self.value = value
-        self.error = error
-        self.__ranges = {}
         self.bounds = bounds  # This sets the FULL range
-        self.__constant = constant
+        self.error = error
 
         # Set the ranges skipping the FULL range, since it is determined by the bounds
         for n, r in (ranges or {}).items():

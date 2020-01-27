@@ -38,7 +38,7 @@ if specified.
 :param array: arrays to concatenate.
 :type array: tuple(numpy.ndarray, ...) or tuple(reikna.cluda.Array, ...)
 :param maximum: possible maximum size for the output array.
-:type maximum: int or None
+:type maximum: int
 :returns: concatenated array.
 :rtype: numpy.ndarray or reikna.cluda.Array
 '''

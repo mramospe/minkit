@@ -15,7 +15,7 @@ def configure_logging():
     logging.basicConfig(level=logging.INFO)
 
 
-def check_parameters(f, s):
+def check_parameters(f, s, **kwargs):
     '''
     Check that two parameters have the same values for the attributes.
     '''
@@ -23,7 +23,7 @@ def check_parameters(f, s):
     for attr in ('bounds', 'value', 'error', 'constant'):
         fa, sa = getattr(f, attr), getattr(s, attr)
         if fa is not None:
-            assert np.allclose(fa, sa)
+            assert np.allclose(fa, sa, **kwargs)
         else:
             assert sa is None
 
@@ -135,7 +135,7 @@ class fit_test(object):
             assert not self.result.fmin.hesse_failed
 
             # Check the values of the parameters
-            results = minkit.minuit_to_registry(self.result)
+            results = minkit.minuit_to_registry(self.result.params)
             for n, v in self.initials.items():
                 assert np.allclose(v, results.get(n).value,
                                    atol=self.atol, rtol=self.rtol)

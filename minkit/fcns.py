@@ -11,6 +11,11 @@ import numpy as np
 __all__ = ['binned_maximum_likelihood', 'binned_chisquare',
            'unbinned_extended_maximum_likelihood', 'unbinned_maximum_likelihood']
 
+# Definition of the errors. This is given from the nature of the FCNs. If this is
+# changed the output of the FCNs must change accordingly. A value of 1 means
+# that the output of the FCNs is a chi-square-like function.
+ERRORDEF = 1.
+
 # Names of different FCNs
 BINNED_CHISQUARE = 'chi2'
 BINNED_MAXIMUM_LIKELIHOOD = 'bml'
@@ -42,7 +47,7 @@ def evaluate_constraints(constraints=None):
     Calculate the values of the constraints, if any.
 
     :param constraints: functions defining constraints to different parameters.
-    :type contraints: list(PDF) or None
+    :type contraints: list(PDF)
     :returns: evaluation of the product of constraints.
     :rtype: float
     '''

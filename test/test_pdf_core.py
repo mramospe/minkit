@@ -112,7 +112,7 @@ def test_constpdf(tmpdir):
 
     # Create a Gaussian PDF
     c = minkit.Parameter('c', 5., bounds=(0, 10))
-    s = minkit.Parameter('s', 1., bounds=(0.1, 3))
+    s = minkit.Parameter('s', 1., bounds=(0.5, 3))
     g = minkit.Gaussian('gaussian', m, c, s)
 
     # Add them together
@@ -128,7 +128,7 @@ def test_constpdf(tmpdir):
     data = pdf.generate(10000)
 
     with fit_test(pdf, rtol=0.05) as test:
-        with minkit.unbinned_minimizer('uml', pdf, data, minimizer='minuit') as minuit:
+        with minkit.minimizer('uml', pdf, data, minimizer='minuit') as minuit:
             test.result = minuit.migrad()
 
     # Test the JSON conversion
@@ -152,11 +152,11 @@ def test_convpdfs(tmpdir):
 
     # Create two Gaussians
     c1 = minkit.Parameter('c1', 0, bounds=(-2, +2))
-    s1 = minkit.Parameter('s1', 3, bounds=(0.1, +10))
+    s1 = minkit.Parameter('s1', 3, bounds=(0.5, +10))
     g1 = minkit.Gaussian('g1', m, c1, s1)
 
     c2 = minkit.Parameter('c2', 0, bounds=(-2, +2))
-    s2 = minkit.Parameter('s2', 4, bounds=(0.1, +10))
+    s2 = minkit.Parameter('s2', 4, bounds=(0.5, +10))
     g2 = minkit.Gaussian('g2', m, c2, s2)
 
     pdf = minkit.ConvPDFs('convolution', g1, g2)
@@ -187,7 +187,7 @@ def test_convpdfs(tmpdir):
 
     # Test a fit
     with fit_test(pdf, atol=0.1, rtol=0.05) as test:
-        with minkit.unbinned_minimizer('uml', pdf, data, minimizer='minuit') as minuit:
+        with minkit.minimizer('uml', pdf, data, minimizer='minuit') as minuit:
             test.result = minuit.migrad()
 
     # Test the JSON conversion

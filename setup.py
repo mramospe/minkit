@@ -92,7 +92,8 @@ setup(
     package_data={'minkit': ['cpu/*.cpp', 'gpu/*.c', 'operations/src/*.c']},
 
     # Test requirements
-    setup_requires=['numpy', 'iminuit', 'pytest-runner'],
+    setup_requires=['numpy', 'iminuit', 'numdifftools',
+                    'scipy', 'uncertainties', 'pytest-runner'],
 
     tests_require=['pytest'],
 )

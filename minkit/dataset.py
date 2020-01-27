@@ -31,7 +31,7 @@ class DataSet(object):
         :param pars: data parameters.
         :type pars: Registry(Parameter)
         :param weights: possible set of weights.
-        :type weights: numpy.ndarray or None
+        :type weights: numpy.ndarray
         :param copy: whether to do copies of arrays.
         :type copy: bool
         :param convert: in case of working in GPUs, the input arrays \
@@ -145,7 +145,7 @@ class DataSet(object):
         Get the weights of the sample.
 
         :returns: weights of the sample.
-        :rtype: numpy.ndarray or None
+        :rtype: numpy.ndarray
         '''
         return self.__weights
 
@@ -172,7 +172,7 @@ class DataSet(object):
         :param data_pars: data parameters.
         :type data_pars: Registry(Parameter)
         :param weights: possible weights to use.
-        :type weights: numpy.ndarray or None
+        :type weights: numpy.ndarray
         '''
         return cls({data_par.name: arr}, parameters.Registry([data_par]), weights, copy=copy, convert=convert)
 
@@ -186,7 +186,7 @@ class DataSet(object):
         :param data_pars: data parameters.
         :type data_pars: Registry(Parameter)
         :param weights: possible weights to use.
-        :type weights: numpy.ndarray or None
+        :type weights: numpy.ndarray
         '''
         dct = {}
         for p in data_pars:
@@ -226,7 +226,7 @@ class DataSet(object):
         :param samples: samples to merge.
         :type samples: tuple(DataSet)
         :param maximum: maximum number of entries for the final sample.
-        :type maximum: int or None
+        :type maximum: int
         :param shuffle: whether to shuffle the sample before trimming it.
         :type shuffle: bool
         :param trim: whether to check the bounds of the data parameters \

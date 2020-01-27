@@ -34,7 +34,7 @@ def test_sweights():
 
     data = pdf.generate(int(ng.value + ne.value))
 
-    with minkit.unbinned_minimizer('ueml', pdf, data, minimizer='minuit') as minuit:
+    with minkit.minimizer('ueml', pdf, data, minimizer='minuit') as minuit:
         r = minuit.migrad()
         print(r)
 
@@ -43,11 +43,11 @@ def test_sweights():
         for a in p.args:
             a.constant = True
 
-    with minkit.unbinned_minimizer('ueml', pdf, data, minimizer='minuit') as minuit:
+    with minkit.minimizer('ueml', pdf, data, minimizer='minuit') as minuit:
         r = minuit.migrad()
         print(r)
 
-    result = minkit.minuit_to_registry(r)
+    result = minkit.minuit_to_registry(r.params)
 
     # Calculate the s-weights (first comes from the Gaussian, second from the exponential)
     sweights, V = minkit.sweights(pdf.pdfs, result.reduce([

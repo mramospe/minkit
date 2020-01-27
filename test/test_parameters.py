@@ -55,7 +55,7 @@ def test_formula(tmpdir):
     compare_with_numpy(g, nd, m)
 
     with helpers.fit_test(g, rtol=0.05) as test:
-        with minkit.unbinned_minimizer('uml', g, data, minimizer='minuit') as minuit:
+        with minkit.minimizer('uml', g, data, minimizer='minuit') as minuit:
             test.result = minuit.migrad()
 
     # Test the JSON (only for formula)
@@ -98,14 +98,14 @@ def test_range():
     data = e.generate(10000)
 
     with helpers.fit_test(e, rtol=0.05) as test:
-        with minkit.unbinned_minimizer('uml', e, data, minimizer='minuit', range='sides') as minuit:
+        with minkit.minimizer('uml', e, data, minimizer='minuit', range='sides') as minuit:
             test.result = minuit.migrad()
 
     # Test generation of data only in the range
     data = e.generate(10000, range='sides')
 
     with helpers.fit_test(e, rtol=0.05) as test:
-        with minkit.unbinned_minimizer('uml', e, data, minimizer='minuit', range='sides') as minuit:
+        with minkit.minimizer('uml', e, data, minimizer='minuit', range='sides') as minuit:
             test.result = minuit.migrad()
 
 

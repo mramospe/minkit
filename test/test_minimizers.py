@@ -19,9 +19,9 @@ def pytest_namespace():
 
 @pytest.mark.minimization
 @helpers.setting_numpy_seed
-def test_unbinned_minimizer():
+def test_minimizer():
     '''
-    Test the "unbinned_minimizer" function.
+    Test the "minimizer" function
     '''
     m = minkit.Parameter('m', bounds=(20, 80))
     c = minkit.Parameter('c', 50, bounds=(30, 70))
@@ -35,7 +35,7 @@ def test_unbinned_minimizer():
     data = minkit.DataSet.from_array(arr, m)
 
     with helpers.fit_test(g, rtol=0.05) as test:
-        with minkit.unbinned_minimizer('uml', g, data, minimizer='minuit') as minuit:
+        with minkit.minimizer('uml', g, data, minimizer='minuit') as minuit:
             test.result = pytest.shared_result = minuit.migrad()
 
     pytest.shared_names = [p.name for p in g.all_args]
@@ -44,11 +44,11 @@ def test_unbinned_minimizer():
     arr = np.random.uniform(*m.bounds, 100000)
     data = minkit.DataSet.from_array(arr, m)
 
-    with minkit.unbinned_minimizer('uml', g, data, minimizer='minuit') as minuit:
+    with minkit.minimizer('uml', g, data, minimizer='minuit') as minuit:
         r = minuit.migrad()
         print(r)
 
-    reg = minkit.minuit_to_registry(r)
+    reg = minkit.minuit_to_registry(r.params)
 
     assert not np.allclose(reg.get(s.name).value, initials[s.name])
 
@@ -56,7 +56,14 @@ def test_unbinned_minimizer():
     data.weights = minkit.as_ndarray(g(data))
 
     with helpers.fit_test(g, rtol=0.05) as test:
-        with minkit.unbinned_minimizer('uml', g, data, minimizer='minuit') as minuit:
+        with minkit.minimizer('uml', g, data, minimizer='minuit') as minuit:
+            test.result = minuit.migrad()
+
+    # Test the binned case
+    data = data.make_binned(bins=100)
+
+    with helpers.fit_test(g, rtol=0.05) as test:
+        with minkit.minimizer('bml', g, data, minimizer='minuit') as minuit:
             test.result = minuit.migrad()
 
 
@@ -96,5 +103,48 @@ def test_minuit_to_registry():
     '''
     Test the "minuit_to_registry" function.
     '''
-    r = minkit.minuit_to_registry(pytest.shared_result)
+    r = minkit.minuit_to_registry(pytest.shared_result.params)
     assert all(n in r.names for n in pytest.shared_names)
+
+
+@pytest.mark.minimization
+def test_scipyminimizer():
+    '''
+    Test the "SciPyMinimizer" class.
+    '''
+    m = minkit.Parameter('m', bounds=(10, 20))
+    s = minkit.Parameter('s', 1, bounds=(0.5, 2))
+    c = minkit.Parameter('c', 15, bounds=(10, 20))
+    g = minkit.Gaussian('g', m, c, s)
+
+    # Test the unbinned case
+    data = g.generate(10000)
+
+    values = []
+    with minkit.minimizer('uml', g, data, minimizer='scipy') as minimizer:
+        for m in minkit.minimizers.SCIPY_CHOICES:
+            values.append(minimizer.result_to_registry(
+                minimizer.minimize(method=m)))
+
+    with minkit.minimizer('uml', g, data, minimizer='minuit') as minimizer:
+        reference = minkit.minuit_to_registry(minimizer.migrad().params)
+
+    for reg in values:
+        for p, r in zip(reg, reference):
+            helpers.check_parameters(p, r, rtol=0.01)
+
+    # Test the binned case
+    data = data.make_binned(bins=100)
+
+    values = []
+    with minkit.minimizer('bml', g, data, minimizer='scipy') as minimizer:
+        for m in minkit.minimizers.SCIPY_CHOICES:
+            values.append(minimizer.result_to_registry(
+                minimizer.minimize(method=m)))
+
+    with minkit.minimizer('bml', g, data, minimizer='minuit') as minimizer:
+        reference = minkit.minuit_to_registry(minimizer.migrad().params)
+
+    for reg in values:
+        for p, r in zip(reg, reference):
+            helpers.check_parameters(p, r, rtol=0.01)
