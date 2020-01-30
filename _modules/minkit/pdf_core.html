@@ -87,9 +87,9 @@
             
             
               <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../main.html">Functions and classes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../performance.html">Performance of the minkit package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../user.html">User guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference.html">MinKit reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../performance.html">Performance</a></li>
 </ul>
 
             
@@ -286,6 +286,23 @@
     <span class="k">return</span> <span class="n">__wrapper</span>
 
 
+<span class="k">def</span> <span class="nf">safe_division</span><span class="p">(</span><span class="n">first</span><span class="p">,</span> <span class="n">second</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Do a safe division by a number of array that can be or contain zeros.</span>
+
+<span class="sd">    :param first: input array or value.</span>
+<span class="sd">    :type first: float, numpy.ndarray or reikna.cluda.Array</span>
+<span class="sd">    :param second: array or value to divide by.</span>
+<span class="sd">    :type second: float, numpy.ndarray or reikna.cluda.Array</span>
+<span class="sd">    :returns: result of the division.</span>
+<span class="sd">    :rtype: numpy.ndarray or reikna.cluda.Array</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">first</span> <span class="o">/</span> <span class="n">second</span>
+    <span class="k">except</span> <span class="ne">ZeroDivisionError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">first</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">nextafter</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">infty</span><span class="p">)</span>
+
+
 <div class="viewcode-block" id="PDF"><a class="viewcode-back" href="../../api/minkit.PDF.html#minkit.PDF">[docs]</a><span class="k">class</span> <span class="nc">PDF</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Object defining the properties of a PDF.</span>
@@ -339,6 +356,24 @@
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
             <span class="s1">&#39;Classes inheriting from &quot;minkit.PDF&quot; must define the &quot;__call__&quot; operator&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PDF.evaluate_binned"><a class="viewcode-back" href="../../api/minkit.PDF.html#minkit.PDF.evaluate_binned">[docs]</a>    <span class="nd">@allows_const_cache</span>
+    <span class="k">def</span> <span class="nf">evaluate_binned</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">norm_to_data</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Evaluate the PDF over a binned sample.</span>
+<span class="sd">        If &quot;norm_to_data&quot; is provided, then the number of entries is normalized</span>
+<span class="sd">        to the sum of values in the data sample.</span>
+<span class="sd">        Otherwise it is normalized to the sum of the data values.</span>
+
+<span class="sd">        :param data: input data.</span>
+<span class="sd">        :type data: BinnedDataSet</span>
+<span class="sd">        :param norm_to_data: possible normalization value.</span>
+<span class="sd">        :type norm_to_data: bool</span>
+<span class="sd">        :returns: values from the evaluation.</span>
+<span class="sd">        :rtype: numpy.ndarray or reikna.cluda.Array</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+            <span class="s1">&#39;Classes inheriting from &quot;minkit.PDF&quot; must define the &quot;evaluate_binned&quot; operator&#39;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="PDF.from_json_object"><a class="viewcode-back" href="../../api/minkit.PDF.html#minkit.PDF.from_json_object">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_json_object</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">pars</span><span class="p">):</span>
@@ -727,15 +762,39 @@
             <span class="n">var_arg_pars</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">var_arg_pars</span><span class="p">)</span>
 
         <span class="c1"># Access the PDF</span>
-        <span class="n">function</span><span class="p">,</span> <span class="n">pdf</span><span class="p">,</span> <span class="n">normalization</span> <span class="o">=</span> <span class="n">accessors</span><span class="o">.</span><span class="n">access_pdf</span><span class="p">(</span>
+        <span class="n">function</span><span class="p">,</span> <span class="n">pdf</span><span class="p">,</span> <span class="n">evb</span><span class="p">,</span> <span class="n">normalization</span> <span class="o">=</span> <span class="n">accessors</span><span class="o">.</span><span class="n">access_pdf</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">ndata_pars</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">data_pars</span><span class="p">),</span> <span class="n">narg_pars</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">arg_pars</span><span class="p">),</span> <span class="n">nvar_arg_pars</span><span class="o">=</span><span class="n">nvar_arg_pars</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">__function</span> <span class="o">=</span> <span class="n">function</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__pdf</span> <span class="o">=</span> <span class="n">pdf</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__evaluate_binned</span> <span class="o">=</span> <span class="n">evb</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__norm</span> <span class="o">=</span> <span class="n">normalization</span>
 
         <span class="nb">super</span><span class="p">(</span><span class="n">SourcePDF</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parameters</span><span class="o">.</span><span class="n">Registry</span><span class="p">(</span>
             <span class="n">data_pars</span><span class="p">),</span> <span class="n">parameters</span><span class="o">.</span><span class="n">Registry</span><span class="p">(</span><span class="n">arg_pars</span> <span class="o">+</span> <span class="n">var_arg_pars</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_norm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">FULL</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Calculate the normalization for a set of values and a range.</span>
+
+<span class="sd">        :param values: values of the parameters.</span>
+<span class="sd">        :type values: tuple(float)</span>
+<span class="sd">        :param range: range for the normalization.</span>
+<span class="sd">        :type range: str</span>
+<span class="sd">        :returns: normalization value.</span>
+<span class="sd">        :rtype: float</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__norm</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+
+            <span class="c1"># There is an analytical approach to calculate the normalization</span>
+            <span class="n">nr</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">bounds_for_range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_pars</span><span class="p">,</span> <span class="nb">range</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">nr</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__norm</span><span class="p">(</span><span class="o">*</span><span class="n">values</span><span class="p">,</span> <span class="o">*</span><span class="n">nr</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">fromiter</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">__norm</span><span class="p">(</span><span class="o">*</span><span class="n">values</span><span class="p">,</span> <span class="o">*</span><span class="n">inr</span><span class="p">)</span>
+                                           <span class="k">for</span> <span class="n">inr</span> <span class="ow">in</span> <span class="n">nr</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">types</span><span class="o">.</span><span class="n">cpu_type</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">numerical_normalization</span><span class="p">(</span><span class="nb">range</span><span class="p">)</span>
 
 <div class="viewcode-block" id="SourcePDF.__call__"><a class="viewcode-back" href="../../api/minkit.SourcePDF.html#minkit.SourcePDF.__call__">[docs]</a>    <span class="nd">@allows_const_cache</span>
     <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">FULL</span><span class="p">,</span> <span class="n">normalized</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
@@ -762,18 +821,63 @@
 
         <span class="c1"># Calculate the normalization</span>
         <span class="k">if</span> <span class="n">normalized</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__norm</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="c1"># There is an analytical approach to calculate the normalization</span>
-                <span class="n">nr</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">bounds_for_range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_pars</span><span class="p">,</span> <span class="nb">range</span><span class="p">)</span>
-                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">nr</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-                    <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__norm</span><span class="p">(</span><span class="o">*</span><span class="n">fvals</span><span class="p">,</span> <span class="o">*</span><span class="n">nr</span><span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">fromiter</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">__norm</span><span class="p">(</span><span class="o">*</span><span class="n">fvals</span><span class="p">,</span> <span class="o">*</span><span class="n">inr</span><span class="p">)</span>
-                                            <span class="k">for</span> <span class="n">inr</span> <span class="ow">in</span> <span class="n">nr</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">types</span><span class="o">.</span><span class="n">cpu_type</span><span class="p">))</span>
-                <span class="k">return</span> <span class="n">out</span> <span class="o">/</span> <span class="n">n</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="c1"># Must use a numerical normalization</span>
-                <span class="k">return</span> <span class="n">out</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">numerical_normalization</span><span class="p">(</span><span class="nb">range</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">safe_division</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_norm</span><span class="p">(</span><span class="n">fvals</span><span class="p">,</span> <span class="nb">range</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">out</span></div>
+
+<div class="viewcode-block" id="SourcePDF.evaluate_binned"><a class="viewcode-back" href="../../api/minkit.SourcePDF.html#minkit.SourcePDF.evaluate_binned">[docs]</a>    <span class="nd">@allows_const_cache</span>
+    <span class="k">def</span> <span class="nf">evaluate_binned</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">norm_to_data</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Evaluate the PDF over a binned sample.</span>
+<span class="sd">        If &quot;norm_to_data&quot; is provided, then the number of entries is normalized</span>
+<span class="sd">        to the sum of values in the data sample.</span>
+<span class="sd">        Otherwise it is normalized to the sum of the data values.</span>
+
+<span class="sd">        :param data: input data.</span>
+<span class="sd">        :type data: BinnedDataSet</span>
+<span class="sd">        :param norm_to_data: possible normalization value.</span>
+<span class="sd">        :type norm_to_data: bool</span>
+<span class="sd">        :returns: values from the evaluation.</span>
+<span class="sd">        :rtype: numpy.ndarray or reikna.cluda.Array</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">fvals</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__evaluate_binned</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+
+            <span class="n">edges</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_pars</span><span class="p">)</span>
+
+            <span class="c1"># Must define the gaps for the edges</span>
+            <span class="n">all_gaps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumprod</span><span class="p">(</span>
+                <span class="p">(</span><span class="mi">1</span><span class="p">,)</span> <span class="o">+</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">])</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">data_pars</span><span class="p">))</span>
+
+            <span class="n">nbins</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">])</span> <span class="o">-</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_pars</span><span class="p">)</span>
+
+            <span class="n">gaps</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">all_gaps</span><span class="p">[</span><span class="n">data</span><span class="o">.</span><span class="n">data_pars</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">)]</span>
+                         <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_pars</span><span class="p">)</span>
+
+            <span class="n">out</span> <span class="o">=</span> <span class="n">aop</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">__evaluate_binned</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="o">*</span><span class="n">fvals</span><span class="p">,</span> <span class="o">*</span><span class="n">nbins</span><span class="p">,</span> <span class="o">*</span><span class="n">gaps</span><span class="p">,</span> <span class="o">*</span><span class="n">edges</span><span class="p">)</span>
+
+            <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_norm</span><span class="p">(</span><span class="n">fvals</span><span class="p">)</span>
+
+            <span class="n">out</span> <span class="o">=</span> <span class="n">safe_division</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+
+            <span class="c1"># Here we are manually evaluating the PDF</span>
+            <span class="n">g</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">evaluation_grid</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data_pars</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">bounds</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm_size</span><span class="p">)</span>
+            <span class="n">i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__call__</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">normalized</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+            <span class="n">pdf_values</span> <span class="o">=</span> <span class="n">i</span> <span class="o">/</span> <span class="n">aop</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+
+            <span class="n">centers</span> <span class="o">=</span> <span class="p">[</span><span class="n">g</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_pars</span><span class="p">]</span>
+            <span class="n">edges</span> <span class="o">=</span> <span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_pars</span><span class="p">]</span>
+
+            <span class="n">out</span> <span class="o">=</span> <span class="n">aop</span><span class="o">.</span><span class="n">sum_inside</span><span class="p">(</span><span class="n">centers</span><span class="p">,</span> <span class="n">edges</span><span class="p">,</span> <span class="n">pdf_values</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">norm_to_data</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">aop</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">values</span><span class="p">)</span> <span class="o">*</span> <span class="n">out</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">out</span></div>
 
@@ -818,7 +922,7 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">fromiter</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">__norm</span><span class="p">(</span><span class="o">*</span><span class="n">fvals</span><span class="p">,</span> <span class="o">*</span><span class="n">inr</span><span class="p">)</span>
                                         <span class="k">for</span> <span class="n">inr</span> <span class="ow">in</span> <span class="n">nr</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">types</span><span class="o">.</span><span class="n">cpu_type</span><span class="p">))</span>
-            <span class="k">return</span> <span class="n">v</span> <span class="o">/</span> <span class="n">n</span>
+            <span class="k">return</span> <span class="n">safe_division</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">v</span></div>
 
@@ -834,15 +938,8 @@
 <span class="sd">        :returns: value of the normalization.</span>
 <span class="sd">        :rtype: float</span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__norm</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">fvals</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">)</span>
-            <span class="n">nr</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">bounds_for_range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_pars</span><span class="p">,</span> <span class="nb">range</span><span class="p">)</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">nr</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__norm</span><span class="p">(</span><span class="o">*</span><span class="n">fvals</span><span class="p">,</span> <span class="o">*</span><span class="n">nr</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">fromiter</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">__norm</span><span class="p">(</span><span class="o">*</span><span class="n">fvals</span><span class="p">,</span> <span class="o">*</span><span class="n">inr</span><span class="p">)</span> <span class="k">for</span> <span class="n">inr</span> <span class="ow">in</span> <span class="n">nr</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">types</span><span class="o">.</span><span class="n">cpu_type</span><span class="p">))</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">numerical_normalization</span><span class="p">(</span><span class="nb">range</span><span class="p">)</span></div>
+        <span class="n">fvals</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_norm</span><span class="p">(</span><span class="n">fvals</span><span class="p">,</span> <span class="nb">range</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="SourcePDF.to_json_object"><a class="viewcode-back" href="../../api/minkit.SourcePDF.html#minkit.SourcePDF.to_json_object">[docs]</a>    <span class="k">def</span> <span class="nf">to_json_object</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
@@ -1070,9 +1167,41 @@
             <span class="n">out</span> <span class="o">+=</span> <span class="n">y</span> <span class="o">*</span> <span class="n">pdf</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">range</span><span class="p">,</span> <span class="n">normalized</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">extended</span> <span class="ow">and</span> <span class="n">normalized</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">out</span> <span class="o">/</span> <span class="nb">sum</span><span class="p">(</span><span class="n">yields</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">safe_division</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="nb">sum</span><span class="p">(</span><span class="n">yields</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">out</span></div>
+
+<div class="viewcode-block" id="AddPDFs.evaluate_binned"><a class="viewcode-back" href="../../api/minkit.AddPDFs.html#minkit.AddPDFs.evaluate_binned">[docs]</a>    <span class="nd">@allows_const_cache</span>
+    <span class="k">def</span> <span class="nf">evaluate_binned</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">norm_to_data</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Evaluate the PDF over a binned sample.</span>
+<span class="sd">        If &quot;norm_to_data&quot; is provided, then the number of entries is normalized</span>
+<span class="sd">        to the sum of values in the data sample.</span>
+<span class="sd">        Otherwise it is normalized to the sum of the data values.</span>
+
+<span class="sd">        :param data: input data.</span>
+<span class="sd">        :type data: BinnedDataSet</span>
+<span class="sd">        :param norm_to_data: possible normalization value.</span>
+<span class="sd">        :type norm_to_data: bool</span>
+<span class="sd">        :returns: values from the evaluation.</span>
+<span class="sd">        :rtype: numpy.ndarray or reikna.cluda.Array</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">yields</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">extended</span><span class="p">:</span>
+            <span class="n">yields</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">1.</span> <span class="o">-</span> <span class="nb">sum</span><span class="p">(</span><span class="n">yields</span><span class="p">))</span>
+
+        <span class="n">out</span> <span class="o">=</span> <span class="n">aop</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">y</span><span class="p">,</span> <span class="n">pdf</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">yields</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pdfs</span><span class="p">):</span>
+            <span class="n">out</span> <span class="o">+=</span> <span class="n">y</span> <span class="o">*</span> <span class="n">pdf</span><span class="o">.</span><span class="n">evaluate_binned</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">norm_to_data</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">extended</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">out</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">norm_to_data</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">aop</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">values</span><span class="p">)</span> <span class="o">*</span> <span class="n">out</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">out</span></div>
 
 <div class="viewcode-block" id="AddPDFs.from_json_object"><a class="viewcode-back" href="../../api/minkit.AddPDFs.html#minkit.AddPDFs.from_json_object">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_json_object</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">pars</span><span class="p">,</span> <span class="n">pdfs</span><span class="p">):</span>
@@ -1207,6 +1336,32 @@
 
         <span class="k">return</span> <span class="n">pdf_values</span></div>
 
+<div class="viewcode-block" id="ConvPDFs.evaluate_binned"><a class="viewcode-back" href="../../api/minkit.ConvPDFs.html#minkit.ConvPDFs.evaluate_binned">[docs]</a>    <span class="nd">@allows_const_cache</span>
+    <span class="k">def</span> <span class="nf">evaluate_binned</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">norm_to_data</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Evaluate the PDF over a binned sample.</span>
+<span class="sd">        If &quot;norm_to_data&quot; is provided, then the number of entries is normalized</span>
+<span class="sd">        to the sum of values in the data sample.</span>
+<span class="sd">        Otherwise it is normalized to the sum of the data values.</span>
+
+<span class="sd">        :param data: input data.</span>
+<span class="sd">        :type data: BinnedDataSet</span>
+<span class="sd">        :param norm_to_data: possible normalization value.</span>
+<span class="sd">        :type norm_to_data: bool</span>
+<span class="sd">        :returns: values from the evaluation.</span>
+<span class="sd">        :rtype: numpy.ndarray or reikna.cluda.Array</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">dv</span><span class="p">,</span> <span class="n">cv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">convolve</span><span class="p">(</span><span class="n">parameters</span><span class="o">.</span><span class="n">FULL</span><span class="p">,</span> <span class="n">normalized</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">par</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_pars</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">out</span> <span class="o">=</span> <span class="n">aop</span><span class="o">.</span><span class="n">interpolate_linear</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">par</span><span class="o">.</span><span class="n">name</span><span class="p">],</span> <span class="n">dv</span><span class="p">,</span> <span class="n">cv</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">norm_to_data</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">aop</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">values</span><span class="p">)</span> <span class="o">*</span> <span class="n">out</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">out</span></div>
+
 <div class="viewcode-block" id="ConvPDFs.from_json_object"><a class="viewcode-back" href="../../api/minkit.ConvPDFs.html#minkit.ConvPDFs.from_json_object">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_json_object</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">pars</span><span class="p">,</span> <span class="n">pdfs</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
@@ -1329,8 +1484,30 @@
         <span class="n">out</span> <span class="o">=</span> <span class="n">aop</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
         <span class="k">for</span> <span class="n">pdf</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pdfs</span><span class="p">:</span>
             <span class="n">out</span> <span class="o">*=</span> <span class="n">pdf</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">range</span><span class="p">,</span> <span class="n">normalized</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
         <span class="k">return</span> <span class="n">out</span></div>
+
+<div class="viewcode-block" id="ProdPDFs.evaluate_binned"><a class="viewcode-back" href="../../api/minkit.ProdPDFs.html#minkit.ProdPDFs.evaluate_binned">[docs]</a>    <span class="nd">@allows_const_cache</span>
+    <span class="k">def</span> <span class="nf">evaluate_binned</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">norm_to_data</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Evaluate the PDF over a binned sample.</span>
+<span class="sd">        If &quot;norm_to_data&quot; is provided, then the number of entries is normalized</span>
+<span class="sd">        to the sum of values in the data sample.</span>
+<span class="sd">        Otherwise it is normalized to the sum of the data values.</span>
+
+<span class="sd">        :param data: input data.</span>
+<span class="sd">        :type data: BinnedDataSet</span>
+<span class="sd">        :param norm_to_data: possible normalization value.</span>
+<span class="sd">        :type norm_to_data: bool</span>
+<span class="sd">        :returns: values from the evaluation.</span>
+<span class="sd">        :rtype: numpy.ndarray or reikna.cluda.Array</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">aop</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">pdf</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pdfs</span><span class="p">:</span>
+            <span class="n">out</span> <span class="o">*=</span> <span class="n">pdf</span><span class="o">.</span><span class="n">evaluate_binned</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">norm_to_data</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">norm_to_data</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">aop</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">values</span><span class="p">)</span> <span class="o">*</span> <span class="n">out</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">out</span></div>
 
 <div class="viewcode-block" id="ProdPDFs.from_json_object"><a class="viewcode-back" href="../../api/minkit.ProdPDFs.html#minkit.ProdPDFs.from_json_object">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_json_object</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">pars</span><span class="p">,</span> <span class="n">pdfs</span><span class="p">):</span>

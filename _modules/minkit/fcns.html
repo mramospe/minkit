@@ -87,9 +87,9 @@
             
             
               <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../main.html">Functions and classes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../performance.html">Performance of the minkit package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../user.html">User guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference.html">MinKit reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../performance.html">Performance</a></li>
 </ul>
 
             
@@ -163,10 +163,16 @@
 <span class="kn">import</span> <span class="nn">functools</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;binned_maximum_likelihood&#39;</span><span class="p">,</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;binned_maximum_likelihood&#39;</span><span class="p">,</span> <span class="s1">&#39;binned_chisquare&#39;</span><span class="p">,</span>
            <span class="s1">&#39;unbinned_extended_maximum_likelihood&#39;</span><span class="p">,</span> <span class="s1">&#39;unbinned_maximum_likelihood&#39;</span><span class="p">]</span>
 
+<span class="c1"># Definition of the errors. This is given from the nature of the FCNs. If this is</span>
+<span class="c1"># changed the output of the FCNs must change accordingly. A value of 1 means</span>
+<span class="c1"># that the output of the FCNs is a chi-square-like function.</span>
+<span class="n">ERRORDEF</span> <span class="o">=</span> <span class="mf">1.</span>
+
 <span class="c1"># Names of different FCNs</span>
+<span class="n">BINNED_CHISQUARE</span> <span class="o">=</span> <span class="s1">&#39;chi2&#39;</span>
 <span class="n">BINNED_MAXIMUM_LIKELIHOOD</span> <span class="o">=</span> <span class="s1">&#39;bml&#39;</span>
 <span class="n">UNBINNED_MAXIMUM_LIKELIHOOD</span> <span class="o">=</span> <span class="s1">&#39;uml&#39;</span>
 <span class="n">UNBINNED_EXTENDED_MAXIMUM_LIKELIHOOD</span> <span class="o">=</span> <span class="s1">&#39;ueml&#39;</span>
@@ -182,7 +188,7 @@
 <span class="sd">    :rtype: str</span>
 <span class="sd">    :raises ValueError: if the FCN is unknown.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
-    <span class="k">if</span> <span class="n">fcn</span> <span class="ow">in</span> <span class="p">(</span><span class="n">BINNED_MAXIMUM_LIKELIHOOD</span><span class="p">,):</span>
+    <span class="k">if</span> <span class="n">fcn</span> <span class="ow">in</span> <span class="p">(</span><span class="n">BINNED_CHISQUARE</span><span class="p">,</span> <span class="n">BINNED_MAXIMUM_LIKELIHOOD</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">dataset</span><span class="o">.</span><span class="n">BINNED</span>
     <span class="k">elif</span> <span class="n">fcn</span> <span class="ow">in</span> <span class="p">(</span><span class="n">UNBINNED_MAXIMUM_LIKELIHOOD</span><span class="p">,</span>
                  <span class="n">UNBINNED_EXTENDED_MAXIMUM_LIKELIHOOD</span><span class="p">):</span>
@@ -196,7 +202,7 @@
 <span class="sd">    Calculate the values of the constraints, if any.</span>
 
 <span class="sd">    :param constraints: functions defining constraints to different parameters.</span>
-<span class="sd">    :type contraints: list(PDF) or None</span>
+<span class="sd">    :type contraints: list(PDF)</span>
 <span class="sd">    :returns: evaluation of the product of constraints.</span>
 <span class="sd">    :rtype: float</span>
 <span class="sd">    &#39;&#39;&#39;</span>
@@ -221,7 +227,7 @@
     <span class="k">return</span> <span class="n">__wrapper</span>
 
 
-<span class="k">def</span> <span class="nf">binned_chisquare</span><span class="p">(</span><span class="n">pdf</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">FULL</span><span class="p">,</span> <span class="n">constraints</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="binned_chisquare"><a class="viewcode-back" href="../../api/minkit.binned_chisquare.html#minkit.binned_chisquare">[docs]</a><span class="k">def</span> <span class="nf">binned_chisquare</span><span class="p">(</span><span class="n">pdf</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">FULL</span><span class="p">,</span> <span class="n">constraints</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Definition of the binned chi-square FCN.</span>
 
@@ -236,7 +242,9 @@
 <span class="sd">    :returns: value of the FCN.</span>
 <span class="sd">    :rtype: float</span>
 <span class="sd">    &#39;&#39;&#39;</span>
-    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;Function not implemented yet&#39;</span><span class="p">)</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">evaluate_constraints</span><span class="p">(</span><span class="n">constraints</span><span class="p">)</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="n">c</span> <span class="o">*</span> <span class="n">pdf</span><span class="o">.</span><span class="n">evaluate_binned</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">aop</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">data</span><span class="o">.</span><span class="n">values</span> <span class="o">-</span> <span class="n">f</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="n">f</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="binned_maximum_likelihood"><a class="viewcode-back" href="../../api/minkit.binned_maximum_likelihood.html#minkit.binned_maximum_likelihood">[docs]</a><span class="nd">@nll_to_chi2</span>
@@ -254,7 +262,7 @@
 <span class="sd">    :rtype: float</span>
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="n">c</span> <span class="o">=</span> <span class="n">evaluate_constraints</span><span class="p">(</span><span class="n">constraints</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">pdf</span><span class="o">.</span><span class="n">norm</span><span class="p">()</span> <span class="o">-</span> <span class="n">aop</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">values</span> <span class="o">*</span> <span class="n">aop</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">c</span> <span class="o">*</span> <span class="n">pdf</span><span class="p">(</span><span class="n">data</span><span class="p">)))</span></div>
+    <span class="k">return</span> <span class="n">pdf</span><span class="o">.</span><span class="n">norm</span><span class="p">()</span> <span class="o">-</span> <span class="n">aop</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">values</span> <span class="o">*</span> <span class="n">aop</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">c</span> <span class="o">*</span> <span class="n">pdf</span><span class="o">.</span><span class="n">evaluate_binned</span><span class="p">(</span><span class="n">data</span><span class="p">)))</span></div>
 
 
 <div class="viewcode-block" id="unbinned_extended_maximum_likelihood"><a class="viewcode-back" href="../../api/minkit.unbinned_extended_maximum_likelihood.html#minkit.unbinned_extended_maximum_likelihood">[docs]</a><span class="nd">@nll_to_chi2</span>
@@ -315,7 +323,9 @@
 <span class="sd">    :returns: associated function.</span>
 <span class="sd">    :rtype: function</span>
 <span class="sd">    &#39;&#39;&#39;</span>
-    <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="n">BINNED_MAXIMUM_LIKELIHOOD</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="n">BINNED_CHISQUARE</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">binned_chisquare</span>
+    <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="n">BINNED_MAXIMUM_LIKELIHOOD</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">binned_maximum_likelihood</span>
     <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="n">UNBINNED_MAXIMUM_LIKELIHOOD</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">unbinned_maximum_likelihood</span>

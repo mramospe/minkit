@@ -1,0 +1,174 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Creating data sets\n",
+    "In this section it will be shown how to handle both binned and unbinned data sets in the MinKit package. All the functions accept either NumPy ndarray objects or GPU arrays. The general idea is to load data to NumPy ndarray objects and, if using a GPU backend, send them to the device. Only GPU arrays returned by MinKit classes and functions are supported."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "%matplotlib inline\n",
+    "import matplotlib.pyplot as plt\n",
+    "import minkit\n",
+    "import numpy as np\n",
+    "\n",
+    "minkit.initialize()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Binned data sets\n",
+    "A binned data set is composed by two arrays, one defining the centers of the bins, and another the values in them. Let's create some data and then a binned data set with their contents."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "image/png": "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\n",
+      "text/plain": [
+       "<Figure size 432x288 with 1 Axes>"
+      ]
+     },
+     "metadata": {
+      "needs_background": "light"
+     },
+     "output_type": "display_data"
+    }
+   ],
+   "source": [
+    "x = minkit.Parameter('x', bounds=(10, 20))\n",
+    "\n",
+    "numpy_data = np.random.normal(15, 1, 10000)\n",
+    "\n",
+    "values, edges = np.histogram(numpy_data, bins=100, range=x.bounds)\n",
+    "\n",
+    "data = minkit.BinnedDataSet.from_array(edges, x, values)\n",
+    "\n",
+    "e = minkit.as_ndarray(data[x.name])\n",
+    "\n",
+    "plt.hist((e[1:] + e[:-1]) / 2., bins=e, weights=values);"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Note that we have created a data set from a single array. If we had more than one data parameter, we must use the constructor. The centers are accessed using the [] operator. Since it return an array corresponding to the current backend, it is better to call \"minkit.as_ndarray\" in order to get the corresponding NumPy ndarray."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Unbinned data sets\n",
+    "In this case, the data set represents an array of values for each data parameter. These data sets are meant to be used in unbinned maximum likelihood fits."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data = minkit.DataSet.from_array(numpy_data, x)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Similarly to binned data sets, if we have more than one data parameter we must use the constructor of the class. Values inside the data set have not been trimmed, that is, points outside the bounds defined by the data parameter are not removed, although it will be done if we decide to do certain operations on them, like a fit. The DataSet class allows to add, merge and create subsets."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Length of primordial sample: 10000\n",
+      "Length of merged data sample: 11000\n",
+      "Length of data with new data: 11000\n",
+      "Length of primordial data set (unchanged): 10000\n",
+      "Length of primordial data set after adding in-place: 11000\n"
+     ]
+    }
+   ],
+   "source": [
+    "new_numpy_data = np.random.normal(15, 1, 1000)\n",
+    "\n",
+    "print(f'Length of primordial sample: {len(data)}')\n",
+    "\n",
+    "new_data = minkit.DataSet.from_array(new_numpy_data, x)\n",
+    "\n",
+    "merged_data = minkit.DataSet.merge([data, new_data])\n",
+    "\n",
+    "print(f'Length of merged data sample: {len(merged_data)}')\n",
+    "\n",
+    "add_data = data.add(new_data)\n",
+    "\n",
+    "print(f'Length of data with new data: {len(add_data)}')\n",
+    "print(f'Length of primordial data set (unchanged): {len(data)}')\n",
+    "\n",
+    "data.add(new_data, inplace=True)\n",
+    "\n",
+    "print(f'Length of primordial data set after adding in-place: {len(data)}')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "In binned data sets we can also define a set of weights to use."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "weights = np.random.uniform(0, 1, len(numpy_data))\n",
+    "\n",
+    "data = minkit.DataSet.from_array(numpy_data, x, weights=weights)"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.6.8"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 2
+}

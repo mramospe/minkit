@@ -1,0 +1,19 @@
+SciPyMinimizer
+==============
+
+.. currentmodule:: minkit
+
+.. autoclass:: SciPyMinimizer
+   :show-inheritance:
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+
+      ~SciPyMinimizer.minimize
+      ~SciPyMinimizer.result_to_registry
+
+   .. rubric:: Methods Documentation
+
+   .. automethod:: minimize
+   .. automethod:: result_to_registry

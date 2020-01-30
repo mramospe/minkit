@@ -39,7 +39,7 @@
   <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="SourcePDF" href="minkit.SourcePDF.html" />
+    <link rel="next" title="SciPyMinimizer" href="minkit.SciPyMinimizer.html" />
     <link rel="prev" title="Range" href="minkit.Range.html" /> 
 </head>
 
@@ -89,9 +89,10 @@
             
             
               <ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="../main.html">Functions and classes</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="../main.html#functions">Functions</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="../main.html#classes">Classes</a><ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../user.html">User guide</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../reference.html">MinKit reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../reference.html#functions">Functions</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../reference.html#classes">Classes</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="minkit.AddPDFs.html">AddPDFs</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.Amoroso.html">Amoroso</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.BinnedDataSet.html">BinnedDataSet</a></li>
@@ -110,15 +111,14 @@
 <li class="toctree-l3"><a class="reference internal" href="minkit.ProdPDFs.html">ProdPDFs</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.Range.html">Range</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">Registry</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.SciPyMinimizer.html">SciPyMinimizer</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.SourcePDF.html">SourcePDF</a></li>
-<li class="toctree-l3"><a class="reference internal" href="minkit.aop.html">aop</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="../main.html#class-inheritance-diagram">Class Inheritance Diagram</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference.html#class-inheritance-diagram">Class Inheritance Diagram</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../performance.html">Performance of the minkit package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../performance.html">Performance</a></li>
 </ul>
 
             
@@ -164,7 +164,7 @@
     
       <li><a href="../index.html">Docs</a> &raquo;</li>
         
-          <li><a href="../main.html">Functions and classes</a> &raquo;</li>
+          <li><a href="../reference.html">MinKit reference</a> &raquo;</li>
         
       <li>Registry</li>
     
@@ -215,7 +215,7 @@
 <dt id="minkit.Registry">
 <em class="property">class </em><code class="sig-prename descclassname">minkit.</code><code class="sig-name descname">Registry</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/parameters.html#Registry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.Registry" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a></p>
-<p>Extension of list to hold information used in <a class="reference internal" href="../main.html#module-minkit" title="minkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">minkit</span></code></a>.
+<p>Extension of list to hold information used in <a class="reference internal" href="../reference.html#module-minkit" title="minkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">minkit</span></code></a>.
 It represents a collection of objects with the attribute “name”, providing a unique
 identifier (each object is assumed to be identified by its name).
 Any attempt to add a new element to the registry with the same name as one already
@@ -261,6 +261,9 @@ Constructor is directly forwarded to <a class="reference external" href="https:/
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#minkit.Registry.to_json_object" title="minkit.Registry.to_json_object"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_json_object</span></code></a>()</p></td>
 <td><p>Represent this class as a JSON-like object.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#minkit.Registry.values" title="minkit.Registry.values"><code class="xref py py-obj docutils literal notranslate"><span class="pre">values</span></code></a>()</p></td>
+<td><p>Get a dictionary with the values of the different parameters.</p></td>
 </tr>
 </tbody>
 </table>
@@ -391,6 +394,20 @@ This is meant to be used together with the <a class="reference external" href="h
 </dl>
 </dd></dl>
 
+<dl class="method">
+<dt id="minkit.Registry.values">
+<code class="sig-name descname">values</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/parameters.html#Registry.values"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.Registry.values" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a dictionary with the values of the different parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>dictionary with the values.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)">dict</a>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 </div>
@@ -403,7 +420,7 @@ This is meant to be used together with the <a class="reference external" href="h
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="minkit.SourcePDF.html" class="btn btn-neutral float-right" title="SourcePDF" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="minkit.SciPyMinimizer.html" class="btn btn-neutral float-right" title="SciPyMinimizer" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="minkit.Range.html" class="btn btn-neutral float-left" title="Range" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

@@ -89,9 +89,10 @@
             
             
               <ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="../main.html">Functions and classes</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="../main.html#functions">Functions</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="../main.html#classes">Classes</a><ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../user.html">User guide</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../reference.html">MinKit reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../reference.html#functions">Functions</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../reference.html#classes">Classes</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="minkit.AddPDFs.html">AddPDFs</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.Amoroso.html">Amoroso</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.BinnedDataSet.html">BinnedDataSet</a></li>
@@ -110,15 +111,14 @@
 <li class="toctree-l3"><a class="reference internal" href="minkit.ProdPDFs.html">ProdPDFs</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.Range.html">Range</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.Registry.html">Registry</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.SciPyMinimizer.html">SciPyMinimizer</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.SourcePDF.html">SourcePDF</a></li>
-<li class="toctree-l3"><a class="reference internal" href="minkit.aop.html">aop</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="../main.html#class-inheritance-diagram">Class Inheritance Diagram</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference.html#class-inheritance-diagram">Class Inheritance Diagram</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../performance.html">Performance of the minkit package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../performance.html">Performance</a></li>
 </ul>
 
             
@@ -164,7 +164,7 @@
     
       <li><a href="../index.html">Docs</a> &raquo;</li>
         
-          <li><a href="../main.html">Functions and classes</a> &raquo;</li>
+          <li><a href="../reference.html">MinKit reference</a> &raquo;</li>
         
       <li>DataSet</li>
     
@@ -221,7 +221,7 @@
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a><em>, </em><a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a>) – data to load.</p></li>
 <li><p><strong>pars</strong> (<a class="reference internal" href="minkit.Registry.html#minkit.Registry" title="minkit.Registry"><em>Registry</em></a><em>(</em><a class="reference internal" href="minkit.Parameter.html#minkit.Parameter" title="minkit.Parameter"><em>Parameter</em></a><em>)</em>) – data parameters.</p></li>
-<li><p><strong>weights</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.8)"><em>None</em></a>) – possible set of weights.</p></li>
+<li><p><strong>weights</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a>) – possible set of weights.</p></li>
 <li><p><strong>copy</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – whether to do copies of arrays.</p></li>
 <li><p><strong>convert</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – in case of working in GPUs, the input arrays         are assumed to be on the host and are copied to the device.</p></li>
 <li><p><strong>trim</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – whether to check the bounds of the data parameters         and remove the data points out of them.</p></li>
@@ -259,16 +259,19 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#minkit.DataSet.from_records" title="minkit.DataSet.from_records"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_records</span></code></a>(arr, data_pars[, weights])</p></td>
 <td><p>Build the class from a <a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a> object.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#minkit.DataSet.merge" title="minkit.DataSet.merge"><code class="xref py py-obj docutils literal notranslate"><span class="pre">merge</span></code></a>(samples[, maximum, shuffle, trim])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#minkit.DataSet.make_binned" title="minkit.DataSet.make_binned"><code class="xref py py-obj docutils literal notranslate"><span class="pre">make_binned</span></code></a>([bins])</p></td>
+<td><p>Make a binned version of this sample.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.DataSet.merge" title="minkit.DataSet.merge"><code class="xref py py-obj docutils literal notranslate"><span class="pre">merge</span></code></a>(samples[, maximum, shuffle, trim])</p></td>
 <td><p>Merge many samples into one.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.DataSet.shuffle" title="minkit.DataSet.shuffle"><code class="xref py py-obj docutils literal notranslate"><span class="pre">shuffle</span></code></a>([inplace])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#minkit.DataSet.shuffle" title="minkit.DataSet.shuffle"><code class="xref py py-obj docutils literal notranslate"><span class="pre">shuffle</span></code></a>([inplace])</p></td>
 <td><p>Shuffle the data set, reordering the data with random numbers.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#minkit.DataSet.subset" title="minkit.DataSet.subset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">subset</span></code></a>([cond, range, copy, trim, …])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.DataSet.subset" title="minkit.DataSet.subset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">subset</span></code></a>([cond, range, copy, trim, …])</p></td>
 <td><p>Get a subset of this data set.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.DataSet.to_records" title="minkit.DataSet.to_records"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_records</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#minkit.DataSet.to_records" title="minkit.DataSet.to_records"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_records</span></code></a>()</p></td>
 <td><p>Convert this class into a <a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a> object.</p></td>
 </tr>
 </tbody>
@@ -297,7 +300,7 @@
 <dd class="field-odd"><p>weights of the sample.</p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)">numpy.ndarray</a> or <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.8)">None</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)">numpy.ndarray</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -334,7 +337,7 @@ the existing class.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>arr</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a>) – array of data.</p></li>
 <li><p><strong>data_pars</strong> (<a class="reference internal" href="minkit.Registry.html#minkit.Registry" title="minkit.Registry"><em>Registry</em></a><em>(</em><a class="reference internal" href="minkit.Parameter.html#minkit.Parameter" title="minkit.Parameter"><em>Parameter</em></a><em>)</em>) – data parameters.</p></li>
-<li><p><strong>weights</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.8)"><em>None</em></a>) – possible weights to use.</p></li>
+<li><p><strong>weights</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a>) – possible weights to use.</p></li>
 </ul>
 </dd>
 </dl>
@@ -349,8 +352,25 @@ the existing class.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>arr</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a>) – array of data.</p></li>
 <li><p><strong>data_pars</strong> (<a class="reference internal" href="minkit.Registry.html#minkit.Registry" title="minkit.Registry"><em>Registry</em></a><em>(</em><a class="reference internal" href="minkit.Parameter.html#minkit.Parameter" title="minkit.Parameter"><em>Parameter</em></a><em>)</em>) – data parameters.</p></li>
-<li><p><strong>weights</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.8)"><em>None</em></a>) – possible weights to use.</p></li>
+<li><p><strong>weights</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a>) – possible weights to use.</p></li>
 </ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.DataSet.make_binned">
+<code class="sig-name descname">make_binned</code><span class="sig-paren">(</span><em class="sig-param">bins=100</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/dataset.html#DataSet.make_binned"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.DataSet.make_binned" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make a binned version of this sample.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>bins</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)"><em>tuple</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a><em>, </em><em>..</em><em>)</em>) – number of bins per data parameter.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>binned data sample.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="minkit.BinnedDataSet.html#minkit.BinnedDataSet" title="minkit.BinnedDataSet">BinnedDataSet</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -365,7 +385,7 @@ condition is applied, if needed.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>samples</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)"><em>tuple</em></a><em>(</em><a class="reference internal" href="#minkit.DataSet" title="minkit.DataSet"><em>DataSet</em></a><em>)</em>) – samples to merge.</p></li>
-<li><p><strong>maximum</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.8)"><em>None</em></a>) – maximum number of entries for the final sample.</p></li>
+<li><p><strong>maximum</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – maximum number of entries for the final sample.</p></li>
 <li><p><strong>shuffle</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – whether to shuffle the sample before trimming it.</p></li>
 <li><p><strong>trim</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – whether to check the bounds of the data parameters         and remove the data points out of them.</p></li>
 </ul>

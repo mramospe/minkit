@@ -1,0 +1,340 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>SciPyMinimizer &mdash; minkit 0.0.0.dev0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="SourcePDF" href="minkit.SourcePDF.html" />
+    <link rel="prev" title="Registry" href="minkit.Registry.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> minkit
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.0.0.dev0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../user.html">User guide</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../reference.html">MinKit reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../reference.html#functions">Functions</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../reference.html#classes">Classes</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="minkit.AddPDFs.html">AddPDFs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.Amoroso.html">Amoroso</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.BinnedDataSet.html">BinnedDataSet</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.Category.html">Category</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.Chebyshev.html">Chebyshev</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.ConvPDFs.html">ConvPDFs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.CrystalBall.html">CrystalBall</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.DataSet.html">DataSet</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.Exponential.html">Exponential</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.Formula.html">Formula</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.Gaussian.html">Gaussian</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.PDF.html">PDF</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.Parameter.html">Parameter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.Polynomial.html">Polynomial</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.PowerLaw.html">PowerLaw</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.ProdPDFs.html">ProdPDFs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.Range.html">Range</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.Registry.html">Registry</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">SciPyMinimizer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.SourcePDF.html">SourcePDF</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../reference.html#class-inheritance-diagram">Class Inheritance Diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../performance.html">Performance</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">minkit</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../reference.html">MinKit reference</a> &raquo;</li>
+        
+      <li>SciPyMinimizer</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/api/minkit.SciPyMinimizer.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="scipyminimizer">
+<h1>SciPyMinimizer<a class="headerlink" href="#scipyminimizer" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="minkit.SciPyMinimizer">
+<em class="property">class </em><code class="sig-prename descclassname">minkit.</code><code class="sig-name descname">SciPyMinimizer</code><span class="sig-paren">(</span><em class="sig-param">evaluator</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/minimizers.html#SciPyMinimizer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.SciPyMinimizer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Wrapper around the <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html#scipy.optimize.minimize" title="(in SciPy v1.4.1)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.optimize.minimize()</span></code></a> function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>evaluator</strong> (<em>UnbinnedEvaluator</em><em>, </em><em>BinnedEvaluator</em><em> or </em><em>SimultaneousEvaluator</em>) – evaluator to be used in the minimization.</p>
+</dd>
+</dl>
+<p class="rubric">Methods Summary</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.SciPyMinimizer.minimize" title="minkit.SciPyMinimizer.minimize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">minimize</span></code></a>([method, tol])</p></td>
+<td><p>Minimize the PDF using the provided method and tolerance.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#minkit.SciPyMinimizer.result_to_registry" title="minkit.SciPyMinimizer.result_to_registry"><code class="xref py py-obj docutils literal notranslate"><span class="pre">result_to_registry</span></code></a>(result[, ignore_warnings])</p></td>
+<td><p>Transform the output of a minimization call done with any of the SciPy methods to a <a class="reference internal" href="minkit.Registry.html#minkit.Registry" title="minkit.Registry"><code class="xref py py-class docutils literal notranslate"><span class="pre">minkit.Registry</span></code></a>.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Methods Documentation</p>
+<dl class="method">
+<dt id="minkit.SciPyMinimizer.minimize">
+<code class="sig-name descname">minimize</code><span class="sig-paren">(</span><em class="sig-param">method='L-BFGS-B'</em>, <em class="sig-param">tol=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/minimizers.html#SciPyMinimizer.minimize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.SciPyMinimizer.minimize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Minimize the PDF using the provided method and tolerance.
+Only the methods (‘L-BFGS-B’, ‘TNC’, ‘SLSQP’, ‘trust-constr’) are allowed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>method</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – method parsed by <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html#scipy.optimize.minimize" title="(in SciPy v1.4.1)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.optimize.minimize()</span></code></a>.</p></li>
+<li><p><strong>tol</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – tolerance to be used in the minimization.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>result of the minimization.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.OptimizeResult.html#scipy.optimize.OptimizeResult" title="(in SciPy v1.4.1)">scipy.optimize.OptimizeResult</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.SciPyMinimizer.result_to_registry">
+<code class="sig-name descname">result_to_registry</code><span class="sig-paren">(</span><em class="sig-param">result</em>, <em class="sig-param">ignore_warnings=True</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/minimizers.html#SciPyMinimizer.result_to_registry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.SciPyMinimizer.result_to_registry" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transform the output of a minimization call done with any of the SciPy methods
+to a <a class="reference internal" href="minkit.Registry.html#minkit.Registry" title="minkit.Registry"><code class="xref py py-class docutils literal notranslate"><span class="pre">minkit.Registry</span></code></a>.
+This function uses <code class="xref py py-class docutils literal notranslate"><span class="pre">numdifftools.Hessian</span></code> in order to calculate the Hessian
+matrix of the FCN.
+Uncertainties are extracted from the inverse of the Hessian, taking into account
+the correlation among the variables.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>result</strong> (<a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.OptimizeResult.html#scipy.optimize.OptimizeResult" title="(in SciPy v1.4.1)"><em>scipy.optimize.OptimizeResult</em></a>) – result of the minimization.</p></li>
+<li><p><strong>ignore_warnings</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – whether to ignore the warnings during the evaluation         of the Hessian or not.</p></li>
+<li><p><strong>kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – keyword arguments to <code class="xref py py-class docutils literal notranslate"><span class="pre">numdifftools.Hessian</span></code></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>registry with new parameters with the values and errors defined.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="minkit.Registry.html#minkit.Registry" title="minkit.Registry">Registry</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="minkit.SourcePDF.html" class="btn btn-neutral float-right" title="SourcePDF" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="minkit.Registry.html" class="btn btn-neutral float-left" title="Registry" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Miguel Ramos Pernas
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

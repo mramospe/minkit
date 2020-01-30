@@ -1,0 +1,6 @@
+as_ndarray
+==========
+
+.. currentmodule:: minkit
+
+.. autofunction:: as_ndarray

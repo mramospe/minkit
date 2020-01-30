@@ -20,6 +20,7 @@ DataSet
       ~DataSet.add
       ~DataSet.from_array
       ~DataSet.from_records
+      ~DataSet.make_binned
       ~DataSet.merge
       ~DataSet.shuffle
       ~DataSet.subset
@@ -35,6 +36,7 @@ DataSet
    .. automethod:: add
    .. automethod:: from_array
    .. automethod:: from_records
+   .. automethod:: make_binned
    .. automethod:: merge
    .. automethod:: shuffle
    .. automethod:: subset

@@ -87,9 +87,9 @@
             
             
               <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../main.html">Functions and classes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../performance.html">Performance of the minkit package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../user.html">User guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference.html">MinKit reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../performance.html">Performance</a></li>
 </ul>
 
             
@@ -167,7 +167,7 @@
 <span class="kn">from</span> <span class="nn">.operations</span> <span class="k">import</span> <span class="n">types</span>
 <span class="kn">from</span> <span class="nn">.operations</span> <span class="k">import</span> <span class="n">gpu_core</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;aop&#39;</span><span class="p">,</span> <span class="s1">&#39;free_cache&#39;</span><span class="p">,</span> <span class="s1">&#39;initialize&#39;</span><span class="p">,</span> <span class="s1">&#39;timer&#39;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;as_ndarray&#39;</span><span class="p">,</span> <span class="s1">&#39;free_cache&#39;</span><span class="p">,</span> <span class="s1">&#39;initialize&#39;</span><span class="p">,</span> <span class="s1">&#39;timer&#39;</span><span class="p">]</span>
 
 
 <span class="c1"># CPU backend</span>
@@ -176,6 +176,8 @@
 <span class="n">OPENCL</span> <span class="o">=</span> <span class="n">gpu_core</span><span class="o">.</span><span class="n">OPENCL</span>
 <span class="c1"># CUDA backend</span>
 <span class="n">CUDA</span> <span class="o">=</span> <span class="n">gpu_core</span><span class="o">.</span><span class="n">CUDA</span>
+<span class="c1"># GPU backend (internal use only)</span>
+<span class="n">GPU</span> <span class="o">=</span> <span class="s1">&#39;gpu&#39;</span>
 
 <span class="c1"># Keep the module to do operation on arrays</span>
 <span class="n">ARRAY_OPERATION</span> <span class="o">=</span> <span class="kc">None</span>
@@ -246,11 +248,24 @@
         <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">ARRAY_OPERATION</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="aop"><a class="viewcode-back" href="../../api/minkit.aop.html#minkit.aop">[docs]</a><span class="k">class</span> <span class="nc">aop</span><span class="p">(</span><span class="n">metaclass</span><span class="o">=</span><span class="n">meta_operation</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">aop</span><span class="p">(</span><span class="n">metaclass</span><span class="o">=</span><span class="n">meta_operation</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Access the operations on arrays for the current backend.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
-    <span class="k">pass</span></div>
+    <span class="k">pass</span>
+
+
+<div class="viewcode-block" id="as_ndarray"><a class="viewcode-back" href="../../api/minkit.as_ndarray.html#minkit.as_ndarray">[docs]</a><span class="k">def</span> <span class="nf">as_ndarray</span><span class="p">(</span><span class="n">a</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Ensure that &quot;a&quot; is expressed as a :class:`numpy.ndarray` object.</span>
+<span class="sd">    If its already an :class:`numpy.ndarray`, it is not copied.</span>
+
+<span class="sd">    :param a: input array.</span>
+<span class="sd">    :type a: numpy.ndarray or reikna.cluda.Array</span>
+<span class="sd">    :returns: converted array.</span>
+<span class="sd">    :rtype: numpy.ndarray</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">return</span> <span class="n">aop</span><span class="o">.</span><span class="n">extract_ndarray</span><span class="p">(</span><span class="n">a</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="free_cache"><a class="viewcode-back" href="../../api/minkit.free_cache.html#minkit.free_cache">[docs]</a><span class="k">def</span> <span class="nf">free_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -280,13 +295,15 @@
 <span class="sd">    - device: (int) number of the device to use (defaults to None).</span>
 <span class="sd">    :type kwargs: dict</span>
 
-<span class="sd">    .. note:: The backend can be also specified as an environmental variable \</span>
-<span class="sd">    MINKIT_BACKEND, overriding that specified in any :func:`initialize` call.</span>
+<span class="sd">    .. note:: The backend can be also specified as an environment variable \</span>
+<span class="sd">    MINKIT_BACKEND, overriding that specified in any :func:`initialize` call. \</span>
+<span class="sd">    The device can be selected using the MINKIT_DEVICE variable as well, with \</span>
+<span class="sd">    an identical behaviour.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="k">global</span> <span class="n">BACKEND</span>
     <span class="k">global</span> <span class="n">ARRAY_OPERATION</span>
 
-    <span class="c1"># Override the backend from the environmental variable &quot;MINKIT_BACKEND&quot;</span>
+    <span class="c1"># Override the backend from the environment variable &quot;MINKIT_BACKEND&quot;</span>
     <span class="n">backend</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;MINKIT_BACKEND&#39;</span><span class="p">,</span> <span class="n">backend</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="n">BACKEND</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">backend</span> <span class="o">!=</span> <span class="n">BACKEND</span><span class="p">:</span>

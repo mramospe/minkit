@@ -1,0 +1,6 @@
+minimizer
+=========
+
+.. currentmodule:: minkit
+
+.. autofunction:: minimizer

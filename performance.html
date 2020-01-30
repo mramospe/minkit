@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Performance of the minkit package &mdash; minkit 0.0.0.dev0 documentation</title>
+  <title>Performance &mdash; minkit 0.0.0.dev0 documentation</title>
   
 
   
@@ -39,8 +39,7 @@
   <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Examples" href="examples.html" />
-    <link rel="prev" title="aop" href="api/minkit.aop.html" /> 
+    <link rel="prev" title="SourcePDF" href="api/minkit.SourcePDF.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -89,9 +88,9 @@
             
             
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="main.html">Functions and classes</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Performance of the minkit package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user.html">User guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference.html">MinKit reference</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Performance</a></li>
 </ul>
 
             
@@ -137,7 +136,7 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-      <li>Performance of the minkit package</li>
+      <li>Performance</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -180,18 +179,35 @@
     text-align: unset;
 }
 </style>
-<div class="section" id="performance-of-the-minkit-package">
-<h1>Performance of the minkit package<a class="headerlink" href="#performance-of-the-minkit-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="performance">
+<h1>Performance<a class="headerlink" href="#performance" title="Permalink to this headline">¶</a></h1>
 <p>The performance of the package has been measured taking the implementation of the <a class="reference external" href="https://root.cern.ch/roofit">RooFit</a> as a reference in order to evaluate the timing.
 The tests have been run using all the different backends available with <a class="reference external" href="https://mramospe.github.io/minkit">minkit</a>, and compared together.
 It has been tested both the generation of random numbers and the minimization procedure for two different models with different complexity.
-The first model is composed by a simple Gaussian function, whilst the second is the addition of a Gaussian and an exponential PDFs.
+The first model is composed by a simple Gaussian function, whilst the second is the addition of a <a class="reference external" href="https://en.wikipedia.org/wiki/Crystal_Ball_function">Crystal-ball</a> and an exponential PDFs.
+The GPU execution has been done using an <a class="reference external" href="https://www.nvidia.com/es-es/geforce/products/10series/geforce-gtx-1080-ti">Nvidia GeForce GTX 1080 Ti</a>, and the CPU execution using an <a class="reference external" href="https://ark.intel.com/content/www/es/es/ark/products/91754/intel-xeon-processor-e5-2680-v4-35m-cache-2-40-ghz.html">Intel(R) Xeon(R) CPU E5-2680 v4 &#64; 2.40GHz</a>.
 The results can be seen in the following figures:</p>
-<p>As it can be seen, the CPU implementations are slower than the GPU for a large number of entries.
-For a small number of entries, the timing remains around the same order of magnitude.
-Note that the CPU version is very close to that of <a class="reference external" href="https://root.cern.ch/roofit">RooFit</a>, despite the latter is purely implemented in C++.
-For minimization, it can be seen that the differences are huge.
-For a big number of entries one can find two orders of magnitude of difference between the CPU and GPU implementations.</p>
+<div class="figure align-default" id="id1">
+<img alt="_images/basic_generate.png" src="_images/basic_generate.png" />
+<p class="caption"><span class="caption-text">Generate data for a model composed by a Gaussian PDF.</span><a class="headerlink" href="#id1" title="Permalink to this image">¶</a></p>
+</div>
+<div class="figure align-default" id="id2">
+<img alt="_images/intermediate_generate.png" src="_images/intermediate_generate.png" />
+<p class="caption"><span class="caption-text">Generate data for a model composed by a Crystal-ball and an exponential PDFs.</span><a class="headerlink" href="#id2" title="Permalink to this image">¶</a></p>
+</div>
+<div class="figure align-default" id="id3">
+<img alt="_images/basic_fit.png" src="_images/basic_fit.png" />
+<p class="caption"><span class="caption-text">Generate and fit to a Gaussian PDF.</span><a class="headerlink" href="#id3" title="Permalink to this image">¶</a></p>
+</div>
+<div class="figure align-default" id="id4">
+<img alt="_images/intermediate_fit.png" src="_images/intermediate_fit.png" />
+<p class="caption"><span class="caption-text">Generate and fit to a model composed by a Crystal-ball and an exponential PDFs.</span><a class="headerlink" href="#id4" title="Permalink to this image">¶</a></p>
+</div>
+<p>If the model is simple, generating random numbers is faster for <a class="reference external" href="https://root.cern.ch/roofit">RooFit</a> than for MinKit, for all the backends, but it soon becomes similar once the model starts to be a bit more complicated.
+For a small number of entries, the timing for fitting remains around the same order of magnitude for the CPU implementation and <a class="reference external" href="https://root.cern.ch/roofit">RooFit</a>, being the GPU backends a bit slower.
+Howerver, once the number of entries is greater than 10000, the GPU starts to be drastically faster with respect to any CPU implementation.
+Once the model starts to be slightly complicated, one can find two orders of magnitude of difference in timing between CPU and GPU.
+Note that the CPU implementation of MinKit has an speed close to that of <a class="reference external" href="https://root.cern.ch/roofit">RooFit</a>, despite the latter is purely implemented in C++.</p>
 </div>
 
 
@@ -202,10 +218,8 @@ For a big number of entries one can find two orders of magnitude of difference b
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="examples.html" class="btn btn-neutral float-right" title="Examples" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
-      
-        <a href="api/minkit.aop.html" class="btn btn-neutral float-left" title="aop" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="api/minkit.SourcePDF.html" class="btn btn-neutral float-left" title="SourcePDF" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

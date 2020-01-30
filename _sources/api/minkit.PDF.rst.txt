@@ -30,6 +30,7 @@ PDF
       ~PDF.__call__
       ~PDF.bind
       ~PDF.enable_cache
+      ~PDF.evaluate_binned
       ~PDF.free_cache
       ~PDF.from_json_object
       ~PDF.generate
@@ -60,6 +61,7 @@ PDF
    .. automethod:: __call__
    .. automethod:: bind
    .. automethod:: enable_cache
+   .. automethod:: evaluate_binned
    .. automethod:: free_cache
    .. automethod:: from_json_object
    .. automethod:: generate

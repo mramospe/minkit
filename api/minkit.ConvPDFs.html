@@ -89,9 +89,10 @@
             
             
               <ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="../main.html">Functions and classes</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="../main.html#functions">Functions</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="../main.html#classes">Classes</a><ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../user.html">User guide</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../reference.html">MinKit reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../reference.html#functions">Functions</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../reference.html#classes">Classes</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="minkit.AddPDFs.html">AddPDFs</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.Amoroso.html">Amoroso</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.BinnedDataSet.html">BinnedDataSet</a></li>
@@ -110,15 +111,14 @@
 <li class="toctree-l3"><a class="reference internal" href="minkit.ProdPDFs.html">ProdPDFs</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.Range.html">Range</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.Registry.html">Registry</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.SciPyMinimizer.html">SciPyMinimizer</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.SourcePDF.html">SourcePDF</a></li>
-<li class="toctree-l3"><a class="reference internal" href="minkit.aop.html">aop</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="../main.html#class-inheritance-diagram">Class Inheritance Diagram</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference.html#class-inheritance-diagram">Class Inheritance Diagram</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../performance.html">Performance of the minkit package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../performance.html">Performance</a></li>
 </ul>
 
             
@@ -164,7 +164,7 @@
     
       <li><a href="../index.html">Docs</a> &raquo;</li>
         
-          <li><a href="../main.html">Functions and classes</a> &raquo;</li>
+          <li><a href="../reference.html">MinKit reference</a> &raquo;</li>
         
       <li>ConvPDFs</li>
     
@@ -239,16 +239,19 @@
 <tr class="row-even"><td><p><a class="reference internal" href="#minkit.ConvPDFs.convolve" title="minkit.ConvPDFs.convolve"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convolve</span></code></a>([range, normalized])</p></td>
 <td><p>Calculate the convolution.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.ConvPDFs.from_json_object" title="minkit.ConvPDFs.from_json_object"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_json_object</span></code></a>(obj, pars, pdfs)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.ConvPDFs.evaluate_binned" title="minkit.ConvPDFs.evaluate_binned"><code class="xref py py-obj docutils literal notranslate"><span class="pre">evaluate_binned</span></code></a>(data[, norm_to_data])</p></td>
+<td><p>Evaluate the PDF over a binned sample.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#minkit.ConvPDFs.from_json_object" title="minkit.ConvPDFs.from_json_object"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_json_object</span></code></a>(obj, pars, pdfs)</p></td>
 <td><p>Build a PDF from a JSON object.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#minkit.ConvPDFs.norm" title="minkit.ConvPDFs.norm"><code class="xref py py-obj docutils literal notranslate"><span class="pre">norm</span></code></a>([range])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.ConvPDFs.norm" title="minkit.ConvPDFs.norm"><code class="xref py py-obj docutils literal notranslate"><span class="pre">norm</span></code></a>([range])</p></td>
 <td><p>Calculate the normalization of the PDF.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.ConvPDFs.numerical_normalization" title="minkit.ConvPDFs.numerical_normalization"><code class="xref py py-obj docutils literal notranslate"><span class="pre">numerical_normalization</span></code></a>([range])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#minkit.ConvPDFs.numerical_normalization" title="minkit.ConvPDFs.numerical_normalization"><code class="xref py py-obj docutils literal notranslate"><span class="pre">numerical_normalization</span></code></a>([range])</p></td>
 <td><p>Calculate a numerical normalization.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#minkit.ConvPDFs.to_json_object" title="minkit.ConvPDFs.to_json_object"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_json_object</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.ConvPDFs.to_json_object" title="minkit.ConvPDFs.to_json_object"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_json_object</span></code></a>()</p></td>
 <td><p>Dump the PDF information into a JSON object.</p></td>
 </tr>
 </tbody>
@@ -285,6 +288,29 @@
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)">numpy.ndarray</a>, <a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)">numpy.ndarray</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.ConvPDFs.evaluate_binned">
+<code class="sig-name descname">evaluate_binned</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">norm_to_data=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/pdf_core.html#ConvPDFs.evaluate_binned"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.ConvPDFs.evaluate_binned" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluate the PDF over a binned sample.
+If “norm_to_data” is provided, then the number of entries is normalized
+to the sum of values in the data sample.
+Otherwise it is normalized to the sum of the data values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<a class="reference internal" href="minkit.BinnedDataSet.html#minkit.BinnedDataSet" title="minkit.BinnedDataSet"><em>BinnedDataSet</em></a>) – input data.</p></li>
+<li><p><strong>norm_to_data</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – possible normalization value.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>values from the evaluation.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)">numpy.ndarray</a> or reikna.cluda.Array</p>
 </dd>
 </dl>
 </dd></dl>

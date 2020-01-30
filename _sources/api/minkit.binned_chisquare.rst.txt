@@ -1,0 +1,6 @@
+binned_chisquare
+================
+
+.. currentmodule:: minkit
+
+.. autofunction:: binned_chisquare

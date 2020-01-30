@@ -10,6 +10,7 @@ BinnedDataSet
 
    .. autosummary::
 
+      ~BinnedDataSet.bounds
       ~BinnedDataSet.data_pars
       ~BinnedDataSet.values
 
@@ -21,6 +22,7 @@ BinnedDataSet
 
    .. rubric:: Attributes Documentation
 
+   .. autoattribute:: bounds
    .. autoattribute:: data_pars
    .. autoattribute:: values
 

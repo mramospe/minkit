@@ -1,0 +1,6 @@
+evaluation_grid
+===============
+
+.. currentmodule:: minkit
+
+.. autofunction:: evaluation_grid

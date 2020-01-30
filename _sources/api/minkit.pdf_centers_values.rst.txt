@@ -1,0 +1,6 @@
+pdf_centers_values
+==================
+
+.. currentmodule:: minkit
+
+.. autofunction:: pdf_centers_values

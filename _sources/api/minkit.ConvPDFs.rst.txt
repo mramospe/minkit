@@ -12,6 +12,7 @@ ConvPDFs
 
       ~ConvPDFs.__call__
       ~ConvPDFs.convolve
+      ~ConvPDFs.evaluate_binned
       ~ConvPDFs.from_json_object
       ~ConvPDFs.norm
       ~ConvPDFs.numerical_normalization
@@ -21,6 +22,7 @@ ConvPDFs
 
    .. automethod:: __call__
    .. automethod:: convolve
+   .. automethod:: evaluate_binned
    .. automethod:: from_json_object
    .. automethod:: norm
    .. automethod:: numerical_normalization

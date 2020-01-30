@@ -89,9 +89,10 @@
             
             
               <ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="../main.html">Functions and classes</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="../main.html#functions">Functions</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="../main.html#classes">Classes</a><ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../user.html">User guide</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../reference.html">MinKit reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../reference.html#functions">Functions</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../reference.html#classes">Classes</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="minkit.AddPDFs.html">AddPDFs</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.Amoroso.html">Amoroso</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">BinnedDataSet</a></li>
@@ -110,15 +111,14 @@
 <li class="toctree-l3"><a class="reference internal" href="minkit.ProdPDFs.html">ProdPDFs</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.Range.html">Range</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.Registry.html">Registry</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.SciPyMinimizer.html">SciPyMinimizer</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.SourcePDF.html">SourcePDF</a></li>
-<li class="toctree-l3"><a class="reference internal" href="minkit.aop.html">aop</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="../main.html#class-inheritance-diagram">Class Inheritance Diagram</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference.html#class-inheritance-diagram">Class Inheritance Diagram</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../performance.html">Performance of the minkit package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../performance.html">Performance</a></li>
 </ul>
 
             
@@ -164,7 +164,7 @@
     
       <li><a href="../index.html">Docs</a> &raquo;</li>
         
-          <li><a href="../main.html">Functions and classes</a> &raquo;</li>
+          <li><a href="../reference.html">MinKit reference</a> &raquo;</li>
         
       <li>BinnedDataSet</li>
     
@@ -213,13 +213,13 @@
 <h1>BinnedDataSet<a class="headerlink" href="#binneddataset" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="minkit.BinnedDataSet">
-<em class="property">class </em><code class="sig-prename descclassname">minkit.</code><code class="sig-name descname">BinnedDataSet</code><span class="sig-paren">(</span><em class="sig-param">centers</em>, <em class="sig-param">data_pars</em>, <em class="sig-param">values</em>, <em class="sig-param">copy=True</em>, <em class="sig-param">convert=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/dataset.html#BinnedDataSet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.BinnedDataSet" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">minkit.</code><code class="sig-name descname">BinnedDataSet</code><span class="sig-paren">(</span><em class="sig-param">edges</em>, <em class="sig-param">data_pars</em>, <em class="sig-param">values</em>, <em class="sig-param">copy=True</em>, <em class="sig-param">convert=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/dataset.html#BinnedDataSet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.BinnedDataSet" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>A binned data set.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>centers</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a>) – centers of the bins.</p></li>
+<li><p><strong>edges</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – centers of the bins.</p></li>
 <li><p><strong>data_pars</strong> (<a class="reference internal" href="minkit.Registry.html#minkit.Registry" title="minkit.Registry"><em>Registry</em></a><em>(</em><a class="reference internal" href="minkit.Parameter.html#minkit.Parameter" title="minkit.Parameter"><em>Parameter</em></a><em>)</em>) – data parameters.</p></li>
 <li><p><strong>values</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a>) – values of the data for each center.</p></li>
 </ul>
@@ -232,10 +232,13 @@
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.BinnedDataSet.data_pars" title="minkit.BinnedDataSet.data_pars"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_pars</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.BinnedDataSet.bounds" title="minkit.BinnedDataSet.bounds"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bounds</span></code></a></p></td>
+<td><p>Bounds of each data parameter.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#minkit.BinnedDataSet.data_pars" title="minkit.BinnedDataSet.data_pars"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_pars</span></code></a></p></td>
 <td><p>Get the data parameters of this sample.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#minkit.BinnedDataSet.values" title="minkit.BinnedDataSet.values"><code class="xref py py-obj docutils literal notranslate"><span class="pre">values</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.BinnedDataSet.values" title="minkit.BinnedDataSet.values"><code class="xref py py-obj docutils literal notranslate"><span class="pre">values</span></code></a></p></td>
 <td><p>Get the values of the data set.</p></td>
 </tr>
 </tbody>
@@ -247,12 +250,18 @@
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.BinnedDataSet.from_array" title="minkit.BinnedDataSet.from_array"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_array</span></code></a>(centers, data_par, values[, …])</p></td>
-<td><p>Build the class from the array of centers and values.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.BinnedDataSet.from_array" title="minkit.BinnedDataSet.from_array"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_array</span></code></a>(edges, data_par, values[, copy, …])</p></td>
+<td><p>Build the class from the array of edges and values.</p></td>
 </tr>
 </tbody>
 </table>
 <p class="rubric">Attributes Documentation</p>
+<dl class="attribute">
+<dt id="minkit.BinnedDataSet.bounds">
+<code class="sig-name descname">bounds</code><a class="headerlink" href="#minkit.BinnedDataSet.bounds" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bounds of each data parameter.</p>
+</dd></dl>
+
 <dl class="attribute">
 <dt id="minkit.BinnedDataSet.data_pars">
 <code class="sig-name descname">data_pars</code><a class="headerlink" href="#minkit.BinnedDataSet.data_pars" title="Permalink to this definition">¶</a></dt>
@@ -284,12 +293,12 @@
 <p class="rubric">Methods Documentation</p>
 <dl class="method">
 <dt id="minkit.BinnedDataSet.from_array">
-<em class="property">classmethod </em><code class="sig-name descname">from_array</code><span class="sig-paren">(</span><em class="sig-param">centers</em>, <em class="sig-param">data_par</em>, <em class="sig-param">values</em>, <em class="sig-param">copy=True</em>, <em class="sig-param">convert=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/dataset.html#BinnedDataSet.from_array"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.BinnedDataSet.from_array" title="Permalink to this definition">¶</a></dt>
-<dd><p>Build the class from the array of centers and values.</p>
+<em class="property">classmethod </em><code class="sig-name descname">from_array</code><span class="sig-paren">(</span><em class="sig-param">edges</em>, <em class="sig-param">data_par</em>, <em class="sig-param">values</em>, <em class="sig-param">copy=True</em>, <em class="sig-param">convert=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/dataset.html#BinnedDataSet.from_array"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.BinnedDataSet.from_array" title="Permalink to this definition">¶</a></dt>
+<dd><p>Build the class from the array of edges and values.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>centers</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a>) – centers of the bins.</p></li>
+<li><p><strong>edges</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a>) – edges of the bins.</p></li>
 <li><p><strong>data_par</strong> (<a class="reference internal" href="minkit.Parameter.html#minkit.Parameter" title="minkit.Parameter"><em>Parameter</em></a>) – data parameter.</p></li>
 <li><p><strong>values</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a>) – values at each bin.</p></li>
 </ul>

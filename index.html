@@ -39,7 +39,7 @@
   <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Functions and classes" href="main.html" /> 
+    <link rel="next" title="User guide" href="user.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -88,9 +88,9 @@
             
             
               <ul>
-<li class="toctree-l1"><a class="reference internal" href="main.html">Functions and classes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="performance.html">Performance of the minkit package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user.html">User guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference.html">MinKit reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="performance.html">Performance</a></li>
 </ul>
 
             
@@ -182,7 +182,7 @@
 <div class="section" id="introduction">
 <h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h1>
 <p>This package provides tools to fit probability density functions (PDFs) to both unbinned and binned data, using different minimizers (like <a class="reference external" href="https://iminuit.readthedocs.io/en/latest/reference.html">Minuit</a>).
-The <a class="reference external" href="https://mramospe.github.io/minkit">minkit</a> package appears as an alternative to existing minimization packages, like <a class="reference external" href="https://root.cern.ch/roofit">RooFit</a>.
+The MinKit package appears as an alternative to existing minimization packages, like <a class="reference external" href="https://root.cern.ch/roofit">RooFit</a>.
 The idea is to provide a friendly pure python API to do minimization and calculations with PDFs.
 It has support for both CPU and GPU backends, being very easy for the user to change from one to the other.
 PDFs are implemented in C++, OpenCL and CUDA, allowing a fast evaluation of the functions.</p>
@@ -258,18 +258,21 @@ pip install -e minkit
 following sections:</p>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="main.html">Functions and classes</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="main.html#functions">Functions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="main.html#classes">Classes</a></li>
-<li class="toctree-l2"><a class="reference internal" href="main.html#class-inheritance-diagram">Class Inheritance Diagram</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="performance.html">Performance of the minkit package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a><ul>
+<li class="toctree-l1"><a class="reference internal" href="user.html">User guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/datasets.html">Creating data sets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="notebooks/basic.html">Basic example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/minimization.html">Minimization with MinKit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/multidimensional.html">Working in more than one dimension</a></li>
 <li class="toctree-l2"><a class="reference internal" href="notebooks/extension.html">Adding custom PDFs</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="reference.html">MinKit reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="reference.html#functions">Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference.html#classes">Classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference.html#class-inheritance-diagram">Class Inheritance Diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="performance.html">Performance</a></li>
 </ul>
 </div>
 </div>
@@ -290,7 +293,7 @@ following sections:</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="main.html" class="btn btn-neutral float-right" title="Functions and classes" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="user.html" class="btn btn-neutral float-right" title="User guide" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
     </div>

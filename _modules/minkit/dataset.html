@@ -87,9 +87,9 @@
             
             
               <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../main.html">Functions and classes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../performance.html">Performance of the minkit package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../user.html">User guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference.html">MinKit reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../performance.html">Performance</a></li>
 </ul>
 
             
@@ -173,9 +173,6 @@
 
 
 <div class="viewcode-block" id="DataSet"><a class="viewcode-back" href="../../api/minkit.DataSet.html#minkit.DataSet">[docs]</a><span class="k">class</span> <span class="nc">DataSet</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    Definition of a set of data.</span>
-<span class="sd">    &#39;&#39;&#39;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">pars</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">convert</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">trim</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
@@ -186,7 +183,7 @@
 <span class="sd">        :param pars: data parameters.</span>
 <span class="sd">        :type pars: Registry(Parameter)</span>
 <span class="sd">        :param weights: possible set of weights.</span>
-<span class="sd">        :type weights: numpy.ndarray or None</span>
+<span class="sd">        :type weights: numpy.ndarray</span>
 <span class="sd">        :param copy: whether to do copies of arrays.</span>
 <span class="sd">        :type copy: bool</span>
 <span class="sd">        :param convert: in case of working in GPUs, the input arrays \</span>
@@ -196,10 +193,10 @@
 <span class="sd">        and remove the data points out of them.</span>
 <span class="sd">        :type trim: bool</span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__data</span> <span class="o">=</span> <span class="p">{</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">aop</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__data</span> <span class="o">=</span> <span class="p">{</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">aop</span><span class="o">.</span><span class="n">data_array</span><span class="p">(</span>
             <span class="n">data</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">],</span> <span class="n">copy</span><span class="o">=</span><span class="n">copy</span><span class="p">,</span> <span class="n">convert</span><span class="o">=</span><span class="n">convert</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pars</span><span class="p">}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__data_pars</span> <span class="o">=</span> <span class="n">pars</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__weights</span> <span class="o">=</span> <span class="n">weights</span> <span class="k">if</span> <span class="n">weights</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">aop</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__weights</span> <span class="o">=</span> <span class="n">weights</span> <span class="k">if</span> <span class="n">weights</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">aop</span><span class="o">.</span><span class="n">data_array</span><span class="p">(</span>
             <span class="n">weights</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="n">copy</span><span class="p">,</span> <span class="n">convert</span><span class="o">=</span><span class="n">convert</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">trim</span><span class="p">:</span>
@@ -300,7 +297,7 @@
 <span class="sd">        Get the weights of the sample.</span>
 
 <span class="sd">        :returns: weights of the sample.</span>
-<span class="sd">        :rtype: numpy.ndarray or None</span>
+<span class="sd">        :rtype: numpy.ndarray</span>
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__weights</span>
 
@@ -315,7 +312,7 @@
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">weights</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                 <span class="s1">&#39;Length of the provided weights does not match that of the DataSet&#39;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__weights</span> <span class="o">=</span> <span class="n">aop</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">weights</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__weights</span> <span class="o">=</span> <span class="n">aop</span><span class="o">.</span><span class="n">data_array</span><span class="p">(</span><span class="n">weights</span><span class="p">)</span>
 
 <div class="viewcode-block" id="DataSet.from_array"><a class="viewcode-back" href="../../api/minkit.DataSet.html#minkit.DataSet.from_array">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_array</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">arr</span><span class="p">,</span> <span class="n">data_par</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">convert</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
@@ -327,7 +324,7 @@
 <span class="sd">        :param data_pars: data parameters.</span>
 <span class="sd">        :type data_pars: Registry(Parameter)</span>
 <span class="sd">        :param weights: possible weights to use.</span>
-<span class="sd">        :type weights: numpy.ndarray or None</span>
+<span class="sd">        :type weights: numpy.ndarray</span>
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="p">({</span><span class="n">data_par</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">arr</span><span class="p">},</span> <span class="n">parameters</span><span class="o">.</span><span class="n">Registry</span><span class="p">([</span><span class="n">data_par</span><span class="p">]),</span> <span class="n">weights</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="n">copy</span><span class="p">,</span> <span class="n">convert</span><span class="o">=</span><span class="n">convert</span><span class="p">)</span></div>
 
@@ -341,7 +338,7 @@
 <span class="sd">        :param data_pars: data parameters.</span>
 <span class="sd">        :type data_pars: Registry(Parameter)</span>
 <span class="sd">        :param weights: possible weights to use.</span>
-<span class="sd">        :type weights: numpy.ndarray or None</span>
+<span class="sd">        :type weights: numpy.ndarray</span>
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="n">dct</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">data_pars</span><span class="p">:</span>
@@ -350,6 +347,31 @@
                     <span class="n">f</span><span class="s1">&#39;No data for parameter &quot;</span><span class="si">{p.name}</span><span class="s1">&quot; has been found in the input array&#39;</span><span class="p">)</span>
             <span class="n">dct</span><span class="p">[</span><span class="n">p</span><span class="p">]</span> <span class="o">=</span> <span class="n">arr</span><span class="p">[</span><span class="n">p</span><span class="p">]</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">dct</span><span class="p">,</span> <span class="n">data_pars</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DataSet.make_binned"><a class="viewcode-back" href="../../api/minkit.DataSet.html#minkit.DataSet.make_binned">[docs]</a>    <span class="k">def</span> <span class="nf">make_binned</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Make a binned version of this sample.</span>
+
+<span class="sd">        :param bins: number of bins per data parameter.</span>
+<span class="sd">        :type bins: int or tuple(int, ...)</span>
+<span class="sd">        :returns: binned data sample.</span>
+<span class="sd">        :rtype: BinnedDataSet</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">bins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">bins</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">bins</span><span class="o">.</span><span class="n">shape</span><span class="p">):</span>
+            <span class="n">edges</span> <span class="o">=</span> <span class="p">{</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">aop</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">*</span><span class="n">p</span><span class="o">.</span><span class="n">bounds</span><span class="p">,</span> <span class="n">b</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+                     <span class="k">for</span> <span class="n">p</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_pars</span><span class="p">,</span> <span class="n">bins</span><span class="p">)}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">edges</span> <span class="o">=</span> <span class="p">{</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">aop</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">*</span><span class="n">p</span><span class="o">.</span><span class="n">bounds</span><span class="p">,</span> <span class="n">bins</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+                     <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_pars</span><span class="p">}</span>
+
+        <span class="n">centers</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_pars</span><span class="p">]</span>
+
+        <span class="n">e</span> <span class="o">=</span> <span class="p">[</span><span class="n">edges</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_pars</span><span class="p">]</span>
+
+        <span class="n">values</span> <span class="o">=</span> <span class="n">aop</span><span class="o">.</span><span class="n">sum_inside</span><span class="p">(</span><span class="n">centers</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">BinnedDataSet</span><span class="p">(</span><span class="n">edges</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_pars</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">convert</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="DataSet.merge"><a class="viewcode-back" href="../../api/minkit.DataSet.html#minkit.DataSet.merge">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">merge</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">samples</span><span class="p">,</span> <span class="n">maximum</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">trim</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
@@ -361,7 +383,7 @@
 <span class="sd">        :param samples: samples to merge.</span>
 <span class="sd">        :type samples: tuple(DataSet)</span>
 <span class="sd">        :param maximum: maximum number of entries for the final sample.</span>
-<span class="sd">        :type maximum: int or None</span>
+<span class="sd">        :type maximum: int</span>
 <span class="sd">        :param shuffle: whether to shuffle the sample before trimming it.</span>
 <span class="sd">        :type shuffle: bool</span>
 <span class="sd">        :param trim: whether to check the bounds of the data parameters \</span>
@@ -512,16 +534,13 @@
 
 
 <div class="viewcode-block" id="BinnedDataSet"><a class="viewcode-back" href="../../api/minkit.BinnedDataSet.html#minkit.BinnedDataSet">[docs]</a><span class="k">class</span> <span class="nc">BinnedDataSet</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    A binned data set.</span>
-<span class="sd">    &#39;&#39;&#39;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">centers</span><span class="p">,</span> <span class="n">data_pars</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">convert</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">edges</span><span class="p">,</span> <span class="n">data_pars</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">convert</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        A binned data set.</span>
 
-<span class="sd">        :param centers: centers of the bins.</span>
-<span class="sd">        :type centers: numpy.ndarray</span>
+<span class="sd">        :param edges: centers of the bins.</span>
+<span class="sd">        :type edges: dict</span>
 <span class="sd">        :param data_pars: data parameters.</span>
 <span class="sd">        :type data_pars: Registry(Parameter)</span>
 <span class="sd">        :param values: values of the data for each center.</span>
@@ -529,22 +548,22 @@
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">BinnedDataSet</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">__centers</span> <span class="o">=</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="n">aop</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="n">copy</span><span class="p">,</span> <span class="n">convert</span><span class="o">=</span><span class="n">convert</span><span class="p">)</span>
-                          <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">arr</span> <span class="ow">in</span> <span class="nb">dict</span><span class="p">(</span><span class="n">centers</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__data_pars</span> <span class="o">=</span> <span class="n">data_pars</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__values</span> <span class="o">=</span> <span class="n">aop</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
-            <span class="n">values</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="n">copy</span><span class="p">,</span> <span class="n">convert</span><span class="o">=</span><span class="n">convert</span><span class="p">)</span>
 
-        <span class="k">assert</span> <span class="n">centers</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">__centers</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__edges</span> <span class="o">=</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="n">aop</span><span class="o">.</span><span class="n">data_array</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="n">copy</span><span class="p">,</span> <span class="n">convert</span><span class="o">=</span><span class="n">convert</span><span class="p">)</span>
+                        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">arr</span> <span class="ow">in</span> <span class="nb">dict</span><span class="p">(</span><span class="n">edges</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__values</span> <span class="o">=</span> <span class="n">aop</span><span class="o">.</span><span class="n">data_array</span><span class="p">(</span>
+            <span class="n">values</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="n">copy</span><span class="p">,</span> <span class="n">convert</span><span class="o">=</span><span class="n">convert</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">var</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Get the centers of the bins for the given parameter.</span>
 
 <span class="sd">        :returns: centers of the bins.</span>
-<span class="sd">        :rtype: numpy.ndarray</span>
+<span class="sd">        :rtype: numpy.ndarray or reikna.cluda.Array</span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__centers</span><span class="p">[</span><span class="n">var</span><span class="p">]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__edges</span><span class="p">[</span><span class="n">var</span><span class="p">]</span>
 
     <span class="k">def</span> <span class="nf">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
@@ -553,7 +572,19 @@
 <span class="sd">        :returns: size of the sample.</span>
 <span class="sd">        :rtype: int</span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__centers</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__centers</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">0</span><span class="p">]])</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__values</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Bounds of each data parameter.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">bounds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__data_pars</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">types</span><span class="o">.</span><span class="n">cpu_type</span><span class="p">)</span>
+        <span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">::</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">aop</span><span class="o">.</span><span class="n">extract_ndarray</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__edges</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__data_pars</span><span class="p">]</span>
+        <span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">::</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">aop</span><span class="o">.</span><span class="n">extract_ndarray</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__edges</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__data_pars</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">bounds</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">data_pars</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -566,12 +597,12 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__data_pars</span>
 
 <div class="viewcode-block" id="BinnedDataSet.from_array"><a class="viewcode-back" href="../../api/minkit.BinnedDataSet.html#minkit.BinnedDataSet.from_array">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">from_array</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">centers</span><span class="p">,</span> <span class="n">data_par</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">convert</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">from_array</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">edges</span><span class="p">,</span> <span class="n">data_par</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">convert</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Build the class from the array of centers and values.</span>
+<span class="sd">        Build the class from the array of edges and values.</span>
 
-<span class="sd">        :param centers: centers of the bins.</span>
-<span class="sd">        :type centers: numpy.ndarray</span>
+<span class="sd">        :param edges: edges of the bins.</span>
+<span class="sd">        :type edges: numpy.ndarray</span>
 <span class="sd">        :param data_par: data parameter.</span>
 <span class="sd">        :type data_par: Parameter</span>
 <span class="sd">        :param values: values at each bin.</span>
@@ -579,7 +610,7 @@
 <span class="sd">        :returns: binned data set.</span>
 <span class="sd">        :rtype: BinnedDataSet</span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="k">return</span> <span class="bp">cls</span><span class="p">({</span><span class="n">data_par</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">centers</span><span class="p">},</span> <span class="n">parameters</span><span class="o">.</span><span class="n">Registry</span><span class="p">([</span><span class="n">data_par</span><span class="p">]),</span> <span class="n">values</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="n">copy</span><span class="p">,</span> <span class="n">convert</span><span class="o">=</span><span class="n">convert</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">({</span><span class="n">data_par</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">edges</span><span class="p">},</span> <span class="n">parameters</span><span class="o">.</span><span class="n">Registry</span><span class="p">([</span><span class="n">data_par</span><span class="p">]),</span> <span class="n">values</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="n">copy</span><span class="p">,</span> <span class="n">convert</span><span class="o">=</span><span class="n">convert</span><span class="p">)</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">values</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -597,7 +628,7 @@
 <span class="sd">    Create a grid of points to evaluate a :class:`PDF` object.</span>
 
 <span class="sd">    :param data_pars: data parameters.</span>
-<span class="sd">    :type data_pars: Registry(Parameter)</span>
+<span class="sd">    :type data_pars: list(Parameter)</span>
 <span class="sd">    :param size: number of entries in the output sample per set of bounds. \</span>
 <span class="sd">    This means that &quot;size&quot; entries will be generated for each pair of (min, max) \</span>
 <span class="sd">    provided, that is, per data parameter.</span>

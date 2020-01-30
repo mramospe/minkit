@@ -87,9 +87,9 @@
             
             
               <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../main.html">Functions and classes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../performance.html">Performance of the minkit package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../user.html">User guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference.html">MinKit reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../performance.html">Performance</a></li>
 </ul>
 
             
@@ -167,15 +167,24 @@
 <span class="kn">import</span> <span class="nn">functools</span>
 <span class="kn">import</span> <span class="nn">iminuit</span>
 <span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">numdifftools</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">scipy.optimize</span> <span class="k">as</span> <span class="nn">scipyopt</span>
+<span class="kn">import</span> <span class="nn">uncertainties</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Category&#39;</span><span class="p">,</span> <span class="s1">&#39;binned_minimizer&#39;</span><span class="p">,</span> <span class="s1">&#39;unbinned_minimizer&#39;</span><span class="p">,</span>
-           <span class="s1">&#39;minuit_to_registry&#39;</span><span class="p">,</span> <span class="s1">&#39;simultaneous_minimizer&#39;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Category&#39;</span><span class="p">,</span> <span class="s1">&#39;minimizer&#39;</span><span class="p">,</span> <span class="s1">&#39;minuit_to_registry&#39;</span><span class="p">,</span>
+           <span class="s1">&#39;simultaneous_minimizer&#39;</span><span class="p">,</span> <span class="s1">&#39;SciPyMinimizer&#39;</span><span class="p">]</span>
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
 <span class="c1"># Names for the minimizers</span>
 <span class="n">MINUIT</span> <span class="o">=</span> <span class="s1">&#39;minuit&#39;</span>
+<span class="n">SCIPY</span> <span class="o">=</span> <span class="s1">&#39;scipy&#39;</span>
+
+<span class="c1"># Choices and default method to minimize with SciPy</span>
+<span class="n">SCIPY_CHOICES</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;L-BFGS-B&#39;</span><span class="p">,</span> <span class="s1">&#39;TNC&#39;</span><span class="p">,</span> <span class="s1">&#39;SLSQP&#39;</span><span class="p">,</span> <span class="s1">&#39;trust-constr&#39;</span><span class="p">)</span>
+<span class="n">SCIPY_DEFAULT</span> <span class="o">=</span> <span class="n">SCIPY_CHOICES</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
 <span class="c1"># Object to help users to create simultaneous minimizers.</span>
 <span class="n">Category</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">namedtuple</span><span class="p">(</span><span class="s1">&#39;Category&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;fcn&#39;</span><span class="p">,</span> <span class="s1">&#39;pdf&#39;</span><span class="p">,</span> <span class="s1">&#39;data&#39;</span><span class="p">])</span>
@@ -184,28 +193,7 @@
 <span class="s1">The type of data (binned/unbinned) is assumed from the FCN.&#39;&#39;&#39;</span>
 
 
-<span class="k">def</span> <span class="nf">parse_fcn</span><span class="p">(</span><span class="n">data_type</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    Parser the &quot;fcn&quot; argument of a function, checking its validity for the given data type.</span>
-<span class="sd">    &#39;&#39;&#39;</span>
-    <span class="k">def</span> <span class="nf">__wrapper</span><span class="p">(</span><span class="n">function</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Internal wrapper.</span>
-<span class="sd">        &#39;&#39;&#39;</span>
-        <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">function</span><span class="p">)</span>
-        <span class="k">def</span> <span class="nf">__wrapper</span><span class="p">(</span><span class="n">fcn</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-            <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">            Internal wrapper.</span>
-<span class="sd">            &#39;&#39;&#39;</span>
-            <span class="k">if</span> <span class="n">fcns</span><span class="o">.</span><span class="n">data_type_for_fcn</span><span class="p">(</span><span class="n">fcn</span><span class="p">)</span> <span class="o">!=</span> <span class="n">data_type</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
-                    <span class="n">f</span><span class="s1">&#39;FCN with name &quot;</span><span class="si">{fcn}</span><span class="s1">&quot; is not available for &quot;</span><span class="si">{data_type}</span><span class="s1">&quot; data type&#39;</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">function</span><span class="p">(</span><span class="n">fcns</span><span class="o">.</span><span class="n">fcn_from_name</span><span class="p">(</span><span class="n">fcn</span><span class="p">),</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">__wrapper</span>
-    <span class="k">return</span> <span class="n">__wrapper</span>
-
-
-<span class="k">class</span> <span class="nc">BinnedEvaluatorProxy</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">BinnedEvaluator</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Definition of a proxy class to evaluate an FCN with a PDF on a BinnedDataSet object.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
@@ -226,7 +214,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">__pdf</span> <span class="o">=</span> <span class="n">pdf</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__constraints</span> <span class="o">=</span> <span class="n">constraints</span> <span class="ow">or</span> <span class="p">[]</span>
 
-        <span class="nb">super</span><span class="p">(</span><span class="n">BinnedEvaluatorProxy</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">BinnedEvaluator</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">values</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
@@ -253,7 +241,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__pdf</span><span class="o">.</span><span class="n">all_real_args</span>
 
 
-<span class="k">class</span> <span class="nc">UnbinnedEvaluatorProxy</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">UnbinnedEvaluator</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Definition of a proxy class to evaluate an FCN with a PDF.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
@@ -286,7 +274,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">__range</span> <span class="o">=</span> <span class="nb">range</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__constraints</span> <span class="o">=</span> <span class="n">constraints</span> <span class="ow">or</span> <span class="p">[]</span>
 
-        <span class="nb">super</span><span class="p">(</span><span class="n">UnbinnedEvaluatorProxy</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">UnbinnedEvaluator</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">values</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
@@ -358,24 +346,24 @@
         <span class="k">return</span> <span class="n">args</span>
 
 
-<div class="viewcode-block" id="minuit_to_registry"><a class="viewcode-back" href="../../api/minkit.minuit_to_registry.html#minkit.minuit_to_registry">[docs]</a><span class="k">def</span> <span class="nf">minuit_to_registry</span><span class="p">(</span><span class="n">result</span><span class="p">):</span>
+<div class="viewcode-block" id="minuit_to_registry"><a class="viewcode-back" href="../../api/minkit.minuit_to_registry.html#minkit.minuit_to_registry">[docs]</a><span class="k">def</span> <span class="nf">minuit_to_registry</span><span class="p">(</span><span class="n">params</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    Transform the output from a call to Minuit into a :class:`Registry`.</span>
+<span class="sd">    Transform the parameters from a call to Minuit into a :class:`Registry`.</span>
 
 <span class="sd">    :param result: result from a migrad call.</span>
-<span class="sd">    :type result: iminuit.Minuit</span>
+<span class="sd">    :type result: iminuit.util.Params</span>
 <span class="sd">    :returns: registry of parameters with the result from Migrad.</span>
 <span class="sd">    :rtype: Registry(str, Parameter)</span>
 <span class="sd">    &#39;&#39;&#39;</span>
-    <span class="n">r</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">params</span><span class="p">:</span>
+    <span class="n">reg</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">Registry</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">params</span><span class="p">:</span>
         <span class="n">limits</span> <span class="o">=</span> <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">lower_limit</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">upper_limit</span><span class="p">)</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">has_limits</span> <span class="k">else</span> <span class="kc">None</span>
-        <span class="n">r</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">parameters</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span>
+        <span class="n">reg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">parameters</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span>
             <span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="n">limits</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">error</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">is_fixed</span><span class="p">))</span>
-    <span class="k">return</span> <span class="n">parameters</span><span class="o">.</span><span class="n">Registry</span><span class="p">(</span><span class="n">r</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">reg</span></div>
 
 
-<span class="k">def</span> <span class="nf">registry_to_minuit_input</span><span class="p">(</span><span class="n">registry</span><span class="p">,</span> <span class="n">errordef</span><span class="o">=</span><span class="mf">1.</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">registry_to_minuit_input</span><span class="p">(</span><span class="n">registry</span><span class="p">,</span> <span class="n">errordef</span><span class="o">=</span><span class="n">fcns</span><span class="o">.</span><span class="n">ERRORDEF</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Transform a registry of parameters into a dictionary to be parsed by Minuit.</span>
 
@@ -393,13 +381,125 @@
     <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">errordef</span><span class="o">=</span><span class="n">errordef</span><span class="p">,</span> <span class="o">**</span><span class="n">values</span><span class="p">,</span> <span class="o">**</span><span class="n">errors</span><span class="p">,</span> <span class="o">**</span><span class="n">limits</span><span class="p">,</span> <span class="o">**</span><span class="n">const</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="unbinned_minimizer"><a class="viewcode-back" href="../../api/minkit.unbinned_minimizer.html#minkit.unbinned_minimizer">[docs]</a><span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
-<span class="nd">@parse_fcn</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">UNBINNED</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">unbinned_minimizer</span><span class="p">(</span><span class="n">fcn</span><span class="p">,</span> <span class="n">pdf</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">minimizer</span><span class="o">=</span><span class="n">MINUIT</span><span class="p">,</span> <span class="n">minimizer_config</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">rescale_weights</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="SciPyMinimizer"><a class="viewcode-back" href="../../api/minkit.SciPyMinimizer.html#minkit.SciPyMinimizer">[docs]</a><span class="k">class</span> <span class="nc">SciPyMinimizer</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">evaluator</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Wrapper around the :func:`scipy.optimize.minimize` function.</span>
+
+<span class="sd">        :param evaluator: evaluator to be used in the minimization.</span>
+<span class="sd">        :type evaluator: UnbinnedEvaluator, BinnedEvaluator or SimultaneousEvaluator</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__eval</span> <span class="o">=</span> <span class="n">evaluator</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__varids</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">evaluator</span><span class="o">.</span><span class="n">args</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">types</span><span class="o">.</span><span class="n">cpu_type</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">evaluator</span><span class="o">.</span><span class="n">args</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">a</span><span class="o">.</span><span class="n">constant</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__values</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">value</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__varids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_evaluate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Evaluate the FCN, parsing the values provided by SciPy.</span>
+
+<span class="sd">        :param args: arguments from SciPy.</span>
+<span class="sd">        :type args: tuple(float, ...)</span>
+<span class="sd">        :returns: value of the FCN.</span>
+<span class="sd">        :rtype: float</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__values</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">__varids</span><span class="p">]</span> <span class="o">=</span> <span class="n">args</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__eval</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">__values</span><span class="p">)</span>
+
+<div class="viewcode-block" id="SciPyMinimizer.minimize"><a class="viewcode-back" href="../../api/minkit.SciPyMinimizer.html#minkit.SciPyMinimizer.minimize">[docs]</a>    <span class="k">def</span> <span class="nf">minimize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">SCIPY_DEFAULT</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Minimize the PDF using the provided method and tolerance.</span>
+<span class="sd">        Only the methods (&#39;L-BFGS-B&#39;, &#39;TNC&#39;, &#39;SLSQP&#39;, &#39;trust-constr&#39;) are allowed.</span>
+
+<span class="sd">        :param method: method parsed by :func:`scipy.optimize.minimize`.</span>
+<span class="sd">        :type method: str</span>
+<span class="sd">        :param tol: tolerance to be used in the minimization.</span>
+<span class="sd">        :type tol: float</span>
+<span class="sd">        :returns: result of the minimization.</span>
+<span class="sd">        :rtype: scipy.optimize.OptimizeResult</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="n">method</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">SCIPY_CHOICES</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="n">f</span><span class="s1">&#39;Unknown minimization method &quot;</span><span class="si">{method}</span><span class="s1">&quot;; choose from </span><span class="si">{SCIPY_CHOICES}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="n">varargs</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">Registry</span><span class="p">(</span>
+            <span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">v</span><span class="p">:</span> <span class="ow">not</span> <span class="n">v</span><span class="o">.</span><span class="n">constant</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__eval</span><span class="o">.</span><span class="n">args</span><span class="p">))</span>
+
+        <span class="n">initials</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">varargs</span><span class="p">)</span>
+
+        <span class="n">bounds</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">bounds</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">varargs</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">scipyopt</span><span class="o">.</span><span class="n">minimize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_evaluate</span><span class="p">,</span> <span class="n">initials</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="n">bounds</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="n">tol</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="SciPyMinimizer.result_to_registry"><a class="viewcode-back" href="../../api/minkit.SciPyMinimizer.html#minkit.SciPyMinimizer.result_to_registry">[docs]</a>    <span class="k">def</span> <span class="nf">result_to_registry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">result</span><span class="p">,</span> <span class="n">ignore_warnings</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Transform the output of a minimization call done with any of the SciPy methods</span>
+<span class="sd">        to a :class:`minkit.Registry`.</span>
+<span class="sd">        This function uses :class:`numdifftools.Hessian` in order to calculate the Hessian</span>
+<span class="sd">        matrix of the FCN.</span>
+<span class="sd">        Uncertainties are extracted from the inverse of the Hessian, taking into account</span>
+<span class="sd">        the correlation among the variables.</span>
+
+<span class="sd">        :param result: result of the minimization.</span>
+<span class="sd">        :type result: scipy.optimize.OptimizeResult</span>
+<span class="sd">        :param ignore_warnings: whether to ignore the warnings during the evaluation \</span>
+<span class="sd">        of the Hessian or not.</span>
+<span class="sd">        :type ignore_warnings: bool</span>
+<span class="sd">        :param kwargs: keyword arguments to :class:`numdifftools.Hessian`</span>
+<span class="sd">        :type kwargs: dict</span>
+<span class="sd">        :returns: registry with new parameters with the values and errors defined.</span>
+<span class="sd">        :rtype: Registry</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="c1"># Disable warnings, since &quot;numdifftools&quot; does not allow to set bounds</span>
+        <span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s1">&#39;ignore&#39;</span><span class="p">)</span>
+            <span class="n">hessian</span> <span class="o">=</span> <span class="n">numdifftools</span><span class="o">.</span><span class="n">Hessian</span><span class="p">(</span>
+                <span class="k">lambda</span> <span class="n">a</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_evaluate</span><span class="p">(</span><span class="o">*</span><span class="n">a</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">cov</span> <span class="o">=</span> <span class="mf">2.</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">hessian</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">x</span><span class="p">))</span>
+
+        <span class="n">values</span> <span class="o">=</span> <span class="n">uncertainties</span><span class="o">.</span><span class="n">correlated_values</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">cov</span><span class="p">)</span>
+
+        <span class="n">reg</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">Registry</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__eval</span><span class="o">.</span><span class="n">args</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__varids</span><span class="p">:</span>
+                <span class="n">reg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">parameters</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span>
+                    <span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">values</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">nominal_value</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">bounds</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="n">values</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">std_dev</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">constant</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">reg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">parameters</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span>
+                    <span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">bounds</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">error</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">constant</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">reg</span></div></div>
+
+
+<div class="viewcode-block" id="minimizer"><a class="viewcode-back" href="../../api/minkit.minimizer.html#minkit.minimizer">[docs]</a><span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
+<span class="k">def</span> <span class="nf">minimizer</span><span class="p">(</span><span class="n">fcn</span><span class="p">,</span> <span class="n">pdf</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">minimizer</span><span class="o">=</span><span class="n">MINUIT</span><span class="p">,</span> <span class="n">minimizer_config</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    Create a new instance of :class:`iminuit.Minuit`.</span>
+<span class="sd">    Create a new minimizer to be used within a context.</span>
 <span class="sd">    This represents a &quot;constant&quot; object, that is, parameters defining</span>
-<span class="sd">    the PDFs are assumed to remain constant during all its lifetime.</span>
+<span class="sd">    the PDFs must keep their constness during the context.</span>
+
+<span class="sd">    :param fcn: type of FCN to use for the minimization.</span>
+<span class="sd">    :type fcn: str</span>
+<span class="sd">    :param pdf: function to minimize.</span>
+<span class="sd">    :type pdf: PDF</span>
+<span class="sd">    :param data: data set to use.</span>
+<span class="sd">    :type data: UnbinnedDataSet or BinnedDataSet</span>
+<span class="sd">    :param minimizer: name of the minimizer to use.</span>
+<span class="sd">    :type minimizer: str</span>
+<span class="sd">    :param minimizer_config: any extra configuration to be passed to the minimizer. For \</span>
+<span class="sd">    &quot;minuit&quot;, the argument &quot;forced_parameters&quot; is unavailable.</span>
+<span class="sd">    :type minimizer_config: dict</span>
+<span class="sd">    :param kwargs: extra arguments to the evaluator to use. Current allowed values are: \</span>
+<span class="sd">    * constraints: (:class:`list`(:class:`PDF`)) constraints for the FCN.\</span>
+<span class="sd">    * rescale_weights: (:class:`bool`) (unbinned data sets only) whether to rescale the weights, so the \</span>
+<span class="sd">    statistical power remains constant.</span>
+<span class="sd">    :type kwargs: dict</span>
 
 <span class="sd">    .. warning: Do not change any attribute of the parameters defining the \</span>
 <span class="sd">    PDFs, since it will not be properly reflected during the minimization \</span>
@@ -407,46 +507,22 @@
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="n">pdf</span><span class="o">.</span><span class="n">enable_cache</span><span class="p">(</span><span class="n">pdf_core</span><span class="o">.</span><span class="n">PDF</span><span class="o">.</span><span class="n">CONST</span><span class="p">)</span>  <span class="c1"># Enable the cache</span>
 
-    <span class="n">evaluator</span> <span class="o">=</span> <span class="n">UnbinnedEvaluatorProxy</span><span class="p">(</span><span class="n">fcn</span><span class="p">,</span> <span class="n">pdf</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="n">mf</span> <span class="o">=</span> <span class="n">fcns</span><span class="o">.</span><span class="n">fcn_from_name</span><span class="p">(</span><span class="n">fcn</span><span class="p">)</span>
 
-    <span class="n">minimizer_config</span> <span class="o">=</span> <span class="n">minimizer_config</span> <span class="ow">or</span> <span class="p">{}</span>
-
-    <span class="k">if</span> <span class="n">minimizer</span> <span class="o">==</span> <span class="n">MINUIT</span><span class="p">:</span>
-        <span class="k">yield</span> <span class="n">iminuit</span><span class="o">.</span><span class="n">Minuit</span><span class="p">(</span><span class="n">evaluator</span><span class="p">,</span>
-                             <span class="n">forced_parameters</span><span class="o">=</span><span class="n">pdf</span><span class="o">.</span><span class="n">all_real_args</span><span class="o">.</span><span class="n">names</span><span class="p">,</span>
-                             <span class="n">pedantic</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                             <span class="o">**</span><span class="n">minimizer_config</span><span class="p">,</span>
-                             <span class="o">**</span><span class="n">registry_to_minuit_input</span><span class="p">(</span><span class="n">pdf</span><span class="o">.</span><span class="n">all_real_args</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">fcns</span><span class="o">.</span><span class="n">data_type_for_fcn</span><span class="p">(</span><span class="n">fcn</span><span class="p">)</span> <span class="o">==</span> <span class="n">dataset</span><span class="o">.</span><span class="n">BINNED</span><span class="p">:</span>
+        <span class="n">evaluator</span> <span class="o">=</span> <span class="n">BinnedEvaluator</span><span class="p">(</span><span class="n">mf</span><span class="p">,</span> <span class="n">pdf</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;Unknown minimizer &quot;</span><span class="si">{minimizer}</span><span class="s1">&quot;&#39;</span><span class="p">)</span>
-
-    <span class="n">pdf</span><span class="o">.</span><span class="n">free_cache</span><span class="p">()</span>  <span class="c1"># Very important</span></div>
-
-
-<div class="viewcode-block" id="binned_minimizer"><a class="viewcode-back" href="../../api/minkit.binned_minimizer.html#minkit.binned_minimizer">[docs]</a><span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
-<span class="nd">@parse_fcn</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">BINNED</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">binned_minimizer</span><span class="p">(</span><span class="n">fcn</span><span class="p">,</span> <span class="n">pdf</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">minimizer</span><span class="o">=</span><span class="n">MINUIT</span><span class="p">,</span> <span class="n">minimizer_config</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    Create a new instance of :class:`iminuit.Minuit`.</span>
-<span class="sd">    This represents a &quot;constant&quot; object, that is, parameters defining</span>
-<span class="sd">    the PDFs are assumed to remain constant during all its lifetime.</span>
-
-<span class="sd">    .. warning: Do not change any attribute of the parameters defining the \</span>
-<span class="sd">    PDFs, since it will not be properly reflected during the minimization \</span>
-<span class="sd">    calls.</span>
-<span class="sd">    &#39;&#39;&#39;</span>
-    <span class="n">pdf</span><span class="o">.</span><span class="n">enable_cache</span><span class="p">(</span><span class="n">pdf_core</span><span class="o">.</span><span class="n">PDF</span><span class="o">.</span><span class="n">CONST</span><span class="p">)</span>  <span class="c1"># Enable the cache</span>
-
-    <span class="n">evaluator</span> <span class="o">=</span> <span class="n">BinnedEvaluatorProxy</span><span class="p">(</span><span class="n">fcn</span><span class="p">,</span> <span class="n">pdf</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">evaluator</span> <span class="o">=</span> <span class="n">UnbinnedEvaluator</span><span class="p">(</span><span class="n">mf</span><span class="p">,</span> <span class="n">pdf</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="n">minimizer_config</span> <span class="o">=</span> <span class="n">minimizer_config</span> <span class="ow">or</span> <span class="p">{}</span>
 
     <span class="k">if</span> <span class="n">minimizer</span> <span class="o">==</span> <span class="n">MINUIT</span><span class="p">:</span>
         <span class="k">yield</span> <span class="n">iminuit</span><span class="o">.</span><span class="n">Minuit</span><span class="p">(</span><span class="n">evaluator</span><span class="p">,</span>
                              <span class="n">forced_parameters</span><span class="o">=</span><span class="n">pdf</span><span class="o">.</span><span class="n">all_real_args</span><span class="o">.</span><span class="n">names</span><span class="p">,</span>
-                             <span class="n">pedantic</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                              <span class="o">**</span><span class="n">minimizer_config</span><span class="p">,</span>
                              <span class="o">**</span><span class="n">registry_to_minuit_input</span><span class="p">(</span><span class="n">pdf</span><span class="o">.</span><span class="n">all_real_args</span><span class="p">))</span>
+    <span class="k">elif</span> <span class="n">minimizer</span> <span class="o">==</span> <span class="n">SCIPY</span><span class="p">:</span>
+        <span class="k">yield</span> <span class="n">SciPyMinimizer</span><span class="p">(</span><span class="n">evaluator</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;Unknown minimizer &quot;</span><span class="si">{minimizer}</span><span class="s1">&quot;&#39;</span><span class="p">)</span>
 
@@ -464,6 +540,8 @@
 <span class="sd">    :type categories: list(Category)</span>
 <span class="sd">    :param minimizer: minimizer to use (only &quot;minuit&quot; is available for the moment).</span>
 <span class="sd">    :type minimizer: str</span>
+<span class="sd">    :param minimizer_config: (Minuit only) extra configuration passed to the minimizer.</span>
+<span class="sd">    :type minimizer_config: dict</span>
 <span class="sd">    :param range: range of data to minimize.</span>
 <span class="sd">    :type range: str</span>
 <span class="sd">    :param constraints: set of constraints to consider in the minimization.</span>
@@ -484,9 +562,9 @@
         <span class="n">fcn</span> <span class="o">=</span> <span class="n">fcns</span><span class="o">.</span><span class="n">fcn_from_name</span><span class="p">(</span><span class="n">cat</span><span class="o">.</span><span class="n">fcn</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">fcns</span><span class="o">.</span><span class="n">data_type_for_fcn</span><span class="p">(</span><span class="n">cat</span><span class="o">.</span><span class="n">fcn</span><span class="p">)</span> <span class="o">==</span> <span class="n">dataset</span><span class="o">.</span><span class="n">BINNED</span><span class="p">:</span>
-            <span class="n">e</span> <span class="o">=</span> <span class="n">BinnedEvaluatorProxy</span><span class="p">(</span><span class="n">fcn</span><span class="p">,</span> <span class="n">cat</span><span class="o">.</span><span class="n">pdf</span><span class="p">,</span> <span class="n">cat</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">constraints</span><span class="p">)</span>
+            <span class="n">e</span> <span class="o">=</span> <span class="n">BinnedEvaluator</span><span class="p">(</span><span class="n">fcn</span><span class="p">,</span> <span class="n">cat</span><span class="o">.</span><span class="n">pdf</span><span class="p">,</span> <span class="n">cat</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">constraints</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">e</span> <span class="o">=</span> <span class="n">UnbinnedEvaluatorProxy</span><span class="p">(</span>
+            <span class="n">e</span> <span class="o">=</span> <span class="n">UnbinnedEvaluator</span><span class="p">(</span>
                 <span class="n">fcn</span><span class="p">,</span> <span class="n">cat</span><span class="o">.</span><span class="n">pdf</span><span class="p">,</span> <span class="n">cat</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="nb">range</span><span class="p">,</span> <span class="n">constraints</span><span class="p">,</span> <span class="n">rescale_weights</span><span class="p">)</span>
 
         <span class="n">evaluators</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
@@ -502,6 +580,8 @@
                              <span class="n">pedantic</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                              <span class="o">**</span><span class="n">minimizer_config</span><span class="p">,</span>
                              <span class="o">**</span><span class="n">registry_to_minuit_input</span><span class="p">(</span><span class="n">evaluator</span><span class="o">.</span><span class="n">args</span><span class="p">))</span>
+    <span class="k">elif</span> <span class="n">minimizer</span> <span class="o">==</span> <span class="n">SCIPY</span><span class="p">:</span>
+        <span class="k">yield</span> <span class="n">SciPyMinimizer</span><span class="p">(</span><span class="n">evaluator</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;Unknown minimizer &quot;</span><span class="si">{minimizer}</span><span class="s1">&quot;&#39;</span><span class="p">)</span>
 

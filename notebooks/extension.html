@@ -39,7 +39,8 @@
   <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="prev" title="Basic example" href="basic.html" /> 
+    <link rel="next" title="MinKit reference" href="../reference.html" />
+    <link rel="prev" title="Working in more than one dimension" href="multidimensional.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -88,18 +89,20 @@
             
             
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../main.html">Functions and classes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../performance.html">Performance of the minkit package</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="../examples.html">Examples</a><ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../user.html">User guide</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="datasets.html">Creating data sets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="basic.html">Basic example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="minimization.html">Minimization with MinKit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="multidimensional.html">Working in more than one dimension</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Adding custom PDFs</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#Adding-a-custom-PDF-in-the-CPU-backend">Adding a custom PDF in the CPU backend</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Basic-example">Basic example</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#New-PDFs-with-a-variable-number-of-arguments">New PDFs with a variable number of arguments</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#Adding-a-custom-PDF-in-the-GPU-backend">Adding a custom PDF in the GPU backend</a></li>
 </ul>
 </li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="../reference.html">MinKit reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../performance.html">Performance</a></li>
 </ul>
 
             
@@ -145,7 +148,7 @@
     
       <li><a href="../index.html">Docs</a> &raquo;</li>
         
-          <li><a href="../examples.html">Examples</a> &raquo;</li>
+          <li><a href="../user.html">User guide</a> &raquo;</li>
         
       <li>Adding custom PDFs</li>
     
@@ -390,16 +393,18 @@ div.rendered_html tbody tr:hover {
 </style>
 <div class="section" id="Adding-custom-PDFs">
 <h1>Adding custom PDFs<a class="headerlink" href="#Adding-custom-PDFs" title="Permalink to this headline">¶</a></h1>
-<p>The “minkit” package allows to easily register new PDFs. Depending on the backend to be used, the PDF code must be implemented in C++ or in both C++ and CUDA. The latter is needed since the single-value evaluation function and the normalization are taken from the C++ source file of the PDFs. In the following lines, it will be shown how to register a new PDF in both CPU and GPU backends.</p>
-<div class="section" id="Adding-a-custom-PDF-in-the-CPU-backend">
-<h2>Adding a custom PDF in the CPU backend<a class="headerlink" href="#Adding-a-custom-PDF-in-the-CPU-backend" title="Permalink to this headline">¶</a></h2>
-<p>In order to add a new PDF for CPU, we must create a source C++ file, and tell the “minkit” package to add its directory to the list of directories to search for PDFs. For this example, we will create a C++ file from python on a temporary directory.</p>
+<p>In this section it will be explained how to create new PDFs and register them within MinKit. All the different PDFs in this package are built from XML files. This allows to automatically implement the operations independently of the backend. The only function that is really needed is that to calculate the value of the probability density function. Optionally, one can also specify the integral of the PDF between two points. If so, the normalization and the evaluation on binned data samples are
+automatically defined, which will boost both processes since no numerical calculations need to be done.</p>
+<div class="section" id="Basic-example">
+<h2>Basic example<a class="headerlink" href="#Basic-example" title="Permalink to this headline">¶</a></h2>
+<p>In order to add a new PDF for CPU, we must create a source XML file, and tell the “minkit” package to add its directory to the list of directories to search for PDFs. For this example, we will create a C++ file from python on a temporary directory.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">minkit</span>
+<span></span><span class="o">%</span><span class="k">matplotlib</span> inline
+<span class="kn">import</span> <span class="nn">minkit</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">tempfile</span>
 
@@ -407,43 +412,38 @@ div.rendered_html tbody tr:hover {
 
 <span class="n">tmpdir</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">TemporaryDirectory</span><span class="p">()</span>
 
-<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tmpdir</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;CustomPDF.cpp&#39;</span><span class="p">),</span> <span class="s1">&#39;wt&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tmpdir</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;CustomPDF.xml&#39;</span><span class="p">),</span> <span class="s1">&#39;wt&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
     <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;</span>
-<span class="s1">        #include &lt;cmath&gt;</span>
-
-<span class="s1">        extern &quot;C&quot; {</span>
-
-<span class="s1">          static inline double shared_function( double x, double k ) {</span>
-<span class="s1">            return std::exp(k * x);</span>
-<span class="s1">          }</span>
-
-<span class="s1">          double function( double x, double k ) {</span>
-<span class="s1">            return shared_function(x, k);</span>
-<span class="s1">          }</span>
-
-<span class="s1">          void evaluate( int len, double *out, double* in, double k ) {</span>
-<span class="s1">            for ( int i = 0; i &lt; len; ++i )</span>
-<span class="s1">              out[i] = shared_function(in[i], k);</span>
-<span class="s1">          }</span>
-
-<span class="s1">          double normalization( double k, double xmin, double xmax ) {</span>
-<span class="s1">            return 1. / k * (std::exp(k * xmax) - std::exp(k * xmin));</span>
-<span class="s1">          }</span>
-
-<span class="s1">        }</span>
+<span class="s1">&lt;PDF&gt;</span>
+<span class="s1">  &lt;preamble/&gt;</span>
+<span class="s1">  &lt;parameters k=&quot;k&quot;/&gt;</span>
+<span class="s1">  &lt;function&gt;</span>
+<span class="s1">    &lt;data x=&quot;x&quot;/&gt;</span>
+<span class="s1">    &lt;code&gt;</span>
+<span class="s1">      return exp(k * x);</span>
+<span class="s1">    &lt;/code&gt;</span>
+<span class="s1">  &lt;/function&gt;</span>
+<span class="s1">  &lt;integral&gt;</span>
+<span class="s1">    &lt;bounds xmin=&quot;xmin&quot; xmax=&quot;xmax&quot;/&gt;</span>
+<span class="s1">    &lt;code&gt;</span>
+<span class="s1">      return 1. / k * (exp(k * xmax) - exp(k * xmin));</span>
+<span class="s1">    &lt;/code&gt;</span>
+<span class="s1">  &lt;/integral&gt;</span>
+<span class="s1">&lt;/PDF&gt;</span>
 <span class="s1">        &#39;&#39;&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
-<p>Note that we have created four functions, although only two of them are usually needed:</p>
+<p>The fields that are present are:</p>
 <ul class="simple">
-<li><p>“shared_function” is an static function that will contain the actual function to evaluate (an exponential in this case).</p></li>
-<li><p>“function”: is a version of the function to evaluate on a single value.</p></li>
-<li><p>“evaluate”: is the function to be used on arrays, so the first element must be the length of the input arrays. The next argument corresponds to the pointer to the output array, followed by those of the input (data) arrays, and finally the arguments for the PDF.</p></li>
-<li><p>“normalization”: this defines the way to integrate the PDF. If it is not provided, a numerical integration will be used.</p></li>
+<li><p>“preamble” (optional): any kind of definition that needs to be added after the “include” directives.</p></li>
+<li><p>“parameters” (optional): defines the parameters that will be used as input arguments for both “function” and “integral”. The quoted values will be the actual names of the parameters</p></li>
+<li><p>“variable_parameters” (optional): this field controls the possible paramaters of a PDF which might vary in number, like for a polynomial PDF, for example. It must contain both the name of the variable referring to the number of parameters and that for the pointer to their values. More information about this kind of PDFs can be found in the next section.</p></li>
+<li><p>“function”: refers to the code used to evaluate the PDF. It must contain a field called “data”, with the different data parameters to use; and “code”, where the actual calculations are done. All the mathematical functions must be available in C.</p></li>
+<li><p>“integral” (optional): this field is optional, since not all the PDFs have an analytical expression for the integral. It is recommended to fill this field when possible, since otherwise MinKit relies on numerical calculations to evaluate binned samples and calculate the normalization. THis field must be composed of two parts: “bounds”, defining the names for the limits of the integration; and “code”, where the calculation of the integral is done. If working with more than one data parameter,
+“bounds” must contain the lower and upper bounds for each parameter, included consecutively (xmin, xmax, ymin, ymax, …).</p></li>
 </ul>
-<p>In conclusion, only “function” and “evaluate” are actually needed, but one should always try to define “normalization”, since calculating integrals numerically is very resource-consuming.</p>
-<p>Now we have to register the PDF. In order to be used in python, we must tell minkit to look for PDFs in the temporary directory.</p>
+<p>Something very important to remember is that since we are dealing with XML format, the symbols &lt;, &gt;, &amp;, ” and ‘ are protected. We must use the escaped versions. Now we have to register the PDF. In order to be used in python, we must tell minkit to look for PDFs in the temporary directory.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
@@ -476,9 +476,8 @@ div.rendered_html tbody tr:hover {
 <span class="n">k</span> <span class="o">=</span> <span class="n">minkit</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">)</span>
 <span class="n">pdf</span> <span class="o">=</span> <span class="n">CustomPDF</span><span class="p">(</span><span class="s1">&#39;pdf&#39;</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
 <span class="n">data</span> <span class="o">=</span> <span class="n">pdf</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="mi">10000</span><span class="p">)</span>
-<span class="o">%</span><span class="k">matplotlib</span> inline
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">minkit</span><span class="o">.</span><span class="n">aop</span><span class="o">.</span><span class="n">extract_ndarray</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]),</span> <span class="n">bins</span><span class="o">=</span><span class="mi">100</span><span class="p">);</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">minkit</span><span class="o">.</span><span class="n">as_ndarray</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]),</span> <span class="n">bins</span><span class="o">=</span><span class="mi">100</span><span class="p">);</span>
 </pre></div>
 </div>
 </div>
@@ -505,29 +504,48 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 </div>
-<p>Note that one can also define PDFs with a set of fixed parameters and a set of variable parameters.</p>
-</div>
-<div class="section" id="Adding-a-custom-PDF-in-the-GPU-backend">
-<h2>Adding a custom PDF in the GPU backend<a class="headerlink" href="#Adding-a-custom-PDF-in-the-GPU-backend" title="Permalink to this headline">¶</a></h2>
-<p>In order to add PDFs for GPU backends, one needs to define first the C++ version of it, presented in the previous sections. The source file for the GPU backend can be in any registered source path via the “minkit.add_pdf_src” function. The “minkit” package relies on “reikna” in order to define functions to run on GPUs, so the syntax must be the same as for any “reikna” function. Let’s define the GPU version of the exponential.</p>
-<div class="nbinput nblast docutils container">
+<p>The XML file must be modified accordingly, using the field “variable_parameters”:</p>
+<div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tmpdir</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;CustomPDF.c&#39;</span><span class="p">),</span> <span class="s1">&#39;wt&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+<span></span><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tmpdir</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;VarArgsCustomPDF.xml&#39;</span><span class="p">),</span> <span class="s1">&#39;wt&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
     <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;</span>
-<span class="s1">        KERNEL void evaluate( GLOBAL_MEM double *out, GLOBAL_MEM double *in, double k )</span>
-<span class="s1">        {</span>
-<span class="s1">            SIZE_T idx  = get_global_id(0);</span>
-<span class="s1">            double x = in[idx];</span>
-<span class="s1">            out[idx] = exp(k * x);</span>
-<span class="s1">        }</span>
+<span class="s1">&lt;PDF&gt;</span>
+<span class="s1">  &lt;preamble/&gt;</span>
+<span class="s1">  &lt;variable_parameters n=&quot;n&quot; p=&quot;p&quot;/&gt;</span>
+<span class="s1">  &lt;function&gt;</span>
+<span class="s1">    &lt;data x=&quot;x&quot;/&gt;</span>
+<span class="s1">    &lt;code&gt;</span>
+<span class="s1">      if ( n == 0 )</span>
+<span class="s1">        return 1.;</span>
+
+<span class="s1">      double out = x * p[n - 1];</span>
+<span class="s1">      for ( int i = 0; i &amp;lt; n; ++i )</span>
+<span class="s1">        out = x * (out + p[n - i - 1]);</span>
+<span class="s1">      return out + 1.;</span>
+<span class="s1">    &lt;/code&gt;</span>
+<span class="s1">  &lt;/function&gt;</span>
+<span class="s1">&lt;/PDF&gt;</span>
 <span class="s1">        &#39;&#39;&#39;</span><span class="p">)</span>
+
+<span class="n">x</span> <span class="o">=</span> <span class="n">minkit</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+<span class="n">p1</span> <span class="o">=</span> <span class="n">minkit</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="s1">&#39;p1&#39;</span><span class="p">,</span> <span class="o">+</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">pdf</span> <span class="o">=</span> <span class="n">VarArgsCustomPDF</span><span class="p">(</span><span class="s1">&#39;pdf&#39;</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">p1</span><span class="p">)</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">pdf</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="mi">10000</span><span class="p">)</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">minkit</span><span class="o">.</span><span class="n">as_ndarray</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]),</span> <span class="n">bins</span><span class="o">=</span><span class="mi">100</span><span class="p">);</span>
 </pre></div>
 </div>
 </div>
-<p>Not thate the arguments are the same as for the C++ version, but we have only defined the “evaluate” function here. For the GPU implementation we do not need to define the length of the element, since this is taken from the global ID of the running thread. To run on GPU we simply need to include these lines together before the construction of any CustomPDF class with the backend set to any GPU type, and we are ready to go.</p>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_extension_12_0.png" src="../_images/notebooks_extension_12_0.png" />
+</div>
+</div>
 </div>
 </div>
 
@@ -539,8 +557,10 @@ div.rendered_html tbody tr:hover {
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
+        <a href="../reference.html" class="btn btn-neutral float-right" title="MinKit reference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
-        <a href="basic.html" class="btn btn-neutral float-left" title="Basic example" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+        <a href="multidimensional.html" class="btn btn-neutral float-left" title="Working in more than one dimension" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

@@ -18,9 +18,9 @@ following sections:
 .. toctree::
    :maxdepth: 2
 
-   main
+   user
+   reference
    performance
-   examples
 
 
 Indices and tables

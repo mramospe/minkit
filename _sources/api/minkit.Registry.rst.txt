@@ -23,6 +23,7 @@ Registry
       ~Registry.insert
       ~Registry.reduce
       ~Registry.to_json_object
+      ~Registry.values
 
    .. rubric:: Attributes Documentation
 
@@ -37,3 +38,4 @@ Registry
    .. automethod:: insert
    .. automethod:: reduce
    .. automethod:: to_json_object
+   .. automethod:: values

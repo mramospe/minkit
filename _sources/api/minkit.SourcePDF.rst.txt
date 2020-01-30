@@ -11,6 +11,7 @@ SourcePDF
    .. autosummary::
 
       ~SourcePDF.__call__
+      ~SourcePDF.evaluate_binned
       ~SourcePDF.from_json_object
       ~SourcePDF.function
       ~SourcePDF.norm
@@ -19,6 +20,7 @@ SourcePDF
    .. rubric:: Methods Documentation
 
    .. automethod:: __call__
+   .. automethod:: evaluate_binned
    .. automethod:: from_json_object
    .. automethod:: function
    .. automethod:: norm

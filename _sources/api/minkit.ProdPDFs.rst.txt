@@ -11,6 +11,7 @@ ProdPDFs
    .. autosummary::
 
       ~ProdPDFs.__call__
+      ~ProdPDFs.evaluate_binned
       ~ProdPDFs.from_json_object
       ~ProdPDFs.norm
       ~ProdPDFs.numerical_normalization
@@ -19,6 +20,7 @@ ProdPDFs
    .. rubric:: Methods Documentation
 
    .. automethod:: __call__
+   .. automethod:: evaluate_binned
    .. automethod:: from_json_object
    .. automethod:: norm
    .. automethod:: numerical_normalization

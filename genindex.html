@@ -88,9 +88,9 @@
             
             
               <ul>
-<li class="toctree-l1"><a class="reference internal" href="main.html">Functions and classes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="performance.html">Performance of the minkit package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user.html">User guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference.html">MinKit reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="performance.html">Performance</a></li>
 </ul>
 
             
@@ -218,8 +218,6 @@
 </li>
       <li><a href="api/minkit.Amoroso.html#minkit.Amoroso">Amoroso (class in minkit)</a>
 </li>
-      <li><a href="api/minkit.aop.html#minkit.aop">aop (class in minkit)</a>
-</li>
       <li><a href="api/minkit.Registry.html#minkit.Registry.append">append() (minkit.Registry method)</a>
 </li>
       <li><a href="api/minkit.Formula.html#minkit.Formula.args">args (minkit.Formula attribute)</a>
@@ -228,6 +226,8 @@
         <li><a href="api/minkit.PDF.html#minkit.PDF.args">(minkit.PDF attribute)</a>
 </li>
       </ul></li>
+      <li><a href="api/minkit.as_ndarray.html#minkit.as_ndarray">as_ndarray() (in module minkit)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -238,17 +238,19 @@
 </li>
       <li><a href="api/minkit.PDF.html#minkit.PDF.bind">bind() (minkit.PDF method)</a>
 </li>
+      <li><a href="api/minkit.binned_chisquare.html#minkit.binned_chisquare">binned_chisquare() (in module minkit)</a>
+</li>
       <li><a href="api/minkit.binned_maximum_likelihood.html#minkit.binned_maximum_likelihood">binned_maximum_likelihood() (in module minkit)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/minkit.binned_minimizer.html#minkit.binned_minimizer">binned_minimizer() (in module minkit)</a>
-</li>
       <li><a href="api/minkit.BinnedDataSet.html#minkit.BinnedDataSet">BinnedDataSet (class in minkit)</a>
 </li>
-      <li><a href="api/minkit.Parameter.html#minkit.Parameter.bounds">bounds (minkit.Parameter attribute)</a>
+      <li><a href="api/minkit.BinnedDataSet.html#minkit.BinnedDataSet.bounds">bounds (minkit.BinnedDataSet attribute)</a>
 
       <ul>
+        <li><a href="api/minkit.Parameter.html#minkit.Parameter.bounds">(minkit.Parameter attribute)</a>
+</li>
         <li><a href="api/minkit.Range.html#minkit.Range.bounds">(minkit.Range attribute)</a>
 </li>
       </ul></li>
@@ -320,6 +322,18 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/minkit.PDF.html#minkit.PDF.enable_cache">enable_cache() (minkit.PDF method)</a>
 </li>
+      <li><a href="api/minkit.AddPDFs.html#minkit.AddPDFs.evaluate_binned">evaluate_binned() (minkit.AddPDFs method)</a>
+
+      <ul>
+        <li><a href="api/minkit.ConvPDFs.html#minkit.ConvPDFs.evaluate_binned">(minkit.ConvPDFs method)</a>
+</li>
+        <li><a href="api/minkit.PDF.html#minkit.PDF.evaluate_binned">(minkit.PDF method)</a>
+</li>
+        <li><a href="api/minkit.ProdPDFs.html#minkit.ProdPDFs.evaluate_binned">(minkit.ProdPDFs method)</a>
+</li>
+        <li><a href="api/minkit.SourcePDF.html#minkit.SourcePDF.evaluate_binned">(minkit.SourcePDF method)</a>
+</li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/minkit.Exponential.html#minkit.Exponential">Exponential (class in minkit)</a>
@@ -410,11 +424,17 @@
 <h2 id="M">M</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/minkit.DataSet.html#minkit.DataSet.make_binned">make_binned() (minkit.DataSet method)</a>
+</li>
       <li><a href="api/minkit.DataSet.html#minkit.DataSet.merge">merge() (minkit.DataSet class method)</a>
+</li>
+      <li><a href="api/minkit.SciPyMinimizer.html#minkit.SciPyMinimizer.minimize">minimize() (minkit.SciPyMinimizer method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="main.html#module-minkit">minkit (module)</a>
+      <li><a href="api/minkit.minimizer.html#minkit.minimizer">minimizer() (in module minkit)</a>
+</li>
+      <li><a href="reference.html#module-minkit">minkit (module)</a>
 </li>
       <li><a href="api/minkit.minuit_to_registry.html#minkit.minuit_to_registry">minuit_to_registry() (in module minkit)</a>
 </li>
@@ -458,6 +478,8 @@
 </li>
       <li><a href="api/minkit.PDF.html#minkit.PDF">PDF (class in minkit)</a>
 </li>
+      <li><a href="api/minkit.pdf_centers_values.html#minkit.pdf_centers_values">pdf_centers_values() (in module minkit)</a>
+</li>
       <li><a href="api/minkit.pdf_from_json.html#minkit.pdf_from_json">pdf_from_json() (in module minkit)</a>
 </li>
   </ul></td>
@@ -486,13 +508,15 @@
 </li>
       <li><a href="api/minkit.Registry.html#minkit.Registry">Registry (class in minkit)</a>
 </li>
+      <li><a href="api/minkit.SciPyMinimizer.html#minkit.SciPyMinimizer.result_to_registry">result_to_registry() (minkit.SciPyMinimizer method)</a>
+</li>
   </ul></td>
 </tr></table>
 
 <h2 id="S">S</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/minkit.scale_pdf_values.html#minkit.scale_pdf_values">scale_pdf_values() (in module minkit)</a>
+      <li><a href="api/minkit.SciPyMinimizer.html#minkit.SciPyMinimizer">SciPyMinimizer (class in minkit)</a>
 </li>
       <li><a href="api/minkit.Parameter.html#minkit.Parameter.set_range">set_range() (minkit.Parameter method)</a>
 </li>
@@ -558,8 +582,6 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/minkit.unbinned_maximum_likelihood.html#minkit.unbinned_maximum_likelihood">unbinned_maximum_likelihood() (in module minkit)</a>
 </li>
-      <li><a href="api/minkit.unbinned_minimizer.html#minkit.unbinned_minimizer">unbinned_minimizer() (in module minkit)</a>
-</li>
   </ul></td>
 </tr></table>
 
@@ -575,6 +597,8 @@
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/minkit.BinnedDataSet.html#minkit.BinnedDataSet.values">values (minkit.BinnedDataSet attribute)</a>
+</li>
+      <li><a href="api/minkit.Registry.html#minkit.Registry.values">values() (minkit.Registry method)</a>
 </li>
   </ul></td>
 </tr></table>

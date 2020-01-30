@@ -5,17 +5,20 @@
    "metadata": {},
    "source": [
     "# Adding custom PDFs\n",
-    "The \"minkit\" package allows to easily register new PDFs.\n",
-    "Depending on the backend to be used, the PDF code must be implemented in C++ or in both C++ and CUDA.\n",
-    "The latter is needed since the single-value evaluation function and the normalization are taken from the C++ source file of the PDFs. In the following lines, it will be shown how to register a new PDF in both CPU and GPU backends."
+    "In this section it will be explained how to create new PDFs and register them within MinKit.\n",
+    "All the different PDFs in this package are built from XML files.\n",
+    "This allows to automatically implement the operations independently of the backend.\n",
+    "The only function that is really needed is that to calculate the value of the probability density function.\n",
+    "Optionally, one can also specify the integral of the PDF between two points.\n",
+    "If so, the normalization and the evaluation on binned data samples are automatically defined, which will boost both processes since no numerical calculations need to be done."
    ]
   },
   {
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "## Adding a custom PDF in the CPU backend\n",
-    "In order to add a new PDF for CPU, we must create a source C++ file, and tell the \"minkit\" package to add its directory to the list of directories to search for PDFs. For this example, we will create a C++ file from python on a temporary directory."
+    "## Basic example\n",
+    "In order to add a new PDF for CPU, we must create a source XML file, and tell the \"minkit\" package to add its directory to the list of directories to search for PDFs. For this example, we will create a C++ file from python on a temporary directory."
    ]
   },
   {
@@ -24,6 +27,7 @@
    "metadata": {},
    "outputs": [],
    "source": [
+    "%matplotlib inline\n",
     "import minkit\n",
     "import os\n",
     "import tempfile\n",
@@ -32,30 +36,24 @@
     "\n",
     "tmpdir = tempfile.TemporaryDirectory()\n",
     "\n",
-    "with open(os.path.join(tmpdir.name, 'CustomPDF.cpp'), 'wt') as f:\n",
+    "with open(os.path.join(tmpdir.name, 'CustomPDF.xml'), 'wt') as f:\n",
     "    f.write('''\n",
-    "        #include <cmath>\n",
-    "\n",
-    "        extern \"C\" {\n",
-    "\n",
-    "          static inline double shared_function( double x, double k ) {\n",
-    "            return std::exp(k * x);\n",
-    "          }\n",
-    "\n",
-    "          double function( double x, double k ) {\n",
-    "            return shared_function(x, k);\n",
-    "          }\n",
-    "\n",
-    "          void evaluate( int len, double *out, double* in, double k ) {\n",
-    "            for ( int i = 0; i < len; ++i )\n",
-    "              out[i] = shared_function(in[i], k);\n",
-    "          }\n",
-    "\n",
-    "          double normalization( double k, double xmin, double xmax ) {\n",
-    "            return 1. / k * (std::exp(k * xmax) - std::exp(k * xmin));\n",
-    "          }\n",
-    "    \n",
-    "        }\n",
+    "<PDF>\n",
+    "  <preamble/>\n",
+    "  <parameters k=\"k\"/>\n",
+    "  <function>\n",
+    "    <data x=\"x\"/>\n",
+    "    <code>\n",
+    "      return exp(k * x);\n",
+    "    </code>\n",
+    "  </function>\n",
+    "  <integral>\n",
+    "    <bounds xmin=\"xmin\" xmax=\"xmax\"/>\n",
+    "    <code>\n",
+    "      return 1. / k * (exp(k * xmax) - exp(k * xmin));\n",
+    "    </code>\n",
+    "  </integral>\n",
+    "</PDF>\n",
     "        ''')"
    ]
   },
@@ -63,16 +61,15 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "Note that we have created four functions, although only two of them are usually needed:\n",
+    "The fields that are present are:\n",
     "\n",
-    "* \"shared_function\" is an static function that will contain the actual function to evaluate (an exponential in this case).\n",
-    "* \"function\": is a version of the function to evaluate on a single value.\n",
-    "* \"evaluate\": is the function to be used on arrays, so the first element must be the length of the input arrays. The next argument corresponds to the pointer to the output array, followed by those of the input (data) arrays, and finally the arguments for the PDF.\n",
-    "* \"normalization\": this defines the way to integrate the PDF. If it is not provided, a numerical integration will be used.\n",
+    "* \"preamble\" (optional): any kind of definition that needs to be added after the \"include\" directives.\n",
+    "* \"parameters\" (optional): defines the parameters that will be used as input arguments for both \"function\" and \"integral\". The quoted values will be the actual names of the parameters\n",
+    "* \"variable_parameters\" (optional): this field controls the possible paramaters of a PDF which might vary in number, like for a polynomial PDF, for example. It must contain both the name of the variable referring to the number of parameters and that for the pointer to their values. More information about this kind of PDFs can be found in the next section.\n",
+    "* \"function\": refers to the code used to evaluate the PDF. It must contain a field called \"data\", with the different data parameters to use; and \"code\", where the actual calculations are done. All the mathematical functions must be available in C.\n",
+    "* \"integral\" (optional): this field is optional, since not all the PDFs have an analytical expression for the integral. It is recommended to fill this field when possible, since otherwise MinKit relies on numerical calculations to evaluate binned samples and calculate the normalization. THis field must be composed of two parts: \"bounds\", defining the names for the limits of the integration; and \"code\", where the calculation of the integral is done. If working with more than one data parameter, \"bounds\" must contain the lower and upper bounds for each parameter, included consecutively (xmin, xmax, ymin, ymax, ...).\n",
     "\n",
-    "In conclusion, only \"function\" and \"evaluate\" are actually needed, but one should always try to define \"normalization\", since calculating integrals numerically is very resource-consuming.\n",
-    "\n",
-    "Now we have to register the PDF. In order to be used in python, we must tell minkit to look for PDFs in the temporary directory."
+    "Something very important to remember is that since we are dealing with XML format, the symbols <, >, &, \" and ' are protected. We must use the escaped versions. Now we have to register the PDF. In order to be used in python, we must tell minkit to look for PDFs in the temporary directory."
    ]
   },
   {
@@ -113,11 +110,13 @@
   {
    "cell_type": "code",
    "execution_count": 4,
-   "metadata": {},
+   "metadata": {
+    "scrolled": true
+   },
    "outputs": [
     {
      "data": {
-      "image/png": "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\n",
+      "image/png": "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\n",
       "text/plain": [
        "<Figure size 432x288 with 1 Axes>"
       ]
@@ -133,9 +132,8 @@
     "k = minkit.Parameter('k', -0.5)\n",
     "pdf = CustomPDF('pdf', x, k)\n",
     "data = pdf.generate(10000)\n",
-    "%matplotlib inline\n",
     "import matplotlib.pyplot as plt\n",
-    "plt.hist(minkit.aop.extract_ndarray(data['x']), bins=100);"
+    "plt.hist(minkit.as_ndarray(data['x']), bins=100);"
    ]
   },
   {
@@ -163,39 +161,54 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "Note that one can also define PDFs with a set of fixed parameters and a set of variable parameters."
-   ]
-  },
-  {
-   "cell_type": "markdown",
-   "metadata": {},
-   "source": [
-    "## Adding a custom PDF in the GPU backend\n",
-    "In order to add PDFs for GPU backends, one needs to define first the C++ version of it, presented in the previous sections. The source file for the GPU backend can be in any registered source path via the \"minkit.add_pdf_src\" function. The \"minkit\" package relies on \"reikna\" in order to define functions to run on GPUs, so the syntax must be the same as for any \"reikna\" function. Let's define the GPU version of the exponential."
+    "The XML file must be modified accordingly, using the field \"variable_parameters\":"
    ]
   },
   {
    "cell_type": "code",
    "execution_count": 6,
    "metadata": {},
-   "outputs": [],
+   "outputs": [
+    {
+     "data": {
+      "image/png": "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\n",
+      "text/plain": [
+       "<Figure size 432x288 with 1 Axes>"
+      ]
+     },
+     "metadata": {
+      "needs_background": "light"
+     },
+     "output_type": "display_data"
+    }
+   ],
    "source": [
-    "with open(os.path.join(tmpdir.name, 'CustomPDF.c'), 'wt') as f:\n",
+    "with open(os.path.join(tmpdir.name, 'VarArgsCustomPDF.xml'), 'wt') as f:\n",
     "    f.write('''\n",
-    "        KERNEL void evaluate( GLOBAL_MEM double *out, GLOBAL_MEM double *in, double k )\n",
-    "        {\n",
-    "            SIZE_T idx  = get_global_id(0);\n",
-    "            double x = in[idx];\n",
-    "            out[idx] = exp(k * x);\n",
-    "        }\n",
-    "        ''')"
-   ]
-  },
-  {
-   "cell_type": "markdown",
-   "metadata": {},
-   "source": [
-    "Not thate the arguments are the same as for the C++ version, but we have only defined the \"evaluate\" function here. For the GPU implementation we do not need to define the length of the element, since this is taken from the global ID of the running thread. To run on GPU we simply need to include these lines together before the construction of any CustomPDF class with the backend set to any GPU type, and we are ready to go.\n"
+    "<PDF>\n",
+    "  <preamble/>\n",
+    "  <variable_parameters n=\"n\" p=\"p\"/>\n",
+    "  <function>\n",
+    "    <data x=\"x\"/>\n",
+    "    <code>\n",
+    "      if ( n == 0 )\n",
+    "        return 1.;\n",
+    "        \n",
+    "      double out = x * p[n - 1];\n",
+    "      for ( int i = 0; i &lt; n; ++i )\n",
+    "        out = x * (out + p[n - i - 1]);\n",
+    "      return out + 1.;\n",
+    "    </code>\n",
+    "  </function>\n",
+    "</PDF>\n",
+    "        ''')\n",
+    "    \n",
+    "x = minkit.Parameter('x', bounds=(0, 10))\n",
+    "p1 = minkit.Parameter('p1', +0.5)\n",
+    "pdf = VarArgsCustomPDF('pdf', x, p1)\n",
+    "data = pdf.generate(10000)\n",
+    "import matplotlib.pyplot as plt\n",
+    "plt.hist(minkit.as_ndarray(data['x']), bins=100);"
    ]
   }
  ],
