@@ -63,7 +63,7 @@ def compare_with_numpy(pdf, numpy_data, data_par, rtol=0.01):
     centers = minkit.DataSet.from_array(
         0.5 * (edges[1:] + edges[:-1]), data_par)
 
-    pdf_values = minkit.scale_pdf_values(pdf, centers, values, edges)
+    pdf_values = minkit.plotting.scaled_pdf_values(pdf, centers, values, edges)
 
     assert np.allclose(np.sum(pdf_values), np.sum(values), rtol=rtol)
 
@@ -87,7 +87,7 @@ def setting_numpy_seed(function=None, seed=98953):
 
 class fit_test(object):
 
-    def __init__(self, proxy, atol=1e-8, rtol=1e-5, simultaneous=False):
+    def __init__(self, proxy, nsigma=5, simultaneous=False):
         '''
         Save the initial values and do a check afterwards to determine whether
         the fit was successful or not.
@@ -95,9 +95,8 @@ class fit_test(object):
         # Must be set after the minimization ends
         self.result = None
 
-        # Tolerances for numpy.allclose
-        self.atol = atol
-        self.rtol = rtol
+        # Number of standard deviations allowed from the fitted value to the initial
+        self.nsigma = nsigma
 
         # Keep the information on the object to minimize
         self.proxy = proxy
@@ -108,8 +107,12 @@ class fit_test(object):
             self.initials = {}
             for c in self.proxy:
                 self.initials.update(c.pdf.get_values())
+            # Do it in a separate loop to avoid modifying the initial values
+            for c in self.proxy:
+                self._variate(c.pdf)
         else:
             self.initials = self.proxy.get_values()
+            self._variate(self.proxy)
 
         super(fit_test, self).__init__()
 
@@ -137,16 +140,38 @@ class fit_test(object):
             # Check the values of the parameters
             results = minkit.minuit_to_registry(self.result.params)
             for n, v in self.initials.items():
-                assert np.allclose(v, results.get(n).value,
-                                   atol=self.atol, rtol=self.rtol)
+                rv = results.get(n)
+                assert np.allclose(v, rv.value, atol=self.nsigma * rv.error)
 
-            # Set the values of the PDF(s)
-            r = {p.name: p.value for p in results}
+            # Reset the values of the PDF(s)
             if self.simultaneous:
                 for c in self.proxy:
-                    c.pdf.set_values(**r)
+                    c.pdf.set_values(**self.initials)
             else:
-                self.proxy.set_values(**r)
+                self.proxy.set_values(**self.initials)
         else:
             raise RuntimeError(
                 'Must set the attribute "result" to the result from the minimization')
+
+    def _variate(self, pdf):
+        '''
+        Variate the values of a PDF following a normal distribution centered
+        in the central value of the parameter, and with standard deviation equal
+        to the distance from the bounds divided by the square root of 12.
+        If it falls out of bounds, the middle distance between the closest bound
+        and the current value is used.
+        '''
+        for p in filter(lambda a: not a.constant, pdf.all_real_args):
+
+            l, r = p.bounds
+
+            c = 0.5 * (r + l)
+
+            v = np.random.normal(c, 0.2886751345948129 * (r - l))
+
+            if v > r:
+                v = 0.5 * (r - c)
+            elif v < l:
+                v = 0.5 * (c - l)
+
+            p.value = v

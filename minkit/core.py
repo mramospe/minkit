@@ -21,6 +21,8 @@ CPU = 'cpu'
 OPENCL = gpu_core.OPENCL
 # CUDA backend
 CUDA = gpu_core.CUDA
+# GPU backend (internal use only)
+GPU = 'gpu'
 
 # Keep the module to do operation on arrays
 ARRAY_OPERATION = None

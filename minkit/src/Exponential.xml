@@ -1,0 +1,16 @@
+<!--Exponential PDF-->
+<PDF>
+  <parameters k="k"/>
+  <function>
+    <data x="x"/>
+    <code>
+      return exp(k * x);
+    </code>
+  </function>
+  <integral>
+    <bounds xmin="xmin" xmax="xmax"/>
+    <code>
+      return 1. / k * (exp(k * xmax) - exp(k * xmin));
+    </code>
+  </integral>
+</PDF>

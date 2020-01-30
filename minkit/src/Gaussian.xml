@@ -1,0 +1,24 @@
+<!--Gaussian PDF-->
+<PDF>
+  <parameters c="c" s="s"/>
+  <preamble>
+    #define SQRTPI_2 1.2533141373155001
+  </preamble>
+  <function>
+    <data x="x"/>
+    <code>
+      double d = (x - c) / s;
+      return exp(- 0.5 * d * d);
+    </code>
+  </function>
+  <integral>
+    <bounds xmin="xmin" xmax="xmax"/>
+    <code>
+      double sqrt2s = M_SQRT2 * s;
+      double pmin   = (xmin - c) / sqrt2s;
+      double pmax   = (xmax - c) / sqrt2s;
+
+      return SQRTPI_2 * s * (erf(pmax) - erf(pmin));
+    </code>
+  </integral>
+</PDF>

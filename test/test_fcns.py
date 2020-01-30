@@ -27,7 +27,7 @@ def test_binned_maximum_likelihood():
 
     data = minkit.BinnedDataSet.from_array(edges, m, values)
 
-    with helpers.fit_test(g, rtol=0.05) as test:
+    with helpers.fit_test(g) as test:
         with minkit.minimizer('bml', g, data, minimizer='minuit') as minuit:
             test.result = minuit.migrad()
 
@@ -36,7 +36,7 @@ def test_binned_maximum_likelihood():
     sc = minkit.Parameter('sc', 0.1)
     gc = minkit.Gaussian('constraint', c, cc, sc)
 
-    with helpers.fit_test(g, rtol=0.05) as test:
+    with helpers.fit_test(g) as test:
         with minkit.minimizer('bml', g, data, minimizer='minuit', constraints=[gc]) as minuit:
             test.result = minuit.migrad()
 
@@ -55,7 +55,7 @@ def test_binned_maximum_likelihood():
 
     data = minkit.BinnedDataSet.from_array(edges, m, values)
 
-    with helpers.fit_test(pdf, rtol=0.1) as test:
+    with helpers.fit_test(pdf) as test:
         with minkit.minimizer('bml', pdf, data) as minimizer:
             test.result = minimizer.migrad()
 
@@ -74,7 +74,7 @@ def test_binned_maximum_likelihood():
 
     data = minkit.BinnedDataSet.from_array(edges, m, values)
 
-    with helpers.fit_test(pdf, rtol=0.1) as test:
+    with helpers.fit_test(pdf) as test:
         with minkit.minimizer('bml', pdf, data) as minimizer:
             test.result = minimizer.migrad()
 
@@ -98,7 +98,7 @@ def test_binned_chisquare():
 
     data = minkit.BinnedDataSet.from_array(edges, m, values)
 
-    with helpers.fit_test(g, rtol=0.05) as test:
+    with helpers.fit_test(g) as test:
         with minkit.minimizer('chi2', g, data) as minimizer:
             test.result = minimizer.migrad()
 
@@ -118,7 +118,7 @@ def test_binned_chisquare():
 
     data = minkit.BinnedDataSet.from_array(edges, m, values)
 
-    with helpers.fit_test(pdf, rtol=0.1) as test:
+    with helpers.fit_test(pdf) as test:
         with minkit.minimizer('bml', pdf, data) as minimizer:
             test.result = minimizer.migrad()
 
@@ -147,16 +147,16 @@ def test_unbinned_extended_maximum_likelihood():
 
     data = pdf.generate(int(ng.value + ne.value))
 
-    with helpers.fit_test(pdf, rtol=0.1) as test:
+    with helpers.fit_test(pdf) as test:
         with minkit.minimizer('ueml', pdf, data, minimizer='minuit') as minuit:
             test.result = minuit.migrad()
 
     # Add constraints
     cc = minkit.Parameter('cc', 10)
-    sc = minkit.Parameter('sc', 0.1)
+    sc = minkit.Parameter('sc', 1)
     gc = minkit.Gaussian('constraint', c, cc, sc)
 
-    with helpers.fit_test(pdf, rtol=0.1) as test:
+    with helpers.fit_test(pdf) as test:
         with minkit.minimizer('ueml', pdf, data, minimizer='minuit', constraints=[gc]) as minuit:
             test.result = minuit.migrad()
 
@@ -175,7 +175,7 @@ def test_unbinned_maximum_likelihood():
 
     data = g.generate(10000)
 
-    with helpers.fit_test(g, rtol=0.05) as test:
+    with helpers.fit_test(g) as test:
         with minkit.minimizer('uml', g, data, minimizer='minuit') as minuit:
             test.result = minuit.migrad()
 
@@ -184,6 +184,6 @@ def test_unbinned_maximum_likelihood():
     sc = minkit.Parameter('sc', 0.1)
     gc = minkit.Gaussian('constraint', c, cc, sc)
 
-    with helpers.fit_test(g, rtol=0.05) as test:
+    with helpers.fit_test(g) as test:
         with minkit.minimizer('uml', g, data, minimizer='minuit', constraints=[gc]) as minuit:
             test.result = minuit.migrad()

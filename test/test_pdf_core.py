@@ -65,7 +65,7 @@ def test_addpdfs(tmpdir):
 
     centers = minkit.DataSet.from_array(0.5 * (edges[1:] + edges[:-1]), m)
 
-    pdf_values = minkit.scale_pdf_values(pdf, centers, values, edges)
+    pdf_values = minkit.plotting.scaled_pdf_values(pdf, centers, values, edges)
 
     assert np.allclose(np.sum(pdf_values), np.sum(values))
 
@@ -127,7 +127,7 @@ def test_constpdf(tmpdir):
     # Test a simple fit
     data = pdf.generate(10000)
 
-    with fit_test(pdf, rtol=0.05) as test:
+    with fit_test(pdf) as test:
         with minkit.minimizer('uml', pdf, data, minimizer='minuit') as minuit:
             test.result = minuit.migrad()
 
@@ -181,12 +181,12 @@ def test_convpdfs(tmpdir):
 
     centers = minkit.DataSet.from_array(0.5 * (edges[1:] + edges[:-1]), m)
 
-    pdf_values = minkit.scale_pdf_values(pdf, centers, values, edges)
+    pdf_values = minkit.plotting.scaled_pdf_values(pdf, centers, values, edges)
 
     assert np.allclose(np.sum(pdf_values), np.sum(values), rtol=0.01)
 
     # Test a fit
-    with fit_test(pdf, atol=0.1, rtol=0.05) as test:
+    with fit_test(pdf) as test:
         with minkit.minimizer('uml', pdf, data, minimizer='minuit') as minuit:
             test.result = minuit.migrad()
 

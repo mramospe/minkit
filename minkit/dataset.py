@@ -8,7 +8,7 @@ from .operations import types
 import logging
 import numpy as np
 
-__all__ = ['evaluation_grid', 'DataSet', 'BinnedDataSet']
+__all__ = ['DataSet', 'BinnedDataSet']
 
 # Names of different data types
 BINNED = 'binned'
@@ -18,9 +18,6 @@ logger = logging.getLogger(__name__)
 
 
 class DataSet(object):
-    '''
-    Definition of a set of data.
-    '''
 
     def __init__(self, data, pars, weights=None, copy=True, convert=True, trim=False):
         '''
@@ -201,18 +198,23 @@ class DataSet(object):
         Make a binned version of this sample.
 
         :param bins: number of bins per data parameter.
-        :type bins: int
+        :type bins: int or tuple(int, ...)
         :returns: binned data sample.
         :rtype: BinnedDataSet
         '''
-        edges = {p.name: aop.linspace(*p.bounds, bins + 1)
-                 for p in self.data_pars}
+        bins = np.array(bins)
+        if len(bins.shape):
+            edges = {p.name: aop.linspace(*p.bounds, b + 1)
+                     for p, b in zip(self.data_pars, bins)}
+        else:
+            edges = {p.name: aop.linspace(*p.bounds, bins + 1)
+                     for p in self.data_pars}
 
         centers = [self[p.name] for p in self.data_pars]
 
         e = [edges[p.name] for p in self.data_pars]
 
-        values = aop.sum_inside(centers, e)
+        values = aop.sum_inside(centers, e, self.weights)
 
         return BinnedDataSet(edges, self.data_pars, values, copy=False, convert=False)
 
@@ -377,9 +379,6 @@ class DataSet(object):
 
 
 class BinnedDataSet(object):
-    '''
-    A binned data set.
-    '''
 
     def __init__(self, edges, data_pars, values, copy=True, convert=True):
         '''
@@ -407,7 +406,7 @@ class BinnedDataSet(object):
         Get the centers of the bins for the given parameter.
 
         :returns: centers of the bins.
-        :rtype: numpy.ndarray
+        :rtype: numpy.ndarray or reikna.cluda.Array
         '''
         return self.__edges[var]
 

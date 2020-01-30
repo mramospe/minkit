@@ -34,7 +34,7 @@ def test_minimizer():
 
     data = minkit.DataSet.from_array(arr, m)
 
-    with helpers.fit_test(g, rtol=0.05) as test:
+    with helpers.fit_test(g) as test:
         with minkit.minimizer('uml', g, data, minimizer='minuit') as minuit:
             test.result = pytest.shared_result = minuit.migrad()
 
@@ -55,14 +55,14 @@ def test_minimizer():
     # With weights fits correctly
     data.weights = minkit.as_ndarray(g(data))
 
-    with helpers.fit_test(g, rtol=0.05) as test:
+    with helpers.fit_test(g) as test:
         with minkit.minimizer('uml', g, data, minimizer='minuit') as minuit:
             test.result = minuit.migrad()
 
     # Test the binned case
     data = data.make_binned(bins=100)
 
-    with helpers.fit_test(g, rtol=0.05) as test:
+    with helpers.fit_test(g) as test:
         with minkit.minimizer('bml', g, data, minimizer='minuit') as minuit:
             test.result = minuit.migrad()
 
@@ -93,7 +93,7 @@ def test_simultaneous_minimizer():
     categories = [minkit.Category('uml', g1, data1),
                   minkit.Category('uml', g2, data2)]
 
-    with helpers.fit_test(categories, rtol=0.05, simultaneous=True) as test:
+    with helpers.fit_test(categories, simultaneous=True) as test:
         with minkit.simultaneous_minimizer(categories, minimizer='minuit') as minuit:
             test.result = minuit.migrad()
 

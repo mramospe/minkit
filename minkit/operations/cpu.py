@@ -192,7 +192,7 @@ def sum(a, *args):
 @docstrings.set_docstring
 def sum_inside(centers, edges, values=None):
     out, _ = np.histogramdd(centers, bins=edges, weights=values)
-    return out.flatten()
+    return out.T.flatten()
 
 
 @docstrings.set_docstring

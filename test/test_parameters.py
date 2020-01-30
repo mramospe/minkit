@@ -54,7 +54,7 @@ def test_formula(tmpdir):
 
     compare_with_numpy(g, nd, m)
 
-    with helpers.fit_test(g, rtol=0.05) as test:
+    with helpers.fit_test(g) as test:
         with minkit.minimizer('uml', g, data, minimizer='minuit') as minuit:
             test.result = minuit.migrad()
 
@@ -97,14 +97,14 @@ def test_range():
 
     data = e.generate(10000)
 
-    with helpers.fit_test(e, rtol=0.05) as test:
+    with helpers.fit_test(e) as test:
         with minkit.minimizer('uml', e, data, minimizer='minuit', range='sides') as minuit:
             test.result = minuit.migrad()
 
     # Test generation of data only in the range
     data = e.generate(10000, range='sides')
 
-    with helpers.fit_test(e, rtol=0.05) as test:
+    with helpers.fit_test(e) as test:
         with minkit.minimizer('uml', e, data, minimizer='minuit', range='sides') as minuit:
             test.result = minuit.migrad()
 

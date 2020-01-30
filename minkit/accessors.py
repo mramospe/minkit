@@ -2,6 +2,7 @@
 Accessors to PDF in code.
 '''
 from . import PACKAGE_PATH
+from . import autocode
 from . import core
 from .operations import gpu_core
 from .operations import types
@@ -51,26 +52,40 @@ def access_cpu_module(name):
         module = CPU_PDF_MODULE_CACHE[name]
     else:
         # By default take it from this package
-        source = os.path.join(PACKAGE_PATH, f'cpu/{name}.cpp')
+        xml_source = os.path.join(PACKAGE_PATH, f'src/{name}.xml')
 
         # Check if it exists in any of the provided paths
         for p in PDF_PATHS:
-            fp = os.path.join(p, f'{name}.cpp')
+            fp = os.path.join(p, f'{name}.xml')
             if os.path.isfile(fp):
-                source = fp
+                xml_source = fp
                 break
 
-        # Compile the C++ code and load the library
-        if not os.path.isfile(source):
+        if not os.path.isfile(xml_source):
             raise RuntimeError(
-                f'Function {name} does not exist in "{source}" or any of the provided paths')
+                f'XML file for function {name} not found in "{PACKAGE_PATH}/src" or any of the provided paths')
 
+        # Write the code
+        source = os.path.join(TMPDIR.name, f'{name}.cpp')
+        code = autocode.generate_code(xml_source, core.CPU)
+        with open(source, 'wt') as f:
+            f.write(code)
+
+        # Compile the C++ code and load the library
         compiler = ccompiler.new_compiler()
-        objects = compiler.compile(
-            [source], output_dir=TMPDIR.name, extra_preargs=CFLAGS)
-        libname = os.path.join(TMPDIR.name, f'lib{name}.so')
-        compiler.link(f'{name} library', objects, libname,
-                      extra_preargs=CFLAGS, libraries=['stdc++'])
+
+        try:
+            objects = compiler.compile(
+                [source], output_dir=TMPDIR.name, extra_preargs=CFLAGS)
+            libname = os.path.join(TMPDIR.name, f'lib{name}.so')
+            compiler.link(f'{name} library', objects, libname,
+                          extra_preargs=CFLAGS, libraries=['stdc++'])
+        except Exception as ex:
+            nl = len(str(code.count('\n')))
+            code = '\n'.join(f'{i + 1:>{nl}}: {l}' for i,
+                             l in enumerate(code.split('\n')))
+            logger.error(f'Error found compiling:\n{code}')
+            raise ex
 
         module = cdll.LoadLibrary(libname)
 
@@ -95,23 +110,35 @@ def access_gpu_module(name):
         module = GPU_PDF_MODULE_CACHE[name]
     else:
         # By default take it from this package
-        source = os.path.join(PACKAGE_PATH, f'gpu/{name}.c')
+        xml_source = os.path.join(PACKAGE_PATH, f'src/{name}.xml')
 
         # Check if it exists in any of the provided paths
         for p in PDF_PATHS:
-            fp = os.path.join(p, f'{name}.c')
+            fp = os.path.join(p, f'{name}.xml')
             if os.path.isfile(fp):
-                source = fp
+                xml_source = fp
                 break
 
-        # Compile the C++ code and load the library
-        if not os.path.isfile(source):
+        if not os.path.isfile(xml_source):
             raise RuntimeError(
-                f'Function {name} does not exist in "{source}" or any of the provided paths')
+                f'XML file for function {name} not found in "{PACKAGE_PATH}/src" or any of the provided paths')
+
+        # Write the code
+        source = os.path.join(TMPDIR.name, f'{name}.c')
+        code = autocode.generate_code(xml_source, core.GPU)
+        with open(source, 'wt') as f:
+            f.write(code)
 
         # Compile the code
         with open(source) as fi:
-            module = gpu_core.THREAD.compile(fi.read())
+            try:
+                module = gpu_core.THREAD.compile(fi.read())
+            except Exception as ex:
+                nl = len(str(code.count('\n')))
+                code = '\n'.join(f'{i + 1:>{nl}}: {l}' for i,
+                                 l in enumerate(code.split('\n')))
+                logger.error(f'Error found compiling:\n{code}')
+                raise ex
 
         GPU_PDF_MODULE_CACHE[name] = module
 
@@ -252,7 +279,7 @@ def create_cpu_function_proxies(module, ndata_pars, narg_pars=0, nvar_arg_pars=N
                 var_arg_pars = types.cpu_type(
                     args[-bs - nvar_arg_pars: -bs])
 
-                # Normal arguments are parse first
+                # Normal arguments are parsed first
                 vals = tuple(
                     map(types.c_double, args[:-nvar_arg_pars - bs]))
                 # Variable number of arguments follow

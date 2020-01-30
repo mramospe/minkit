@@ -1,0 +1,25 @@
+<!--Power-law PDF-->
+<PDF>
+  <parameters c="c" n="n"/>
+  <function>
+    <data x="x"/>
+    <code>
+      return 1. / pow(fabs(x - c), n);
+    </code>
+  </function>
+  <integral>
+    <bounds xmin="xmin" xmax="xmax"/>
+    <code>
+      bool use_log = ( fabs(n - 1.) &lt; 1e-5 );
+
+      double result = 0.;
+
+      if ( use_log )
+        result = (log(xmax - c) - log(xmin - c));
+      else
+        result = 1. / (1. - n) * (1. / pow(fabs(xmax - c), n - 1.) - 1. / pow(fabs(xmin - c), n - 1.));
+
+      return result != 0. ? result : 1e-300;
+    </code>
+  </integral>
+</PDF>

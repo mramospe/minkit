@@ -84,7 +84,7 @@ def test_aop():
     n = minkit.core.aop.random_uniform(0, 1, len(l))
 
     assert np.allclose(minkit.core.aop.count_nonzero(minkit.core.aop.ale(n, l)),
-                       len(l) / 2., rtol=0.05)
+                       0.5 * len(l), rtol=0.05)
 
     # concatenate
     l1 = minkit.core.aop.linspace(0, 1, 10000)
@@ -113,7 +113,7 @@ def test_aop():
 
     # sum_inside
     l = minkit.core.aop.linspace(0, 100, 1001)
-    c = (l[1:] + l[:-1]) / 2.
+    c = 0.5 * (l[1:] + l[:-1])
     e = minkit.core.aop.linspace(0, 100, 101)
 
     r = minkit.core.aop.sum_inside([c], [e])
@@ -122,6 +122,17 @@ def test_aop():
     v = minkit.core.aop.zeros(len(c), dtype=types.cpu_type)
     r = minkit.core.aop.sum_inside([c], [e], v)
     assert np.allclose(minkit.as_ndarray(r), np.zeros(len(r)))
+
+    ex = minkit.core.aop.linspace(0, 10, 101)
+    ey = minkit.core.aop.linspace(0, 10, 101)
+    cx = 0.5 * (ex[1:] + ex[:-1])
+    cy = 0.5 * (ey[1:] + ey[:-1])
+
+    mx, my = minkit.core.aop.meshgrid(cx, cy)
+
+    r = minkit.as_ndarray(minkit.core.aop.sum_inside([mx, my], [ex, ey]))
+
+    assert np.allclose(r, np.full(len(r), 1))
 
     # FFT
     n = 1000

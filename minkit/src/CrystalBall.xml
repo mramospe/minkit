@@ -1,0 +1,74 @@
+<!--Crystal-ball PDF-->
+<PDF>
+  <parameters c="c" s="s" a="a" n="n"/>
+  <preamble>
+    #define SQRTPI_2 1.2533141373155001
+    #define SQRT2 1.4142135623730951
+  </preamble>
+  <function>
+    <data x="x"/>
+    <code>
+      double t = ( a &lt; 0 ? -1 : +1 ) * ( x - c ) / s;
+
+      double aa = fabs(a);
+
+      if ( t >= -aa )
+        return exp(-0.5 * t * t);
+      else {
+        double A = pow(n / aa, n) * exp(-0.5 * aa * aa);
+        double B = n / aa - aa;
+
+        return A / pow(B - t, n);
+      }
+    </code>
+  </function>
+  <integral>
+    <bounds xmin="xmin" xmax="xmax"/>
+    <code>
+      double result = 0.;
+
+      bool use_log = ( fabs(n - 1.) &lt; 1e-5 );
+
+      double tmin = (xmin - c) / s;
+      double tmax = (xmax - c) / s;
+
+      if ( a &lt; 0 ) {
+
+      double tmp = tmin;
+      tmin = -tmax;
+      tmax = -tmp;
+      }
+
+      double aa = fabs(a);
+
+      if ( tmin >= -aa )
+      result += s * SQRTPI_2 * (erf(tmax / SQRT2) - erf(tmin / SQRT2));
+      else {
+      double A = pow(n / aa, n) * exp(-0.5 * aa * aa);
+      double B = n / aa - aa;
+
+      if ( tmax &lt;= -aa ) {
+
+      if ( use_log )
+      result += A * s * (log(B - tmin) - log(B - tmax));
+      else
+      result += A * s / (1. - n) * (1. / pow(B - tmin, n - 1.) - 1. / pow(B - tmax, n - 1.));
+      }
+      else {
+      double t1 = 0.;
+
+      if ( use_log )
+      t1 = A * s * (log(B - tmin) - log(n / aa));
+      else
+      t1 = A * s / (1. - n) * (1. / pow(B - tmin, n - 1.) - 1. / pow(n / aa, n - 1.));
+
+      double t2 = s * SQRTPI_2 * (erf(tmax / SQRT2) - erf(-aa / SQRT2));
+
+      result += t1 + t2;
+      }
+      }
+
+      return result != 0. ? result : 1e-300;
+    </code>
+  </integral>
+</PDF>

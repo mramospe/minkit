@@ -1,0 +1,11 @@
+<!--Amoroso PDF-->
+<PDF>
+  <parameters a="a" theta="theta" alpha="alpha" beta="beta"/>
+  <function>
+    <data x="x"/>
+    <code>
+      double d = (x - a) / theta;
+      return pow(d, alpha * beta - 1) * exp(- pow(d, beta));
+    </code>
+  </function>
+</PDF>

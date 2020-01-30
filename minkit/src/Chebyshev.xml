@@ -1,0 +1,79 @@
+<!--Chebyshev polynomial PDF-->
+<PDF>
+  <variable_parameters n="n" p="p"/>
+  <function>
+    <data x="x"/>
+    <code>
+      if ( n == 0 )
+         return 1.;
+       else if ( n == 1 )
+         return 1. + p[0] * x;
+       else {
+
+         double Tipp = 1.;
+         double Tip = x;
+
+         double res = p[0] * Tip + Tipp;
+
+         for ( int i = 1; i &lt; n; ++i ) {
+
+           double Ti = 2. * x * Tip - Tipp;
+
+	   res += p[i] * Ti;
+
+	   Tipp = Tip;
+	   Tip = Ti;
+	 }
+
+	 return res;
+       }
+    </code>
+  </function>
+  <integral>
+    <bounds xmin="xmin" xmax="xmax"/>
+    <code>
+      if ( n == 0 )
+         return (xmax - xmin);
+      else if ( n == 1 )
+         return (xmax - xmin) + 0.5 * p[0] * (xmax * xmax - xmin * xmin);
+      else {
+
+        double Tipp_r = 1.;
+        double Tipp_l = 1.;
+
+        double Tip_r = xmax;
+        double Tip_l = xmin;
+
+        double res = (xmax - xmin) + 0.5 * p[0] * (xmax * xmax - xmin * xmin);
+
+        for ( int i = 1; i &lt; n; ++i ) {
+
+          double Ti_r = 2. * xmax * Tip_r - Tipp_r;
+          double Tin_r = 2. * xmax * Ti_r - Tip_r;
+
+          double Ti_l = 2. * xmin * Tip_l - Tipp_l;
+          double Tin_l = 2. * xmin * Ti_l - Tip_l;
+
+          res += 0.5 * p[i] * ((Tin_r - Tin_l) / (i + 1) - (Tip_r - Tip_l) / (i - 1));
+
+          double tmp;
+
+          // Swap
+          tmp = Tip_r;
+          Tip_r = Tipp_r;
+          Tipp_r = tmp;
+
+          // Swap
+          tmp    = Tip_l;
+          Tip_l  = Tipp_l;
+          Tipp_l = tmp;
+
+          Tip_r = Ti_r;
+          Tip_l = Ti_l;
+        }
+
+        return res;
+      }
+    </code>
+  </integral>
+</PDF>

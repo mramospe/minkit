@@ -89,7 +89,7 @@ setup(
 
     # Install data
     package_dir={'minkit': 'minkit'},
-    package_data={'minkit': ['cpu/*.cpp', 'gpu/*.c', 'operations/src/*.c']},
+    package_data={'minkit': ['src/*.xml', 'operations/src/*.c']},
 
     # Test requirements
     setup_requires=['numpy', 'iminuit', 'numdifftools',
