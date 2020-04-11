@@ -157,7 +157,7 @@ def add_pdf_src(path):
     PDF_PATHS.insert(0, path)
 
 
-def create_cpu_function_proxies(module, ndata_pars, narg_pars=0, nvar_arg_pars=None):
+def create_cpu_function_proxies(module, ndata_pars, nvar_arg_pars=None):
     '''
     Create proxies for C++ that handle correctly the input and output data
     types of a function.
@@ -166,11 +166,9 @@ def create_cpu_function_proxies(module, ndata_pars, narg_pars=0, nvar_arg_pars=N
     :type module: module
     :param ndata_pars: number of data parameters.
     :type ndata_pars: int
-    :param narg_pars: number of fixed argument parameters.
-    :type narg_pars: int
     :param nvar_arg_pars: number of variable argument parameters.
     :type nvar_arg_pars: int
-    :returns: proxies for the function, the array-like function and normalization.
+    :returns: proxies for the function, the array-like function and integral.
     :rtype: function, function, function
     '''
     # Get the functions
@@ -182,161 +180,117 @@ def create_cpu_function_proxies(module, ndata_pars, narg_pars=0, nvar_arg_pars=N
     else:
         evaluate_binned = None
 
-    if hasattr(module, 'normalization'):
-        normalization = module.normalization
+    if hasattr(module, 'integral'):
+        integral = module.integral
     else:
-        normalization = None
+        integral = None
 
     # Define the types of the input arguments
-    partypes = [types.c_double for _ in range(narg_pars)]
-
     if nvar_arg_pars is not None:
-        partypes += [types.c_int, types.c_double_p]
+        partypes = [types.c_int, types.c_double_p]
+    else:
+        partypes = [types.c_double_p]
 
     # Define the types passed to the function
-    functiontypes = [types.c_double for _ in range(ndata_pars)]
-    functiontypes += partypes
-    function.argtypes = functiontypes
+    function.argtypes = [types.c_double_p] + partypes
     function.restype = types.c_double
 
     @functools.wraps(function)
-    def __function(*args):
+    def __function(data, args):
         '''
         Internal wrapper.
         '''
+        dv = data.ctypes.data_as(types.c_double_p)
+        ac = args.ctypes.data_as(types.c_double_p)
+
         if nvar_arg_pars is not None:
-            if nvar_arg_pars != 0:
-                var_arg_pars = types.cpu_type(args[-nvar_arg_pars:])
-                pos_args = tuple(
-                    map(types.c_double, args[ndata_pars:-nvar_arg_pars]))
-            else:
-                var_arg_pars = types.cpu_type([])
-                pos_args = tuple(map(types.c_double, args[ndata_pars:]))
-
-            vals = pos_args + (types.c_int(nvar_arg_pars),
-                               var_arg_pars.ctypes.data_as(types.c_double_p))
+            return function(dv, types.c_int(nvar_arg_pars), ac)
         else:
-            vals = tuple(map(types.c_double, args))
-
-        return function(*vals)
+            return function(dv, ac)
 
     # Define the types for the arguments passed to the evaluate function
-    argtypes = [types.c_int, types.c_double_p]
-    argtypes += [types.c_double_p for _ in range(ndata_pars)]
-    argtypes += partypes
-    evaluate.argtypes = argtypes
+    evaluate.argtypes = [types.c_int, types.c_double_p,
+                         types.c_int_p, types.c_double_p] + partypes
 
     @functools.wraps(evaluate)
-    def __evaluate(output_array, *args):
+    def __evaluate(output_array, data_idx, input_array, args):
         '''
         Internal wrapper.
         '''
         op = output_array.ctypes.data_as(types.c_double_p)
-        ips = tuple(d.ctypes.data_as(types.c_double_p)
-                    for d in args[:ndata_pars])
+        ip = input_array.ctypes.data_as(types.c_double_p)
+        di = data_idx.ctypes.data_as(types.c_int_p)
+        ac = args.ctypes.data_as(types.c_double_p)
+
+        l = types.c_int(len(output_array))
 
         if nvar_arg_pars is not None:
-
-            if nvar_arg_pars != 0:
-                var_arg_pars = types.cpu_type(args[-nvar_arg_pars:])
-                pos_args = tuple(
-                    map(types.c_double, args[ndata_pars:-nvar_arg_pars]))
-            else:
-                var_arg_pars = types.cpu_type([])
-                pos_args = tuple(map(types.c_double, args[ndata_pars:]))
-
-            vals = pos_args + (types.c_int(nvar_arg_pars),
-                               var_arg_pars.ctypes.data_as(types.c_double_p))
-
+            return evaluate(l, op, di, ip, types.c_int(nvar_arg_pars), ac)
         else:
-            vals = tuple(map(types.c_double, args[ndata_pars:]))
+            return evaluate(l, op, di, ip, ac)
 
-        return evaluate(types.c_int(len(output_array)), op, *ips, *vals)
-
-    if normalization is not None and evaluate_binned is None:
+    # Check the functions that need the integral to be defined
+    if integral is not None and evaluate_binned is None:
         logger.warning(
-            'If you are able to define a normalization function you can also provide an evaluation for binned data sets.')
+            'If you are able to define a integral function you can also provide an evaluation for binned data sets.')
 
     if evaluate_binned is not None:
 
-        argtypes = [types.c_int, types.c_double_p]
-        argtypes += partypes
-        argtypes += [types.c_int for _ in range(2 * ndata_pars)]
-        argtypes += [types.c_double_p for _ in range(ndata_pars)]
-        evaluate_binned.argtypes = argtypes
+        # Define the types for the arguments passed to the evaluate_binned function
+        evaluate_binned.argtypes = [types.c_int, types.c_double_p, types.c_int,
+                                    types.c_int_p, types.c_int_p, types.c_double_p] + partypes
 
         @functools.wraps(evaluate_binned)
-        def __evaluate_binned(output_array, *args):
+        def __evaluate_binned(output_array, gaps_idx, gaps, edges, args):
             '''
             Internal wrapper.
             '''
             op = output_array.ctypes.data_as(types.c_double_p)
+            ed = edges.ctypes.data_as(types.c_double_p)
+            gi = gaps_idx.ctypes.data_as(types.c_int_p)
+            gp = gaps.ctypes.data_as(types.c_int_p)
+            ac = args.ctypes.data_as(types.c_double_p)
 
-            bs = 3 * ndata_pars
+            l = types.c_int(len(output_array))
+
+            vals = (l, op, types.c_int(len(gaps)), gi, gp, ed)
 
             if nvar_arg_pars is not None:
-
-                var_arg_pars = types.cpu_type(
-                    args[-bs - nvar_arg_pars: -bs])
-
-                # Normal arguments are parsed first
-                vals = tuple(
-                    map(types.c_double, args[:-nvar_arg_pars - bs]))
-                # Variable number of arguments follow
-                vals += (types.c_int(nvar_arg_pars),
-                         var_arg_pars.ctypes.data_as(types.c_double_p))
-                # Add the number of edges and gap values
-                vals += tuple(map(types.c_int, args[-bs:-ndata_pars]))
-                # Finally, the integration limits must be specified
-                vals += tuple(a.ctypes.data_as(types.c_double_p)
-                              for a in args[-ndata_pars:])
-
+                return evaluate_binned(*vals, types.c_int(nvar_arg_pars), ac)
             else:
-                vals = tuple(map(types.c_double, args[:-bs])) + tuple(
-                    map(types.c_int, args[-bs:-ndata_pars])) + tuple(
-                    a.ctypes.data_as(types.c_double_p) for a in args[-ndata_pars:])
-
-            return evaluate_binned(types.c_int(len(output_array)), op, *vals)
+                return evaluate_binned(*vals, ac)
     else:
         __evaluate_binned = None
 
-    if normalization is not None:
+    if integral is not None:
 
-        # Define the types passed to the normalization function
-        normtypes = partypes
-        normtypes += [types.c_double for _ in range(2 * ndata_pars)]
-        normalization.argtypes = normtypes
-        normalization.restype = types.c_double
+        # Define the types passed to the integral function
+        integral.argtypes = [types.c_double_p, types.c_double_p] + partypes
+        integral.restype = types.c_double
 
-        @functools.wraps(normalization)
-        def __normalization(*args):
+        @functools.wraps(integral)
+        def __integral(lb, ub, args):
             '''
             Internal wrapper.
             '''
+            if lb.ndim == 0:
+                lb, ub = types.float_array(lb), types.float_array(ub)
+
+            lb = lb.ctypes.data_as(types.c_double_p)
+            ub = ub.ctypes.data_as(types.c_double_p)
+            ac = args.ctypes.data_as(types.c_double_p)
+
             if nvar_arg_pars is not None:
-
-                bs = 2 * ndata_pars
-
-                var_arg_pars = types.cpu_type(args[-bs - nvar_arg_pars: -bs])
-
-                # Normal arguments are parse first
-                vals = tuple(map(types.c_double, args[:-nvar_arg_pars - bs]))
-                # Variable number of arguments follow
-                vals += (types.c_int(nvar_arg_pars),
-                         var_arg_pars.ctypes.data_as(types.c_double_p))
-                # Finally, the integration limits must be specified
-                vals += tuple(map(types.c_double, args[-bs:]))
+                return integral(lb, ub, types.c_int(nvar_arg_pars), ac)
             else:
-                vals = tuple(map(types.c_double, args))
-
-            return normalization(*vals)
+                return integral(lb, ub, ac)
     else:
-        __normalization = None
+        __integral = None
 
-    return __function, __evaluate, __evaluate_binned, __normalization
+    return __function, __evaluate, __evaluate_binned, __integral
 
 
-def create_gpu_function_proxy(module, ndata_pars, narg_pars, nvar_arg_pars):
+def create_gpu_function_proxy(module, ndata_pars, nvar_arg_pars):
     '''
     Creates a proxy for a function writen in GPU.
 
@@ -344,8 +298,6 @@ def create_gpu_function_proxy(module, ndata_pars, narg_pars, nvar_arg_pars):
     :type module: module
     :param ndata_pars: number of data parameters.
     :type ndata_pars: int
-    :param narg_pars: number of fixed argument parameters.
-    :type narg_pars: int
     :param nvar_arg_pars: number of variable argument parameters.
     :type nvar_arg_pars: int
     :returns: proxy for the array-like function.
@@ -361,67 +313,54 @@ def create_gpu_function_proxy(module, ndata_pars, narg_pars, nvar_arg_pars):
         evaluate_binned = None
 
     @functools.wraps(evaluate)
-    def __evaluate(output_array, *args):
+    def __evaluate(output_array, data_idx, input_array, args):
         '''
         Internal wrapper.
         '''
-        ips = args[:ndata_pars]
+        ic = core.aop.data_array(data_idx, dtype=types.cpu_int, convert=True)
+
+        if len(args) == 0:
+            # It seems we can not pass a null pointer in OpenCL
+            ac = core.aop.zeros(1)
+        else:
+            ac = core.aop.data_array(args, dtype=types.cpu_type, convert=True)
 
         if nvar_arg_pars is not None:
-
-            # Variable arguments must be the last in the list
-            if nvar_arg_pars != 0:
-                var_arg_pars = types.cpu_type(args[-nvar_arg_pars:])
-                pos_args = tuple(
-                    map(types.cpu_type, args[ndata_pars:-nvar_arg_pars]))
-            else:
-                # This is necessary because arrays with zero size are not allowed
-                # in reikna
-                var_arg_pars = types.cpu_type([0])
-                pos_args = tuple(map(types.cpu_type, args[ndata_pars:]))
-
-            vals = pos_args + (types.cpu_int(nvar_arg_pars),
-                               core.aop.data_array(var_arg_pars))
+            vals = (types.cpu_int(nvar_arg_pars), ac)
         else:
-            vals = tuple(map(types.cpu_type, args[ndata_pars:]))
+            vals = (ac,)
 
         global_size, local_size = gpu_core.get_sizes(len(output_array))
 
-        return evaluate(output_array, *ips, *vals, global_size=global_size, local_size=local_size)
+        return evaluate(output_array, ic, input_array, *vals, global_size=global_size, local_size=local_size)
 
     if evaluate_binned is not None:
 
         @functools.wraps(evaluate_binned)
-        def __evaluate_binned(output_array, *args):
+        def __evaluate_binned(output_array, gaps_idx, gaps, edges, args):
             '''
             Internal wrapper.
             '''
-            bs = 3 * ndata_pars
+            gi = core.aop.data_array(
+                gaps_idx, dtype=types.cpu_int, convert=True)
+            gp = core.aop.data_array(gaps, dtype=types.cpu_int, convert=True)
+            nd = types.cpu_int(len(gaps))
+
+            if len(args) == 0:
+                # It seems we can not pass a null pointer in OpenCL
+                ac = core.aop.zeros(1)
+            else:
+                ac = core.aop.data_array(
+                    args, dtype=types.cpu_type, convert=True)
 
             if nvar_arg_pars is not None:
-
-                var_arg_pars = types.cpu_type(
-                    args[-bs - nvar_arg_pars: -bs])
-
-                # Normal arguments are parse first
-                vals = tuple(
-                    map(types.cpu_type, args[:-nvar_arg_pars - bs]))
-                # Variable number of arguments follow
-                vals += (types.cpu_int(nvar_arg_pars),
-                         core.aop.data_array(var_arg_pars))
-                # Add the number of edges and gap values
-                vals += tuple(map(types.c_int, args[-bs:-ndata_pars]))
-                # Finally, the integration limits must be specified
-                vals += args[-ndata_pars:]
-
+                vals = (types.cpu_int(nvar_arg_pars), ac)
             else:
-                vals = tuple(map(
-                    types.cpu_type, args[:-bs])) + tuple(map(
-                        types.cpu_int, args[-bs:-ndata_pars])) + args[-ndata_pars:]
+                vals = (ac,)
 
             global_size, local_size = gpu_core.get_sizes(len(output_array))
 
-            return evaluate_binned(output_array, *vals, global_size=global_size, local_size=local_size)
+            return evaluate_binned(output_array, nd, gi, gp, edges, *vals, global_size=global_size, local_size=local_size)
     else:
         __evaluate_binned = None
 
@@ -429,7 +368,7 @@ def create_gpu_function_proxy(module, ndata_pars, narg_pars, nvar_arg_pars):
 
 
 @core.with_backend
-def access_pdf(name, ndata_pars, narg_pars=0, nvar_arg_pars=None):
+def access_pdf(name, ndata_pars, nvar_arg_pars=None):
     '''
     Access a PDF with the given name and number of data and parameter arguments.
 
@@ -437,11 +376,9 @@ def access_pdf(name, ndata_pars, narg_pars=0, nvar_arg_pars=None):
     :type name: str
     :param ndata_pars: number of data parameters.
     :type ndata_pars: int
-    :param narg_pars: number of fixed argument parameters.
-    :type narg_pars: int
     :param nvar_arg_pars: number of variable argument parameters.
     :type nvar_arg_pars: int
-    :returns: PDF and normalization function.
+    :returns: PDF and integral function.
     :rtype: tuple(function, function)
     '''
     global CPU_PDF_MODULE_CACHE
@@ -458,7 +395,7 @@ def access_pdf(name, ndata_pars, narg_pars=0, nvar_arg_pars=None):
             cpu_output = CPU_PDF_CACHE[modname]
         else:
             cpu_output = create_cpu_function_proxies(
-                cpu_module, ndata_pars, narg_pars, nvar_arg_pars)
+                cpu_module, ndata_pars, nvar_arg_pars)
             CPU_PDF_CACHE[modname] = cpu_output
 
     except AttributeError as ex:
@@ -471,8 +408,8 @@ def access_pdf(name, ndata_pars, narg_pars=0, nvar_arg_pars=None):
 
     elif core.BACKEND == core.CUDA or core.BACKEND == core.OPENCL:
 
-        # Function and normalization are taken from the C++ version
-        function, _, _, normalization = cpu_output
+        # Function and integral are taken from the C++ version
+        function, _, _, integral = cpu_output
 
         # Get the "evaluate" function from source
         if modname in GPU_PDF_CACHE:
@@ -482,10 +419,10 @@ def access_pdf(name, ndata_pars, narg_pars=0, nvar_arg_pars=None):
             gpu_module = access_gpu_module(name)
 
             evaluate, evaluate_binned = create_gpu_function_proxy(
-                gpu_module, ndata_pars, narg_pars, nvar_arg_pars)
+                gpu_module, ndata_pars, nvar_arg_pars)
             GPU_PDF_CACHE[modname] = evaluate, evaluate_binned
 
-        return function, evaluate, evaluate_binned, normalization
+        return function, evaluate, evaluate_binned, integral
     else:
         raise NotImplementedError(
             f'Function not implemented for backend "{core.BACKEND}"')

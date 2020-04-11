@@ -210,12 +210,12 @@ def test_prodpdfs(tmpdir):
     # Create two Gaussians
     mx = minkit.Parameter('mx', bounds=(-5, +5))
     cx = minkit.Parameter('cx', 0., bounds=(-2, +2))
-    sx = minkit.Parameter('sx', 1., bounds=(-3, +3))
+    sx = minkit.Parameter('sx', 1., bounds=(0.1, +3))
     gx = minkit.Gaussian('gx', mx, cx, sx)
 
     my = minkit.Parameter('my', bounds=(-5, +5))
     cy = minkit.Parameter('cy', 0., bounds=(-2, +2))
-    sy = minkit.Parameter('sy', 1., bounds=(-3, +3))
+    sy = minkit.Parameter('sy', 2., bounds=(0.5, +3))
     gy = minkit.Gaussian('gy', my, cy, sy)
 
     pdf = minkit.ProdPDFs('pdf', [gx, gy])

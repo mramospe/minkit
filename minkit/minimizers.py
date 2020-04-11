@@ -39,12 +39,11 @@ The type of data (binned/unbinned) is assumed from the FCN.'''
 
 
 class BinnedEvaluator(object):
-    '''
-    Definition of a proxy class to evaluate an FCN with a PDF on a BinnedDataSet object.
-    '''
 
     def __init__(self, fcn, pdf, data, constraints=None):
         '''
+        Proxy class to evaluate an FCN with a PDF on a BinnedDataSet object.
+
         :param fcn: FCN to be used during minimization.
         :type fcn: str
         :param pdf: PDF to minimize.
@@ -87,12 +86,11 @@ class BinnedEvaluator(object):
 
 
 class UnbinnedEvaluator(object):
-    '''
-    Definition of a proxy class to evaluate an FCN with a PDF.
-    '''
 
     def __init__(self, fcn, pdf, data, range=parameters.FULL, constraints=None, rescale_weights=True):
         '''
+        Proxy class to evaluate an FCN with a PDF.
+
         :param fcn: FCN to be used during minimization.
         :type fcn: str
         :param pdf: PDF to minimize.
@@ -110,9 +108,9 @@ class UnbinnedEvaluator(object):
             if rescale_weights:
                 logger.info('Rescaling weights for the fit')
                 self.__data = data.subset(
-                    range=range, copy=False, rescale_weights=rescale_weights, trim=True)
+                    range, copy=False, rescale_weights=rescale_weights)
         else:
-            self.__data = data.subset(range=range, copy=False, trim=True)
+            self.__data = data.subset(range, copy=False)
 
         self.__fcn = fcn
         self.__pdf = pdf
@@ -147,9 +145,6 @@ class UnbinnedEvaluator(object):
 
 
 class SimultaneousEvaluator(object):
-    '''
-    Definition of an evaluator of PDFs for simultaneous fits.
-    '''
 
     def __init__(self, evaluators):
         '''

@@ -519,7 +519,8 @@ def bounds_for_range(data_pars, range):
     if len(multi_bounds) == 0:
         # Simple case, all data parameters have only one set of bounds
         # for this normalization range
-        return np.array([r.bounds for r in single_bounds.values()]).flatten()
+        t = np.array([r.bounds for r in single_bounds.values()]).T
+        return np.array([t])
     else:
         # Must calculate all the combinations of normalization ranges
         # for every data parameter.
@@ -527,7 +528,7 @@ def bounds_for_range(data_pars, range):
         maxs = collections.OrderedDict()
         for n in data_pars.names:
             if n in single_bounds:
-                mins[n], maxs[n] = single_bounds[n].bounds.T
+                mins[n], maxs[n] = single_bounds[n].bounds
             elif p.name in multi_bounds:
                 mins[n], maxs[n] = multi_bounds[n].bounds.T
             else:
@@ -535,7 +536,9 @@ def bounds_for_range(data_pars, range):
                     'Internal error detected; please report the bug')
 
         # Get all the combinations of minimum and maximum values for the bounds of each variable
-        mmins = [m.flatten() for m in np.meshgrid(*[b for b in mins.values()])]
-        mmaxs = [m.flatten() for m in np.meshgrid(*[b for b in maxs.values()])]
+        mmins = np.array([m.flatten()
+                          for m in np.meshgrid(*[b for b in mins.values()])]).T
+        mmaxs = np.array([m.flatten()
+                          for m in np.meshgrid(*[b for b in maxs.values()])]).T
 
-        return np.concatenate([np.array([mi, ma]).T for mi, ma in zip(mmins, mmaxs)], axis=1)
+        return np.array([(lb, ub) for lb, ub in zip(mmins, mmaxs)])

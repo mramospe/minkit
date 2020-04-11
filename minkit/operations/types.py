@@ -14,7 +14,15 @@ cpu_int = np.int32  # int
 cpu_bool = np.uint32
 cpu_real_bool = np.bool  # bool (not allowed in PyOpenCL)
 
+
+def float_array(a): return np.array(a, dtype=cpu_type)
+
+
+def int_array(a): return np.array(a, dtype=cpu_int)
+
+
 # Types to handle with ctypes
 c_int = ctypes.c_int  # int
+c_int_p = ctypes.POINTER(c_int)  # int*
 c_double = ctypes.c_double  # double
 c_double_p = ctypes.POINTER(c_double)  # double*

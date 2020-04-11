@@ -149,9 +149,7 @@ def safe_division(first, second):
 
 
 class PDF(object):
-    '''
-    Object defining the properties of a PDF.
-    '''
+
     # Cache types
     BIND = 'bind'
     CONST = 'const'
@@ -292,7 +290,7 @@ class PDF(object):
         :returns: area of the normalization bin.
         :rtype: float
         '''
-        return np.prod(bounds[1::2] - bounds[0::2]) * 1. / size
+        return np.prod(bounds[1] - bounds[0]) * 1. / size
 
     def _integral_single_bounds(self, bounds, range):
         '''
@@ -467,9 +465,9 @@ class PDF(object):
         with self.bind(range, normalized=False) as proxy:
 
             bounds = parameters.bounds_for_range(proxy.data_pars, range)
-            if len(bounds.shape) == 1:
+            if len(bounds) == 1:
                 result = proxy._generate_single_bounds(
-                    size, mapsize, gensize, safe_factor, bounds)
+                    size, mapsize, gensize, safe_factor, bounds[0])
             else:
                 # Get the associated number of entries per bounds
                 fracs = []
@@ -516,10 +514,7 @@ class PDF(object):
         :rtype: float
         '''
         bounds = parameters.bounds_for_range(self.data_pars, integral_range)
-        if len(bounds.shape) == 1:
-            return self._integral_single_bounds(bounds, range)
-        else:
-            return np.sum(np.fromiter((self._integral_single_bounds(b, range) for b in bounds), dtype=types.cpu_type))
+        return np.sum(np.fromiter((self._integral_single_bounds(b, range) for b in bounds), dtype=types.cpu_type))
 
     @allows_bind_or_const_cache
     def norm(self, range=parameters.FULL):
@@ -545,10 +540,7 @@ class PDF(object):
         :rtype: float
         '''
         bounds = parameters.bounds_for_range(self.data_pars, range)
-        if len(bounds.shape) == 1:
-            return self._numerical_normalization_single_bounds(bounds)
-        else:
-            return np.sum(np.fromiter((self._numerical_normalization_single_bounds(b) for b in bounds), dtype=types.cpu_type))
+        return np.sum(np.fromiter((self._numerical_normalization_single_bounds(b) for b in bounds), dtype=types.cpu_type))
 
     def set_values(self, **kwargs):
         '''
@@ -575,9 +567,6 @@ class PDF(object):
 
 
 class SourcePDF(PDF):
-    '''
-    A PDF created from source files.
-    '''
 
     def __init__(self, name, data_pars, arg_pars=None, var_arg_pars=None):
         '''
@@ -607,13 +596,13 @@ class SourcePDF(PDF):
             var_arg_pars = list(var_arg_pars)
 
         # Access the PDF
-        function, pdf, evb, normalization = accessors.access_pdf(
-            self.__class__.__name__, ndata_pars=len(data_pars), narg_pars=len(arg_pars), nvar_arg_pars=nvar_arg_pars)
+        function, pdf, evb, integral = accessors.access_pdf(
+            self.__class__.__name__, ndata_pars=len(data_pars), nvar_arg_pars=nvar_arg_pars)
 
         self.__function = function
-        self.__pdf = pdf
+        self.__evaluate = pdf
         self.__evaluate_binned = evb
-        self.__norm = normalization
+        self.__norm = integral
 
         super(SourcePDF, self).__init__(name, parameters.Registry(
             data_pars), parameters.Registry(arg_pars + var_arg_pars))
@@ -630,14 +619,10 @@ class SourcePDF(PDF):
         :rtype: float
         '''
         if self.__norm is not None:
-
             # There is an analytical approach to calculate the normalization
-            nr = parameters.bounds_for_range(self.data_pars, range)
-            if len(nr.shape) == 1:
-                return self.__norm(*values, *nr)
-            else:
-                return np.sum(np.fromiter((self.__norm(*values, *inr)
-                                           for inr in nr), dtype=types.cpu_type))
+            bounds = parameters.bounds_for_range(self.data_pars, range)
+            return np.sum(np.fromiter((self.__norm(*b, values)
+                                       for b in bounds), dtype=types.cpu_type))
         else:
             return self.numerical_normalization(range)
 
@@ -654,15 +639,16 @@ class SourcePDF(PDF):
         :type normalized: bool
         '''
         # Determine the values to use
-        fvals = tuple(v.value for v in self.args)
+        fvals = np.fromiter((v.value for v in self.args), dtype=types.cpu_type)
 
         # Prepare the data arrays I/O
         out = aop.zeros(len(data))
 
-        data_arrs = tuple(data[p.name] for p in self.data_pars)
+        di = np.array([i * len(out) for i, p in enumerate(data.data_pars) if p in self.data_pars],
+                      dtype=types.cpu_int)
 
         # Call the real function
-        self.__pdf(out, *data_arrs, *fvals)
+        self.__evaluate(out, di, data.values, fvals)
 
         # Calculate the normalization
         if normalized:
@@ -685,24 +671,16 @@ class SourcePDF(PDF):
         :returns: values from the evaluation.
         :rtype: numpy.ndarray or reikna.cluda.Array
         '''
-        fvals = tuple(v.value for v in self.args)
+        fvals = np.fromiter((v.value for v in self.args), dtype=types.cpu_type)
 
         if self.__evaluate_binned is not None:
 
-            edges = tuple(data[p.name] for p in self.data_pars)
-
-            # Must define the gaps for the edges
-            all_gaps = np.cumprod(
-                (1,) + tuple(len(data[p.name]) for p in data.data_pars))
-
-            nbins = tuple(len(data[p.name]) - 1 for p in self.data_pars)
-
-            gaps = tuple(all_gaps[data.data_pars.index(p.name)]
-                         for p in self.data_pars)
+            gaps_idx = np.array([data.data_pars.index(p.name) for p in self.data_pars],
+                                dtype=types.cpu_int)
 
             out = aop.zeros(len(data))
 
-            self.__evaluate_binned(out, *fvals, *nbins, *gaps, *edges)
+            self.__evaluate_binned(out, gaps_idx, data.gaps, data.edges, fvals)
 
             n = self._norm(fvals)
 
@@ -716,10 +694,8 @@ class SourcePDF(PDF):
 
             pdf_values = i / aop.sum(i)
 
-            centers = [g[p.name] for p in self.data_pars]
-            edges = [data[p.name] for p in self.data_pars]
-
-            out = aop.sum_inside(centers, edges, pdf_values)
+            out = aop.sum_inside(data.edges_indices, data.gaps,
+                                 g.values, data.edges, pdf_values)
 
         if norm_to_data:
             return aop.sum(data.values) * out
@@ -757,16 +733,16 @@ class SourcePDF(PDF):
         :returns: value of the PDF.
         :rtype: float
         '''
-        dvals = tuple(v.value for v in self.data_pars)
-        fvals = tuple(v.value for v in self.args)
-        v = self.__function(*dvals, *fvals)
+        dvals = np.fromiter(
+            (v.value for v in self.data_pars), dtype=types.cpu_type)
+        fvals = np.fromiter((v.value for v in self.args), dtype=types.cpu_type)
+
+        v = self.__function(dvals, fvals)
+
         if normalized:
-            nr = parameters.bounds_for_range(self.data_pars, range)
-            if len(nr.shape) == 1:
-                n = self.__norm(*fvals, *nr)
-            else:
-                n = np.sum(np.fromiter((self.__norm(*fvals, *inr)
-                                        for inr in nr), dtype=types.cpu_type))
+            bounds = parameters.bounds_for_range(self.data_pars, range)
+            n = np.sum(np.fromiter((self.__norm(*b, fvals)
+                                    for b in bounds), dtype=types.cpu_type))
             return safe_division(v, n)
         else:
             return v
@@ -783,7 +759,7 @@ class SourcePDF(PDF):
         :returns: value of the normalization.
         :rtype: float
         '''
-        fvals = tuple(v.value for v in self.args)
+        fvals = np.fromiter((v.value for v in self.args), dtype=types.cpu_type)
         return self._norm(fvals, range)
 
     def to_json_object(self):
@@ -801,9 +777,6 @@ class SourcePDF(PDF):
 
 
 class MultiPDF(PDF):
-    '''
-    Base class for subclasses managing multiple PDFs.
-    '''
 
     # Allow to define if a PDF object depends on other PDFs. All PDF objects
     # with this value set to "True" must have the property "pdfs" implemented.
@@ -966,9 +939,6 @@ class MultiPDF(PDF):
 
 @register_pdf
 class AddPDFs(MultiPDF):
-    '''
-    Definition of the addition of many PDFs.
-    '''
 
     def __init__(self, name, pdfs, yields):
         '''
@@ -1095,6 +1065,19 @@ class AddPDFs(MultiPDF):
         '''
         return len(self.pdfs) == len(self.args)
 
+    def integral(self, integral_range=parameters.FULL, range=parameters.FULL):
+        '''
+        Calculate the integral of a :class:`PDF`.
+
+        :param integral_range: range of the integral to compute.
+        :type integral_range: str
+        :param range: normalization range to consider.
+        :type range: str
+        :returns: integral of the PDF in the range defined by "integral_range" normalized to "range".
+        :rtype: float
+        '''
+        return np.sum(np.fromiter((pdf.integral(integral_range, range) for pdf in self.pdfs), dtype=types.cpu_type))
+
     @allows_bind_or_const_cache
     def norm(self, range=parameters.FULL):
         '''
@@ -1129,9 +1112,6 @@ class AddPDFs(MultiPDF):
 
 @register_pdf
 class ConvPDFs(MultiPDF):
-    '''
-    Definition of a convolution of two PDFs.
-    '''
 
     def __init__(self, name, first, second, range=None):
         '''
@@ -1147,13 +1127,9 @@ class ConvPDFs(MultiPDF):
         PDFs lie outside the evaluation range. It is set to "full" by default.
         :type range: str
         '''
-        error = ValueError(
-            f'Convolution is only supported in 1-dimensional PDFs')
-        if len(first.data_pars) != 1:
-            raise error
-
-        if len(second.data_pars) != 1:
-            raise error
+        if len(first.data_pars) != 1 or len(second.data_pars) != 1:
+            raise ValueError(
+                f'Convolution is only supported in 1-dimensional PDFs')
 
         # The convolution size and range can be changed by the user
         self.range = range or parameters.FULL
@@ -1175,9 +1151,10 @@ class ConvPDFs(MultiPDF):
         '''
         dv, cv = self.convolve(range, normalized)
 
-        par = tuple(self.data_pars)[0]
+        data_idx = np.array([data.data_pars.index(p.name)
+                             for p in self.data_pars], dtype=types.cpu_int)
 
-        pdf_values = aop.interpolate_linear(data[par.name], dv, cv)
+        pdf_values = aop.interpolate_linear(data_idx, data.values, dv, cv)
 
         return pdf_values
 
@@ -1198,9 +1175,10 @@ class ConvPDFs(MultiPDF):
         '''
         dv, cv = self.convolve(parameters.FULL, normalized=True)
 
-        par = tuple(self.data_pars)[0]
+        data_idx = np.array([data.data_pars.index(p)
+                             for p in self.__data_pars], dtype=types.cpu_int)
 
-        out = aop.interpolate_linear(data[par.name], dv, cv)
+        out = aop.interpolate_linear(data_idx, data.values, dv, cv)
 
         if norm_to_data:
             return aop.sum(data.values) * out
@@ -1238,20 +1216,20 @@ class ConvPDFs(MultiPDF):
 
         bounds = parameters.bounds_for_range(first.data_pars, self.range)
 
-        if bounds.shape != (2,):
+        if len(bounds) != 1:
             raise RuntimeError(
                 f'The convolution bounds must not be disjointed')
 
         # Only works for the 1-dimensional case
-        par = tuple(first.data_pars)[0]
+        par = first.data_pars[0]
 
         grid = dataset.evaluation_grid(
-            first.data_pars, bounds, size=self.conv_size)
+            first.data_pars, bounds[0], size=self.conv_size)
 
         fv = first(grid, self.range, normalized)
         sv = second(grid, self.range, normalized)
 
-        return grid[par.name], aop.real(aop.fftconvolve(fv, sv, grid[par.name]))
+        return grid.values, aop.real(aop.fftconvolve(fv, sv, grid.values))
 
     @allows_bind_or_const_cache
     def norm(self, range=parameters.FULL):
@@ -1298,9 +1276,6 @@ class ConvPDFs(MultiPDF):
 
 @register_pdf
 class ProdPDFs(MultiPDF):
-    '''
-    Definition of the product of two different PDFs with different data parameters.
-    '''
 
     def __init__(self, name, pdfs):
         '''
@@ -1367,6 +1342,19 @@ class ProdPDFs(MultiPDF):
         '''
         pdfs = list(map(pdfs.get, obj['pdfs']))
         return cls(obj['name'], pdfs)
+
+    def integral(self, integral_range=parameters.FULL, range=parameters.FULL):
+        '''
+        Calculate the integral of a :class:`PDF`.
+
+        :param integral_range: range of the integral to compute.
+        :type integral_range: str
+        :param range: normalization range to consider.
+        :type range: str
+        :returns: integral of the PDF in the range defined by "integral_range" normalized to "range".
+        :rtype: float
+        '''
+        return np.prod(np.fromiter((pdf.integral(integral_range, range) for pdf in self.pdfs), dtype=types.cpu_type))
 
     @allows_bind_or_const_cache
     def norm(self, range=parameters.FULL):

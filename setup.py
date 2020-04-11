@@ -89,11 +89,12 @@ setup(
 
     # Install data
     package_dir={'minkit': 'minkit'},
-    package_data={'minkit': ['src/*.xml', 'operations/src/*.c']},
+    package_data={'minkit': ['src/*.xml',
+                             'templates/*.c', 'operations/src/*.c']},
 
-    # Test requirements
-    setup_requires=['numpy', 'iminuit', 'numdifftools',
-                    'scipy', 'uncertainties', 'pytest-runner'],
+    # Install requirements
+    install_requires=['iminuit', 'numpy', 'numdifftools',
+                      'scipy', 'uncertainties', 'pytest-runner'],
 
     tests_require=['pytest'],
 )

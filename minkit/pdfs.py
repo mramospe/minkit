@@ -15,9 +15,6 @@ logger = logging.getLogger(__name__)
 
 @pdf_core.register_pdf
 class Amoroso(pdf_core.SourcePDF):
-    '''
-    Definition of the Amoroso PDF.
-    '''
 
     def __init__(self, name, x, a, theta, alpha, beta):
         r'''
@@ -54,9 +51,6 @@ class Amoroso(pdf_core.SourcePDF):
 
 @pdf_core.register_pdf
 class Chebyshev(pdf_core.SourcePDF):
-    '''
-    Definition of a Chebyshev polynomial PDF.
-    '''
 
     def __init__(self, name, x, *coeffs):
         r'''
@@ -84,9 +78,6 @@ class Chebyshev(pdf_core.SourcePDF):
 
 @pdf_core.register_pdf
 class CrystalBall(pdf_core.SourcePDF):
-    '''
-    Definition of the CrystalBall PDF.
-    '''
 
     def __init__(self, name, x, c, s, a, n):
         r'''
@@ -127,9 +118,6 @@ class CrystalBall(pdf_core.SourcePDF):
 
 @pdf_core.register_pdf
 class Exponential(pdf_core.SourcePDF):
-    '''
-    Definition of an Exponential.
-    '''
 
     def __init__(self, name, x, k):
         r'''
@@ -150,9 +138,6 @@ class Exponential(pdf_core.SourcePDF):
 
 @pdf_core.register_pdf
 class Gaussian(pdf_core.SourcePDF):
-    '''
-    Definition of a Gaussian.
-    '''
 
     def __init__(self, name, x, center, sigma):
         r'''
@@ -176,9 +161,6 @@ class Gaussian(pdf_core.SourcePDF):
 
 @pdf_core.register_pdf
 class Polynomial(pdf_core.SourcePDF):
-    '''
-    Definition of a polynomial PDF.
-    '''
 
     def __init__(self, name, x, *coeffs):
         r'''
@@ -202,9 +184,6 @@ class Polynomial(pdf_core.SourcePDF):
 
 @pdf_core.register_pdf
 class PowerLaw(pdf_core.SourcePDF):
-    '''
-    Definition of a power-law PDF.
-    '''
 
     def __init__(self, name, x, c, n):
         r'''

@@ -126,20 +126,25 @@ def pdf_centers_values(pdf, data_values, edges, range=parameters.FULL, component
     If the range is disjoint, the result is a tuple of the previously mentioned \
     quantities, one per subrange.
     :rtype: numpy.ndarray or tuple(numpy.ndarray, ...), numpy.ndarray
+    :raises RuntimeError: If the number of data parameters is greater than one \
+    and no projection is specified.
 
     .. note:: The input edges must be consistent with the range for plotting.
     '''
     bounds = parameters.bounds_for_range(pdf.data_pars, range)
 
-    if len(bounds.shape) == 1:
+    if len(bounds) == 1:
 
-        grid = evaluation_grid(pdf.data_pars, bounds, size)
+        grid = evaluation_grid(pdf.data_pars, bounds[0], size)
 
         pdf_values = scaled_pdf_values(
             pdf, grid, data_values, edges, range, component)
-        centers = aop.extract_ndarray(grid[pdf.data_pars[0].name])
 
         if projection is None:
+            if len(grid.data_pars) > 1:
+                raise RuntimeError(
+                    'Number of data parameters is greater than one and no projection has been specified')
+            centers = aop.extract_ndarray(grid[grid.data_pars[0].name])
             return centers, pdf_values
         else:
             return calculate_projection(grid, pdf_values, edges, projection, size)
@@ -153,11 +158,11 @@ def pdf_centers_values(pdf, data_values, edges, range=parameters.FULL, component
             ed = np.array(edges)
 
             # Get only the elements that are inside the bounds
-            for i, (l, r) in zip(bds[0::2], bds[1::2]):
+            for i, (l, u) in zip(*bds):
 
                 c = 0.5 * (ed[i][1:] + ed[i][:-1])
 
-                cond = np.logical_and(c >= l, c <= r)
+                cond = np.logical_and(c >= l, c <= u)
 
                 dv = dv[cond]
 
@@ -171,13 +176,13 @@ def pdf_centers_values(pdf, data_values, edges, range=parameters.FULL, component
 
             grid = evaluation_grid(pdf.data_pars, bds, size)
 
-            pdf_values = scaled_pdf_values(pdf, grid, dv, ed, range, component)
+            v = scaled_pdf_values(pdf, grid, dv, ed, range, component)
 
             # Reduce the centers and modify the values if asking for a projection
             if projection is None:
                 centers.append(tuple(aop.extract_ndarray(
                     grid[p.name]) for p in grid.data_pars))
-                values.append(p)
+                values.append(v)
             else:
                 c, v = calculate_projection(
                     grid, pdf_values, ed, projection, size)

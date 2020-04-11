@@ -139,6 +139,15 @@ Calculate the inverse of the fast-Fourier transform of an array.
 :returns: array with the inverse fast-fourier transform.
 :rtype: numpy.ndarray or reikna.cluda.Array
 '''
+indices_to_mask = '''
+Transform a set of indices (to use use for indexing an array) by a mask
+of booleans.
+
+:param n: size of the output array.
+:type n: int
+:param indices: indices to preserve.
+:type indices: numpy.ndarray or reikna.cluda.Array
+'''
 interpolate_linear = '''
 Do a linear interpolation.
 
@@ -149,6 +158,30 @@ Do a linear interpolation.
 :param fp: true evaluation points.
 :type fp: numpy.ndarray or reikna.cluda.Array
 :returns: values associated to the "x" points.
+:rtype: numpy.ndarray or reikna.cluda.Array
+'''
+is_inside = '''
+Check whether the elements from an array of data are inside the given bounds.
+
+:param data: data array.
+:type data: numpy.ndarray or reikna.cluda.Array
+:param lb: lower bounds.
+:param ub: upper bounds.
+:returns: whether the data is inside the bounds or not.
+:rtype: numpy.ndarray or reikna.cluda.Array
+'''
+keep_to_limit = '''
+Drop the last elements from a data array.
+
+:param maximum: length of the output array.
+:type maximum: int
+:param ndim: number of dimensions.
+:type ndim: int
+:param len: length of the data.
+:type len: int
+:param data: data array.
+:type data: numpy.ndarray or reikna.cluda.Array
+:returns: copy of the input data array with the last elements dropped.
 :rtype: numpy.ndarray or reikna.cluda.Array
 '''
 le = '''

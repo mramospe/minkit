@@ -37,12 +37,12 @@ def count_nonzero(a):
 
 
 @docstrings.set_docstring
-def data_array(a, copy=True, convert=True):
+def data_array(a, copy=True, convert=True, dtype=types.cpu_type):
     if copy:
-        return np.array(a, dtype=types.cpu_type)
+        return np.array(a, dtype=dtype)
     else:
-        if a.dtype != types.cpu_type:
-            return a.astype(types.cpu_type)
+        if a.dtype != dtype:
+            return a.astype(dtype)
         return a
 
 
@@ -106,8 +106,36 @@ def ifft(a):
 
 
 @docstrings.set_docstring
-def interpolate_linear(x, xp, yp):
-    return np.interp(x, xp, yp)
+def indices_to_mask(n, indices):
+    a = np.zeros(n, dtype=types.cpu_real_bool)
+    a[indices] = True
+    return a
+
+
+@docstrings.set_docstring
+def interpolate_linear(idx, x, xp, yp):
+    nd = len(idx)
+    ln = len(x) // nd
+    st = idx[0]
+    return np.interp(x[st:st + ln], xp, yp)  # 1D case
+
+
+@docstrings.set_docstring
+def is_inside(data, lb, ub):
+    if len(lb) > 1:
+        ln = len(data) // len(lb)
+        c = np.ones(ln, dtype=types.cpu_real_bool)
+        for i, (l, u) in enumerate(zip(lb, ub)):
+            d = data[i * ln:(i + 1) * ln]
+            c = np.logical_and(c, np.logical_and(d >= l, d < u))
+    else:
+        c = np.logical_and(data >= lb, data < ub)
+    return c
+
+
+@docstrings.set_docstring
+def keep_to_limit(maximum, ndim, len, data):
+    return np.concatenate(tuple(data[i * len:i * len + maximum] for i in range(ndim)))
 
 
 @docstrings.set_docstring
@@ -190,19 +218,27 @@ def sum(a, *args):
 
 
 @docstrings.set_docstring
-def sum_inside(centers, edges, values=None):
-    out, _ = np.histogramdd(centers, bins=edges, weights=values)
+def sum_inside(indices, gaps, centers, edges, values=None):
+
+    nd = len(gaps)
+    lc = len(centers) // nd
+
+    c = [centers[i * lc:(i + 1) * lc] for i in range(nd)]
+    e = [edges[p:n] for p, n in zip(indices[:-1], indices[1:])]
+
+    out, _ = np.histogramdd(c, bins=e, weights=values)
+
     return out.T.flatten()
 
 
 @docstrings.set_docstring
-def slice_from_boolean(a, valid):
-    return a[valid]
+def slice_from_boolean(a, valid, dim=1):
+    return a[np.tile(valid, dim)]
 
 
 @docstrings.set_docstring
-def slice_from_integer(a, indices):
-    return a[indices]
+def slice_from_integer(a, indices, dim=1):
+    return a[np.tile(indices, dim)]
 
 
 @docstrings.set_docstring

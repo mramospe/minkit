@@ -3,7 +3,6 @@ Operations with GPU objects
 '''
 from . import PACKAGE_PATH
 from . import docstrings
-from . import multi_par
 from . import rfuncs
 from . import types
 from .gpu_core import get_sizes, THREAD
@@ -146,6 +145,9 @@ RETURN_BOOL = return_dtype(types.cpu_bool)
 with open(os.path.join(PACKAGE_PATH, 'src/functions_by_element.c')) as fi:
     FUNCS_BY_ELEMENT = THREAD.compile(fi.read())
 
+with open(os.path.join(PACKAGE_PATH, 'src/multiparameter.c')) as fi:
+    FUNCS_MULTIPAR = THREAD.compile(fi.read())
+
 # These functions take an array of doubles and return another array of doubles
 for function in ('exponential_complex',):
     setattr(FUNCS_BY_ELEMENT, function, RETURN_COMPLEX(
@@ -197,7 +199,7 @@ for function in ('arange_complex',):
         getattr(FUNCS_BY_ELEMENT, function)))
 
 # These functions create e new array of doubles
-for function in ('interpolate', 'linspace', 'ones_double', 'slice_from_integer', 'zeros_double'):
+for function in ('interpolate', 'linspace', 'ones_double', 'zeros_double'):
     setattr(FUNCS_BY_ELEMENT, function, CREATE_DOUBLE(
         getattr(FUNCS_BY_ELEMENT, function)))
 
@@ -286,10 +288,10 @@ def count_nonzero(a):
 
 
 @docstrings.set_docstring
-def data_array(a, copy=True, convert=True):
+def data_array(a, copy=True, convert=True, dtype=types.cpu_type):
     if convert:
-        if a.dtype != types.cpu_type:
-            a = a.astype(types.cpu_type)
+        if a.dtype != dtype:
+            a = a.astype(dtype)
         return THREAD.to_device(a)
     # Is assumed to be a GPU-array
     if copy:
@@ -362,8 +364,49 @@ def ifft(a):
 
 
 @docstrings.set_docstring
-def interpolate_linear(x, xp, yp):
-    return FUNCS_BY_ELEMENT.interpolate(len(x), x, types.cpu_int(len(xp)), xp, yp)
+def interpolate_linear(idx, x, xp, yp):
+    ix = data_array(idx, dtype=types.cpu_int)
+    nd = types.cpu_int(len(idx))
+    lp = types.cpu_int(len(xp))
+    ln = types.cpu_int(len(x))
+    return FUNCS_BY_ELEMENT.interpolate(ln, nd, ln, ix, x, lp, xp, yp)
+
+
+@docstrings.set_docstring
+def is_inside(data, lb, ub):
+
+    if lb.ndim == 0:
+        lb, ub = data_array(types.float_array(
+            [lb])), data_array(types.float_array([ub]))
+    else:
+        lb, ub = data_array(lb), data_array(ub)
+
+    ndim = types.cpu_int(len(lb))
+    lgth = types.cpu_int(len(data) // ndim)
+
+    out = get_array_cache(types.cpu_bool).get_array(lgth)
+
+    gs, ls = get_sizes(lgth)
+
+    FUNCS_BY_ELEMENT.is_inside(out, lgth, data, ndim, lb, ub,
+                               global_size=gs, local_size=ls)
+
+    return out
+
+
+@docstrings.set_docstring
+def keep_to_limit(maximum, ndim, lgth, data):
+
+    maximum, ndim, lgth = (types.cpu_int(i) for i in (maximum, ndim, lgth))
+
+    out = get_array_cache(types.cpu_type).get_array(maximum)
+
+    gs, ls = get_sizes(maximum // ndim)
+
+    FUNCS_BY_ELEMENT.keep_to_limit(out, maximum, ndim, lgth, data,
+                                   global_size=gs, local_size=ls)
+
+    return out
 
 
 @docstrings.set_docstring
@@ -459,40 +502,49 @@ def sum(a, *args):
 
 
 @docstrings.set_docstring
-def sum_inside(centers, edges, values=None):
+def sum_inside(indices, gaps, centers, edges, values=None):
 
-    borders = meshgrid(*tuple(false_till(len(e) - 1, len(e) - 2)
-                              for e in edges))
+    ndim = types.cpu_int(len(gaps))
+    lgth = types.cpu_int(len(centers) // ndim)
 
-    gaps = tuple(map(lambda e: types.cpu_int(len(e)), edges))
+    n = np.prod(indices[1:] - indices[:-1] - 1)
 
-    out = zeros(
-        np.prod(np.fromiter((len(e) - 1 for e in edges), dtype=types.cpu_int)))
+    out = zeros(n, dtype=types.cpu_type)
 
-    gs, ls = get_sizes(len(out))
+    gs, ls = get_sizes(n)
 
-    gs = (len(centers[0]), gs)
+    gs = (int(lgth), gs)
     ls = (1, ls)
 
+    gidx = THREAD.to_device(gaps)
+    print('HEREEE', gidx.__class__, gidx.dtype)
     if values is None:
-        f = multi_par.sum_inside_bins(len(edges))
-        f(out, *centers, *gaps, *edges, *borders, global_size=gs, local_size=ls)
+        FUNCS_MULTIPAR.sum_inside_bins(out, lgth, centers, ndim, gidx, edges,
+                                       global_size=gs, local_size=ls)
     else:
-        f = multi_par.sum_inside_bins_with_values(len(edges))
-        f(out, *centers, *gaps, *edges, *borders,
-          values, global_size=gs, local_size=ls)
+        FUNCS_MULTIPAR.sum_inside_bins_with_values(out, lgth, centers, ndim, gidx, edges, values,
+                                                   global_size=gs, local_size=ls)
 
     return out
 
 
 @docstrings.set_docstring
-def slice_from_boolean(a, valid):
-    return THREAD.to_device(a.get()[valid.get().astype(types.cpu_real_bool)])
+def slice_from_boolean(a, valid, dim=1):
+    b = a.get()[np.tile(valid.get().astype(types.cpu_real_bool), dim)]
+    if len(b) != 0:
+        return THREAD.to_device(b)
+    else:
+        return None
 
 
 @docstrings.set_docstring
-def slice_from_integer(a, indices):
-    return FUNCS_BY_ELEMENT.slice_from_integer(len(indices), a, indices)
+def slice_from_integer(a, indices, dim=1):
+    l = len(indices)
+    out = get_array_cache(types.cpu_type).get_array(l * dim)
+    gs, ls = get_sizes(l)
+    FUNCS_BY_ELEMENT.slice_from_integer(out, dim, len(a), a, l, indices,
+                                        global_size=gs, local_size=ls)
+    return out
 
 
 @docstrings.set_docstring
