@@ -113,25 +113,29 @@ def test_scipyminimizer():
     Test the "SciPyMinimizer" class.
     '''
     m = minkit.Parameter('m', bounds=(10, 20))
-    s = minkit.Parameter('s', 1, bounds=(0.5, 2))
-    c = minkit.Parameter('c', 15, bounds=(10, 20))
+    s = minkit.Parameter('s', 2, bounds=(1.5, 2.5))
+    c = minkit.Parameter('c', 15, bounds=(13, 17))
     g = minkit.Gaussian('g', m, c, s)
 
     # Test the unbinned case
     data = g.generate(10000)
 
+    initials = g.get_values()
+
     values = []
     with minkit.minimizer('uml', g, data, minimizer='scipy') as minimizer:
         for m in minkit.minimizers.SCIPY_CHOICES:
+            g.set_values(**initials)
             values.append(minimizer.result_to_registry(
                 minimizer.minimize(method=m)))
 
     with minkit.minimizer('uml', g, data, minimizer='minuit') as minimizer:
+        g.set_values(**initials)
         reference = minkit.minuit_to_registry(minimizer.migrad().params)
 
     for reg in values:
         for p, r in zip(reg, reference):
-            helpers.check_parameters(p, r, rtol=0.01)
+            helpers.check_parameters(p, r, rtol=0.05)
 
     # Test the binned case
     data = data.make_binned(bins=100)
@@ -139,12 +143,14 @@ def test_scipyminimizer():
     values = []
     with minkit.minimizer('bml', g, data, minimizer='scipy') as minimizer:
         for m in minkit.minimizers.SCIPY_CHOICES:
+            g.set_values(**initials)
             values.append(minimizer.result_to_registry(
                 minimizer.minimize(method=m)))
 
     with minkit.minimizer('bml', g, data, minimizer='minuit') as minimizer:
+        g.set_values(**initials)
         reference = minkit.minuit_to_registry(minimizer.migrad().params)
 
     for reg in values:
         for p, r in zip(reg, reference):
-            helpers.check_parameters(p, r, rtol=0.01)
+            helpers.check_parameters(p, r, rtol=0.05)

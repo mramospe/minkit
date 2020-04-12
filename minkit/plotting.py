@@ -2,12 +2,12 @@
 Some utilities to plot data and PDFs using matplotlib.
 '''
 import numpy as np
+from . import dataset
 from . import parameters
 from .core import aop
-from .dataset import evaluation_grid
 from .operations import types
 
-__all__ = ['pdf_centers_values']
+__all__ = ['data_plotting_arrays', 'pdf_plotting_arrays']
 
 
 def bin_area(edges):
@@ -46,7 +46,7 @@ def scaled_pdf_values(pdf, grid, data_values, edges, range=parameters.FULL, comp
     :type edges: numpy.ndarray or tuple(numpy.ndarray, ...)
     :param range: normalization range.
     :type range: str
-    :param component: if provided, then "pdf" is assumed to be a :class:`AddPDFs` \
+    :param component: if provided, then *pdf* is assumed to be a :class:`AddPDFs` \
     class, and the values associated to the given component will be calculated.
     :type component: str
     :returns: normalized values of the PDF
@@ -100,7 +100,145 @@ def calculate_projection(grid, pdf_values, edges, projection, size):
     return c, v
 
 
-def pdf_centers_values(pdf, data_values, edges, range=parameters.FULL, component=None, projection=None, size=1000):
+def data_plotting_arrays(data, **kwargs):
+    '''
+    Get the values from a data sample for plotting.
+    The possibilities for *kwargs* differ from the binned and unbinned cases:
+
+    **Unbinned**
+
+    - *bins* (int or tuple(int, ...)): number of bins per \
+    dimension of data.
+
+    - *projection* (str): project the output data in the given dimension.
+
+    - *sw2* (bool): if the sample has weights and is set to True, return also the errors \
+    calculated as the square root of the sum of weights per bin: \
+    :math:`\\sigma_j = \\sqrt{\\sum_i^n (\\omega_j^i)^2}`
+
+    **Binned**
+
+    - *rebin* (int or tuple(int, ...)): change the bins \
+    by mergin *rebin* bins together.
+
+    - *projection* (str): project the output data in the given dimension.
+
+    :param data: data sample.
+    :type data: DataSet or BinnedDataSet
+    :param kwargs: keyword arguments.
+    :type kwargs: dict
+    :returns: In the unbinned case, the values, list of edges, and the errors if *sw2* is set \
+    to True. In the binned case, the values and the list of edges. If the has only one \
+    dimension, the edges are returned as a single array.
+    :rtype: numpy.ndarray, (numpy.ndarray or list(numpy.ndarray)), (numpy.ndarray)
+    '''
+    projection = kwargs.get('projection', None)
+
+    ndim = len(data.data_pars)
+
+    if projection:
+        sa = tuple(i for i, p in enumerate(
+            data.data_pars) if p.name != projection)
+
+    if data.sample_type == dataset.UNBINNED:
+
+        # Exclusive options for unbinned samples
+        bins = kwargs.get('bins', None)
+        sw2 = kwargs.get('sw2', None)
+
+        # Make the histogram of values (common for any case)
+        if data.weights is not None:
+            weights = aop.extract_ndarray(data.weights)
+        else:
+            weights = None
+
+        values, edges = np.histogramdd(tuple(aop.extract_ndarray(data[p.name]) for p in data.data_pars),
+                                       bins=bins,
+                                       range=tuple(
+                                           p.bounds for p in data.data_pars),
+                                       weights=weights)
+
+        if projection:
+            values = np.sum(values, axis=sa)
+            edges = edges[data.data_pars.index(projection)]
+
+        # Return a single value if we are in 1D
+        if ndim == 1:
+            edges = edges[0]
+
+        if data.weights is not None and sw2:
+
+            # Must calculate the errors per bin
+            clone = dataset.DataSet(
+                data.data, data.data_pars, data.weights**2, copy=False, convert=False)
+
+            if projection:
+                errors = np.sqrt(np.sum(np.histogramdd(tuple(aop.extract_ndarray(clone[p.name]) for p in clone.data_pars),
+                                                       bins=bins,
+                                                       range=tuple(
+                                                           p.bounds for p in clone.data_pars),
+                                                       weights=aop.extract_ndarray(clone.weights))[0], axis=sa))
+            else:
+                errors = np.sqrt(aop.extract_ndarray(clone.weights))
+
+            return values, edges, errors
+        else:
+            return values.T.flatten(), edges
+    else:
+
+        # Exclusive options for binned samples
+        rebin = kwargs.get('rebin', None)
+
+        if rebin is not None:
+            # Rebin the data
+
+            rebin = np.array(rebin)
+
+            if rebin.ndim == 0:
+                # Only one rebinning argument; all the variables will have the same
+                kwargs['rebin'] = np.full(ndim, rebin)
+                return data_plotting_arrays(data, **kwargs)
+            else:
+                if ndim != len(rebin):
+                    raise ValueError(
+                        'Number of rebinning arguments must be equal to the number of dimensions in data')
+
+                edges = tuple(aop.extract_ndarray(
+                    data[p.name]) for p in data.data_pars)
+
+                centers = tuple(a.flatten() for a in np.meshgrid(
+                    *(0.5 * (e[1:] + e[:-1]) for e in edges)))
+
+                for e, b in zip(edges, rebin):
+                    if (len(e) - 1) % b:
+                        raise ValueError(
+                            'Rebinning must be a proper divisor of the number of bins')
+
+                edges_rebin = tuple(e[::b] for e, b in zip(edges, rebin))
+
+                v = aop.extract_ndarray(data.values)
+
+                values = np.histogramdd(centers, bins=edges, weights=v)[0]
+        else:
+            edges = tuple(aop.extract_ndarray(
+                data[p.name]) for p in data.data_pars)
+            values = aop.extract_ndarray(data.values).reshape(
+                tuple(len(e) - 1 for e in edges))
+
+        if projection:
+            values = np.sum(values.T, axis=sa)
+            edges = edges[data.data_pars.index(projection)]
+        else:
+            values = values.flatten()
+
+        # Return a single value if we are in 1D
+        if ndim == 1:
+            edges = edges[0]
+
+        return values, edges
+
+
+def pdf_plotting_arrays(pdf, data_values, edges, range=parameters.FULL, component=None, projection=None, size=1000):
     '''
     Scale the PDF values given the data values that have already been
     plotted using a defined set of edges.
@@ -113,7 +251,7 @@ def pdf_centers_values(pdf, data_values, edges, range=parameters.FULL, component
     :type edges: numpy.ndarray or tuple(numpy.ndarray, ...)
     :param range: normalization range.
     :type range: str
-    :param component: if provided, then "pdf" is assumed to be a :class:`AddPDFs` \
+    :param component: if provided, then *pdf* is assumed to be a :class:`AddPDFs` \
     class, and the values associated to the given component will be calculated.
     :type component: str
     :param projection: calculate the projection on a given variable.
@@ -135,7 +273,7 @@ def pdf_centers_values(pdf, data_values, edges, range=parameters.FULL, component
 
     if len(bounds) == 1:
 
-        grid = evaluation_grid(pdf.data_pars, bounds[0], size)
+        grid = dataset.evaluation_grid(pdf.data_pars, bounds[0], size)
 
         pdf_values = scaled_pdf_values(
             pdf, grid, data_values, edges, range, component)
@@ -174,7 +312,7 @@ def pdf_centers_values(pdf, data_values, edges, range=parameters.FULL, component
 
                 ed[i] = ed[i][me]
 
-            grid = evaluation_grid(pdf.data_pars, bds, size)
+            grid = dataset.evaluation_grid(pdf.data_pars, bds, size)
 
             v = scaled_pdf_values(pdf, grid, dv, ed, range, component)
 

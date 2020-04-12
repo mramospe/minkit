@@ -11,13 +11,15 @@ import numpy as np
 __all__ = ['DataSet', 'BinnedDataSet']
 
 # Names of different data types
-BINNED = 'binned'
-UNBINNED = 'unbinned'
+BINNED = 0
+UNBINNED = 1
 
 logger = logging.getLogger(__name__)
 
 
 class DataSet(object):
+
+    sample_type = UNBINNED
 
     def __init__(self, data, pars, weights=None, copy=True, convert=True):
         '''
@@ -212,8 +214,8 @@ class DataSet(object):
     @classmethod
     def merge(cls, samples, maximum=None, shuffle=False):
         '''
-        Merge many samples into one. If "maximum" is specified, then the last elements will
-        be dropped. If "shuffle" is specified, then it the result is shuffled before the "maximum"
+        Merge many samples into one. If *maximum* is specified, then the last elements will
+        be dropped. If *shuffle* is specified, then it the result is shuffled before the *maximum*
         condition is applied, if needed.
 
         :param samples: samples to merge.
@@ -354,6 +356,8 @@ class DataSet(object):
 
 
 class BinnedDataSet(object):
+
+    sample_type = BINNED
 
     def __init__(self, edges, gaps, pars, values, copy=True, convert=True):
         '''
@@ -500,7 +504,7 @@ def evaluation_grid(data_pars, bounds, size):
     :param data_pars: data parameters.
     :type data_pars: list(Parameter)
     :param size: number of entries in the output sample per set of bounds. \
-    This means that "size" entries will be generated for each pair of (min, max) \
+    This means that *size* entries will be generated for each pair of (min, max) \
     provided, that is, per data parameter.
     :type size: int
     :param bounds: bounds of the different data parameters. Even indices for \

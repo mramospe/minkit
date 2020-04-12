@@ -275,7 +275,10 @@ class SciPyMinimizer(object):
 
         bounds = tuple(a.bounds for a in varargs)
 
-        return scipyopt.minimize(self._evaluate, initials, method=method, bounds=bounds, tol=tol)
+        with warnings.catch_warnings():
+            warnings.filterwarnings(
+                'ignore', category=UserWarning, module=r'.*_hessian_update_strategy')
+            return scipyopt.minimize(self._evaluate, initials, method=method, bounds=bounds, tol=tol)
 
     def result_to_registry(self, result, ignore_warnings=True, **kwargs):
         '''
@@ -321,7 +324,7 @@ class SciPyMinimizer(object):
 def minimizer(fcn, pdf, data, minimizer=MINUIT, minimizer_config=None, **kwargs):
     '''
     Create a new minimizer to be used within a context.
-    This represents a "constant" object, that is, parameters defining
+    This represents a *constant* object, that is, parameters defining
     the PDFs must keep their constness during the context.
 
     :param fcn: type of FCN to use for the minimization.
@@ -333,7 +336,7 @@ def minimizer(fcn, pdf, data, minimizer=MINUIT, minimizer_config=None, **kwargs)
     :param minimizer: name of the minimizer to use.
     :type minimizer: str
     :param minimizer_config: any extra configuration to be passed to the minimizer. For \
-    "minuit", the argument "forced_parameters" is unavailable.
+    *minuit*, the argument *forced_parameters* is unavailable.
     :type minimizer_config: dict
     :param kwargs: extra arguments to the evaluator to use. Current allowed values are: \
     * constraints: (:class:`list`(:class:`PDF`)) constraints for the FCN.\
@@ -373,12 +376,12 @@ def minimizer(fcn, pdf, data, minimizer=MINUIT, minimizer_config=None, **kwargs)
 def simultaneous_minimizer(categories, minimizer=MINUIT, minimizer_config=None, rescale_weights=True, range=parameters.FULL, constraints=None):
     '''
     Create a new instance of :class:`iminuit.Minuit`.
-    This represents a "constant" object, that is, parameters defining
+    This represents a *constant* object, that is, parameters defining
     the PDFs are assumed to remain constant during all its lifetime.
 
     :param categories: categories to process.
     :type categories: list(Category)
-    :param minimizer: minimizer to use (only "minuit" is available for the moment).
+    :param minimizer: minimizer to use (only *minuit* is available for the moment).
     :type minimizer: str
     :param minimizer_config: (Minuit only) extra configuration passed to the minimizer.
     :type minimizer_config: dict
@@ -387,7 +390,7 @@ def simultaneous_minimizer(categories, minimizer=MINUIT, minimizer_config=None, 
     :param constraints: set of constraints to consider in the minimization.
     :type constraints: list(PDF)
     :returns: minimizer to call.
-    :rtype: depends on the "minimizer" argument
+    :rtype: depends on the *minimizer* argument
 
     .. warning: Do not change any attribute of the parameters defining the \
     PDFs, since it will not be properly reflected during the minimization \

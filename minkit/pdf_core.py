@@ -465,6 +465,7 @@ class PDF(object):
         with self.bind(range, normalized=False) as proxy:
 
             bounds = parameters.bounds_for_range(proxy.data_pars, range)
+
             if len(bounds) == 1:
                 result = proxy._generate_single_bounds(
                     size, mapsize, gensize, safe_factor, bounds[0])

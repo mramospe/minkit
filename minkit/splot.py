@@ -68,7 +68,7 @@ def sweights(pdfs, yields, data, range=parameters.FULL, return_covariance=False)
 
 def sweights_u(a, sweights, bins=10, range=None):
     r'''
-    Get the uncertainty associated to the s-weights related to sample "a".
+    Get the uncertainty associated to the s-weights related to sample *a*.
     Arguments are similar to those of :func:`numpy.histogram`.
     By definition, the uncertainty on the s-weights (for plotting), is defined as the
     sum of the squares of the weights in that bin, like

@@ -17,7 +17,8 @@ def fit(pdf, nevts, repetitions):
     Generate data following the given model and fit it.
     '''
     times = np.empty(repetitions, dtype=np.float64)
-    initials = pdf.get_values()
+    initials = {p.name: np.random.uniform(
+        *p.bounds) for p in pdf.all_real_args}
     for i in range(len(times)):
         data = pdf.generate(nevts)
         start = time.time()

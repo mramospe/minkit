@@ -15,7 +15,8 @@ def fit(pdf, nevts, repetitions, m, pars):
     Generate data following the given model and fit it.
     '''
     times = np.empty(repetitions, dtype=np.float64)
-    initials = {p.GetName(): p.getVal() for p in pars}
+    initials = {p.GetName(): np.random.uniform(p.getMin(), p.GetMax())
+                for p in pars}
     for i in range(len(times)):
         data = pdf.generate(rt.RooArgSet(m), nevts)
         start = time.time()

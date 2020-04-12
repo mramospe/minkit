@@ -14,16 +14,16 @@ minkit.initialize()
 @helpers.setting_numpy_seed
 def test_binned_maximum_likelihood():
     '''
-    Tets the "binned_maximum_likelihood" FCN.
+    Test the "binned_maximum_likelihood" FCN.
     '''
     # Simple fit to a Gaussian
     m = minkit.Parameter('m', bounds=(5, 15))
-    c = minkit.Parameter('c', 10., bounds=(8, 12))
-    s = minkit.Parameter('s', 1., bounds=(0.5, 2))
+    c = minkit.Parameter('c', 10, bounds=(8, 12))
+    s = minkit.Parameter('s', 2, bounds=(1, 3))
     g = minkit.Gaussian('gaussian', m, c, s)
 
     values, edges = np.histogram(
-        np.random.normal(c.value, s.value, 10000), bins=100)
+        np.random.normal(c.value, s.value, 1000), bins=100)
 
     data = minkit.BinnedDataSet.from_array(edges, m, values)
 
@@ -33,7 +33,7 @@ def test_binned_maximum_likelihood():
 
     # Add constraints
     cc = minkit.Parameter('cc', 10)
-    sc = minkit.Parameter('sc', 0.1)
+    sc = minkit.Parameter('sc', 1)
     gc = minkit.Gaussian('constraint', c, cc, sc)
 
     with helpers.fit_test(g) as test:
@@ -48,7 +48,7 @@ def test_binned_maximum_likelihood():
 
     pdf = minkit.AddPDFs.two_components('pdf', g, e, y)
 
-    data = pdf.generate(10000)
+    data = pdf.generate(1000)
 
     values, edges = np.histogram(
         minkit.as_ndarray(data[m.name]), bins=100)

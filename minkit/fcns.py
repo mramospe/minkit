@@ -7,6 +7,7 @@ from . import parameters
 
 import functools
 import numpy as np
+import warnings
 
 __all__ = ['binned_maximum_likelihood', 'binned_chisquare',
            'unbinned_extended_maximum_likelihood', 'unbinned_maximum_likelihood']
@@ -61,6 +62,30 @@ def evaluate_constraints(constraints=None):
     return res
 
 
+def warn_if_nan(function):
+    '''
+    Decorate an FCN so a warning is displayed if the result is nan.
+    This happens when the probability is zero or negative for at least one value.
+    '''
+    @functools.wraps(function)
+    def __wrapper(*args, **kwargs):
+
+        with warnings.catch_warnings():
+            # Get rid of the warnings for the calls to "log" with zero or negative
+            # values and the multiplication of the result by an array
+            warnings.filterwarnings('ignore', category=RuntimeWarning)
+
+            v = function(*args, **kwargs)
+
+        if np.isnan(v):
+            warnings.warn(
+                'Evaluation of the PDF is zero or negative', RuntimeWarning)
+
+        return v
+
+    return __wrapper
+
+
 def nll_to_chi2(function):
     '''
     Decorate the a function that returns a negative logarithm of likelihood into
@@ -72,6 +97,7 @@ def nll_to_chi2(function):
     return __wrapper
 
 
+@warn_if_nan
 def binned_chisquare(pdf, data, range=parameters.FULL, constraints=None):
     '''
     Definition of the binned chi-square FCN.
@@ -82,7 +108,7 @@ def binned_chisquare(pdf, data, range=parameters.FULL, constraints=None):
     :type data: BinnedDataSet
     :param range: normalization range of the PDF.
     :type range: str
-    :param constraints: PDFs with the constraints for paramters in "pdf".
+    :param constraints: PDFs with the constraints for paramters in *pdf*.
     :type constraints: list(PDF)
     :returns: value of the FCN.
     :rtype: float
@@ -93,6 +119,7 @@ def binned_chisquare(pdf, data, range=parameters.FULL, constraints=None):
 
 
 @nll_to_chi2
+@warn_if_nan
 def binned_maximum_likelihood(pdf, data, constraints=None):
     '''
     Definition of the binned maximum likelihood FCN.
@@ -101,7 +128,7 @@ def binned_maximum_likelihood(pdf, data, constraints=None):
     :type pdf: PDF
     :param data: data to evaluate.
     :type data: BinnedDataSet
-    :param constraints: PDFs with the constraints for paramters in "pdf".
+    :param constraints: PDFs with the constraints for paramters in *pdf*.
     :type constraints: list(PDF)
     :returns: value of the FCN.
     :rtype: float
@@ -111,11 +138,12 @@ def binned_maximum_likelihood(pdf, data, constraints=None):
 
 
 @nll_to_chi2
+@warn_if_nan
 def unbinned_extended_maximum_likelihood(pdf, data, range=parameters.FULL, constraints=None):
     '''
     Definition of the unbinned extended maximum likelihood FCN.
     In this case, entries in data are assumed to follow a Poissonian distribution.
-    The given :class:`PDF` must be of "extended" type.
+    The given :class:`PDF` must be of *extended* type.
 
     :param pdf: function to evaluate.
     :type pdf: PDF
@@ -123,7 +151,7 @@ def unbinned_extended_maximum_likelihood(pdf, data, range=parameters.FULL, const
     :type data: DataSet
     :param range: normalization range of the PDF.
     :type range: str
-    :param constraints: PDFs with the constraints for paramters in "pdf".
+    :param constraints: PDFs with the constraints for paramters in *pdf*.
     :type constraints: list(PDF)
     :returns: value of the FCN.
     :rtype: float
@@ -136,10 +164,11 @@ def unbinned_extended_maximum_likelihood(pdf, data, range=parameters.FULL, const
 
 
 @nll_to_chi2
+@warn_if_nan
 def unbinned_maximum_likelihood(pdf, data, range=parameters.FULL, constraints=None):
     '''
     Definition of the unbinned maximum likelihood FCN.
-    The given :class:`PDF` must not be of "extended" type.
+    The given :class:`PDF` must not be of *extended* type.
 
     :param pdf: function to evaluate.
     :type pdf: PDF
@@ -147,7 +176,7 @@ def unbinned_maximum_likelihood(pdf, data, range=parameters.FULL, constraints=No
     :type data: DataSet
     :param range: normalization range of the PDF.
     :type range: str
-    :param constraints: PDFs with the constraints for paramters in "pdf".
+    :param constraints: PDFs with the constraints for paramters in *pdf*.
     :type constraints: list(PDF)
     :returns: value of the FCN.
     :rtype: float

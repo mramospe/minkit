@@ -7,7 +7,7 @@ import json
 import logging
 import numpy as np
 
-__all__ = ['Parameter', 'Formula', 'Range', 'Registry']
+__all__ = ['Parameter', 'Formula', 'Registry']
 
 # Default range
 FULL = 'full'
@@ -30,7 +30,7 @@ class Parameter(object):
         :type name: str
         :param value: initial value.
         :type value: float
-        :param bounds: bounds for the parameter. This defines the "full" range.
+        :param bounds: bounds for the parameter. This defines the *full* range.
         :type bounds: tuple or tuple(tuple, ...)
         :param ranges: possible ranges
         :type ranges: dict(str, tuple) or dict(str, tuple(tuple, ...))
@@ -49,10 +49,9 @@ class Parameter(object):
         self.bounds = bounds  # This sets the FULL range
         self.error = error
 
-        # Set the ranges skipping the FULL range, since it is determined by the bounds
-        for n, r in (ranges or {}).items():
-            if n != FULL:
-                self.__ranges[n] = Range(r)
+        if ranges is not None:
+            for n, r in ranges.items():
+                self.set_range(n, r)
 
     def __repr__(self):
         '''
@@ -67,14 +66,14 @@ class Parameter(object):
     @property
     def bounds(self):
         '''
-        Bounds of the parameter, defining the "full" range.
+        Bounds of the parameter, defining the *full* range.
         '''
         return self.__bounds
 
     @bounds.setter
     def bounds(self, values):
         '''
-        Set the bounds of the parameter, which also modifies the "full" range.
+        Set the bounds of the parameter, which also modifies the *full* range.
 
         :param values: bounds to set.
         :type values: tuple or tuple(tuple, ...)
@@ -83,7 +82,7 @@ class Parameter(object):
             self.__bounds = values
         else:
             self.__bounds = np.array(values, dtype=types.cpu_type)
-        self.__ranges[FULL] = Range(self.__bounds)
+        self.__ranges[FULL] = self.__bounds
 
     @property
     def constant(self):
@@ -99,7 +98,7 @@ class Parameter(object):
     @constant.setter
     def constant(self, v):
         '''
-        Define the "constant" status of the class.
+        Define the *constant* status of the class.
 
         :param v: value determining whether this object must be considered as constant or not.
         :type v: bool
@@ -128,14 +127,14 @@ class Parameter(object):
         :param name: name of the range.
         :type name: str
         :returns: attached range.
-        :rtype: Range
+        :rtype: numpy.ndarray
         '''
         return self.__ranges[name]
 
     def set_range(self, name, values):
         '''
-        Define the range with name "name".
-        Must not be "full".
+        Define the range with name *name*.
+        Must not be *full*.
 
         :param name: name of the range.
         :type name: str
@@ -145,7 +144,7 @@ class Parameter(object):
         if name == FULL:
             raise ValueError(
                 f'Range name "{name}" is protected; can not be used')
-        self.__ranges[name] = Range(values)
+        self.__ranges[name] = np.array(values, dtype=types.cpu_type)
 
     def to_json_object(self):
         '''
@@ -162,7 +161,7 @@ class Parameter(object):
         return {'name': self.name,
                 'value': self.value,
                 'bounds': bounds,
-                'ranges': {n: r.bounds.tolist() for n, r in self.__ranges.items() if n != FULL},
+                'ranges': {n: r.tolist() for n, r in self.__ranges.items() if n != FULL},
                 'error': self.error,
                 'constant': self.constant}
 
@@ -279,60 +278,17 @@ class Formula(object):
         return {'name': self.name, 'formula': self.__formula, 'pars': self.args.names}
 
 
-class Range(object):
+def range_is_disjoint(r):
+    '''
+    Return whether this range is composed by more than one subrange (with no
+    common borders.
 
-    def __init__(self, bounds):
-        '''
-        Object to define bounds for a parameter.
-
-        :param bounds: bounds of the range.
-        :type bounds: tuple or tuple(tuple, ...)
-        '''
-        self.__bounds = np.array(bounds, dtype=types.cpu_type)
-
-    def __len__(self):
-        '''
-        Return the number of bounds.
-
-        :return: number of bounds.
-        :rtype: int
-        '''
-        return len(self.__bounds)
-
-    @property
-    def bounds(self):
-        '''
-        Bounds of the range.
-
-        :returns: bounds of the range.
-        :rtype: numpy.ndarray
-        '''
-        return self.__bounds
-
-    @property
-    def disjoint(self):
-        '''
-        Return whether this range is composed by more than one subrange (with no
-        common borders.
-
-        :returns: whether the range is disjoint.
-        :rtype: bool
-        '''
-        return len(self.__bounds.shape) > 1
-
-    @property
-    def size(self):
-        '''
-        Return the size of the range.
-        This corresponds to the sum of the areas of any subrange.
-
-        :returns: size of the range.
-        :rtype: float
-        '''
-        if len(self.__bounds.shape) == 1:
-            return self.__bounds[1] - self.__bounds[0]
-        else:
-            return np.sum(np.fromiter(((s - f) for f, s in self.__bounds), dtype=types.cpu_type))
+    :param r: range to process.
+    :type r: numpy.ndarray
+    :returns: whether the range is disjoint or not.
+    :rtype: bool
+    '''
+    return len(r.shape) > 1
 
 
 class Registry(list):
@@ -340,7 +296,7 @@ class Registry(list):
     def __init__(self, *args, **kwargs):
         '''
         Extension of list to hold information used in :py:mod:`minkit`.
-        It represents a collection of objects with the attribute "name", providing a unique
+        It represents a collection of objects with the attribute *name*, providing a unique
         identifier (each object is assumed to be identified by its name).
         Any attempt to add a new element to the registry with the same name as one already
         existing will skip the process, as long as the two objects are the same.
@@ -424,7 +380,7 @@ class Registry(list):
 
     def get(self, name):
         '''
-        Return the object with name "name" in this registry.
+        Return the object with name *name* in this registry.
 
         :param name: name of the object.
         :type name: str
@@ -453,7 +409,7 @@ class Registry(list):
 
     def insert(self, i, p):
         '''
-        Insert an object before index "i".
+        Insert an object before index *i*.
 
         :param i: index where to insert the object.
         :type i: int
@@ -511,7 +467,7 @@ def bounds_for_range(data_pars, range):
     multi_bounds = collections.OrderedDict()
     for p in data_pars:
         r = p.get_range(range)
-        if r.disjoint:
+        if range_is_disjoint(r):
             multi_bounds[p.name] = r
         else:
             single_bounds[p.name] = r
@@ -519,7 +475,7 @@ def bounds_for_range(data_pars, range):
     if len(multi_bounds) == 0:
         # Simple case, all data parameters have only one set of bounds
         # for this normalization range
-        t = np.array([r.bounds for r in single_bounds.values()]).T
+        t = np.array([r for r in single_bounds.values()]).T
         return np.array([t])
     else:
         # Must calculate all the combinations of normalization ranges
@@ -528,9 +484,9 @@ def bounds_for_range(data_pars, range):
         maxs = collections.OrderedDict()
         for n in data_pars.names:
             if n in single_bounds:
-                mins[n], maxs[n] = single_bounds[n].bounds
+                mins[n], maxs[n] = single_bounds[n]
             elif p.name in multi_bounds:
-                mins[n], maxs[n] = multi_bounds[n].bounds.T
+                mins[n], maxs[n] = multi_bounds[n].T
             else:
                 raise RuntimeError(
                     'Internal error detected; please report the bug')

@@ -77,14 +77,8 @@ def test_formula(tmpdir):
 @helpers.setting_numpy_seed
 def test_range():
     '''
-    Test the "Range" class.
+    Test for disjointed ranges.
     '''
-    # Simple constructor
-    v = [(1, 2), (5, 6)]
-    r = minkit.Range(v)
-
-    assert np.allclose(r.bounds, v)
-
     # Do calculations in a range
     m = minkit.Parameter('m', bounds=(0, 10))
     k = minkit.Parameter('k', -0.5, bounds=(-0.8, -0.3))

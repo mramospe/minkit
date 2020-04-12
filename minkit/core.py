@@ -83,7 +83,7 @@ class meta_operation(type):
     @with_backend
     def __getattr__(cls, name):
         '''
-        Get an operation with name "name".
+        Get an operation with name *name*.
 
         :param name: name of the operation.
         :type name: str
@@ -102,7 +102,7 @@ class aop(metaclass=meta_operation):
 
 def as_ndarray(a):
     '''
-    Ensure that "a" is expressed as a :class:`numpy.ndarray` object.
+    Ensure that *a* is expressed as a :class:`numpy.ndarray` object.
     If its already an :class:`numpy.ndarray`, it is not copied.
 
     :param a: input array.
@@ -116,7 +116,7 @@ def as_ndarray(a):
 def free_cache(self):
     '''
     Free the cache of arrays. Only works in GPU mode, with
-    backend "cuda" or "opencl".
+    backend *cuda* or *opencl*.
     In :py:mod:`minkit`, when the backend is set to GPU, arrays will
     tend to be reused and kept in the device till a call to :func:`free_cache`
     is done.
@@ -132,7 +132,7 @@ def initialize(backend=CPU, **kwargs):
     Initialize the package, setting the backend and determining what packages to
     use accordingly.
 
-    :param backend: backend to use. It must be any of "cpu", "cuda" or "opencl".
+    :param backend: backend to use. It must be any of *cpu*, *cuda* or *opencl*.
     :type backend: str
     :param kwargs: meant to be used in the CUDA or OpenCL backend, it may contain \
     any of the following values: \
