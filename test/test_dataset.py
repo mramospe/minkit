@@ -3,12 +3,13 @@ Tests for the "dataset.py" module.
 '''
 import helpers
 import minkit
-from minkit import dataset
+from minkit.pdfs import dataset
 import numpy as np
 import pytest
 
 helpers.configure_logging()
-minkit.initialize()
+
+aop = minkit.backends.core.parse_backend()
 
 
 @pytest.mark.core
@@ -26,17 +27,17 @@ def test_dataset():
 
     new_data = data.subset('reduced')
 
-    assert np.allclose(minkit.core.aop.count_nonzero(
-        minkit.core.aop.leq(new_data[m.name], -2.1)), 0)
+    assert np.allclose(aop.count_nonzero(
+        aop.le(new_data[m.name], -2.1)), 0)
 
-    assert np.allclose(minkit.core.aop.count_nonzero(
-        minkit.core.aop.geq(new_data[m.name], +2.1)), 0)
+    assert np.allclose(aop.count_nonzero(
+        aop.ge(new_data[m.name], +2.1)), 0)
 
     binned_data = data.make_binned(bins=100)
 
     values, _ = np.histogram(numpy_data, range=m.bounds, bins=100)
 
-    assert np.allclose(minkit.as_ndarray(binned_data.values), values)
+    assert np.allclose(binned_data.values.as_ndarray(), values)
 
     # Multidimensional case
     x = minkit.Parameter('x', bounds=(-5, +5))
@@ -69,12 +70,12 @@ def test_evaluation_grid():
 
     # Test single range
     p = minkit.Registry([x])
-    b = minkit.parameters.bounds_for_range(p, 'full')[0]
-    g = dataset.evaluation_grid(p, b, n)
+    b = minkit.base.parameters.bounds_for_range(p, 'full')[0]
+    g = dataset.evaluation_grid(aop, p, b, n)
     assert len(g) == n
 
     # Test multi-range
     p = minkit.Registry([x, y])
-    b = minkit.parameters.bounds_for_range(p, 'full')[0]
-    g = dataset.evaluation_grid(p, b, n)
+    b = minkit.base.parameters.bounds_for_range(p, 'full')[0]
+    g = dataset.evaluation_grid(aop, p, b, n)
     assert len(g) == n**2

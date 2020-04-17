@@ -6,8 +6,6 @@ import numpy as np
 import os
 import pytest
 
-minkit.initialize()
-
 
 @pytest.mark.pdfs
 @pytest.mark.source_pdf

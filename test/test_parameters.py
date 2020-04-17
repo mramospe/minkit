@@ -10,7 +10,6 @@ import os
 import pytest
 
 helpers.configure_logging()
-minkit.initialize()
 
 
 @pytest.mark.core

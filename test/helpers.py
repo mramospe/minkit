@@ -63,7 +63,8 @@ def compare_with_numpy(pdf, numpy_data, data_par, rtol=0.01):
     centers = minkit.DataSet.from_array(
         0.5 * (edges[1:] + edges[:-1]), data_par)
 
-    pdf_values = minkit.plotting.scaled_pdf_values(pdf, centers, values, edges)
+    pdf_values = minkit.plotting.core.scaled_pdf_values(
+        pdf, centers, values, edges)
 
     assert np.allclose(np.sum(pdf_values), np.sum(values), rtol=rtol)
 

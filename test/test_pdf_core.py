@@ -10,7 +10,8 @@ import minkit
 import pytest
 
 helpers.configure_logging()
-minkit.initialize()
+
+aop = minkit.backends.core.parse_backend()
 
 
 @pytest.mark.pdfs
@@ -65,7 +66,8 @@ def test_addpdfs(tmpdir):
 
     centers = minkit.DataSet.from_array(0.5 * (edges[1:] + edges[:-1]), m)
 
-    pdf_values = minkit.plotting.scaled_pdf_values(pdf, centers, values, edges)
+    pdf_values = minkit.plotting.core.scaled_pdf_values(
+        pdf, centers, values, edges)
 
     assert np.allclose(np.sum(pdf_values), np.sum(values))
 
@@ -164,8 +166,8 @@ def test_convpdfs(tmpdir):
     data = pdf.generate(10000)
 
     # Check that the output is another Gaussian with bigger standard deviation
-    mean = minkit.core.aop.sum(data[m.name]) / len(data)
-    var = minkit.core.aop.sum((data[m.name] - mean)**2) / len(data)
+    mean = aop.sum(data[m.name]) / len(data)
+    var = aop.sum((data[m.name] - mean)**2) / len(data)
 
     assert np.allclose(var, s1.value**2 + s2.value**2, rtol=0.1)
 
@@ -176,12 +178,13 @@ def test_convpdfs(tmpdir):
         assert np.allclose(proxy.numerical_normalization(), 1.)
 
     # Ordinary check for PDFs
-    values, edges = np.histogram(minkit.as_ndarray(
-        data[m.name]), bins=100, range=m.bounds)
+    values, edges = np.histogram(
+        data[m.name].as_ndarray(), bins=100, range=m.bounds)
 
     centers = minkit.DataSet.from_array(0.5 * (edges[1:] + edges[:-1]), m)
 
-    pdf_values = minkit.plotting.scaled_pdf_values(pdf, centers, values, edges)
+    pdf_values = minkit.plotting.core.scaled_pdf_values(
+        pdf, centers, values, edges)
 
     assert np.allclose(np.sum(pdf_values), np.sum(values), rtol=0.01)
 

@@ -7,7 +7,6 @@ import minkit
 import pytest
 
 helpers.configure_logging()
-minkit.initialize()
 
 
 def pytest_namespace():
@@ -53,7 +52,7 @@ def test_minimizer():
     assert not np.allclose(reg.get(s.name).value, initials[s.name])
 
     # With weights fits correctly
-    data.weights = minkit.as_ndarray(g(data))
+    data = minkit.DataSet(data.values, data.data_pars, weights=g(data))
 
     with helpers.fit_test(g) as test:
         with minkit.minimizer('uml', g, data, minimizer='minuit') as minuit:
@@ -124,7 +123,7 @@ def test_scipyminimizer():
 
     values = []
     with minkit.minimizer('uml', g, data, minimizer='scipy') as minimizer:
-        for m in minkit.minimizers.SCIPY_CHOICES:
+        for m in minkit.minimization.minimizers.SCIPY_CHOICES:
             g.set_values(**initials)
             values.append(minimizer.result_to_registry(
                 minimizer.minimize(method=m)))
@@ -142,7 +141,7 @@ def test_scipyminimizer():
 
     values = []
     with minkit.minimizer('bml', g, data, minimizer='scipy') as minimizer:
-        for m in minkit.minimizers.SCIPY_CHOICES:
+        for m in minkit.minimization.minimizers.SCIPY_CHOICES:
             g.set_values(**initials)
             values.append(minimizer.result_to_registry(
                 minimizer.minimize(method=m)))

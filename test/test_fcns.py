@@ -7,7 +7,6 @@ import numpy as np
 import pytest
 
 helpers.configure_logging()
-minkit.initialize()
 
 
 @pytest.mark.minimization
@@ -50,8 +49,7 @@ def test_binned_maximum_likelihood():
 
     data = pdf.generate(1000)
 
-    values, edges = np.histogram(
-        minkit.as_ndarray(data[m.name]), bins=100)
+    values, edges = np.histogram(data[m.name].as_ndarray(), bins=100)
 
     data = minkit.BinnedDataSet.from_array(edges, m, values)
 
@@ -70,7 +68,7 @@ def test_binned_maximum_likelihood():
     data = pdf.generate(1000)
 
     values, edges = np.histogram(
-        minkit.as_ndarray(data[m.name]), range=m.bounds, bins=100)
+        data[m.name].as_ndarray(), range=m.bounds, bins=100)
 
     data = minkit.BinnedDataSet.from_array(edges, m, values)
 
@@ -93,8 +91,7 @@ def test_binned_chisquare():
 
     data = g.generate(10000)
 
-    values, edges = np.histogram(
-        minkit.as_ndarray(data[m.name]), bins=100)
+    values, edges = np.histogram(data[m.name].as_ndarray(), bins=100)
 
     data = minkit.BinnedDataSet.from_array(edges, m, values)
 
@@ -113,8 +110,7 @@ def test_binned_chisquare():
 
     data = pdf.generate(int(ng.value + ne.value))
 
-    values, edges = np.histogram(
-        minkit.as_ndarray(data[m.name]), bins=100)
+    values, edges = np.histogram(data[m.name].as_ndarray(), bins=100)
 
     data = minkit.BinnedDataSet.from_array(edges, m, values)
 

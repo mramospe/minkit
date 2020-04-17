@@ -8,7 +8,6 @@ import numpy as np
 import pytest
 
 helpers.configure_logging()
-minkit.initialize()
 
 
 @pytest.mark.pdfs

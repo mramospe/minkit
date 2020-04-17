@@ -1,4 +1,3 @@
-#!/ usr / bin / env python
 '''
 Setup script for the "minkit" package
 '''
@@ -7,6 +6,8 @@ import os
 import subprocess
 import sys
 from setuptools import Command, setup, find_packages
+
+PWD = os.path.abspath(os.path.dirname(__file__))
 
 
 class CheckFormatCommand(Command):
@@ -69,6 +70,13 @@ class CheckFormatCommand(Command):
                 'Found differences for files in directory "{}" with file type "{}"'.format(self.directory, self.file_type))
 
 
+# Determine the source files
+src_path = os.path.join(PWD, 'minkit', 'backends', 'src')
+rel_path = os.path.join('backends', 'src')
+
+data_files = [os.path.join(rel_path, d, f) for d in ('gpu', 'templates', 'xml') for f in os.listdir(
+    os.path.join(src_path, d))]
+
 # Setup function
 setup(
 
@@ -89,8 +97,7 @@ setup(
 
     # Install data
     package_dir={'minkit': 'minkit'},
-    package_data={'minkit': ['src/*.xml',
-                             'templates/*.c', 'operations/src/*.c']},
+    package_data={'minkit': data_files},
 
     # Install requirements
     install_requires=['iminuit', 'numpy', 'numdifftools',

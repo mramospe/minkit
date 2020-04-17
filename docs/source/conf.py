@@ -24,9 +24,6 @@ import os
 import minkit
 import functools
 
-# Must initialize it with CPU backend
-minkit.initialize()
-
 
 def no_op_wraps(func):
     '''
