@@ -10,7 +10,10 @@
   <integral>
     <bounds xmin="xmin" xmax="xmax"/>
     <code>
-      return 1. / k * (exp(k * xmax) - exp(k * xmin));
+      if (k != 0)
+         return 1. / k * (exp(k * xmax) - exp(k * xmin));
+      else
+         return xmax - xmin;
     </code>
   </integral>
 </PDF>

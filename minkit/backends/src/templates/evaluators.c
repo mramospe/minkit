@@ -4,12 +4,11 @@
  * The following macros need to be defined before including this file:
  * - NDIM: number of dimensions the PDF will be working on
  * - NPARS: number of parameters
- * - NVAR_PARS (optional): number of variable parameters
+ * - NVAR_ARG_PARS (optional): number of variable parameters
  * - FUNCTION: function to evaluate the PDF.
  * - INTEGRAL (optional): function to calculate the integral between certain
  *   bounds.
  ******************************************************************************/
-
 // Define the accessors (allows for a maximum of 50 arguments)
 #define GETARG_1(X) X[0]
 #define GETARG_2(X) GETARG_1(X), X[1]
@@ -79,111 +78,227 @@ extern "C" {
 #endif // USE_CPU
 
 // All these macros must be used in conjunction
-#define PARAMS_NAME_ params
-#define NVAR_PARAMS_ nvar_params
-#ifdef HAS_VARIABLE_PARAMETERS
+#ifdef NVAR_ARG_PARS
 // Modify the arguments to the function ()
-#define INPUT_PARAMS int NVAR_PARAMS_, GLOBAL_MEM double *PARAMS_NAME_
 #if NPARS > 0
-#define FWD_PARAMS PARAMS(PARAMS_NAME_), NVAR_PARAMS_, PARAMS_NAME_ + NPARS
+#define FWD_PARAMS(params) PARAMS(params), NVAR_ARG_PARS, params + NPARS
 #else
-#define FWD_PARAMS NVAR_PARAMS_, PARAMS_NAME_ + NPARS
+#define FWD_PARAMS(params) NVAR_ARG_PARS, params
 #endif // NPARS > 0
 #else
-#define INPUT_PARAMS GLOBAL_MEM double *PARAMS_NAME_
-#define FWD_PARAMS PARAMS(PARAMS_NAME_)
-#endif // HAS_VARIABLE_PARAMETERS
+#define FWD_PARAMS(params) PARAMS(params)
+#endif // NVAR_ARG_PARS
 
 #ifdef USE_CPU
 // Define the function to evaluate on single values
-double function(double *data, INPUT_PARAMS) {
+double function(double *data, double *params) {
 
-  return FUNCTION(DATA(data), FWD_PARAMS);
+  return FUNCTION(DATA(data), FWD_PARAMS(params));
 }
 
 #ifdef INTEGRAL
 // Define the integral function
-double integral(double *lower_bounds, double *upper_bounds, INPUT_PARAMS) {
+double integral(double *lower_bounds, double *upper_bounds, double *params) {
 
-  return INTEGRAL(DATA(lower_bounds), DATA(upper_bounds), FWD_PARAMS);
+  return INTEGRAL(DATA(lower_bounds), DATA(upper_bounds), FWD_PARAMS(params));
 }
 #endif // INTEGRAL
 #endif // USE_CPU
 
 // Evaluation on a data sample
-#define EVALUATE_CODE(i, output_array, data_idx, data_array)                   \
+#define EVALUATE_CODE(i, output_array, ndim, data_idx, data_array, params)     \
   {                                                                            \
     double data[NDIM];                                                         \
     for (int j = 0; j < NDIM; ++j)                                             \
-      data[j] = data_array[data_idx[j] + i];                                   \
+      data[j] = data_array[data_idx[j] + i * ndim];                            \
                                                                                \
-    output_array[i] = FUNCTION(DATA(data), FWD_PARAMS);                        \
+    output_array[i] = FUNCTION(DATA(data), FWD_PARAMS(params));                \
   }
 
 #ifdef USE_CPU
-void evaluate(int len, double *output_array, int *data_idx, double *data_array,
-              INPUT_PARAMS) {
+void evaluate(int len, double *output_array, int ndim, int *data_idx,
+              double *data_array, double *params) {
 
   for (int i = 0; i < len; ++i) {
-    EVALUATE_CODE(i, output_array, data_idx, data_array);
+    EVALUATE_CODE(i, output_array, ndim, data_idx, data_array, params);
   }
 }
 #else
-KERNEL void evaluate(GLOBAL_MEM double *output_array, GLOBAL_MEM int *data_idx,
-                     GLOBAL_MEM double *data_array, INPUT_PARAMS) {
+KERNEL void evaluate(int lgth, GLOBAL_MEM double *output_array, int ndim,
+                     GLOBAL_MEM int *data_idx, GLOBAL_MEM double *data_array,
+                     GLOBAL_MEM double *params) {
 
   SIZE_T i = get_global_id(0);
 
-  EVALUATE_CODE(i, output_array, data_idx, data_array);
+  if (i >= lgth)
+    return;
+
+  EVALUATE_CODE(i, output_array, ndim, data_idx, data_array, params);
+}
+#endif // USE_CPU
+
+/// Fill the lower and upper bounds for a given bin index
+WITHIN_KERNEL void fill_bounds(double *lb, double *ub, int r, int ngaps,
+                               GLOBAL_MEM int *gaps_idx, GLOBAL_MEM int *gaps,
+                               GLOBAL_MEM double *edges) {
+
+  for (int j = ngaps - 1; j >= 0; --j) {
+
+    int k = r / gaps[j];
+
+    for (int s = 0; s < NDIM; ++s) {
+
+      if (gaps_idx[s] == j) {
+        lb[s] = edges[k];
+        ub[s] = edges[k + 1];
+        break;
+      }
+    }
+
+    r %= gaps[j];
+  }
+}
+
+/// Calculate the integer power of another integer
+WITHIN_KERNEL int int_power(int n, int p) {
+
+  if (p == 0)
+    return 1;
+
+  int r = n;
+  for (int i = 1; i < p; ++i)
+    r *= n;
+
+  return r;
+}
+
+/// Simpson's rule for numerical integration (N must be even)
+#ifdef USE_CPU
+WITHIN_KERNEL double simpson_rule(int N, int nsteps, double *lb, double *ub,
+                                  double *params) {
+#else
+WITHIN_KERNEL double simpson_rule(int N, int nsteps, double *lb, double *ub,
+                                  GLOBAL_MEM double *params) {
+#endif // USE_CPU
+
+  const double p2 = int_power(2, NDIM);
+
+  // Define the steps and the global factor for the integral
+  double I = 1. / p2;
+
+  double steps[NDIM];
+  for (int i = 0; i < NDIM; ++i) {
+
+    steps[i] = (ub[i] - lb[i]) / (nsteps - 1);
+
+    I *= steps[i];
+  }
+
+  // Calculate the sum of the evaluations in the grid
+  double cumulative = 0.;
+  for (int j = 0; j < N; ++j) {
+
+    double data[NDIM];
+
+    int r = j;
+
+    double fctr = p2;
+
+    for (int k = 0; k < NDIM; ++k) {
+
+      double rem = r % nsteps;
+
+      data[k] = lb[k] + rem * steps[k];
+
+      if (rem == 0 ||
+          rem == (nsteps - 1)) // it is the first or the last element
+        fctr /= 2;
+
+      r /= nsteps;
+    }
+
+    cumulative += fctr * FUNCTION(DATA(data), FWD_PARAMS(params));
+  }
+
+  return I * cumulative;
+}
+
+// Code to evaluate a PDF on a binned data set numerically
+#define EVALUATE_BINNED_NUMERICAL_CODE(i, out, ngaps, gaps_idx, gaps, edges,   \
+                                       nsteps, params)                         \
+  {                                                                            \
+    double lower_bounds[NDIM];                                                 \
+    double upper_bounds[NDIM];                                                 \
+                                                                               \
+    fill_bounds(lower_bounds, upper_bounds, i, ngaps, gaps_idx, gaps, edges);  \
+                                                                               \
+    int N = int_power(nsteps, NDIM);                                           \
+                                                                               \
+    out[i] = simpson_rule(N, nsteps, lower_bounds, upper_bounds, params);      \
+  }
+
+#ifdef USE_CPU
+KERNEL void evaluate_binned_numerical(int len, double *out, int ngaps,
+                                      int *gaps_idx, int *gaps, double *edges,
+                                      int nsteps, double *params) {
+
+  for (int i = 0; i < len; ++i) {
+    EVALUATE_BINNED_NUMERICAL_CODE(i, out, ngaps, gaps_idx, gaps, edges, nsteps,
+                                   params);
+  }
+}
+#else
+KERNEL void evaluate_binned_numerical(int lgth, GLOBAL_MEM double *out,
+                                      int ngaps, GLOBAL_MEM int *gaps_idx,
+                                      GLOBAL_MEM int *gaps,
+                                      GLOBAL_MEM double *edges, int nsteps,
+                                      GLOBAL_MEM double *params) {
+
+  SIZE_T i = get_global_id(0);
+
+  if (i >= lgth / NDIM)
+    return;
+
+  EVALUATE_BINNED_NUMERICAL_CODE(i, out, ngaps, gaps_idx, gaps, edges, nsteps,
+                                 params);
 }
 #endif // USE_CPU
 
 #ifdef INTEGRAL
 // If the integral is defined, the evaluation in the binned case is also
 // defined.
-#define INTEGRAL_CODE(i, output_array, ngaps, gaps_idx, gaps, edges)           \
+#define INTEGRAL_CODE(i, output_array, ngaps, gaps_idx, gaps, edges, params)   \
   {                                                                            \
                                                                                \
     double lower_bounds[NDIM];                                                 \
     double upper_bounds[NDIM];                                                 \
                                                                                \
-    int r = i;                                                                 \
-    for (int j = ngaps - 1; j >= 0; --j) {                                     \
-                                                                               \
-      int k = r / gaps[j];                                                     \
-                                                                               \
-      for (int s = 0; s < NDIM; ++s) {                                         \
-                                                                               \
-        if (gaps_idx[s] == j) {                                                \
-          lower_bounds[s] = edges[k];                                          \
-          upper_bounds[s] = edges[k + 1];                                      \
-          break;                                                               \
-        }                                                                      \
-      }                                                                        \
-                                                                               \
-      r %= gaps[j];                                                            \
-    }                                                                          \
+    fill_bounds(lower_bounds, upper_bounds, i, ngaps, gaps_idx, gaps, edges);  \
                                                                                \
     output_array[i] =                                                          \
-        INTEGRAL(DATA(lower_bounds), DATA(upper_bounds), FWD_PARAMS);          \
+        INTEGRAL(DATA(lower_bounds), DATA(upper_bounds), FWD_PARAMS(params));  \
   }
 
 #ifdef USE_CPU
 void evaluate_binned(int len, double *output_array, int ngaps, int *gaps_idx,
-                     int *gaps, double *edges, INPUT_PARAMS) {
+                     int *gaps, double *edges, double *params) {
 
   for (int i = 0; i < len; ++i) {
-    INTEGRAL_CODE(i, output_array, ngaps, gaps_idx, gaps, edges);
+    INTEGRAL_CODE(i, output_array, ngaps, gaps_idx, gaps, edges, params);
   }
 }
 #else
-KERNEL void evaluate_binned(GLOBAL_MEM double *output_array, int ngaps,
-                            GLOBAL_MEM int *gaps_idx, GLOBAL_MEM int *gaps,
-                            GLOBAL_MEM double *edges, INPUT_PARAMS) {
+KERNEL void evaluate_binned(int lgth, GLOBAL_MEM double *output_array,
+                            int ngaps, GLOBAL_MEM int *gaps_idx,
+                            GLOBAL_MEM int *gaps, GLOBAL_MEM double *edges,
+                            GLOBAL_MEM double *params) {
 
   SIZE_T i = get_global_id(0);
 
-  INTEGRAL_CODE(i, output_array, ngaps, gaps_idx, gaps, edges);
+  if (i >= lgth)
+    return;
+
+  INTEGRAL_CODE(i, output_array, ngaps, gaps_idx, gaps, edges, params);
 }
 #endif // USE_CPU
 

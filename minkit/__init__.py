@@ -2,10 +2,8 @@ from .base.core import get_exposed_package_objects
 from .backends import core as backends_core
 from .backends import aop
 
-import functools
 import inspect
 import os
-import types
 
 PACKAGE_PATH = os.path.dirname(os.path.abspath(__file__))
 
@@ -15,18 +13,21 @@ minkit_api = get_exposed_package_objects(PACKAGE_PATH)
 
 globals().update(minkit_api)
 
-__all__ += list(sorted(minkit_api.keys()))
+__all__ += list(minkit_api.keys())
+
+__all__.sort()
 
 
 class Backend(object):
 
-    objects_backend_dependent_with_init = ('Amoroso', 'Chebyshev',
-                                           'CrystalBall', 'Exponential', 'Gaussian', 'Polynomial', 'PowerLaw', 'PDF',
-                                           'SourcePDF')
+    _objects_backend_dependent_with_init = ('Amoroso', 'Chebyshev',
+                                            'CrystalBall', 'Exponential', 'Gaussian', 'Polynomial', 'PowerLaw', 'PDF',
+                                            'SourcePDF')
 
-    objects_backend_no_init = ('BinnedDataSet', 'DataSet')
+    _objects_backend_no_init = ('BinnedDataSet', 'DataSet')
 
-    objects_backend_dependent = objects_backend_dependent_with_init + objects_backend_no_init
+    _objects_backend_dependent = _objects_backend_dependent_with_init + \
+        _objects_backend_no_init
 
     def __init__(self, btype=backends_core.CPU, **kwargs):
         '''
@@ -37,27 +38,31 @@ class Backend(object):
         :param btype: backend type ('cpu', 'cuda', 'opencl').
         :type btype: str
         :param kwargs: arguments forwarded to the backend constructor \
-        (cuda and opencl backends only). It can contain any of the following \
-        keys: \
-        * device: \
-        * interactive: \
+        (cuda and opencl backends only). See below for more details.
         :type kwargs: dict
+
+        The keyword arguments can contain any of the following:
+        * device
+        * interactive
+        These arguments are only available in *cuda* and *opencl* backends only.
         '''
         super(Backend, self).__init__()
-        self.__btype = btype
+        self.__btype = btype.lower()
 
-        self.__aop = aop.array_operations(self, **kwargs)
+        self.__aop = aop.ArrayOperations(self, **kwargs)
 
-        for n in Backend.objects_backend_no_init:
+        for n in Backend._objects_backend_no_init:
             setattr(self, n, object_wrapper(minkit_api[n], self))
 
-        for n in Backend.objects_backend_dependent_with_init:
+        for n in Backend._objects_backend_dependent_with_init:
             setattr(self, n, iobject_wrapper(minkit_api[n], self))
 
     @property
     def aop(self):
         '''
         Object to do operations on arrays.
+
+        :type: ArrayOperations
         '''
         return self.__aop
 
@@ -65,6 +70,8 @@ class Backend(object):
     def btype(self):
         '''
         Backend type.
+
+        :type: str
         '''
         return self.__btype
 
@@ -72,7 +79,7 @@ class Backend(object):
 class object_wrapper(object):
 
     members_backend_dependent = {o: {n: v for n, v in inspect.getmembers(
-        minkit_api[o], inspect.ismethod)} for o in Backend.objects_backend_dependent}
+        minkit_api[o], inspect.ismethod)} for o in Backend._objects_backend_dependent}
 
     def __init__(self, cls, backend):
         '''
@@ -97,7 +104,7 @@ class object_wrapper(object):
         :type args: tuple
         :param kwargs: arguments forwarded to the __init__ function.
         :type kwargs: dict
-        :returns: wrapped object.
+        :returns: Wrapped object.
         '''
         return self.__cls(*args, **kwargs)
 
@@ -107,7 +114,7 @@ class object_wrapper(object):
 
         :param name: name of the member.
         :type name: str
-        :returns: wrapper function.
+        :returns: Wrapped function.
         :rtype: function
         '''
         def wrapper(*args, **kwargs):
@@ -122,7 +129,7 @@ Wrapper around the "{name}" function, which automatically sets the backend.
         '''
         Represent this class as a string.
 
-        :returns: this class as a string.
+        :returns: This class as a string.
         :rtype: str
         '''
         return f'object_wrapper({self.__cls.__name__}, {tuple(self.__members.keys())})'
@@ -132,8 +139,8 @@ class iobject_wrapper(object_wrapper):
 
     def __init__(self, cls, backend):
         '''
-        Object to wrap the members of other objects (including initialization methods)
-        so the backend is always set to that provided to this class.
+        Object to wrap the members of other objects (including initialization
+        methods) so the backend is always set to that provided to this class.
 
         :param cls: class to wrap.
         :type cls: class
@@ -150,7 +157,7 @@ class iobject_wrapper(object_wrapper):
         :type args: tuple
         :param kwargs: arguments forwarded to the __init__ function.
         :type kwargs: dict
-        :returns: wrapped object.
+        :returns: Wrapped object.
         '''
         return self.__cls(*args, backend=self.__backend, **kwargs)
 
@@ -158,7 +165,7 @@ class iobject_wrapper(object_wrapper):
         '''
         Represent this class as a string.
 
-        :returns: this class as a string.
+        :returns: This class as a string.
         :rtype: str
         '''
         return f'iobject_wrapper({self.__cls.__name__}, {tuple(self.__members.keys())})'

@@ -8,7 +8,7 @@ import os
 
 PACKAGE_PATH = os.path.dirname(os.path.abspath(__file__))
 
-exposed_modules = ('core', 'aop')
+exposed_modules = ('core', 'aop', 'arrays')
 
 pkg = os.path.normpath(
     PACKAGE_PATH[PACKAGE_PATH.rfind('minkit'):]).replace(os.sep, '.')

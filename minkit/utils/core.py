@@ -16,10 +16,10 @@ def bin_area(edges):
 
     :param edges: bounds of the bins
     :type edges: numpy.ndarray or tuple(numpy.ndarray, ...)
-    :returns: area of the bins.
+    :returns: Area of the bins.
     :rtype: float
     '''
-    edges = np.array(edges)
+    edges = data_types.array_float(edges)
     if len(edges.shape) > 1:
         m = tuple(c.flatten()
                   for c in np.meshgrid(*tuple(e[1:] - e[:-1] for e in edges)))
@@ -49,7 +49,7 @@ def scaled_pdf_values(pdf, grid, data_values, edges, range=parameters.FULL, comp
     :param component: if provided, then *pdf* is assumed to be a :class:`AddPDFs` \
     class, and the values associated to the given component will be calculated.
     :type component: str
-    :returns: normalized values of the PDF
+    :returns: Normalized values of the PDF
     :rtype: numpy.ndarray
     '''
     if component is None:
@@ -83,12 +83,13 @@ def calculate_projection(grid, pdf_values, edges, projection, size):
     :type projection: str
     :param size: size used for the evaluation grid.
     :type size: int
-    :returns: centers and values of the PDF.
+    :returns: Centers and values of the PDF.
     :rtype: numpy.ndarray, numpy.ndarray
     '''
     i = grid.data_pars.index(projection)
 
-    pdf_values = pdf_values.reshape(np.full(len(grid.data_pars), size))
+    pdf_values = pdf_values.reshape(
+        data_types.full_int(grid.ndim, size))
 
     # Product of the ratio of bin areas between data and grid
     r = np.prod(data_types.fromiter_float(
@@ -192,11 +193,11 @@ def data_plotting_arrays(data, **kwargs):
         if rebin is not None:
             # Rebin the data
 
-            rebin = np.array(rebin)
+            rebin = data_types.array_int(rebin)
 
             if rebin.ndim == 0:
                 # Only one rebinning argument; all the variables will have the same
-                kwargs['rebin'] = np.full(ndim, rebin)
+                kwargs['rebin'] = data_types.full_int(ndim, rebin)
                 return data_plotting_arrays(data, **kwargs)
             else:
                 if ndim != len(rebin):
@@ -214,7 +215,7 @@ def data_plotting_arrays(data, **kwargs):
                         raise ValueError(
                             'Rebinning must be a proper divisor of the number of bins')
 
-                edges_rebin = tuple(e[::b] for e, b in zip(edges, rebin))
+                edges = tuple(e[::b] for e, b in zip(edges, rebin))
 
                 v = data.values.as_ndarray()
 
@@ -258,7 +259,7 @@ def pdf_plotting_arrays(pdf, data_values, edges, range=parameters.FULL, componen
     :param size: number of points to evaluate. If the range is disjoint, then this \
     size corresponds to the number of points per subrange.
     :type size: int
-    :returns: normalized values of the PDF and tuple with the centers in each \
+    :returns: Normalized values of the PDF and tuple with the centers in each \
     dimension. In the 1D case, the array of centers is directly returned. \
     If the range is disjoint, the result is a tuple of the previously mentioned \
     quantities, one per subrange.
@@ -279,9 +280,9 @@ def pdf_plotting_arrays(pdf, data_values, edges, range=parameters.FULL, componen
             pdf, grid, data_values, edges, range, component)
 
         if projection is None:
-            if len(grid.data_pars) > 1:
+            if grid.ndim > 1:
                 raise RuntimeError(
-                    'Number of data parameters is greater than one and no projection has been specified')
+                    'Number of dimensions is greater than one and no projection has been specified')
             centers = grid[grid.data_pars[0].name].as_ndarray()
             return centers, pdf_values
         else:
@@ -292,8 +293,8 @@ def pdf_plotting_arrays(pdf, data_values, edges, range=parameters.FULL, componen
         for bds in bounds:
 
             # Copy the array of values and edges
-            dv = np.array(data_values)
-            ed = np.array(edges)
+            dv = data_types.array_float(data_values)
+            ed = data_types.array_float(edges)
 
             # Get only the elements that are inside the bounds
             for i, (l, u) in zip(*bds):

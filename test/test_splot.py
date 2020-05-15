@@ -4,15 +4,16 @@ Test the "splot" module.
 import helpers
 import minkit
 import numpy as np
+import pytest
+
+from minkit.minimization.minuit_api import MinuitMinimizer
 
 helpers.configure_logging()
-
-# For reproducibility
-np.random.seed(98953)
 
 aop = minkit.backends.core.parse_backend()
 
 
+@pytest.mark.utils
 def test_sweights():
     '''
     Test the "sweights" function.
@@ -48,7 +49,7 @@ def test_sweights():
         r = minuit.migrad()
         print(r)
 
-    result = minkit.minuit_to_registry(r.params)
+    result = MinuitMinimizer.result_to_registry(r.params)
 
     # Calculate the s-weights (first comes from the Gaussian, second from the exponential)
     sweights, V = minkit.sweights(pdf.pdfs, result.reduce([

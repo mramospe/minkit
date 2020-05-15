@@ -223,4 +223,5 @@ intersphinx_mapping = {
     'http://matplotlib.sourceforge.net/': None,
     'https://iminuit.readthedocs.io/en/latest': None,
     'https://documen.tician.de/pycuda/': None,
+    'http://reikna.publicfields.net/en/latest': None,
 }

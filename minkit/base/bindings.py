@@ -22,8 +22,6 @@ def bind_method_arguments(method, **binded_kwargs):
 
     arg_names = list(p.name for p in filter(
         lambda p: p.default == inspect.Parameter.empty, method_pars.values()))
-    kwarg_names = list(p.name for p in filter(
-        lambda p: p.default != inspect.Parameter.empty, method_pars.values()))
 
     # Get the argument names that must be specified
     available_args = []

@@ -3,7 +3,6 @@ Tests for the "backends" module.
 '''
 import helpers
 import minkit
-import numpy as np
 import os
 import pytest
 
@@ -20,12 +19,12 @@ def test_backend():
 
     x = minkit.Parameter('x', bounds=(-1, +1))
 
-    data = np.random.uniform(0, 1, 1000)
+    data = helpers.rndm_gen.uniform(0, 1, 1000)
 
     # Test initialization and constructor methods
-    bk.DataSet(bk.aop.ndarray_to_farray(data), [x])
+    bk.DataSet(minkit.darray.from_ndarray(data, bk), [x])
 
-    dataset = bk.DataSet.from_array(data, x)
+    dataset = bk.DataSet.from_ndarray(data, x)
 
     new_bk = minkit.Backend(minkit.backends.core.CPU)
 
@@ -35,11 +34,11 @@ def test_backend():
 
 BACKEND = os.environ.get('MINKIT_BACKEND', None)
 
-if BACKEND in (minkit.backends.core.CUDA, minkit.backends.core.OPENCL):
+if minkit.backends.core.is_gpu_backend(BACKEND):
 
     def test_gpu_backends():
         '''
         Test the change of objects from a CPU to a GPU backend.
         '''
-        cpu_backend = minkit.Backend()
-        gpu_backend = minkit.Backend(BACKEND)
+        minkit.Backend()
+        minkit.Backend(BACKEND)

@@ -3,6 +3,7 @@ Accessors to PDF in code.
 '''
 from . import PACKAGE_PATH
 
+import collections
 import os
 
 __all__ = ['add_pdf_src']
@@ -22,6 +23,10 @@ DEFAULT_AOP = None
 # Path to directories where to search for PDFs
 PDF_PATHS = [os.path.join(PACKAGE_PATH, 'src', 'xml')]
 
+# This class is meant to store run-time compiled functions
+FunctionsProxy = collections.namedtuple('FunctionsProxy', [
+                                        'function', 'integral', 'evaluate', 'evaluate_binned', 'evaluate_binned_numerical', 'numerical_integral'])
+
 
 def add_pdf_src(path):
     '''
@@ -33,6 +38,17 @@ def add_pdf_src(path):
     :type path: str
     '''
     PDF_PATHS.insert(0, path)
+
+
+def document_operations_method(method):
+    '''
+    Build the documentation of the given method.
+    '''
+    method.__doc__ = f'''
+This function resolves the :method:`ArrayOperations.{method.__name__}` method
+in this backend.
+'''
+    return method
 
 
 def common_backend(objects):
@@ -70,7 +86,7 @@ def is_gpu_backend(backend):
     :returns: whether the backend is of GPU type or not.
     :rtype: bool
     '''
-    return (backend != CPU)
+    return backend is not None and (backend.lower() != CPU)
 
 
 def parse_backend(backend=None):

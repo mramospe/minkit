@@ -3,16 +3,13 @@
  * GPU backends.
  ******************************************************************************/
 #ifdef USE_CPU
-extern "C" {{
+extern "C" {
 #endif
 
-WITHIN_KERNEL double integral_function({integral_arguments}) {{
-
-  {integral_code}
-}}
+WITHIN_KERNEL double integral_function($integral_arguments) { $integral_code; }
 
 #define INTEGRAL integral_function
 
 #ifdef USE_CPU
-}}
+}
 #endif

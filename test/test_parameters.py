@@ -1,7 +1,7 @@
 '''
 Test the "parameters" module.
 '''
-from helpers import check_parameters, compare_with_numpy
+from helpers import check_parameters, compare_with_numpy, rndm_gen
 import json
 import helpers
 import minkit
@@ -30,7 +30,27 @@ def test_parameter(tmpdir):
 
 
 @pytest.mark.core
-@helpers.setting_numpy_seed
+def test_eval_math_expression():
+    '''
+    Test the "eval_math_expression" function.
+    '''
+    ev = minkit.base.core.eval_math_expression
+
+    assert ev('1 * 2') == 2  # simple operation
+
+    assert ev('min(1, 2)') == 1  # functions
+
+    assert ev('cos(pi)') == -1  # functions and constants
+
+    with pytest.raises(NameError):
+        ev('non_existing_function(1, 2)')  # error if function does not exist
+
+    with pytest.raises(NameError):
+        ev('__import__("subprocess")')  # avoid doing nasty things
+
+
+@pytest.mark.core
+@helpers.setting_seed
 def test_formula(tmpdir):
     '''
     Test the "Formula" class.
@@ -49,7 +69,7 @@ def test_formula(tmpdir):
 
     data = g.generate(10000)
 
-    nd = np.random.normal(c.value, s.value, 10000)
+    nd = rndm_gen.normal(c.value, s.value, 10000)
 
     compare_with_numpy(g, nd, m)
 
@@ -73,7 +93,7 @@ def test_formula(tmpdir):
 
 
 @pytest.mark.core
-@helpers.setting_numpy_seed
+@helpers.setting_seed
 def test_range():
     '''
     Test for disjointed ranges.
@@ -85,8 +105,7 @@ def test_range():
 
     m.set_range('sides', [(0, 4), (6, 10)])
 
-    assert np.allclose(e.norm(range='sides'),
-                       e.numerical_normalization(range='sides'))
+    helpers.check_numerical_normalization(e, range='sides')
 
     data = e.generate(10000)
 

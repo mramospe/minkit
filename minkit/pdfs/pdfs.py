@@ -5,8 +5,8 @@ from . import pdf_core
 
 import logging
 
-__all__ = ['Amoroso', 'Chebyshev', 'CrystalBall',
-           'Exponential', 'Gaussian', 'Polynomial', 'PowerLaw']
+__all__ = ['Amoroso', 'Argus', 'Chebyshev', 'CrystalBall',
+           'Exponential', 'ExpPoly', 'Gaussian', 'Landau', 'Polynomial', 'PowerLaw']
 
 logger = logging.getLogger(__name__)
 
@@ -44,8 +44,32 @@ class Amoroso(pdf_core.SourcePDF):
             logger.warning(
                 'Parameter "alpha" for the {self.__class__.__name__} PDF must be greater than zero; check its bounds')
 
-        super(Amoroso, self).__init__(
+        super().__init__(
             name, [x], [a, theta, alpha, beta], backend)
+
+
+@pdf_core.register_pdf
+class Argus(pdf_core.SourcePDF):
+
+    def __init__(self, name, x, mu, c, p, backend=None):
+        r'''
+        Create a new PDF with the name, parameter related to the data and the argument parameters.
+        If :math:`p = 0.5`, the Amoroso distribution can be simplified as
+
+        .. math:: f\left(x;\mu,c,p\right) = x \sqrt{1 - \frac{x^2}{\mu^2}} e^{- \frac{1}{2}\left(1 - \frac{x^2}{\mu^2}\right)}
+
+        :param name: name of the PDF.
+        :type name: str
+        :param x: data parameter.
+        :type x: Parameter
+        :param mu: cut-off of the distribution.
+        :type mu: Parameter
+        :param c: parameter ruling the curvature of the distribution.
+        :type c: Parameter
+        :param p: power ruling the peaking strength of the distribution.
+        :type p: Parameter
+        '''
+        super().__init__(name, [x], [mu, c, p], backend)
 
 
 @pdf_core.register_pdf
@@ -72,7 +96,7 @@ class Chebyshev(pdf_core.SourcePDF):
         :param coeffs: coefficients for the polynomial
         :type coeffs: tuple(Parameter)
         '''
-        super(Chebyshev, self).__init__(name, [x], None, coeffs, backend)
+        super().__init__(name, [x], None, coeffs, backend)
 
 
 @pdf_core.register_pdf
@@ -112,7 +136,7 @@ class CrystalBall(pdf_core.SourcePDF):
         :param n: power of the power-law.
         :type n: Parameter
         '''
-        super(CrystalBall, self).__init__(name, [x], [c, s, a, n], backend)
+        super().__init__(name, [x], [c, s, a, n], backend)
 
 
 @pdf_core.register_pdf
@@ -132,7 +156,32 @@ class Exponential(pdf_core.SourcePDF):
         :param k: parameter of the exponential.
         :type k: Parameter
         '''
-        super(Exponential, self).__init__(name, [x], [k], backend)
+        super().__init__(name, [x], [k], backend)
+
+
+@pdf_core.register_pdf
+class ExpPoly(pdf_core.SourcePDF):
+
+    def __init__(self, name, x, k, *coeffs, backend=None):
+        r'''
+        Create a new PDF with the parameters related to the data and the slope parameter.
+        The PDF is defined as
+
+        .. math:: f\left(x;k\right) = \sum_{i = 0}^n \alpha_i x^i e^{k x},
+
+        where the first parameter :math:`\alpha_0` is set to one due to the
+        normalization requirement.
+
+        :param name: name of the PDF.
+        :type name: str
+        :param x: data parameter.
+        :type x: Parameter
+        :param k: parameter of the exponential.
+        :type k: Parameter
+        :param coeffs: coefficients for the polynomial
+        :type coeffs: tuple(Parameter)
+        '''
+        super().__init__(name, [x], [k], coeffs, backend)
 
 
 @pdf_core.register_pdf
@@ -155,7 +204,32 @@ class Gaussian(pdf_core.SourcePDF):
         :param sigma: standard deviation.
         :type sigma: Parameter
         '''
-        super(Gaussian, self).__init__(name, [x], [center, sigma], backend)
+        super().__init__(name, [x], [center, sigma], backend)
+
+
+@pdf_core.register_pdf
+class Landau(pdf_core.SourcePDF):
+
+    def __init__(self, name, x, center, sigma, backend=None):
+        r'''
+        Create a Landau PDF with the parameters related to the data, center and
+        scale parameter. The PDF is defined as
+
+        .. math:: f\left(x;c,\sigma\right) = \frac{1}{2\pi i \sigma}\int_{a - i \infty}^{a + i \infty} e^{\lambda s + s \log s} ds,
+
+        where :math:`\lambda = \frac{x - c}{\sigma}` and *a* is an arbitrary
+        parameter.
+
+        :param name: name of the PDF.
+        :type name: str
+        :param x: Parameter
+        :type x: data parameter.
+        :param center: center of the Gaussian.
+        :type center: Parameter
+        :param sigma: scale parameter.
+        :type sigma: Parameter
+        '''
+        super().__init__(name, [x], [center, sigma], backend)
 
 
 @pdf_core.register_pdf
@@ -178,7 +252,7 @@ class Polynomial(pdf_core.SourcePDF):
         :param coeffs: coefficients for the polynomial
         :type coeffs: tuple(Parameter)
         '''
-        super(Polynomial, self).__init__(name, [x], None, coeffs, backend)
+        super().__init__(name, [x], None, coeffs, backend)
 
 
 @pdf_core.register_pdf
@@ -209,4 +283,4 @@ class PowerLaw(pdf_core.SourcePDF):
                 logger.warning(
                     'Defining power law with an asymptote that might lie in the middle of the range of interest')
 
-        super(PowerLaw, self).__init__(name, [x], [c, n], backend)
+        super().__init__(name, [x], [c, n], backend)

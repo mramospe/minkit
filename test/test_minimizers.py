@@ -6,6 +6,8 @@ import numpy as np
 import minkit
 import pytest
 
+from minkit.minimization.minuit_api import MinuitMinimizer
+
 helpers.configure_logging()
 
 
@@ -17,7 +19,7 @@ def pytest_namespace():
 
 
 @pytest.mark.minimization
-@helpers.setting_numpy_seed
+@helpers.setting_seed
 def test_minimizer():
     '''
     Test the "minimizer" function
@@ -29,9 +31,9 @@ def test_minimizer():
 
     initials = g.get_values()
 
-    arr = np.random.normal(c.value, s.value, 10000)
+    arr = helpers.rndm_gen.normal(c.value, s.value, 10000)
 
-    data = minkit.DataSet.from_array(arr, m)
+    data = minkit.DataSet.from_ndarray(arr, m)
 
     with helpers.fit_test(g) as test:
         with minkit.minimizer('uml', g, data, minimizer='minuit') as minuit:
@@ -40,14 +42,14 @@ def test_minimizer():
     pytest.shared_names = [p.name for p in g.all_args]
 
     # Unweighted fit to uniform distribution fails
-    arr = np.random.uniform(*m.bounds, 100000)
-    data = minkit.DataSet.from_array(arr, m)
+    arr = helpers.rndm_gen.uniform(*m.bounds, 100000)
+    data = minkit.DataSet.from_ndarray(arr, m)
 
     with minkit.minimizer('uml', g, data, minimizer='minuit') as minuit:
         r = minuit.migrad()
         print(r)
 
-    reg = minkit.minuit_to_registry(r.params)
+    reg = MinuitMinimizer.result_to_registry(r.params)
 
     assert not np.allclose(reg.get(s.name).value, initials[s.name])
 
@@ -67,7 +69,7 @@ def test_minimizer():
 
 
 @pytest.mark.minimization
-@helpers.setting_numpy_seed
+@helpers.setting_seed
 def test_simultaneous_minimizer():
     '''
     Test the "simultaneous_minimizer" function.
@@ -98,15 +100,6 @@ def test_simultaneous_minimizer():
 
 
 @pytest.mark.minimization
-def test_minuit_to_registry():
-    '''
-    Test the "minuit_to_registry" function.
-    '''
-    r = minkit.minuit_to_registry(pytest.shared_result.params)
-    assert all(n in r.names for n in pytest.shared_names)
-
-
-@pytest.mark.minimization
 def test_scipyminimizer():
     '''
     Test the "SciPyMinimizer" class.
@@ -123,14 +116,15 @@ def test_scipyminimizer():
 
     values = []
     with minkit.minimizer('uml', g, data, minimizer='scipy') as minimizer:
-        for m in minkit.minimization.minimizers.SCIPY_CHOICES:
+        for m in minkit.minimization.scipy_api.SCIPY_CHOICES:
             g.set_values(**initials)
             values.append(minimizer.result_to_registry(
                 minimizer.minimize(method=m)))
 
     with minkit.minimizer('uml', g, data, minimizer='minuit') as minimizer:
         g.set_values(**initials)
-        reference = minkit.minuit_to_registry(minimizer.migrad().params)
+        reference = MinuitMinimizer.result_to_registry(
+            minimizer.migrad().params)
 
     for reg in values:
         for p, r in zip(reg, reference):
@@ -141,14 +135,15 @@ def test_scipyminimizer():
 
     values = []
     with minkit.minimizer('bml', g, data, minimizer='scipy') as minimizer:
-        for m in minkit.minimization.minimizers.SCIPY_CHOICES:
+        for m in minkit.minimization.scipy_api.SCIPY_CHOICES:
             g.set_values(**initials)
             values.append(minimizer.result_to_registry(
                 minimizer.minimize(method=m)))
 
     with minkit.minimizer('bml', g, data, minimizer='minuit') as minimizer:
         g.set_values(**initials)
-        reference = minkit.minuit_to_registry(minimizer.migrad().params)
+        reference = MinuitMinimizer.result_to_registry(
+            minimizer.migrad().params)
 
     for reg in values:
         for p, r in zip(reg, reference):

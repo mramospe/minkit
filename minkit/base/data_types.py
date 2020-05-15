@@ -39,8 +39,85 @@ def fromiter_int(i):
     return np.fromiter(i, dtype=cpu_int)
 
 
-# Types to handle with ctypes
-c_double = ctypes.c_double  # double
-c_double_p = ctypes.POINTER(c_double)  # double*
-c_int = ctypes.c_int  # int
-c_int_p = ctypes.POINTER(c_int)  # int*
+def full_int(n, i):
+    return np.full(n, i, dtype=cpu_int)
+
+
+# Expose ctypes objects
+c_double = ctypes.c_double
+c_double_p = ctypes.POINTER(c_double)
+c_int = ctypes.c_int
+c_int_p = ctypes.POINTER(c_int)
+py_object = ctypes.py_object
+
+# Functions to deal with ctypes and numpy value types
+
+
+def as_c_double(*args):
+    '''
+    Transform arguments to a :mod:`ctypes` "double".
+    '''
+    if len(args) == 1:
+        return c_double(*args)
+    else:
+        return tuple(c_double(a) for a in args)
+
+
+def as_double(*args):
+    '''
+    Transform arguments to a :mod:`numpy` "double".
+    '''
+    if len(args) == 1:
+        return cpu_float(*args)
+    else:
+        return tuple(cpu_float(a) for a in args)
+
+
+def data_as_c_double(*args):
+    '''
+    Transform arguments to a :mod:`ctypes` "double*".
+    '''
+    if len(args) == 1:
+        return args[0].ctypes.data_as(c_double_p)
+    else:
+        return tuple(a.ctypes.data_as(c_double_p) for a in args)
+
+
+def as_c_integer(*args):
+    '''
+    Transform arguments to a :mode:`ctypes` "int".
+    '''
+    if len(args) == 1:
+        return c_int(*args)
+    else:
+        return tuple(c_int(a) for a in args)
+
+
+def as_integer(*args):
+    '''
+    Transform arguments to a :mod:`numpy` "integral" type.
+    '''
+    if len(args) == 1:
+        return cpu_int(*args)
+    else:
+        return tuple(cpu_int(a) for a in args)
+
+
+def data_as_c_int(*args):
+    '''
+    Transform arguments to a :mod:`ctypes` "int*".
+    '''
+    if len(args) == 1:
+        return args[0].ctypes.data_as(c_int_p)
+    else:
+        return tuple(a.ctypes.data_as(c_int_p) for a in args)
+
+
+def as_py_object(*args):
+    '''
+    Transform arguments to a :mod:`ctypes` "PyObject".
+    '''
+    if len(args) == 1:
+        return py_object(*args)
+    else:
+        return tuple(py_object(a) for a in args)

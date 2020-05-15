@@ -1,11 +1,17 @@
 '''
 Helper functions to test the minkit package.
 '''
-import contextlib
 import functools
 import logging
 import minkit
 import numpy as np
+
+from minkit.minimization.minuit_api import MinuitMinimizer
+
+# Default seed for the generators
+DEFAULT_SEED = 4987
+
+rndm_gen = np.random.RandomState(seed=DEFAULT_SEED)
 
 
 def configure_logging():
@@ -52,6 +58,14 @@ def check_multi_pdfs(f, s):
         check_pdfs(fp, sp)
 
 
+def check_numerical_normalization(pdf, range=minkit.base.parameters.FULL):
+    '''
+    Check the numerical normalization of a PDF.
+    '''
+    assert np.allclose(pdf.numerical_normalization(
+        range=range), pdf.norm(range=range), rtol=0.05)
+
+
 def compare_with_numpy(pdf, numpy_data, data_par, rtol=0.01):
     '''
     Compare the output of the evaluation of a PDF with data taken from
@@ -60,23 +74,62 @@ def compare_with_numpy(pdf, numpy_data, data_par, rtol=0.01):
     # Create the data
     values, edges = np.histogram(numpy_data, bins=100, range=data_par.bounds)
 
-    centers = minkit.DataSet.from_array(
+    centers = minkit.DataSet.from_ndarray(
         0.5 * (edges[1:] + edges[:-1]), data_par)
 
-    pdf_values = minkit.plotting.core.scaled_pdf_values(
+    pdf_values = minkit.utils.core.scaled_pdf_values(
         pdf, centers, values, edges)
 
     assert np.allclose(np.sum(pdf_values), np.sum(values), rtol=rtol)
 
 
-def setting_numpy_seed(function=None, seed=98953):
+def default_add_pdfs(center='c', sigma='s', k='k', extended=False, yields=None):
+    '''
+    Create a combination of a Gaussian and an exponential.
+    '''
+    # Simple fit to a Gaussian
+    x = minkit.Parameter('x', bounds=(0, 20))  # bounds to generate data later
+    c = minkit.Parameter(center, 10, bounds=(8, 12))
+    s = minkit.Parameter(sigma, 2, bounds=(1, 3))
+    g = minkit.Gaussian('gaussian', x, c, s)
+
+    # Test for a composed PDF
+    k = minkit.Parameter(k, -0.1, bounds=(-1, 0))
+    e = minkit.Exponential('exponential', x, k)
+
+    if extended:
+        ng_name, ne_name = tuple(
+            yields if yields is not None else ('ng', 'ne'))
+        ng = minkit.Parameter(ng_name, 9000, bounds=(0, 10000))
+        ne = minkit.Parameter(ne_name, 1000, bounds=(0, 10000))
+        return minkit.AddPDFs.two_components('pdf', g, e, ng, ne)
+    else:
+        y_name = yields if yields is not None else 'y'
+        y = minkit.Parameter(y_name, 0.5, bounds=(0, 1))
+        return minkit.AddPDFs.two_components('pdf', g, e, y)
+
+
+def default_gaussian(center='c', sigma='s', data_par=None):
+    '''
+    Create a Gaussian function.
+    '''
+    x = data_par if data_par is not None else minkit.Parameter(
+        'x', bounds=(-4, +4))
+    c = minkit.Parameter(center, 0, bounds=(-4, +4))
+    s = minkit.Parameter(sigma, 1, bounds=(0.1, 2.))
+    return minkit.Gaussian('gaussian', x, c, s)
+
+
+def setting_seed(function=None, seed=DEFAULT_SEED):
     '''
     Decorator to set the NumPy random seed before executing a function.
     '''
     def __wrapper(function):
         @functools.wraps(function)
         def __wrapper(*args, **kwargs):
-            np.random.seed(seed)
+            global rndm_gen
+            rndm_gen = np.random.RandomState(seed=seed)  # set the numpy seed
+            minkit.backends.core.parse_backend().set_rndm_seed(seed)  # set the minkit seed
             return function(*args, **kwargs)
         return __wrapper
 
@@ -139,7 +192,7 @@ class fit_test(object):
             assert not self.result.fmin.hesse_failed
 
             # Check the values of the parameters
-            results = minkit.minuit_to_registry(self.result.params)
+            results = MinuitMinimizer.result_to_registry(self.result.params)
             for n, v in self.initials.items():
                 rv = results.get(n)
                 assert np.allclose(v, rv.value, atol=self.nsigma * rv.error)
@@ -168,11 +221,10 @@ class fit_test(object):
 
             c = 0.5 * (r + l)
 
-            v = np.random.normal(c, 0.2886751345948129 * (r - l))
+            def gen(): return rndm_gen.normal(c, 0.2886751345948129 * (r - l))
 
-            if v > r:
-                v = 0.5 * (r - c)
-            elif v < l:
-                v = 0.5 * (c - l)
+            v = gen()
+            while v > r or v < l:
+                v = gen()
 
             p.value = v

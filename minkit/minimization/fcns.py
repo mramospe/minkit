@@ -8,16 +8,15 @@ import functools
 import numpy as np
 import warnings
 
-__all__ = []
-
-# Definition of the errors. This is given from the nature of the FCNs. If this is
-# changed the output of the FCNs must change accordingly. A value of 1 means
-# that the output of the FCNs is a chi-square-like function.
-ERRORDEF = 1.
+__all__ = ['binned_chisquare', 'binned_maximum_likelihood',
+           'binned_extended_chisquare', 'binned_extended_maximum_likelihood',
+           'unbinned_maximum_likelihood', 'unbinned_extended_maximum_likelihood']
 
 # Names of different FCNs
 BINNED_CHISQUARE = 'chi2'
+BINNED_EXTENDED_CHISQUARE = 'echi2'
 BINNED_MAXIMUM_LIKELIHOOD = 'bml'
+BINNED_EXTENDED_MAXIMUM_LIKELIHOOD = 'beml'
 UNBINNED_MAXIMUM_LIKELIHOOD = 'uml'
 UNBINNED_EXTENDED_MAXIMUM_LIKELIHOOD = 'ueml'
 
@@ -32,7 +31,7 @@ def data_type_for_fcn(fcn):
     :rtype: str
     :raises ValueError: if the FCN is unknown.
     '''
-    if fcn in (BINNED_CHISQUARE, BINNED_MAXIMUM_LIKELIHOOD):
+    if fcn in (BINNED_CHISQUARE, BINNED_EXTENDED_CHISQUARE, BINNED_MAXIMUM_LIKELIHOOD, BINNED_EXTENDED_MAXIMUM_LIKELIHOOD):
         return dataset.BINNED
     elif fcn in (UNBINNED_MAXIMUM_LIKELIHOOD,
                  UNBINNED_EXTENDED_MAXIMUM_LIKELIHOOD):
@@ -51,13 +50,13 @@ def evaluate_constraints(constraints=None):
     :rtype: float
     '''
     if constraints is None:
-        return 1.
+        return 0.
 
     res = 1.
     for c in constraints:
-        res *= c.function(normalized=False)
+        res *= c.function(normalized=True)
 
-    return res
+    return -2. * np.log(res)
 
 
 def warn_if_nan(function):
@@ -77,28 +76,25 @@ def warn_if_nan(function):
 
         if np.isnan(v):
             warnings.warn(
-                'Evaluation of the PDF is zero or negative', RuntimeWarning)
+                'Evaluation of the PDF is zero or negative', RuntimeWarning, stacklevel=2)
 
         return v
 
     return __wrapper
 
 
-def nll_to_chi2(function):
-    '''
-    Decorate the a function that returns a negative logarithm of likelihood into
-    a chi-square, by multiplying it by two.
-    '''
-    @functools.wraps(function)
-    def __wrapper(*args, **kwargs):
-        return 2. * function(*args, **kwargs)
-    return __wrapper
-
-
 @warn_if_nan
-def binned_chisquare(pdf, data, range=parameters.FULL, constraints=None):
-    '''
-    Definition of the binned chi-square FCN.
+def binned_chisquare(pdf, data, range=parameters.FULL):
+    r'''
+    Definition of the binned chi-square FCN. The returned values are directly
+    the :math:`\chi^2` of the PDF in the data sample, and it is computed as
+
+    .. math::
+       \text{FCN} = \sum_{b = 0}^M \frac{\left(n_b - f_b(\vec{p})\right)^2}{f_b(\vec{p})},
+
+    where :math:`n_b` is the number of entries in bin *b*, :math:`f(b;\vec{\theta})`
+    is the integral of the function to minimize in the bin *b*
+    (without normalization), :math:`\vec{\theta}` are the function parameters
 
     :param pdf: function to evaluate.
     :type pdf: PDF
@@ -106,42 +102,107 @@ def binned_chisquare(pdf, data, range=parameters.FULL, constraints=None):
     :type data: BinnedDataSet
     :param range: normalization range of the PDF.
     :type range: str
-    :param constraints: PDFs with the constraints for paramters in *pdf*.
-    :type constraints: list(PDF)
     :returns: value of the FCN.
     :rtype: float
     '''
-    c = evaluate_constraints(constraints)
-    f = c * pdf.evaluate_binned(data)
+    f = pdf.evaluate_binned(data)
+    f *= data.values.sum()
     return ((data.values - f)**2 / f).sum()
 
 
-@nll_to_chi2
 @warn_if_nan
-def binned_maximum_likelihood(pdf, data, constraints=None):
-    '''
-    Definition of the binned maximum likelihood FCN.
+def binned_extended_chisquare(pdf, data):
+    r'''
+    Definition of the binned chi-square FCN for extended PDFs. The returned
+    value is directly the :math:`\chi^2` of the PDF in the data sample, and it
+    is computed as
+
+    .. math::
+       \text{FCN} = \sum_{b = 0}^M \frac{\left(n_b - f_b(\vec{p})\right)^2}{f_b(\vec{p})},
+
+    where :math:`n_b` is the number of entries in bin *b*, :math:`f(b;\vec{\theta})`
+    is the integral of the function to minimize in the bin *b*
+    (without normalization), :math:`\vec{\theta}` are the function parameters
 
     :param pdf: function to evaluate.
     :type pdf: PDF
     :param data: data to evaluate.
     :type data: BinnedDataSet
-    :param constraints: PDFs with the constraints for paramters in *pdf*.
-    :type constraints: list(PDF)
+    :param range: normalization range of the PDF.
+    :type range: str
     :returns: value of the FCN.
     :rtype: float
     '''
-    c = evaluate_constraints(constraints)
-    return pdf.norm() - (data.values * pdf.aop.log(c * pdf.evaluate_binned(data))).sum()
+    f = pdf.evaluate_binned(data, normalized=False)
+    return ((data.values - f)**2 / f).sum()
 
 
-@nll_to_chi2
 @warn_if_nan
-def unbinned_extended_maximum_likelihood(pdf, data, range=parameters.FULL, constraints=None):
+def binned_maximum_likelihood(pdf, data):
+    r'''
+    Definition of the binned maximum likelihood FCN.
+    The output is two times the logarithm of the likelihood, and is computed as
+
+    .. math::
+       \text{FCN} = -2 \times \left[\sum_{b=0}^M n_b \log\frac{n_b}{f(b;\vec{\theta})} + f(b;\vec{\theta}) - n_b\right],
+
+    where :math:`n_b` is the number of entries in bin *b*,
+    :math:`f(b;\vec{\theta})` is the integral of the function to minimize
+    in the bin *b* (without normalization), :math:`\vec{\theta}` are the function
+    parameters.
+
+    :param pdf: function to evaluate.
+    :type pdf: PDF
+    :param data: data to evaluate.
+    :type data: BinnedDataSet
+    :returns: value of the FCN.
+    :rtype: float
     '''
+    f = pdf.evaluate_binned(data)
+    f *= data.values.sum()
+    return 2. * (pdf.aop.product_by_zero_is_zero(data.values, pdf.aop.log(data.values / f)) + f - data.values).sum()
+
+
+@warn_if_nan
+def binned_extended_maximum_likelihood(pdf, data):
+    r'''
+    Definition of the binned extended maximum likelihood FCN.
+    The output is two times the logarithm of the likelihood, and is computed as
+
+    .. math::
+       \text{FCN} = -2 \times \left[\sum_{b=0}^M n_b \log\frac{n_b}{f(b;\vec{\theta})} + f(b;\vec{\theta}) - n_b\right],
+
+    where :math:`n_b` is the number of entries in bin *b*,
+    :math:`f(b;\vec{\theta})` is the integral of the function to minimize
+    in the bin *b* (without normalization), :math:`\vec{\theta}` are the function
+    parameters.
+
+    :param pdf: function to evaluate.
+    :type pdf: PDF
+    :param data: data to evaluate.
+    :type data: BinnedDataSet
+    :returns: value of the FCN.
+    :rtype: float
+    '''
+    f = pdf.evaluate_binned(data, normalized=False)
+    return 2. * (pdf.aop.product_by_zero_is_zero(data.values, pdf.aop.log(data.values / f)) + f - data.values).sum()
+
+
+@warn_if_nan
+def unbinned_extended_maximum_likelihood(pdf, data, range=parameters.FULL):
+    r'''
     Definition of the unbinned extended maximum likelihood FCN.
     In this case, entries in data are assumed to follow a Poissonian distribution.
     The given :class:`PDF` must be of *extended* type.
+    The output is two times the logarithm of the likelihood, and is computed as
+
+    .. math::
+       \text{FCN} = -2 \times \left[\sum_{i=0}^N \log f(\vec{x}_i;\vec{\theta}) - A(\vec{\theta})\right],
+
+    where :math:`f(\vec{x}_i;\vec{\theta})` is the function to minimize (without
+    normalization), :math:`\vec{x}_i` are the data points, :math:`\vec{\theta}`
+    are the function parameters and :math:`A(\vec{\theta})` is the normalization
+    value.
 
     :param pdf: function to evaluate.
     :type pdf: PDF
@@ -149,24 +210,29 @@ def unbinned_extended_maximum_likelihood(pdf, data, range=parameters.FULL, const
     :type data: DataSet
     :param range: normalization range of the PDF.
     :type range: str
-    :param constraints: PDFs with the constraints for paramters in *pdf*.
-    :type constraints: list(PDF)
     :returns: value of the FCN.
     :rtype: float
     '''
-    c = evaluate_constraints(constraints)
     lf = pdf.aop.log(pdf(data, range, normalized=False))
     if data.weights is not None:
         lf *= data.weights
-    return pdf.norm(range) - lf.sum() - len(data) * np.log(c)
+    return 2. * (pdf.norm(range) - lf.sum())
 
 
-@nll_to_chi2
 @warn_if_nan
-def unbinned_maximum_likelihood(pdf, data, range=parameters.FULL, constraints=None):
-    '''
+def unbinned_maximum_likelihood(pdf, data, range=parameters.FULL):
+    r'''
     Definition of the unbinned maximum likelihood FCN.
     The given :class:`PDF` must not be of *extended* type.
+    The output is two times the logarithm of the likelihood, and is computed as
+
+    .. math::
+       \text{FCN} = -2 \times \left[\sum_{i=0}^N \log \frac{f(\vec{x}_i;\vec{\theta})}{A(\vec{\theta})}\right],
+
+    where :math:`f(\vec{x}_i;\vec{\theta})` is the function to minimize (without
+    normalization), :math:`\vec{x}_i` are the data points, :math:`\vec{\theta}`
+    are the function parameters and :math:`A(\vec{\theta})` is the normalization
+    value.
 
     :param pdf: function to evaluate.
     :type pdf: PDF
@@ -174,16 +240,13 @@ def unbinned_maximum_likelihood(pdf, data, range=parameters.FULL, constraints=No
     :type data: DataSet
     :param range: normalization range of the PDF.
     :type range: str
-    :param constraints: PDFs with the constraints for paramters in *pdf*.
-    :type constraints: list(PDF)
     :returns: value of the FCN.
     :rtype: float
     '''
-    c = evaluate_constraints(constraints)
     lf = pdf.aop.log(pdf(data, range))
     if data.weights is not None:
         lf *= data.weights
-    return - lf.sum() - len(data) * np.log(c)
+    return -2. * lf.sum()
 
 
 def fcn_from_name(name):
@@ -197,6 +260,10 @@ def fcn_from_name(name):
     '''
     if name == BINNED_CHISQUARE:
         return binned_chisquare
+    elif name == BINNED_EXTENDED_CHISQUARE:
+        return binned_extended_chisquare
+    elif name == BINNED_EXTENDED_MAXIMUM_LIKELIHOOD:
+        return binned_extended_maximum_likelihood
     elif name == BINNED_MAXIMUM_LIKELIHOOD:
         return binned_maximum_likelihood
     elif name == UNBINNED_MAXIMUM_LIKELIHOOD:

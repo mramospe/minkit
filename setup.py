@@ -4,32 +4,42 @@ Setup script for the "minkit" package
 
 import os
 import subprocess
-import sys
 from setuptools import Command, setup, find_packages
 
 PWD = os.path.abspath(os.path.dirname(__file__))
 
 
-class CheckFormatCommand(Command):
-    '''
-    Check the format of the files in the given directory. This script takes only
-    one argument, the directory to process. A recursive look-up will be done to
-    look for python files in the sub-directories and determine whether the files
-    have the correct format.
-    '''
-    description = 'check the format of the files of a certain type in a given directory'
+class DirectoryChecker(Command):
 
     user_options = [
         ('directory=', 'd', 'directory to process'),
-        ('file-type=', 't', 'file type (python|all)'),
     ]
+
+    def _check_process(self, name, process, compare=None):
+        '''
+        Check the return code of a process. If "compare" is given, it is used to
+        compare the output with it. By default it just checks that there is no output.
+        '''
+        stdout, stderr = process.communicate()
+
+        if process.returncode < 0:
+            raise RuntimeError(
+                f'Call to {name} exited with error {abs(process.returncode)}; the message is:\n{stderr}')
+
+        if compare is None:
+            if len(stdout):
+                raise RuntimeError(
+                    f'Found problems for files in directory "{self.directory}"')
+        else:
+            if stdout.decode('ascii') != compare:
+                raise RuntimeError(
+                    f'Found problems for files in directory "{self.directory}"')
 
     def initialize_options(self):
         '''
         Running at the begining of the configuration.
         '''
         self.directory = None
-        self.file_type = None
 
     def finalize_options(self):
         '''
@@ -39,35 +49,56 @@ class CheckFormatCommand(Command):
             raise Exception('Parameter --directory is missing')
         if not os.path.isdir(self.directory):
             raise Exception('Not a directory {}'.format(self.directory))
-        if self.file_type is None:
-            raise Exception('Parameter --file-type is missing')
-        if self.file_type not in ('python', 'all'):
-            raise Exception('File type must be either "python" or "all"')
+
+
+class CheckFormatCommand(DirectoryChecker):
+
+    description = 'check the format of the files of a certain type in a given directory'
 
     def run(self):
         '''
         Execution of the command action.
         '''
-        matched_files = []
+        python_files, c_files = [], []
         for root, _, files in os.walk(self.directory):
-            for f in files:
-                if self.file_type == 'python' and not f.endswith('.py'):
-                    continue
-                matched_files.append(os.path.join(root, f))
+            for f in filter(lambda f: f.endswith('.py'), files):
+                python_files.append(os.path.join(root, f))
+            for f in filter(lambda f: any(map(f.endswith, ('.h', '.c', '.xml'))), files):
+                c_files.append(os.path.join(root, f))
 
-        process = subprocess.Popen(['autopep8', '--diff'] + matched_files,
+        # Check python files
+        process = subprocess.Popen(['autopep8', '--diff'] + python_files,
+                                   stdout=subprocess.PIPE,
+                                   stderr=subprocess.PIPE)
+        self._check_process('autopep8', process)
+
+        # Check the C files
+        for fl in c_files:
+            process = subprocess.Popen(['clang-format', fl],
+                                       stdout=subprocess.PIPE,
+                                       stderr=subprocess.PIPE)
+            with open(fl) as f:
+                self._check_process('clang-format', process, compare=f.read())
+
+
+class CheckPyFlakesCommand(DirectoryChecker):
+
+    description = 'run pyflakes in order to detect unused objects and errors in the code'
+
+    def run(self):
+        '''
+        Execution of the command action.
+        '''
+        python_files = []
+        for root, _, files in os.walk(self.directory):
+            for f in filter(lambda f: f.endswith('.py'), files):
+                python_files.append(os.path.join(root, f))
+
+        process = subprocess.Popen(['pyflakes'] + python_files,
                                    stdout=subprocess.PIPE,
                                    stderr=subprocess.PIPE)
 
-        stdout, stderr = process.communicate()
-
-        if process.returncode < 0:
-            raise RuntimeError('Call to autopep8 exited with error {}\nMessage:\n{}'.format(
-                abs(returncode), stderr))
-
-        if len(stdout):
-            raise RuntimeError(
-                'Found differences for files in directory "{}" with file type "{}"'.format(self.directory, self.file_type))
+        self._check_process('pyflakes', process)
 
 
 # Determine the source files
@@ -84,7 +115,8 @@ setup(
 
     description='Package to perform fits in both CPUs and GPUs',
 
-    cmdclass={'check_format': CheckFormatCommand},
+    cmdclass={'check_format': CheckFormatCommand,
+              'check_pyflakes': CheckPyFlakesCommand},
 
     # Read the long description from the README
     long_description=open('README.rst').read(),

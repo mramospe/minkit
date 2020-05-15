@@ -1,6 +1,7 @@
 '''
 Tests for the "accessors" module.
 '''
+import helpers
 import minkit
 import numpy as np
 import os
@@ -55,4 +56,4 @@ def test_add_pdf_src(tmpdir):
     pdf = ExistingPDF('existing', x, a)
 
     assert np.allclose(pdf.integral(), 1)
-    assert np.allclose(pdf.numerical_normalization(), pdf.norm())
+    helpers.check_numerical_normalization(pdf)

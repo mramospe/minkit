@@ -1,14 +1,15 @@
 '''
 Define classes and functions to work with parameters.
 '''
+from . import core
 from . import data_types
+from . import exceptions
 
 import collections
-import json
 import logging
 import numpy as np
 
-__all__ = ['Parameter', 'Formula', 'Registry']
+__all__ = ['ParameterBase', 'Parameter', 'Formula', 'Registry']
 
 # Default range
 FULL = 'full'
@@ -16,14 +17,55 @@ FULL = 'full'
 logger = logging.getLogger(__name__)
 
 
-class Parameter(object):
+class ParameterBase(object, metaclass=core.DocMeta):
 
     # Flag to determine if this parameter class depends on other parameters
     # or not. Any object with dependent = True must have the property "args"
     # defined.
     dependent = False
 
-    def __init__(self, name, value=None, bounds=None, ranges=None, error=0., constant=False):
+    def __init__(self):
+        '''
+        Abstract class for parameter objects.
+        '''
+        super().__init__()
+
+    @property
+    def value(self):
+        '''
+        Value of the parameter.
+
+        :type: float
+        '''
+        raise exceptions.PropertyNotDefinedError(self.__class__, 'value')
+
+    @classmethod
+    def from_json_object(cls, obj):
+        '''
+        Build the parameter from a JSON object (a dictionary).
+        This is meant to be used together with the :mod:`json` module.
+
+        :param obj: object to use to construct the class.
+        :type obj: dict
+        :returns: parameter created from the JSON object.
+        :rtype: Parameter
+        '''
+        raise exceptions.MethodNotDefinedError(cls, 'from_json_object')
+
+    def to_json_object(self):
+        '''
+        Represent this class as a JSON-like object.
+
+        :returns: this class as a JSON-like object.
+        :rtype: dict
+        '''
+        raise exceptions.MethodNotDefinedError(
+            self.__class__, 'to_json_object')
+
+
+class Parameter(ParameterBase):
+
+    def __init__(self, name, value=None, bounds=None, ranges=None, error=0., constant=False, asym_errors=None):
         '''
         Object to represent a parameter for a PDF.
 
@@ -39,9 +81,13 @@ class Parameter(object):
         :type error: float
         :param constant: whether to initialize this parameter as constant.
         :type constant: bool
+        :param asym_errors: asymmetric errors.
+        :type asym_errors: tuple(float, float)
         :ivar name: name of the parameter.
         :ivar error: error of the parameter.
         '''
+        super().__init__()
+
         self.__constant = constant
         self.__ranges = {}
 
@@ -49,6 +95,7 @@ class Parameter(object):
         self.value = value
         self.bounds = bounds  # This sets the FULL range
         self.error = error
+        self.asym_errors = asym_errors
 
         if ranges is not None:
             for n, r in ranges.items():
@@ -68,6 +115,8 @@ class Parameter(object):
     def bounds(self):
         '''
         Bounds of the parameter, defining the *full* range.
+
+        :type: numpy.ndarray
         '''
         return self.__bounds
 
@@ -88,22 +137,14 @@ class Parameter(object):
     @property
     def constant(self):
         '''
-        Return whether this parameter is marked as constant.
-        Any parameter forced to constant or with no bounds is considered to be constant.
+        Whether this parameter is marked as constant.
 
-        :returns: whether this parameter is constant or not.
-        :rtype: bool
+        :type: bool
         '''
         return self.__constant or (self.__bounds is None)
 
     @constant.setter
     def constant(self, v):
-        '''
-        Define the *constant* status of the class.
-
-        :param v: value determining whether this object must be considered as constant or not.
-        :type v: bool
-        '''
         self.__constant = v
 
     @classmethod
@@ -169,26 +210,22 @@ class Parameter(object):
     @property
     def value(self):
         '''
-        Get the value of the parameter.
+        Value of the parameter.
+
+        :type: float
         '''
         return self.__value
 
     @value.setter
     def value(self, value):
-        '''
-        Set the value of the parameter.
-        '''
         if value is not None:
             self.__value = data_types.cpu_float(value)
         else:
             self.__value = value
 
 
-class Formula(object):
+class Formula(ParameterBase):
 
-    # Flag to determine if this parameter class depends on other parameters
-    # or not. Any object with dependent = True must have the property "args"
-    # defined.
     dependent = True
 
     def __init__(self, name, formula, pars):
@@ -202,6 +239,8 @@ class Formula(object):
         :param pars: input parameters.
         :type pars: Registry
         '''
+        super().__init__()
+
         self.name = name
         self.__pars = Registry(pars)
 
@@ -217,8 +256,6 @@ class Formula(object):
 
         self.__formula = formula
 
-        super(Formula, self).__init__()
-
     def __repr__(self):
         '''
         Rerpresent this class as a string, showing its attributes.
@@ -232,7 +269,9 @@ class Formula(object):
     @property
     def all_args(self):
         '''
-        Get the parameters this object depends on.
+        All argument parameters this object depends on.
+
+        :type: Registry(Parameter)
         '''
         pars = Registry(self.__pars)
         for p in filter(lambda p: p.dependent, pars):
@@ -242,7 +281,9 @@ class Formula(object):
     @property
     def args(self):
         '''
-        Get the parameters this object depends on.
+        Argument parameters this object depends on.
+
+        :type: Registry(Parameter)
         '''
         return self.__pars
 
@@ -250,10 +291,11 @@ class Formula(object):
     def value(self):
         '''
         Value, evaluated from the values of the other parameters.
+
+        :type: float
         '''
-        import math
         values = {p.name: p.value for p in self.args}
-        return eval(self.__formula.format(**values))
+        return core.eval_math_expression(self.__formula.format(**values))
 
     @classmethod
     def from_json_object(cls, obj, pars):
@@ -333,6 +375,15 @@ class Registry(list):
             self._raise_if_not_same(el)
         return super(Registry, self).__iadd__(filter(lambda p: p.name not in self.names, other))
 
+    def __len__(self):
+        '''
+        Get the length of the registry.
+
+        :returns: length of the registry.
+        :rtype: int
+        '''
+        return data_types.cpu_int(super(Registry, self).__len__())
+
     def _raise_if_not_same(self, el):
         '''
         Raise an error saying that an object that is trying to be added with given name
@@ -347,10 +398,9 @@ class Registry(list):
     @property
     def names(self):
         '''
-        Get the names in the current registry.
+        Names in the current registry.
 
-        :returns: names in the current registry.
-        :rtype: list(str)
+        :type: list(str)
         '''
         return [p.name for p in self]
 
@@ -476,8 +526,8 @@ def bounds_for_range(data_pars, range):
     if len(multi_bounds) == 0:
         # Simple case, all data parameters have only one set of bounds
         # for this normalization range
-        t = np.array([r for r in single_bounds.values()]).T
-        return np.array([t])
+        t = data_types.array_float([r for r in single_bounds.values()]).T
+        return data_types.array_float([t])
     else:
         # Must calculate all the combinations of normalization ranges
         # for every data parameter.
@@ -493,9 +543,9 @@ def bounds_for_range(data_pars, range):
                     'Internal error detected; please report the bug')
 
         # Get all the combinations of minimum and maximum values for the bounds of each variable
-        mmins = np.array([m.flatten()
-                          for m in np.meshgrid(*[b for b in mins.values()])]).T
-        mmaxs = np.array([m.flatten()
-                          for m in np.meshgrid(*[b for b in maxs.values()])]).T
+        mmins = data_types.array_float([m.flatten()
+                                        for m in np.meshgrid(*[b for b in mins.values()])]).T
+        mmaxs = data_types.array_float([m.flatten()
+                                        for m in np.meshgrid(*[b for b in maxs.values()])]).T
 
-        return np.array([(lb, ub) for lb, ub in zip(mmins, mmaxs)])
+        return data_types.array_float([(lb, ub) for lb, ub in zip(mmins, mmaxs)])

@@ -10,21 +10,21 @@ helpers.configure_logging()
 
 
 @pytest.mark.minimization
-@helpers.setting_numpy_seed
+@helpers.setting_seed
 def test_binned_maximum_likelihood():
     '''
     Test the "binned_maximum_likelihood" FCN.
     '''
     # Simple fit to a Gaussian
-    m = minkit.Parameter('m', bounds=(5, 15))
+    m = minkit.Parameter('m', bounds=(0, 20))  # bounds to generate data later
     c = minkit.Parameter('c', 10, bounds=(8, 12))
     s = minkit.Parameter('s', 2, bounds=(1, 3))
     g = minkit.Gaussian('gaussian', m, c, s)
 
     values, edges = np.histogram(
-        np.random.normal(c.value, s.value, 1000), bins=100)
+        helpers.rndm_gen.normal(c.value, s.value, 1000), range=m.bounds, bins=100)
 
-    data = minkit.BinnedDataSet.from_array(edges, m, values)
+    data = minkit.BinnedDataSet.from_ndarray(edges, m, values)
 
     with helpers.fit_test(g) as test:
         with minkit.minimizer('bml', g, data, minimizer='minuit') as minuit:
@@ -47,11 +47,12 @@ def test_binned_maximum_likelihood():
 
     pdf = minkit.AddPDFs.two_components('pdf', g, e, y)
 
-    data = pdf.generate(1000)
+    data = pdf.generate(10000)
 
-    values, edges = np.histogram(data[m.name].as_ndarray(), bins=100)
+    values, edges = np.histogram(
+        data[m.name].as_ndarray(), range=m.bounds, bins=100)
 
-    data = minkit.BinnedDataSet.from_array(edges, m, values)
+    data = minkit.BinnedDataSet.from_ndarray(edges, m, values)
 
     with helpers.fit_test(pdf) as test:
         with minkit.minimizer('bml', pdf, data) as minimizer:
@@ -65,12 +66,12 @@ def test_binned_maximum_likelihood():
     beta = minkit.Parameter('beta', 2)
     pdf = minkit.Amoroso('amoroso', m, a, theta, alpha, beta)
 
-    data = pdf.generate(1000)
+    data = pdf.generate(10000)
 
     values, edges = np.histogram(
         data[m.name].as_ndarray(), range=m.bounds, bins=100)
 
-    data = minkit.BinnedDataSet.from_array(edges, m, values)
+    data = minkit.BinnedDataSet.from_ndarray(edges, m, values)
 
     with helpers.fit_test(pdf) as test:
         with minkit.minimizer('bml', pdf, data) as minimizer:
@@ -78,22 +79,41 @@ def test_binned_maximum_likelihood():
 
 
 @pytest.mark.minimization
-@helpers.setting_numpy_seed
+@helpers.setting_seed
+def test_binned_extended_maximum_likelihood():
+    '''
+    Test the "binned_extended_maximum_likelihood" FCN.
+    '''
+    pdf = helpers.default_add_pdfs(extended=True, yields=('ng', 'ne'))
+
+    ntot = int(pdf.args.get('ng').value + pdf.args.get('ne').value)
+
+    data = pdf.generate(ntot).make_binned(100)
+
+    with helpers.fit_test(pdf) as test:
+        with minkit.minimizer('beml', pdf, data) as minimizer:
+            test.result = minimizer.migrad()
+
+
+@pytest.mark.minimization
+@helpers.setting_seed
 def test_binned_chisquare():
     '''
     Test the "binned_chisquare" FCN.
     '''
     # Single PDF
-    m = minkit.Parameter('m', bounds=(5, 15))
-    c = minkit.Parameter('c', 10., bounds=(5, 15))
-    s = minkit.Parameter('s', 1., bounds=(0.5, 2))
+    m = minkit.Parameter('m', bounds=(0, 20))
+    c = minkit.Parameter('c', 10., bounds=(8, 12))
+    # all bins must be highly populated
+    s = minkit.Parameter('s', 3., bounds=(2, 7))
     g = minkit.Gaussian('gaussian', m, c, s)
 
     data = g.generate(10000)
 
-    values, edges = np.histogram(data[m.name].as_ndarray(), bins=100)
+    values, edges = np.histogram(
+        data[m.name].as_ndarray(), range=m.bounds, bins=100)
 
-    data = minkit.BinnedDataSet.from_array(edges, m, values)
+    data = minkit.BinnedDataSet.from_ndarray(edges, m, values)
 
     with helpers.fit_test(g) as test:
         with minkit.minimizer('chi2', g, data) as minimizer:
@@ -110,17 +130,35 @@ def test_binned_chisquare():
 
     data = pdf.generate(int(ng.value + ne.value))
 
-    values, edges = np.histogram(data[m.name].as_ndarray(), bins=100)
+    values, edges = np.histogram(
+        data[m.name].as_ndarray(), range=m.bounds, bins=100)
 
-    data = minkit.BinnedDataSet.from_array(edges, m, values)
+    data = minkit.BinnedDataSet.from_ndarray(edges, m, values)
 
     with helpers.fit_test(pdf) as test:
-        with minkit.minimizer('bml', pdf, data) as minimizer:
+        with minkit.minimizer('chi2', pdf, data) as minimizer:
             test.result = minimizer.migrad()
 
 
 @pytest.mark.minimization
-@helpers.setting_numpy_seed
+@helpers.setting_seed
+def test_binned_extended_chisquare():
+    '''
+    Test the "binned_extended_chisquare" FCN.
+    '''
+    pdf = helpers.default_add_pdfs(extended=True, yields=('ng', 'ne'))
+
+    ntot = int(pdf.args.get('ng').value + pdf.args.get('ne').value)
+
+    data = pdf.generate(ntot).make_binned(100)
+
+    with helpers.fit_test(pdf) as test:
+        with minkit.minimizer('echi2', pdf, data) as minimizer:
+            test.result = minimizer.migrad()
+
+
+@pytest.mark.minimization
+@helpers.setting_seed
 def test_unbinned_extended_maximum_likelihood():
     '''
     Test the "unbinned_extended_maximum_likelihood" FCN.
@@ -132,7 +170,7 @@ def test_unbinned_extended_maximum_likelihood():
     e = minkit.Exponential('exponential', m, k)
 
     # Create a Gaussian PDF
-    c = minkit.Parameter('c', 10., bounds=(5, 15))
+    c = minkit.Parameter('c', 10., bounds=(8, 12))
     s = minkit.Parameter('s', 1., bounds=(0.5, 2))
     g = minkit.Gaussian('gaussian', m, c, s)
 
@@ -158,14 +196,14 @@ def test_unbinned_extended_maximum_likelihood():
 
 
 @pytest.mark.minimization
-@helpers.setting_numpy_seed
+@helpers.setting_seed
 def test_unbinned_maximum_likelihood():
     '''
     Test the "unbinned_maximum_likelihood" FCN.
     '''
     # Simple fit to a Gaussian
     m = minkit.Parameter('m', bounds=(5, 15))
-    c = minkit.Parameter('c', 10., bounds=(5, 15))
+    c = minkit.Parameter('c', 10., bounds=(8, 12))
     s = minkit.Parameter('s', 1., bounds=(0.5, 2))
     g = minkit.Gaussian('gaussian', m, c, s)
 

@@ -1,7 +1,7 @@
 '''
 Test the "pdf_core" module.
 '''
-from helpers import check_parameters, check_pdfs, check_multi_pdfs, fit_test, setting_numpy_seed
+from helpers import check_pdfs, check_multi_pdfs, fit_test, setting_seed
 import json
 import helpers
 import numpy as np
@@ -15,7 +15,7 @@ aop = minkit.backends.core.parse_backend()
 
 
 @pytest.mark.pdfs
-@setting_numpy_seed
+@setting_seed
 def test_pdf():
     '''
     General tests for the PDF class.
@@ -36,7 +36,7 @@ def test_pdf():
 
 @pytest.mark.pdfs
 @pytest.mark.multipdf
-@setting_numpy_seed
+@setting_seed
 def test_addpdfs(tmpdir):
     '''
     Test the "AddPDFs" class.
@@ -58,15 +58,15 @@ def test_addpdfs(tmpdir):
 
     assert len(pdf.all_args) == (1 + len(g.args) + len(e.args))
 
-    gdata = np.random.normal(c.value, s.value, 100000)
-    edata = np.random.exponential(-1. / k.value, 100000)
+    gdata = helpers.rndm_gen.normal(c.value, s.value, 100000)
+    edata = helpers.rndm_gen.exponential(-1. / k.value, 100000)
     data = np.concatenate([gdata, edata])
 
     values, edges = np.histogram(data, bins=100, range=m.bounds)
 
-    centers = minkit.DataSet.from_array(0.5 * (edges[1:] + edges[:-1]), m)
+    centers = minkit.DataSet.from_ndarray(0.5 * (edges[1:] + edges[:-1]), m)
 
-    pdf_values = minkit.plotting.core.scaled_pdf_values(
+    pdf_values = minkit.utils.core.scaled_pdf_values(
         pdf, centers, values, edges)
 
     assert np.allclose(np.sum(pdf_values), np.sum(values))
@@ -96,12 +96,12 @@ def test_category():
     Test the "Category" class.
     '''
     with pytest.raises(TypeError):
-        c = minkit.Category()
+        minkit.Category()
 
 
 @pytest.mark.pdfs
 @pytest.mark.multipdf
-@setting_numpy_seed
+@setting_seed
 def test_constpdf(tmpdir):
     '''
     Test a fit with a constant PDF.
@@ -145,7 +145,7 @@ def test_constpdf(tmpdir):
 
 @pytest.mark.pdfs
 @pytest.mark.multipdf
-@setting_numpy_seed(seed=431582)
+@setting_seed(seed=431582)
 def test_convpdfs(tmpdir):
     '''
     Test the "ConvPDFs" class.
@@ -171,24 +171,20 @@ def test_convpdfs(tmpdir):
 
     assert np.allclose(var, s1.value**2 + s2.value**2, rtol=0.1)
 
-    # Check that the normalization is correct
-    with pdf.bind() as proxy:
-        assert np.allclose(proxy.integral(), 1.)
-        assert np.allclose(proxy.norm(), 1.)
-        assert np.allclose(proxy.numerical_normalization(), 1.)
-
     # Ordinary check for PDFs
     values, edges = np.histogram(
         data[m.name].as_ndarray(), bins=100, range=m.bounds)
 
-    centers = minkit.DataSet.from_array(0.5 * (edges[1:] + edges[:-1]), m)
+    centers = minkit.DataSet.from_ndarray(0.5 * (edges[1:] + edges[:-1]), m)
 
-    pdf_values = minkit.plotting.core.scaled_pdf_values(
+    pdf_values = minkit.utils.core.scaled_pdf_values(
         pdf, centers, values, edges)
 
     assert np.allclose(np.sum(pdf_values), np.sum(values), rtol=0.01)
 
     # Test a fit
+    s2.constant = True  # otherwise the minimization is undefined
+
     with fit_test(pdf) as test:
         with minkit.minimizer('uml', pdf, data, minimizer='minuit') as minuit:
             test.result = minuit.migrad()
@@ -205,7 +201,7 @@ def test_convpdfs(tmpdir):
 
 @pytest.mark.pdfs
 @pytest.mark.multipdf
-@setting_numpy_seed
+@setting_seed
 def test_prodpdfs(tmpdir):
     '''
     Test the "ProdPDFs" class.
@@ -224,7 +220,7 @@ def test_prodpdfs(tmpdir):
     pdf = minkit.ProdPDFs('pdf', [gx, gy])
 
     # Test integration
-    assert np.allclose(pdf.norm(), pdf.numerical_normalization())
+    helpers.check_numerical_normalization(pdf)
 
     # Test consteness of the PDFs
     for p in gx.all_args:
@@ -243,10 +239,20 @@ def test_prodpdfs(tmpdir):
 
     check_multi_pdfs(s, pdf)
 
+    # Do a simple fit
+    for p in pdf.all_real_args:
+        p.constant = False
+
+    data = pdf.generate(10000)
+
+    with fit_test(pdf) as test:
+        with minkit.minimizer('uml', pdf, data) as minimizer:
+            test.result = minimizer.migrad()
+
 
 @pytest.mark.pdfs
 @pytest.mark.source_pdf
-@setting_numpy_seed
+@setting_seed
 def test_sourcepdf(tmpdir):
     '''
     Test the "SourcePDF" class.
@@ -255,15 +261,15 @@ def test_sourcepdf(tmpdir):
     m = minkit.Parameter('m', bounds=(-5, +5))
     c = minkit.Parameter('c', 0., bounds=(-2, +2))
     s = minkit.Parameter('s', 1., bounds=(-3, +3))
-    g = minkit.Gaussian('gaussian', m, c, s)
+    minkit.Gaussian('gaussian', m, c, s)
 
     # Test the construction of a PDF with variable number of arguments
     m = minkit.Parameter('m', bounds=(-5, +5))
     p1 = minkit.Parameter('p1', 1.)
     p2 = minkit.Parameter('p2', 2.)
     pol0 = minkit.Polynomial('pol0', m)
-    pol1 = minkit.Polynomial('pol1', m, p1)
-    pol2 = minkit.Polynomial('pol2', m, p1, p2)
+    minkit.Polynomial('pol1', m, p1)
+    minkit.Polynomial('pol2', m, p1, p2)
 
     # Test the JSON conversion
     with open(os.path.join(tmpdir, 'pdf.json'), 'wt') as fi:
@@ -273,3 +279,67 @@ def test_sourcepdf(tmpdir):
         s = minkit.pdf_from_json(json.load(fi))
 
     check_pdfs(s, pol0)
+
+
+@pytest.mark.pdfs
+@pytest.mark.source_pdf
+@setting_seed
+def test_evaluation():
+    '''
+    Test the methods used for evaluation of the PDF.
+    '''
+    m = minkit.Parameter('m', bounds=(-5, +5))
+    c = minkit.Parameter('c', 0., bounds=(-2, +2))
+    s = minkit.Parameter('s', 1., bounds=(-3, +3))
+    g = minkit.Gaussian('gaussian', m, c, s)
+
+    m.set_range('reduced', (-3, +3))
+
+    assert not np.allclose(g.function(), g.function('reduced'))
+
+    data = g.generate(1000)
+
+    g(data)  # normal evaluation
+
+    binned_data = data.make_binned(100)
+
+    bv = g.evaluate_binned(binned_data)  # evaluation on a binned data set
+
+    assert np.allclose(bv.sum(), 1.)
+
+
+@pytest.mark.pdfs
+@pytest.mark.source_pdf
+def test_display_pdfs():
+    '''
+    Test that the PDFs are displayed correctly as strings.
+    '''
+    # Define the model
+    x = minkit.Parameter('x', bounds=(-5, +5))
+    y = minkit.Parameter('y', bounds=(-5, +5))
+    c = minkit.Parameter('c', 0, bounds=(-5, +5))
+
+    k = minkit.Parameter('k', -0.1)
+
+    sx = minkit.Parameter('sx', 2, bounds=(1, 3))
+    sy = minkit.Parameter('sy', 1, bounds=(0.5, 3))
+
+    gx = minkit.Gaussian('gx', x, c, sx)
+    ex = minkit.Exponential('exp', x, k)
+    gy = minkit.Gaussian('gy', y, c, sy)
+
+    # Print a single PDF
+    print(gx)
+
+    # Print AddPDFs
+    y = minkit.Parameter('y', 0.5)
+    pdf = minkit.AddPDFs.two_components('pdf', gx, ex, y)
+    print(pdf)
+
+    # Print ProdPDFs
+    pdf = minkit.ProdPDFs('pdf', [gx, gy])
+    print(pdf)
+
+    # Print ConvPDFs
+    pdf = minkit.ConvPDFs('pdf', gx, gy)
+    print(pdf)

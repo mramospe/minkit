@@ -1,8 +1,11 @@
 '''
 Functions and classes to handle sets of data.
 '''
-from ..base import parameters
+from ..base import core
 from ..base import data_types
+from ..base import exceptions
+from ..base import parameters
+from ..backends.arrays import darray
 from ..backends.core import parse_backend
 
 import logging
@@ -17,7 +20,72 @@ UNBINNED = 1
 logger = logging.getLogger(__name__)
 
 
-class DataSet(object):
+class DataObject(object, metaclass=core.DocMeta):
+
+    sample_type = None  # must be defined for each class
+
+    def __init__(self, pars, backend):
+        '''
+        Abstract class for data objects.
+
+        :param pars: data parameters.
+        :type pars: Registry(Parameter)
+        :param backend: backend where this object is built.
+        :type backend: Backend
+        '''
+        self.__data_pars = pars
+        self.__aop = backend.aop
+
+        super().__init__()
+
+    @property
+    def aop(self):
+        '''
+        Object to do operations on arrays.
+
+        :type: ArrayOperations
+        '''
+        return self.__aop
+
+    @property
+    def backend(self):
+        '''
+        Backend interface.
+
+        :type: Backend
+        '''
+        return self.__aop.backend
+
+    @property
+    def data_pars(self):
+        '''
+        Data parameters associated to this sample.
+
+        :type: Registry(Parameter)
+        '''
+        return self.__data_pars
+
+    @property
+    def ndim(self):
+        '''
+        Number of dimensions.
+
+        :type: int
+        '''
+        return data_types.cpu_int(len(self.__data_pars))
+
+    def to_backend(self, backend):
+        '''
+        Initialize this class in a different backend.
+
+        :param backend: new backend.
+        :type backend: Backend
+        :returns: This class in the new backend.
+        '''
+        raise exceptions.MethodNotDefinedError(self.__class__, 'to_backend')
+
+
+class DataSet(DataObject):
 
     sample_type = UNBINNED
 
@@ -26,69 +94,44 @@ class DataSet(object):
         Definition of an unbinned data set to evaluate PDFs.
 
         :param data: data in the provided backend.
-        :type data: numpy.ndarray or reikna.cluda.Array
+        :type data: darray
         :param pars: data parameters.
         :type pars: Registry(Parameter)
         :param weights: possible set of weights.
-        :type weights: numpy.ndarray or reikna.cluda.Array
+        :type weights: darray
         '''
-        self.__aop = data.aop
+        super().__init__(pars, data.aop.backend)
+
         self.__data = data
-        self.__data_pars = parameters.Registry(pars)
         self.__weights = weights
 
     def __getitem__(self, var):
         '''
         Get the array of data for the given parameter.
 
-        :returns: data array.
+        :returns: Data array.
         :rtype: numpy.ndarray
         '''
-        i = self.__data_pars.index(var)
-        l = len(self)
-        return self.__data.take_slice(i * l, (i + 1) * l)
+        return self.__data.take_column(self.data_pars.index(var))
 
     def __len__(self):
         '''
         Get the size of the sample.
 
-        :returns: size of the sample.
+        :returns: Size of the sample.
         :rtype: int
         '''
         if self.__data is not None:
-            return len(self.__data) // len(self.__data_pars)
+            return len(self.__data)
         else:
-            return 0
-
-    @property
-    def aop(self):
-        return self.__aop
-
-    @property
-    def backend(self):
-        '''
-        Backend interface.
-        '''
-        return self.__aop.backend
-
-    @property
-    def data_pars(self):
-        '''
-        Data parameters associated to this sample.
-        '''
-        return self.__data_pars
-
-    @property
-    def ndim(self):
-        '''
-        Number of dimensions.
-        '''
-        return len(self.__data_pars)
+            return data_types.cpu_int(0)
 
     @property
     def values(self):
         '''
         Values of the data set.
+
+        :type: darray
         '''
         return self.__data
 
@@ -96,11 +139,13 @@ class DataSet(object):
     def weights(self):
         '''
         Weights of the sample.
+
+        :type: darray or None
         '''
         return self.__weights
 
     @classmethod
-    def from_array(cls, arr, data_par, weights=None, backend=None):
+    def from_ndarray(cls, arr, data_par, weights=None, backend=None):
         '''
         Build the class from a single array.
 
@@ -112,10 +157,16 @@ class DataSet(object):
         :type weights: numpy.ndarray
         '''
         aop = parse_backend(backend)
-        data = aop.ndarray_to_farray(arr)
+
+        data = darray.from_ndarray(arr, aop.backend)
+
         if weights is not None:
-            weights = aop.ndarray_to_farray(weights)
-        return cls(data, parameters.Registry([data_par]), weights)
+            weights = darray.from_ndarray(weights, aop.backend)
+
+        if data.ndim > 1:
+            return cls(data, parameters.Registry(data_par), weights)
+        else:
+            return cls(data, parameters.Registry([data_par]), weights)
 
     @classmethod
     def from_records(cls, arr, data_pars, weights=None, backend=None):
@@ -130,15 +181,15 @@ class DataSet(object):
         :type weights: numpy.ndarray
         '''
         aop = parse_backend(backend)
-        arrs = []
-        for p in data_pars:
+        arrs = np.empty((len(arr), len(data_pars)))
+        for i, p in enumerate(data_pars):
             if p.name not in arr.dtype.names:
                 raise RuntimeError(
                     f'No data for parameter "{p.name}" has been found in the input array')
-            arrs.append(arr[p.name])
-        data = aop.ndarray_to_farray(np.concatenate(arrs))
+            arrs[:, i] = arr[p.name]
+        data = darray.from_ndarray(arrs, aop.backend)
         if weights is not None:
-            weights = aop.ndarray_to_farray(weights)
+            weights = darray.from_ndarray(weights, aop.backend)
         return cls(data, data_pars, weights)
 
     def make_binned(self, bins=100):
@@ -147,44 +198,43 @@ class DataSet(object):
 
         :param bins: number of bins per data parameter.
         :type bins: int or tuple(int, ...)
-        :returns: binned data sample.
+        :returns: Binned data sample.
         :rtype: BinnedDataSet
         '''
         bins = data_types.array_int(bins)
         if bins.ndim > 0:
             edges = self.aop.concatenate(
-                tuple(self.aop.linspace(*p.bounds, b + 1) for p, b in zip(self.__data_pars, bins)))
+                tuple(self.aop.linspace(*p.bounds, b + 1) for p, b in zip(self.data_pars, bins)))
             gaps = bins
         else:
             edges = self.aop.concatenate(
-                tuple(self.aop.linspace(*p.bounds, bins + 1) for p in self.__data_pars))
-            gaps = np.full(len(self.__data_pars), bins)
+                tuple(self.aop.linspace(*p.bounds, bins + 1) for p in self.data_pars))
+            gaps = data_types.full_int(len(self.data_pars), bins)
 
-        gaps[1:] = np.cumsum(gaps[:-1])
-        gaps[0] = 1
+        gaps = np.cumprod(gaps) // gaps[0]
 
         indices = edges_indices(gaps, edges)
 
         values = self.aop.sum_inside(
             indices, gaps, self.__data, edges, self.__weights)
 
-        return BinnedDataSet(edges, gaps, self.__data_pars, values)
+        return BinnedDataSet(edges, gaps, self.data_pars, values)
 
     @classmethod
-    def merge(cls, samples, maximum=None, shuffle=False):
+    def merge(cls, samples, maximum=None):
         '''
         Merge many samples into one. If *maximum* is specified, then the last elements will
-        be dropped. If *shuffle* is specified, then it the result is shuffled before the *maximum*
-        condition is applied, if needed.
+        be dropped.
 
         :param samples: samples to merge.
         :type samples: tuple(DataSet)
         :param maximum: maximum number of entries for the final sample.
         :type maximum: int
-        :param shuffle: whether to shuffle the sample.
-        :type shuffle: bool
-        :returns: merged sample.
+        :returns: Merged sample.
         :rtype: DataSet
+
+        ... warning:: If *maximum* is specified, the last elements corresponding to the
+            last samples might be dropped.
         '''
         ns = np.sum(data_types.fromiter_int(map(len, samples)))
         if maximum is not None and maximum > ns:
@@ -206,7 +256,7 @@ class DataSet(object):
                 'Attempt to merge samples with and without weihts')
 
         data = aop.concatenate(
-            tuple(s[p.name] for p in data_pars for s in filter(lambda s: s.values is not None, samples)))
+            tuple(s.values for s in filter(lambda s: s.values is not None, samples)))
 
         if not mw:
             weights = aop.concatenate(tuple(s.weights for s in filter(
@@ -214,42 +264,34 @@ class DataSet(object):
         else:
             weights = None
 
-        ndim = samples[0].ndim
-
-        # Shuffle the data
-        if shuffle:
-            sidx = aop.shuffling_index(len(data))
-            data = data.slice(sidx, dim=ndim)
-            if weights is not None:
-                weights = weights.slice(sidx, sim=ndim)
-
         if maximum is not None:
 
-            l = len(data) // ndim
-
-            data = aop.restrict_data_size(maximum, ndim, l, data)
+            data = aop.restrict_data_size(maximum, data)
 
             if weights is not None:
                 weights = weights[:maximum]
 
-        result = cls(data, data_pars, weights)
-
-        return result
+        return cls(data, data_pars, weights)
 
     def subset(self, arg, rescale_weights=False):
-        '''
-        Get a subset of this data set.
+        r'''
+        Get a subset of this data set. If *arg* is a string, it will be
+        considered as a range. In case it is a :class:`barray`, then it is
+        considered to be a mask array. If *rescale_weights* is set to True, then
+        the weights are rescaled so their statistical weight in minimization
+        processes is proportional to the event weights:
 
-        :param cond: condition to apply to the data arrays to build the new data set.
-        :type cond: numpy.ndarray or slice
-        :param range: range to consider for the subset.
-        :type range: str
-        :param rescale_weights: if set to True, the weights are rescaled, so the FCN makes sense.
+        .. math::
+           \omega^\prime_i = \omega_i \times \frac{\sum_{j = 0}^n \omega_j}{\sum_{j = 0}^n \omega_j^2}
+
+        :param arg: argument to create the subset.
+        :type arg: str or barray
+        :param rescale_weights: whether to rescale the sample weights.
         :type rescale_weights: bool
-        :returns: new data set.
+        :returns: New data set.
         :rtype: DataSet
         '''
-        if np.array(arg).dtype.kind == np.dtype(str).kind:
+        if np.asarray(arg).dtype.kind == np.dtype(str).kind:
             use_range = True
         else:
             use_range = False
@@ -271,52 +313,45 @@ class DataSet(object):
                 for lb, ub in bounds:
                     cond |= self.aop.is_inside(self.__data, lb, ub)
 
-        data = self.__data.slice(cond, dim=self.ndim)
+        data = self.__data.slice(cond)
 
         if self.__weights is not None:
             weights = self.__weights.slice(cond)
-
-            if rescale_weights:
-                weights = weights * weights.sum() / (weights**2).sum()
         else:
             weights = self.__weights
+
+        if weights is not None and rescale_weights:
+            weights = rescale_weights_sw2(weights)
 
         return self.__class__(data, self.data_pars, weights)
 
     def to_backend(self, backend):
-        '''
-        Initialize this class in a different backend.
 
-        :param backend: new backend.
-        :type backend: Backend
-        :returns: this class in the new backend.
-        :rtype: DataSet
-        '''
         data = self.__data.to_backend(backend)
+
         if self.__weights is not None:
             weights = self.__weights.to_backend(backend)
         else:
             weights = None
-        return self.__class__(data, self.__data_pars, weights)
 
-    def to_records():
+        return self.__class__(data, self.data_pars, weights)
+
+    def to_records(self):
         '''
         Convert this class into a :class:`numpy.ndarray` object.
 
-        :returns: this object as a a :class:`numpy.ndarray` object.
+        :returns: This object as a a :class:`numpy.ndarray` object.
         :rtype: numpy.ndarray
         '''
-        l = len(self)
-
-        out = np.empty(l, dtype=[(p.name, data_types.cpu_float)
-                                 for p in self.__data_pars])
+        out = np.empty(len(self), dtype=[(p.name, data_types.cpu_float)
+                                         for p in self.data_pars])
         data = self.__data.as_ndarray()
-        for i, p in self.__data_pars:
-            out[p.name] = data.take_slice(i * l, (i + 1) * l)
+        for i, p in enumerate(self.data_pars):
+            out[p.name] = data[i::self.ndim]
         return out
 
 
-class BinnedDataSet(object):
+class BinnedDataSet(DataObject):
 
     sample_type = BINNED
 
@@ -324,27 +359,25 @@ class BinnedDataSet(object):
         '''
         A binned data set.
 
-        :param edges: centers of the bins.
-        :type edges: numpy.ndarray or reikna.cluda.Array
+        :param edges: edges of the bins.
+        :type edges: darray
         :param gaps: gaps between edges belonging to different parameters.
         :type gaps: numpy.ndarray
         :param data_pars: data parameters.
         :type data_pars: Registry(Parameter)
         :param values: values of the data for each center.
-        :type values: numpy.ndarray or reikna.cluda.Array
+        :type values: darray
         '''
-        super(BinnedDataSet, self).__init__()
+        super().__init__(pars, edges.aop.backend)
 
-        self.__aop = edges.aop
         self.__edges = edges
         self.__gaps = data_types.array_int(gaps)
-        self.__data_pars = parameters.Registry(pars)
         self.__values = values
 
         # The gaps refer to the bins, not to the edges
         g = self.edges_indices
 
-        bounds = data_types.empty_float(2 * len(self.__data_pars))
+        bounds = data_types.empty_float(2 * len(pars))
         bounds[0::2] = [self.__edges.get(i) for i in g[:-1]]
         bounds[1::2] = [self.__edges.get(i - 1) for i in g[1:]]
 
@@ -354,10 +387,10 @@ class BinnedDataSet(object):
         '''
         Get the centers of the bins for the given parameter.
 
-        :returns: centers of the bins.
-        :rtype: numpy.ndarray or reikna.cluda.Array
+        :returns: Centers of the bins.
+        :rtype: darray
         '''
-        i = self.__data_pars.index(var)
+        i = self.data_pars.index(var)
         e = self.edges_indices
         return self.__edges.take_slice(e[i], e[i + 1])
 
@@ -365,40 +398,26 @@ class BinnedDataSet(object):
         '''
         Get the size of the sample.
 
-        :returns: size of the sample.
+        :returns: Size of the sample.
         :rtype: int
         '''
         return len(self.__values)
 
     @property
-    def aop(self):
-        return self.__aop
-
-    @property
-    def backend(self):
-        '''
-        Backend interface.
-        '''
-        return self.__aop.backend
-
-    @property
     def bounds(self):
         '''
         Bounds of each data parameter.
+
+        :type: numpy.ndarray
         '''
         return self.__bounds
-
-    @property
-    def data_pars(self):
-        '''
-        Get the data parameters of this sample.
-        '''
-        return self.__data_pars
 
     @property
     def edges(self):
         '''
         Edges of the histogram.
+
+        :type: darray
         '''
         return self.__edges
 
@@ -406,6 +425,8 @@ class BinnedDataSet(object):
     def edges_indices(self):
         '''
         Indices to access the edges.
+
+        :type: numpy.ndarray
         '''
         return edges_indices(self.__gaps, self.__edges)
 
@@ -413,28 +434,22 @@ class BinnedDataSet(object):
     def gaps(self):
         '''
         Gaps among the different edges.
+
+        :type: numpy.ndarray
         '''
         return self.__gaps
 
     @property
-    def ndim(self):
-        '''
-        Number of dimensions.
-        '''
-        return len(self.__data_pars)
-
-    @property
     def values(self):
         '''
-        Get the values of the data set.
+        Values of the data set.
 
-        :returns: values of the data set.
-        :rtype: numpy.ndarray
+        :type: darray
         '''
         return self.__values
 
     @classmethod
-    def from_array(cls, edges, data_par, values, backend=None):
+    def from_ndarray(cls, edges, data_par, values, backend=None):
         '''
         Build the class from the array of edges and values.
 
@@ -444,25 +459,19 @@ class BinnedDataSet(object):
         :type data_par: Parameter
         :param values: values at each bin.
         :type values: numpy.ndarray
-        :returns: binned data set.
+        :returns: Binned data set.
         :rtype: BinnedDataSet
         '''
         aop = parse_backend(backend)
-        edges, values = aop.ndarray_to_farray(
-            edges), aop.ndarray_to_farray(values)
+        edges = darray.from_ndarray(edges, aop.backend)
+        values = darray.from_ndarray(values, aop.backend)
         return cls(edges, [1], parameters.Registry([data_par]), values)
 
     def to_backend(self, backend):
-        '''
-        Initialize this class in a different backend.
 
-        :param backend: new backend.
-        :type backend: Backend
-        :returns: this class in the new backend.
-        :rtype: BinnedDataSet
-        '''
         edges = self.__edges.to_backend(backend)
         values = self.__values.to_backend(backend)
+
         return self.__class__(edges, self.__gaps, self.__data_pars, values)
 
 
@@ -476,13 +485,12 @@ def edges_indices(gaps, edges):
     :type gaps: numpy.ndarray
     :param edges: common array of edges.
     :type edges: numpy.ndarray
-    :returns: array of indices.
+    :returns: Array of indices.
     :rtype: numpy.ndarray
     '''
-    l = len(gaps)
-    g = data_types.empty_int(l + 1)
-    g[1:-1] = gaps[1:] + np.arange(1, l)
+    g = data_types.empty_int(len(gaps) + 1)
     g[0], g[-1] = 0, len(edges)
+    g[1:-1] = np.cumsum(np.arange(1, len(gaps)) + gaps[1:] // gaps[:-1])
     return g
 
 
@@ -495,24 +503,36 @@ def evaluation_grid(aop, data_pars, bounds, size):
     :param size: number of entries in the output sample per set of bounds. \
     This means that *size* entries will be generated for each pair of (min, max) \
     provided, that is, per data parameter.
-    :type size: int
+    :type size: int or tuple(int)
     :param bounds: bounds of the different data parameters. Even indices for \
     the lower bounds, and odd indices for the upper bounds.
     :type bounds: numpy.ndarray
-    :returns: uniform sample.
+    :returns: Uniform sample.
     :rtype: DataSet
     '''
     if bounds.shape == (2,):
         data = aop.linspace(*bounds, size)
     else:
-        values = []
-        lb, ub = bounds
-        for p, l, u in zip(data_pars, lb, ub):
-            values.append(aop.linspace(l, u, size))
-
-        data = aop.concatenate(aop.meshgrid(*values))
+        if np.asarray(size).ndim == 0:
+            size = data_types.full_int(len(bounds[0]), size)
+        data = aop.meshgrid(*bounds, size)
 
     return DataSet(data, data_pars)
+
+
+def rescale_weights_sw2(weights):
+    r'''
+    Rescale the given weights so the statistical power is treated properly in
+    :math:`\log\mathcal{L}` FCNs. This is done using the following equation:
+
+    .. math:: \omega^\prime_i = \omega_i \times \frac{\sum_{j = 0}^n \omega_j}{\sum_{j = 0}^n \omega_j^2}
+
+    :param weights: weights to rescale.
+    :type weights: numpy.ndarray
+    :returns: rescaled weights.
+    :rtype: numpy.ndarray
+    '''
+    return weights * weights.sum() / (weights**2).sum()
 
 
 def uniform_sample(aop, data_pars, bounds, size):
@@ -525,9 +545,12 @@ def uniform_sample(aop, data_pars, bounds, size):
     :type size: int
     :param bounds: bounds where to create the sample.
     :type bounds: tuple(float, float)
-    :returns: uniform sample.
+    :returns: Uniform sample.
     :rtype: DataSet
     '''
-    data = aop.concatenate(tuple(aop.random_uniform(l, u, size)
-                                 for l, u in zip(*bounds)))
+    if bounds.shape == (2,):
+        data = aop.random_uniform(*bounds, size)
+    else:
+        data = aop.random_grid(*bounds, size)
+
     return DataSet(data, data_pars)

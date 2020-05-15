@@ -1,0 +1,83 @@
+<!--Landau PDF-->
+<PDF>
+  <parameters center="center" sigma="sigma"/>
+  <preamble>
+    CONSTANT_MEM double landau_p1[5] = {0.4259894875,-0.1249762550, 0.03984243700, -0.006298287635,   0.001511162253};
+    CONSTANT_MEM double landau_q1[5] = {1.0         ,-0.3388260629, 0.09594393323, -0.01608042283,    0.003778942063};
+
+    CONSTANT_MEM double landau_p2[5] = {0.1788541609, 0.1173957403, 0.01488850518, -0.001394989411,   0.0001283617211};
+    CONSTANT_MEM double landau_q2[5] = {1.0         , 0.7428795082, 0.3153932961,   0.06694219548,    0.008790609714};
+
+    CONSTANT_MEM double landau_p3[5] = {0.1788544503, 0.09359161662,0.006325387654, 0.00006611667319,-0.000002031049101};
+    CONSTANT_MEM double landau_q3[5] = {1.0         , 0.6097809921, 0.2560616665,   0.04746722384,    0.006957301675};
+
+    CONSTANT_MEM double landau_p4[5] = {0.9874054407, 118.6723273,  849.2794360,   -743.7792444,      427.0262186};
+    CONSTANT_MEM double landau_q4[5] = {1.0         , 106.8615961,  337.6496214,    2016.712389,      1597.063511};
+
+    CONSTANT_MEM double landau_p5[5] = {1.003675074,  167.5702434,  4789.711289,    21217.86767,     -22324.94910};
+    CONSTANT_MEM double landau_q5[5] = {1.0         , 156.9424537,  3745.310488,    9834.698876,      66924.28357};
+
+    CONSTANT_MEM double landau_p6[5] = {1.000827619,  664.9143136,  62972.92665,    475554.6998,     -5743609.109};
+    CONSTANT_MEM double landau_q6[5] = {1.0         , 651.4101098,  56974.73333,    165917.4725,     -2815759.939};
+
+    CONSTANT_MEM double landau_a1[3] = {0.04166666667,-0.01996527778, 0.02709538966};
+
+    CONSTANT_MEM double landau_a2[2] = {-1.845568670,-4.284640743};
+
+    WITHIN_KERNEL double landau_pdf( double v ) {
+
+      double u, ue, us, denlan;
+      if (v &lt; -5.5) {
+         u = exp(v + 1.);
+
+         if (u &lt; 1e-10)
+          return 0.;
+
+         ue  = exp(-1. / u);
+         us  = sqrt(u);
+         denlan = 0.3989422803 * (ue / us) * (1 + (landau_a1[0] + (landau_a1[1] + landau_a1[2] * u) * u) * u);
+      }
+      else if(v &lt; -1) {
+         u = exp(-v - 1);
+         denlan = exp(-u) * sqrt(u) *
+            (landau_p1[0] + (landau_p1[1] + (landau_p1[2] + (landau_p1[3] + landau_p1[4] * v) * v) * v) * v) /
+            (landau_q1[0] + (landau_q1[1] + (landau_q1[2] + (landau_q1[3] + landau_q1[4] * v) * v) * v) * v);
+      }
+      else if(v &lt; 1) {
+         denlan = (landau_p2[0] + (landau_p2[1] + (landau_p2[2] + (landau_p2[3] + landau_p2[4] * v) * v) * v) * v) /
+            (landau_q2[0] + (landau_q2[1] + (landau_q2[2] + (landau_q2[3] + landau_q2[4] * v) * v) * v) * v);
+      }
+      else if(v &lt; 5) {
+         denlan = (landau_p3[0] + (landau_p3[1] + (landau_p3[2] + (landau_p3[3] + landau_p3[4] * v) * v) * v) * v) /
+            (landau_q3[0] + (landau_q3[1] + (landau_q3[2] + (landau_q3[3] + landau_q3[4] * v) * v) * v) * v);
+      }
+      else if(v &lt; 12) {
+         u = 1. / v;
+         denlan = u * u * (landau_p4[0] + (landau_p4[1] + (landau_p4[2] + (landau_p4[3] + landau_p4[4] * u) * u) * u) * u) /
+            (landau_q4[0] + (landau_q4[1] + (landau_q4[2] + (landau_q4[3] + landau_q4[4] * u) * u) * u) * u);
+      }
+      else if(v &lt; 50) {
+         u = 1. / v;
+         denlan = u * u * (landau_p5[0] + (landau_p5[1] + (landau_p5[2] + (landau_p5[3] + landau_p5[4] * u) * u) * u) * u) /
+            (landau_q5[0] + (landau_q5[1] + (landau_q5[2] + (landau_q5[3] + landau_q5[4] * u) * u) * u) * u);
+      }
+      else if(v &lt; 300) {
+         u = 1. / v;
+         denlan = u * u * (landau_p6[0] + (landau_p6[1] + (landau_p6[2] + (landau_p6[3] + landau_p6[4] * u) * u) * u) * u) /
+            (landau_q6[0] + (landau_q6[1] + (landau_q6[2] + (landau_q6[3] + landau_q6[4] * u) * u) * u) * u);
+      }
+      else {
+         u   = 1. / (v - v * log(v) / (v + 1.));
+         denlan = u * u * (1. + (landau_a2[0] + landau_a2[1] * u) * u);
+      }
+
+      return denlan;
+    }
+  </preamble>
+  <function>
+    <data x="x"/>
+    <code>
+      return landau_pdf((x - center) / sigma)
+    </code>
+  </function>
+</PDF>

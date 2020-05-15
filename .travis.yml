@@ -4,6 +4,7 @@ env:
   - CFLAGS="-shared -fPIC -std=c++0x"
 before_install:
   - python --version
+  - sudo apt-get install libgsl-dev
   - pip install pytest
   - pip install pytest-cov
   - pip install codecov
@@ -21,12 +22,18 @@ jobs:
       python: 3.7
     - stage: format
       python: 3.7
-      install: pip install autopep8
+      install:
+        - sudo apt-get install clang-format
+        - pip install autopep8
+        - pip install pyflakes
       before_script: " "
       script:
-        - python setup.py check_format --directory docs --file-type python
-        - python setup.py check_format --directory minkit --file-type python
-        - python setup.py check_format --directory test --file-type python
+        - python setup.py check_format --directory docs
+        - python setup.py check_format --directory minkit
+        - python setup.py check_format --directory test
+        - python setup.py check_pyflakes --directory docs
+        - python setup.py check_pyflakes --directory minkit
+        - python setup.py check_pyflakes --directory test
       after_success: " "
     - stage: documentation
       python: 3.7

@@ -2,7 +2,6 @@
 Tests fot the "bindings.py" module.
 '''
 import helpers
-import numpy as np
 import minkit
 import pytest
 
@@ -10,7 +9,7 @@ helpers.configure_logging()
 
 
 @pytest.mark.core
-@helpers.setting_numpy_seed
+@helpers.setting_seed
 def test_bind_class_arguments():
     '''
     Test the "bind_class_arguments" function.

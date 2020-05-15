@@ -24,7 +24,7 @@ def sweights(pdfs, yields, data, range=parameters.FULL, return_covariance=False)
     :type range: str
     :param return_covariance: if set to True, it also returns the covariance matrix.
     :type return_covariance: bool
-    :returns: s-weights for each specie and possible covariance matrix.
+    :returns: Values of the s-weights for each specie and possible covariance matrix.
     :rtype: list(numpy.ndarray), (numpy.ndarray)
     '''
     l = len(yields)
@@ -77,4 +77,4 @@ def sweights_u(a, sweights, bins=10, range=None):
 
     .. math:: \sigma = \sqrt{\sum_{b \in \delta x} \omega^2}
     '''
-    return np.sqrt(np.histogram(a, bins=edges, weights=sweights*sweights))
+    return np.sqrt(np.histogram(a, bins=bins, weights=sweights*sweights))

@@ -1,0 +1,53 @@
+<!--Exponential x Polynomial PDF-->
+<PDF>
+  <parameters c="c"/>
+  <variable_parameters npars="npars" p="p"/>
+  <preamble>
+    WITHIN_KERNEL double integral_in_bound(double x, double c, int npars, GLOBAL_MEM double* p) {
+
+      double s = 0.;
+      for (int n = 0; n &lt; npars + 1; ++n) {
+
+        double v = (n == 0 ? 1. : p[n - 1]);
+
+        double gn = tgamma(n + 1.);
+
+        double ss = 0.;
+        for (int i = 0; i &lt;= n; ++i) {
+
+          double sign = ((n - i) % 2) == 0 ? +1 : -1;
+
+          double den = tgamma(i + 1.) * pow(c, n - i + 1);
+
+          ss += sign * gn * pow(x, i) / den;
+        }
+
+        s += ss * v * exp(c * x);
+      }
+
+      return s;
+    }
+  </preamble>
+  <function>
+    <data x="x"/>
+    <code>
+      double s = 0.;
+      for (int n = 0; n &lt; npars + 1; ++n) {
+
+        double v = (n == 0 ? 1. : p[n - 1]);
+
+        s += v * pow(x, n);
+      }
+
+      return s * exp(c * x);
+    </code>
+  </function>
+  <integral>
+    <bounds xmin="xmin" xmax="xmax"/>
+    <code>
+      double r = integral_in_bound(xmax, c, npars, p);
+      double l = integral_in_bound(xmin, c, npars, p);
+      return r - l;
+    </code>
+  </integral>
+</PDF>
