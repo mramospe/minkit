@@ -88,7 +88,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'minkit'
-copyright = u'2017, Miguel Ramos Pernas'
+copyright = u'2020, Miguel Ramos Pernas'
 author = u'Miguel Ramos Pernas'
 
 # The version info for the project you're documenting, acts as replacement for
