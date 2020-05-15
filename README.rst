@@ -30,13 +30,6 @@ Classes meant for the user are imported directly from the main module
 .. code-block:: python
 
    import minkit
-   minkit.initialize()
-
-The second line allows to define the backend where the execution will take place (CPU/GPU).
-By default (like in this case) it is set to CPU.
-Let us now define a very simple normal PDF:
-
-.. code-block:: python
 
    x = minkit.Parameter('x', bounds=(-10, +10))
    c = minkit.Parameter('c', 0.)
@@ -54,35 +47,35 @@ The sample can be easily fitted calling:
    with minkit.unbinned_minimizer('uml', g, data) as minimizer:
       r = minimizer.migrad()
 
-In this case "minimizer" is a `Minuit <https://iminuit.readthedocs.io/en/latest/reference.html#minuit>`__ instance, since by default `Minuit <https://iminuit.readthedocs.io/en/latest/reference.html#minuit>`__ is used to do the minimization.
-The string "uml" specifies the type of figure to minimize (FCN), unbinned-maximum likelihood, in this case.
+In this case *minimizer* is a `Minuit <https://iminuit.readthedocs.io/en/latest/reference.html#minuit>`__ instance, since by default `Minuit <https://iminuit.readthedocs.io/en/latest/reference.html#minuit>`__ is used to do the minimization.
+The string *uml* specifies the type of figure to minimize (FCN), unbinned-maximum likelihood, in this case.
 
 The compilation of C++ sources is completely system dependent (Linux, MacOS, Windows), and it also depends on the way python
 has been installed.
 The PDFs in this package need the C++ standard from 2011.
-In some old systems, functions need to be compiled with extra flags, that are not used by default in `distutils <https://docs.python.org/3/library/distutils.html>`__.
+Depending on the system, functions might need to be compiled with extra flags that are not used by default in `distutils <https://docs.python.org/3/library/distutils.html>`__.
 If you get errors of the type:
 
 .. code-block:: bash
 
    relocation R_X86_64_PC32 against undefined symbol
 
-suggesting to use "-fPIC" option (when the system is using gcc to compile C code) or
+suggesting to use *-fPIC* option (when the system is using *gcc* to compile C code) or
 
 .. code-block:: bash
 
    error: ‘erf’ is not a member of ‘std’
 
-more likely it is needed to specify the standard and flags to use.
-In order to do so, simply execute your script setting the value of the environmental variable "CFLAGS" accordingly:
+more likely it is needed to specify the flags to use.
+In order to do so, simply execute your script setting the value of the environmental variable *CFLAGS* accordingly:
 
 .. code-block:: bash
 
    CFLAGS="-fPIC -std=c++11" python script.py
 
 
-Installation:
-=============
+Fast installation:
+==================
 
 This package is available on `PyPi <https://pypi.org/>`__, so simply type
 
@@ -91,16 +84,24 @@ This package is available on `PyPi <https://pypi.org/>`__, so simply type
    pip install minkit
 
 to install the package in your current python environment.
-To use the **latest development version**, clone the repository and install with `pip`:
+To use the **latest development version**, clone the repository and install with *pip*:
 
 .. code-block:: bash
 
    git clone https://github.com/mramospe/minkit.git
    pip install minkit
 
-Remember that you can also install the package in-place, something very useful for developers, by calling
+In order to profit from certain features of the package, like numerical integration, it is necessary
+that the system has the *GSL* libraries visible to the compiler.
+To install them on Linux, you can simply run
 
 .. code-block:: bash
 
-   git clone https://github.com/mramospe/minkit.git
-   pip install -e minkit
+   sudo apt-get install libgsl-dev
+
+Depending on the system, you might need to set also the necessary environment variables
+specifying the path to the include and libraries directory, like
+
+.. code-block:: bash
+
+   export CFLAGS="$CFLAGS -I/usr/include -L/usr/lib/x86_64-linux-gnu"

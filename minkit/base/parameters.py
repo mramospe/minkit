@@ -108,8 +108,8 @@ class Parameter(ParameterBase):
         :returns: this class as a string.
         :rtype: str
         '''
-        return '{}(name={}, value={}, bounds={}, error={}, constant={})'.format(
-            self.__class__.__name__, self.name, self.value, self.bounds, self.error, self.constant)
+        return '{}(name={}, value={}, bounds={}, error={}, asym_errors={}, constant={})'.format(
+            self.__class__.__name__, self.name, self.value, self.bounds, self.error, self.asym_errors, self.constant)
 
     @property
     def bounds(self):
