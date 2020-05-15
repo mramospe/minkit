@@ -1,0 +1,6 @@
+fcn_profile
+===========
+
+.. currentmodule:: minkit
+
+.. autofunction:: fcn_profile

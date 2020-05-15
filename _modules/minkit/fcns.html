@@ -162,6 +162,7 @@
 
 <span class="kn">import</span> <span class="nn">functools</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;binned_maximum_likelihood&#39;</span><span class="p">,</span> <span class="s1">&#39;binned_chisquare&#39;</span><span class="p">,</span>
            <span class="s1">&#39;unbinned_extended_maximum_likelihood&#39;</span><span class="p">,</span> <span class="s1">&#39;unbinned_maximum_likelihood&#39;</span><span class="p">]</span>
@@ -216,6 +217,30 @@
     <span class="k">return</span> <span class="n">res</span>
 
 
+<span class="k">def</span> <span class="nf">warn_if_nan</span><span class="p">(</span><span class="n">function</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Decorate an FCN so a warning is displayed if the result is nan.</span>
+<span class="sd">    This happens when the probability is zero or negative for at least one value.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">function</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__wrapper</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>
+            <span class="c1"># Get rid of the warnings for the calls to &quot;log&quot; with zero or negative</span>
+            <span class="c1"># values and the multiplication of the result by an array</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s1">&#39;ignore&#39;</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="ne">RuntimeWarning</span><span class="p">)</span>
+
+            <span class="n">v</span> <span class="o">=</span> <span class="n">function</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="s1">&#39;Evaluation of the PDF is zero or negative&#39;</span><span class="p">,</span> <span class="ne">RuntimeWarning</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">v</span>
+
+    <span class="k">return</span> <span class="n">__wrapper</span>
+
+
 <span class="k">def</span> <span class="nf">nll_to_chi2</span><span class="p">(</span><span class="n">function</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Decorate the a function that returns a negative logarithm of likelihood into</span>
@@ -227,7 +252,8 @@
     <span class="k">return</span> <span class="n">__wrapper</span>
 
 
-<div class="viewcode-block" id="binned_chisquare"><a class="viewcode-back" href="../../api/minkit.binned_chisquare.html#minkit.binned_chisquare">[docs]</a><span class="k">def</span> <span class="nf">binned_chisquare</span><span class="p">(</span><span class="n">pdf</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">FULL</span><span class="p">,</span> <span class="n">constraints</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="binned_chisquare"><a class="viewcode-back" href="../../api/minkit.binned_chisquare.html#minkit.binned_chisquare">[docs]</a><span class="nd">@warn_if_nan</span>
+<span class="k">def</span> <span class="nf">binned_chisquare</span><span class="p">(</span><span class="n">pdf</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">FULL</span><span class="p">,</span> <span class="n">constraints</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Definition of the binned chi-square FCN.</span>
 
@@ -237,7 +263,7 @@
 <span class="sd">    :type data: BinnedDataSet</span>
 <span class="sd">    :param range: normalization range of the PDF.</span>
 <span class="sd">    :type range: str</span>
-<span class="sd">    :param constraints: PDFs with the constraints for paramters in &quot;pdf&quot;.</span>
+<span class="sd">    :param constraints: PDFs with the constraints for paramters in *pdf*.</span>
 <span class="sd">    :type constraints: list(PDF)</span>
 <span class="sd">    :returns: value of the FCN.</span>
 <span class="sd">    :rtype: float</span>
@@ -248,6 +274,7 @@
 
 
 <div class="viewcode-block" id="binned_maximum_likelihood"><a class="viewcode-back" href="../../api/minkit.binned_maximum_likelihood.html#minkit.binned_maximum_likelihood">[docs]</a><span class="nd">@nll_to_chi2</span>
+<span class="nd">@warn_if_nan</span>
 <span class="k">def</span> <span class="nf">binned_maximum_likelihood</span><span class="p">(</span><span class="n">pdf</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">constraints</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Definition of the binned maximum likelihood FCN.</span>
@@ -256,7 +283,7 @@
 <span class="sd">    :type pdf: PDF</span>
 <span class="sd">    :param data: data to evaluate.</span>
 <span class="sd">    :type data: BinnedDataSet</span>
-<span class="sd">    :param constraints: PDFs with the constraints for paramters in &quot;pdf&quot;.</span>
+<span class="sd">    :param constraints: PDFs with the constraints for paramters in *pdf*.</span>
 <span class="sd">    :type constraints: list(PDF)</span>
 <span class="sd">    :returns: value of the FCN.</span>
 <span class="sd">    :rtype: float</span>
@@ -266,11 +293,12 @@
 
 
 <div class="viewcode-block" id="unbinned_extended_maximum_likelihood"><a class="viewcode-back" href="../../api/minkit.unbinned_extended_maximum_likelihood.html#minkit.unbinned_extended_maximum_likelihood">[docs]</a><span class="nd">@nll_to_chi2</span>
+<span class="nd">@warn_if_nan</span>
 <span class="k">def</span> <span class="nf">unbinned_extended_maximum_likelihood</span><span class="p">(</span><span class="n">pdf</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">FULL</span><span class="p">,</span> <span class="n">constraints</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Definition of the unbinned extended maximum likelihood FCN.</span>
 <span class="sd">    In this case, entries in data are assumed to follow a Poissonian distribution.</span>
-<span class="sd">    The given :class:`PDF` must be of &quot;extended&quot; type.</span>
+<span class="sd">    The given :class:`PDF` must be of *extended* type.</span>
 
 <span class="sd">    :param pdf: function to evaluate.</span>
 <span class="sd">    :type pdf: PDF</span>
@@ -278,7 +306,7 @@
 <span class="sd">    :type data: DataSet</span>
 <span class="sd">    :param range: normalization range of the PDF.</span>
 <span class="sd">    :type range: str</span>
-<span class="sd">    :param constraints: PDFs with the constraints for paramters in &quot;pdf&quot;.</span>
+<span class="sd">    :param constraints: PDFs with the constraints for paramters in *pdf*.</span>
 <span class="sd">    :type constraints: list(PDF)</span>
 <span class="sd">    :returns: value of the FCN.</span>
 <span class="sd">    :rtype: float</span>
@@ -291,10 +319,11 @@
 
 
 <div class="viewcode-block" id="unbinned_maximum_likelihood"><a class="viewcode-back" href="../../api/minkit.unbinned_maximum_likelihood.html#minkit.unbinned_maximum_likelihood">[docs]</a><span class="nd">@nll_to_chi2</span>
+<span class="nd">@warn_if_nan</span>
 <span class="k">def</span> <span class="nf">unbinned_maximum_likelihood</span><span class="p">(</span><span class="n">pdf</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">FULL</span><span class="p">,</span> <span class="n">constraints</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Definition of the unbinned maximum likelihood FCN.</span>
-<span class="sd">    The given :class:`PDF` must not be of &quot;extended&quot; type.</span>
+<span class="sd">    The given :class:`PDF` must not be of *extended* type.</span>
 
 <span class="sd">    :param pdf: function to evaluate.</span>
 <span class="sd">    :type pdf: PDF</span>
@@ -302,7 +331,7 @@
 <span class="sd">    :type data: DataSet</span>
 <span class="sd">    :param range: normalization range of the PDF.</span>
 <span class="sd">    :type range: str</span>
-<span class="sd">    :param constraints: PDFs with the constraints for paramters in &quot;pdf&quot;.</span>
+<span class="sd">    :param constraints: PDFs with the constraints for paramters in *pdf*.</span>
 <span class="sd">    :type constraints: list(PDF)</span>
 <span class="sd">    :returns: value of the FCN.</span>
 <span class="sd">    :rtype: float</span>

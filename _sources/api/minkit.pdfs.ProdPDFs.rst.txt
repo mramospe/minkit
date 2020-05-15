@@ -1,0 +1,33 @@
+ProdPDFs
+========
+
+.. currentmodule:: minkit.pdfs
+
+.. autoclass:: ProdPDFs
+   :show-inheritance:
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+
+      ~ProdPDFs.__call__
+      ~ProdPDFs.evaluate_binned
+      ~ProdPDFs.from_json_object
+      ~ProdPDFs.integral
+      ~ProdPDFs.norm
+      ~ProdPDFs.numerical_integral
+      ~ProdPDFs.numerical_normalization
+      ~ProdPDFs.to_backend
+      ~ProdPDFs.to_json_object
+
+   .. rubric:: Methods Documentation
+
+   .. automethod:: __call__
+   .. automethod:: evaluate_binned
+   .. automethod:: from_json_object
+   .. automethod:: integral
+   .. automethod:: norm
+   .. automethod:: numerical_integral
+   .. automethod:: numerical_normalization
+   .. automethod:: to_backend
+   .. automethod:: to_json_object

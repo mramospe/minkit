@@ -1,0 +1,29 @@
+darray
+======
+
+.. currentmodule:: minkit
+
+.. autoclass:: darray
+   :show-inheritance:
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+
+      ~darray.from_ndarray
+      ~darray.max
+      ~darray.min
+      ~darray.slice
+      ~darray.sum
+      ~darray.take_column
+      ~darray.take_slice
+
+   .. rubric:: Methods Documentation
+
+   .. automethod:: from_ndarray
+   .. automethod:: max
+   .. automethod:: min
+   .. automethod:: slice
+   .. automethod:: sum
+   .. automethod:: take_column
+   .. automethod:: take_slice

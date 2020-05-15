@@ -1,0 +1,363 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>minkit.minimization.minuit_api &mdash; minkit 0.0.0.dev0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../../_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> minkit
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.0.0.dev0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../user.html">User guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference.html">MinKit reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../performance.html">Performance</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">minkit</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+          <li><a href="../../minkit.html">minkit</a> &raquo;</li>
+        
+      <li>minkit.minimization.minuit_api</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for minkit.minimization.minuit_api</h1><div class="highlight"><pre>
+<span></span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Definition of the interface functions and classes with :mod:`iminuit`.</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="kn">from</span> <span class="nn">..base</span> <span class="k">import</span> <span class="n">parameters</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">core</span>
+
+<span class="kn">import</span> <span class="nn">functools</span>
+<span class="kn">import</span> <span class="nn">iminuit</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;MinuitMinimizer&#39;</span><span class="p">]</span>
+
+<span class="c1"># Definition of the errors. This is given from the nature of the FCNs. If this is</span>
+<span class="c1"># changed the output of the FCNs must change accordingly. A value of 1 means</span>
+<span class="c1"># that the output of the FCNs is a chi-square-like function.</span>
+<span class="n">ERRORDEF</span> <span class="o">=</span> <span class="mf">1.</span>
+
+
+<span class="k">def</span> <span class="nf">use_const_cache</span><span class="p">(</span><span class="n">method</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Use the constant cache of the evaluator when calling the method.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">method</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">evaluator</span><span class="o">.</span><span class="n">using_caches</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">method</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">wrapper</span>
+
+
+<span class="k">def</span> <span class="nf">registry_to_minuit_input</span><span class="p">(</span><span class="n">registry</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Transform a registry of parameters into a dictionary to be parsed by Minuit.</span>
+
+<span class="sd">    :param registry: registry of parameters.</span>
+<span class="sd">    :type registry: Registry(Parameter)</span>
+<span class="sd">    :returns: Minuit configuration dictionary.</span>
+<span class="sd">    :rtype: dict</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">values</span> <span class="o">=</span> <span class="p">{</span><span class="n">v</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">v</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">registry</span><span class="p">}</span>
+    <span class="n">errors</span> <span class="o">=</span> <span class="p">{</span><span class="n">f</span><span class="s1">&#39;error_</span><span class="si">{v.name}</span><span class="s1">&#39;</span><span class="p">:</span> <span class="n">v</span><span class="o">.</span><span class="n">error</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">registry</span><span class="p">}</span>
+    <span class="n">limits</span> <span class="o">=</span> <span class="p">{</span><span class="n">f</span><span class="s1">&#39;limit_</span><span class="si">{v.name}</span><span class="s1">&#39;</span><span class="p">:</span> <span class="n">v</span><span class="o">.</span><span class="n">bounds</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">registry</span><span class="p">}</span>
+    <span class="n">const</span> <span class="o">=</span> <span class="p">{</span><span class="n">f</span><span class="s1">&#39;fix_</span><span class="si">{v.name}</span><span class="s1">&#39;</span><span class="p">:</span> <span class="n">v</span><span class="o">.</span><span class="n">constant</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">registry</span><span class="p">}</span>
+    <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">errordef</span><span class="o">=</span><span class="n">ERRORDEF</span><span class="p">,</span> <span class="o">**</span><span class="n">values</span><span class="p">,</span> <span class="o">**</span><span class="n">errors</span><span class="p">,</span> <span class="o">**</span><span class="n">limits</span><span class="p">,</span> <span class="o">**</span><span class="n">const</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="MinuitMinimizer"><a class="viewcode-back" href="../../../api/minkit.MinuitMinimizer.html#minkit.MinuitMinimizer">[docs]</a><span class="k">class</span> <span class="nc">MinuitMinimizer</span><span class="p">(</span><span class="n">core</span><span class="o">.</span><span class="n">Minimizer</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">evaluator</span><span class="p">,</span> <span class="o">**</span><span class="n">minimizer_config</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Interface with the :class:`iminuit.Minuit` class. In the calls to the</span>
+<span class="sd">        different methods of this class it is ensured that the parameters of</span>
+<span class="sd">        the PDF(s) from the evaluator instance have their value set to that of</span>
+<span class="sd">        the minimum after a minimization process.</span>
+
+<span class="sd">        :param evaluator: evaluator to be used in the minimization.</span>
+<span class="sd">        :type evaluator: UnbinnedEvaluator, BinnedEvaluator or SimultaneousEvaluator</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__eval</span> <span class="o">=</span> <span class="n">evaluator</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__args</span> <span class="o">=</span> <span class="n">evaluator</span><span class="o">.</span><span class="n">args</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__minuit</span> <span class="o">=</span> <span class="n">iminuit</span><span class="o">.</span><span class="n">Minuit</span><span class="p">(</span><span class="n">evaluator</span><span class="p">,</span>
+                                       <span class="n">forced_parameters</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__args</span><span class="o">.</span><span class="n">names</span><span class="p">,</span>
+                                       <span class="n">pedantic</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                       <span class="o">**</span><span class="n">minimizer_config</span><span class="p">,</span>
+                                       <span class="o">**</span><span class="n">registry_to_minuit_input</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__args</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_update_args</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Update the parameters using the information from the given parameters.</span>
+
+<span class="sd">        :param params: list of parameters.</span>
+<span class="sd">        :type params: iminuit.util.Params</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">params</span><span class="p">:</span>
+            <span class="n">a</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="c1"># Update the fields</span>
+            <span class="n">a</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">value</span>
+            <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">has_limits</span><span class="p">:</span>
+                <span class="n">a</span><span class="o">.</span><span class="n">bounds</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">lower_limit</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">upper_limit</span>
+            <span class="n">a</span><span class="o">.</span><span class="n">error</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">error</span>
+            <span class="n">a</span><span class="o">.</span><span class="n">constant</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">is_fixed</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">evaluator</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Evaluator of the minimizer.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__eval</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">minuit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Underlying :class:`iminuit.Minuit` object.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__minuit</span>
+
+<div class="viewcode-block" id="MinuitMinimizer.hesse"><a class="viewcode-back" href="../../../api/minkit.MinuitMinimizer.html#minkit.MinuitMinimizer.hesse">[docs]</a>    <span class="nd">@use_const_cache</span>
+    <span class="k">def</span> <span class="nf">hesse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Arguments are forwarded to the :py:meth:`iminuit.Minuit.hesse` function,</span>
+<span class="sd">        and the values of the parameters are set to those from the minimization</span>
+<span class="sd">        result.</span>
+
+<span class="sd">        :returns: output from :py:meth:`iminuit.Minuit.hesse`.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__minuit</span><span class="o">.</span><span class="n">hesse</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">*</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_update_args</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">result</span></div>
+
+<div class="viewcode-block" id="MinuitMinimizer.migrad"><a class="viewcode-back" href="../../../api/minkit.MinuitMinimizer.html#minkit.MinuitMinimizer.migrad">[docs]</a>    <span class="nd">@use_const_cache</span>
+    <span class="k">def</span> <span class="nf">migrad</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Arguments are forwarded to the :py:meth:`iminuit.Minuit.migrad` function,</span>
+<span class="sd">        and the values of the parameters are set to those from the minimization</span>
+<span class="sd">        result.</span>
+
+<span class="sd">        :returns: output from :py:meth:`iminuit.Minuit.migrad`.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__minuit</span><span class="o">.</span><span class="n">migrad</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">*</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_update_args</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">params</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">result</span></div>
+
+<div class="viewcode-block" id="MinuitMinimizer.minos"><a class="viewcode-back" href="../../../api/minkit.MinuitMinimizer.html#minkit.MinuitMinimizer.minos">[docs]</a>    <span class="nd">@use_const_cache</span>
+    <span class="k">def</span> <span class="nf">minos</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Arguments are forwarded to the :py:meth:`iminuit.Minuit.minos` function,</span>
+<span class="sd">        and the values of the parameters are set to those from the minimization</span>
+<span class="sd">        result.</span>
+
+<span class="sd">        :returns: output from :py:meth:`iminuit.Minuit.minos`.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__minuit</span><span class="o">.</span><span class="n">minos</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">*</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">a</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+            <span class="n">a</span><span class="o">.</span><span class="n">asym_errors</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">lower</span><span class="p">,</span> <span class="n">v</span><span class="o">.</span><span class="n">upper</span>
+
+        <span class="k">return</span> <span class="n">result</span></div>
+
+<div class="viewcode-block" id="MinuitMinimizer.result_to_registry"><a class="viewcode-back" href="../../../api/minkit.MinuitMinimizer.html#minkit.MinuitMinimizer.result_to_registry">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">result_to_registry</span><span class="p">(</span><span class="n">result</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Transform the parameters from a call to Minuit into a :class:`Registry`.</span>
+
+<span class="sd">        :param result: result from a migrad call.</span>
+<span class="sd">        :type result: iminuit.util.Params</span>
+<span class="sd">        :returns: registry of parameters with the result from Migrad.</span>
+<span class="sd">        :rtype: Registry(Parameter)</span>
+
+<span class="sd">        .. warning::</span>
+<span class="sd">           The parameters in the returned registry do not belong to the</span>
+<span class="sd">           minimized object(s).</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">reg</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">Registry</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+            <span class="n">limits</span> <span class="o">=</span> <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">lower_limit</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">upper_limit</span><span class="p">)</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">has_limits</span> <span class="k">else</span> <span class="kc">None</span>
+            <span class="n">reg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">parameters</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span>
+                <span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="n">limits</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">error</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">is_fixed</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">reg</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Miguel Ramos Pernas
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

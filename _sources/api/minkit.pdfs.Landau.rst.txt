@@ -1,0 +1,7 @@
+Landau
+======
+
+.. currentmodule:: minkit.pdfs
+
+.. autoclass:: Landau
+   :show-inheritance:

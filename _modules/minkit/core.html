@@ -238,7 +238,7 @@
     <span class="nd">@with_backend</span>
     <span class="k">def</span> <span class="nf">__getattr__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Get an operation with name &quot;name&quot;.</span>
+<span class="sd">        Get an operation with name *name*.</span>
 
 <span class="sd">        :param name: name of the operation.</span>
 <span class="sd">        :type name: str</span>
@@ -257,7 +257,7 @@
 
 <div class="viewcode-block" id="as_ndarray"><a class="viewcode-back" href="../../api/minkit.as_ndarray.html#minkit.as_ndarray">[docs]</a><span class="k">def</span> <span class="nf">as_ndarray</span><span class="p">(</span><span class="n">a</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    Ensure that &quot;a&quot; is expressed as a :class:`numpy.ndarray` object.</span>
+<span class="sd">    Ensure that *a* is expressed as a :class:`numpy.ndarray` object.</span>
 <span class="sd">    If its already an :class:`numpy.ndarray`, it is not copied.</span>
 
 <span class="sd">    :param a: input array.</span>
@@ -271,7 +271,7 @@
 <div class="viewcode-block" id="free_cache"><a class="viewcode-back" href="../../api/minkit.free_cache.html#minkit.free_cache">[docs]</a><span class="k">def</span> <span class="nf">free_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Free the cache of arrays. Only works in GPU mode, with</span>
-<span class="sd">    backend &quot;cuda&quot; or &quot;opencl&quot;.</span>
+<span class="sd">    backend *cuda* or *opencl*.</span>
 <span class="sd">    In :py:mod:`minkit`, when the backend is set to GPU, arrays will</span>
 <span class="sd">    tend to be reused and kept in the device till a call to :func:`free_cache`</span>
 <span class="sd">    is done.</span>
@@ -287,7 +287,7 @@
 <span class="sd">    Initialize the package, setting the backend and determining what packages to</span>
 <span class="sd">    use accordingly.</span>
 
-<span class="sd">    :param backend: backend to use. It must be any of &quot;cpu&quot;, &quot;cuda&quot; or &quot;opencl&quot;.</span>
+<span class="sd">    :param backend: backend to use. It must be any of *cpu*, *cuda* or *opencl*.</span>
 <span class="sd">    :type backend: str</span>
 <span class="sd">    :param kwargs: meant to be used in the CUDA or OpenCL backend, it may contain \</span>
 <span class="sd">    any of the following values: \</span>

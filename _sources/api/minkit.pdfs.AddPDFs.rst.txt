@@ -1,0 +1,45 @@
+AddPDFs
+=======
+
+.. currentmodule:: minkit.pdfs
+
+.. autoclass:: AddPDFs
+   :show-inheritance:
+
+   .. rubric:: Attributes Summary
+
+   .. autosummary::
+
+      ~AddPDFs.extended
+      ~AddPDFs.yields
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+
+      ~AddPDFs.__call__
+      ~AddPDFs.evaluate_binned
+      ~AddPDFs.from_json_object
+      ~AddPDFs.integral
+      ~AddPDFs.norm
+      ~AddPDFs.numerical_integral
+      ~AddPDFs.to_backend
+      ~AddPDFs.to_json_object
+      ~AddPDFs.two_components
+
+   .. rubric:: Attributes Documentation
+
+   .. autoattribute:: extended
+   .. autoattribute:: yields
+
+   .. rubric:: Methods Documentation
+
+   .. automethod:: __call__
+   .. automethod:: evaluate_binned
+   .. automethod:: from_json_object
+   .. automethod:: integral
+   .. automethod:: norm
+   .. automethod:: numerical_integral
+   .. automethod:: to_backend
+   .. automethod:: to_json_object
+   .. automethod:: two_components

@@ -1,0 +1,45 @@
+marray
+======
+
+.. currentmodule:: minkit
+
+.. autoclass:: marray
+   :show-inheritance:
+
+   .. rubric:: Attributes Summary
+
+   .. autosummary::
+
+      ~marray.aop
+      ~marray.backend
+      ~marray.dtype
+      ~marray.length
+      ~marray.shape
+      ~marray.ua
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+
+      ~marray.as_ndarray
+      ~marray.copy
+      ~marray.from_ndarray
+      ~marray.get
+      ~marray.to_backend
+
+   .. rubric:: Attributes Documentation
+
+   .. autoattribute:: aop
+   .. autoattribute:: backend
+   .. autoattribute:: dtype
+   .. autoattribute:: length
+   .. autoattribute:: shape
+   .. autoattribute:: ua
+
+   .. rubric:: Methods Documentation
+
+   .. automethod:: as_ndarray
+   .. automethod:: copy
+   .. automethod:: from_ndarray
+   .. automethod:: get
+   .. automethod:: to_backend

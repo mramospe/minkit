@@ -1,0 +1,781 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>PDF &mdash; minkit 0.0.0.dev0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Polynomial" href="minkit.pdfs.Polynomial.html" />
+    <link rel="prev" title="MultiPDF" href="minkit.pdfs.MultiPDF.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> minkit
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.0.0.dev0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user.html">User guide</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../detailed_reference.html">Detailed reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../detailed_reference.html#functions">Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../detailed_reference.html#classes">Classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../detailed_reference.html#class-inheritance-diagram">Class Inheritance Diagram</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../detailed_reference.html#id1">Functions</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../detailed_reference.html#id2">Classes</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="minkit.pdfs.AddPDFs.html">AddPDFs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.pdfs.Amoroso.html">Amoroso</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.pdfs.Argus.html">Argus</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.pdfs.BinnedDataSet.html">BinnedDataSet</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.pdfs.Chebyshev.html">Chebyshev</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.pdfs.ConvPDFs.html">ConvPDFs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.pdfs.CrystalBall.html">CrystalBall</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.pdfs.DataSet.html">DataSet</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.pdfs.ExpPoly.html">ExpPoly</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.pdfs.Exponential.html">Exponential</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.pdfs.Gaussian.html">Gaussian</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.pdfs.Landau.html">Landau</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.pdfs.MultiPDF.html">MultiPDF</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">PDF</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.pdfs.Polynomial.html">Polynomial</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.pdfs.PowerLaw.html">PowerLaw</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.pdfs.ProdPDFs.html">ProdPDFs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.pdfs.SourcePDF.html">SourcePDF</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../detailed_reference.html#id3">Class Inheritance Diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../reference.html">MinKit reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../performance.html">Performance</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">minkit</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../detailed_reference.html">Detailed reference</a> &raquo;</li>
+        
+      <li>PDF</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/api/minkit.pdfs.PDF.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="pdf">
+<h1>PDF<a class="headerlink" href="#pdf" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="minkit.pdfs.PDF">
+<em class="property">class </em><code class="sig-prename descclassname">minkit.pdfs.</code><code class="sig-name descname">PDF</code><span class="sig-paren">(</span><em class="sig-param">name</em>, <em class="sig-param">data_pars</em>, <em class="sig-param">args_pars</em>, <em class="sig-param">backend=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/pdfs/pdf_core.html#PDF"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.pdfs.PDF" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Build the class from a name, a set of data parameters and argument parameters.
+The first correspond to those that must be present on any <a class="reference internal" href="minkit.pdfs.DataSet.html#minkit.pdfs.DataSet" title="minkit.pdfs.DataSet"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataSet</span></code></a> or
+<a class="reference internal" href="minkit.pdfs.BinnedDataSet.html#minkit.pdfs.BinnedDataSet" title="minkit.pdfs.BinnedDataSet"><code class="xref py py-class docutils literal notranslate"><span class="pre">BinnedDataSet</span></code></a> classes where this object is evaluated.
+The second corresponds to the parameters defining the shape of the PDF.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – name of the object.</p></li>
+<li><p><strong>data_pars</strong> (<a class="reference internal" href="minkit.Registry.html#minkit.Registry" title="minkit.Registry"><em>Registry</em></a><em>(</em><a class="reference internal" href="minkit.Parameter.html#minkit.Parameter" title="minkit.Parameter"><em>Parameter</em></a><em>)</em>) – data parameters.</p></li>
+<li><p><strong>arg_pars</strong> (<a class="reference internal" href="minkit.Registry.html#minkit.Registry" title="minkit.Registry"><em>Registry</em></a><em>(</em><a class="reference internal" href="minkit.Parameter.html#minkit.Parameter" title="minkit.Parameter"><em>Parameter</em></a><em>)</em>) – argument parameters.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Attributes Summary</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.pdfs.PDF.BIND" title="minkit.pdfs.PDF.BIND"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BIND</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#minkit.pdfs.PDF.CACHE_TYPES" title="minkit.pdfs.PDF.CACHE_TYPES"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CACHE_TYPES</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.pdfs.PDF.CONST" title="minkit.pdfs.PDF.CONST"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CONST</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#minkit.pdfs.PDF.all_args" title="minkit.pdfs.PDF.all_args"><code class="xref py py-obj docutils literal notranslate"><span class="pre">all_args</span></code></a></p></td>
+<td><p>All the argument parameters associated to this class.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.pdfs.PDF.all_pars" title="minkit.pdfs.PDF.all_pars"><code class="xref py py-obj docutils literal notranslate"><span class="pre">all_pars</span></code></a></p></td>
+<td><p>All the parameters associated to this class.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#minkit.pdfs.PDF.all_real_args" title="minkit.pdfs.PDF.all_real_args"><code class="xref py py-obj docutils literal notranslate"><span class="pre">all_real_args</span></code></a></p></td>
+<td><p>All the argument parameters that are not <code class="xref py py-class docutils literal notranslate"><span class="pre">ParameterFormula</span></code> instances.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.pdfs.PDF.aop" title="minkit.pdfs.PDF.aop"><code class="xref py py-obj docutils literal notranslate"><span class="pre">aop</span></code></a></p></td>
+<td><p>Object to do operations on arrays.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#minkit.pdfs.PDF.args" title="minkit.pdfs.PDF.args"><code class="xref py py-obj docutils literal notranslate"><span class="pre">args</span></code></a></p></td>
+<td><p>Argument parameters this object directly depends on.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.pdfs.PDF.backend" title="minkit.pdfs.PDF.backend"><code class="xref py py-obj docutils literal notranslate"><span class="pre">backend</span></code></a></p></td>
+<td><p>Backend interface.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#minkit.pdfs.PDF.cache" title="minkit.pdfs.PDF.cache"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cache</span></code></a></p></td>
+<td><p>Return the cached values for this PDF.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.pdfs.PDF.cache_type" title="minkit.pdfs.PDF.cache_type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cache_type</span></code></a></p></td>
+<td><p>Cache type being used.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#minkit.pdfs.PDF.constant" title="minkit.pdfs.PDF.constant"><code class="xref py py-obj docutils literal notranslate"><span class="pre">constant</span></code></a></p></td>
+<td><p>Whether this is a constant <a class="reference internal" href="#minkit.pdfs.PDF" title="minkit.pdfs.PDF"><code class="xref py py-class docutils literal notranslate"><span class="pre">PDF</span></code></a>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.pdfs.PDF.data_pars" title="minkit.pdfs.PDF.data_pars"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_pars</span></code></a></p></td>
+<td><p>Data parameters this object directly depends on.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#minkit.pdfs.PDF.dependent" title="minkit.pdfs.PDF.dependent"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dependent</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Methods Summary</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.pdfs.PDF.__call__" title="minkit.pdfs.PDF.__call__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__call__</span></code></a>(data[, range, normalized])</p></td>
+<td><p>Call the PDF in the given set of data.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#minkit.pdfs.PDF.bind" title="minkit.pdfs.PDF.bind"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bind</span></code></a>([range, normalized])</p></td>
+<td><p>Prepare an object that will be called many times with the same set of values.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.pdfs.PDF.evaluate_binned" title="minkit.pdfs.PDF.evaluate_binned"><code class="xref py py-obj docutils literal notranslate"><span class="pre">evaluate_binned</span></code></a>(data[, norm_to_data])</p></td>
+<td><p>Evaluate the PDF over a binned sample.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#minkit.pdfs.PDF.from_json_object" title="minkit.pdfs.PDF.from_json_object"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_json_object</span></code></a>(obj, pars)</p></td>
+<td><p>Build a PDF from a JSON object.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.pdfs.PDF.generate" title="minkit.pdfs.PDF.generate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">generate</span></code></a>([size, mapsize, gensize, …])</p></td>
+<td><p>Generate random data.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#minkit.pdfs.PDF.get_values" title="minkit.pdfs.PDF.get_values"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_values</span></code></a>()</p></td>
+<td><p>Get the values of the parameters within this object.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.pdfs.PDF.integral" title="minkit.pdfs.PDF.integral"><code class="xref py py-obj docutils literal notranslate"><span class="pre">integral</span></code></a>([integral_range, range])</p></td>
+<td><p>Calculate the integral of a <a class="reference internal" href="#minkit.pdfs.PDF" title="minkit.pdfs.PDF"><code class="xref py py-class docutils literal notranslate"><span class="pre">PDF</span></code></a>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#minkit.pdfs.PDF.norm" title="minkit.pdfs.PDF.norm"><code class="xref py py-obj docutils literal notranslate"><span class="pre">norm</span></code></a>([range])</p></td>
+<td><p>Calculate the normalization of the PDF.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.pdfs.PDF.numerical_integral" title="minkit.pdfs.PDF.numerical_integral"><code class="xref py py-obj docutils literal notranslate"><span class="pre">numerical_integral</span></code></a>([integral_range, range])</p></td>
+<td><p>Calculate the integral of a <a class="reference internal" href="#minkit.pdfs.PDF" title="minkit.pdfs.PDF"><code class="xref py py-class docutils literal notranslate"><span class="pre">PDF</span></code></a>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#minkit.pdfs.PDF.numerical_normalization" title="minkit.pdfs.PDF.numerical_normalization"><code class="xref py py-obj docutils literal notranslate"><span class="pre">numerical_normalization</span></code></a>([range])</p></td>
+<td><p>Calculate a numerical normalization.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.pdfs.PDF.set_values" title="minkit.pdfs.PDF.set_values"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_values</span></code></a>(**kwargs)</p></td>
+<td><p>Set the values of the parameters associated to this PDF.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#minkit.pdfs.PDF.to_backend" title="minkit.pdfs.PDF.to_backend"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_backend</span></code></a>(backend)</p></td>
+<td><p>Initialize this class in a different backend.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.pdfs.PDF.to_json_object" title="minkit.pdfs.PDF.to_json_object"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_json_object</span></code></a>()</p></td>
+<td><p>Dump the PDF information into a JSON object.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#minkit.pdfs.PDF.using_cache" title="minkit.pdfs.PDF.using_cache"><code class="xref py py-obj docutils literal notranslate"><span class="pre">using_cache</span></code></a>(ctype)</p></td>
+<td><p>Safe method to enable a cache of the PDF.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes Documentation</p>
+<dl class="attribute">
+<dt id="minkit.pdfs.PDF.BIND">
+<code class="sig-name descname">BIND</code><em class="property"> = 'bind'</em><a class="headerlink" href="#minkit.pdfs.PDF.BIND" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="minkit.pdfs.PDF.CACHE_TYPES">
+<code class="sig-name descname">CACHE_TYPES</code><em class="property"> = ('bind', 'const')</em><a class="headerlink" href="#minkit.pdfs.PDF.CACHE_TYPES" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="minkit.pdfs.PDF.CONST">
+<code class="sig-name descname">CONST</code><em class="property"> = 'const'</em><a class="headerlink" href="#minkit.pdfs.PDF.CONST" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="minkit.pdfs.PDF.all_args">
+<code class="sig-name descname">all_args</code><a class="headerlink" href="#minkit.pdfs.PDF.all_args" title="Permalink to this definition">¶</a></dt>
+<dd><p>All the argument parameters associated to this class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="minkit.Registry.html#minkit.Registry" title="minkit.Registry">Registry</a>(<a class="reference internal" href="minkit.Parameter.html#minkit.Parameter" title="minkit.Parameter">Parameter</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="minkit.pdfs.PDF.all_pars">
+<code class="sig-name descname">all_pars</code><a class="headerlink" href="#minkit.pdfs.PDF.all_pars" title="Permalink to this definition">¶</a></dt>
+<dd><p>All the parameters associated to this class.
+This includes also any <code class="xref py py-class docutils literal notranslate"><span class="pre">ParameterFormula</span></code> and the data parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="minkit.Registry.html#minkit.Registry" title="minkit.Registry">Registry</a>(<a class="reference internal" href="minkit.Parameter.html#minkit.Parameter" title="minkit.Parameter">Parameter</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="minkit.pdfs.PDF.all_real_args">
+<code class="sig-name descname">all_real_args</code><a class="headerlink" href="#minkit.pdfs.PDF.all_real_args" title="Permalink to this definition">¶</a></dt>
+<dd><p>All the argument parameters that are not <code class="xref py py-class docutils literal notranslate"><span class="pre">ParameterFormula</span></code> instances.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="minkit.Registry.html#minkit.Registry" title="minkit.Registry">Registry</a>(<a class="reference internal" href="minkit.Parameter.html#minkit.Parameter" title="minkit.Parameter">Parameter</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="minkit.pdfs.PDF.aop">
+<code class="sig-name descname">aop</code><a class="headerlink" href="#minkit.pdfs.PDF.aop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Object to do operations on arrays.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="minkit.ArrayOperations.html#minkit.ArrayOperations" title="minkit.ArrayOperations">ArrayOperations</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="minkit.pdfs.PDF.args">
+<code class="sig-name descname">args</code><a class="headerlink" href="#minkit.pdfs.PDF.args" title="Permalink to this definition">¶</a></dt>
+<dd><p>Argument parameters this object directly depends on.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="minkit.Registry.html#minkit.Registry" title="minkit.Registry">Registry</a>(<a class="reference internal" href="minkit.Parameter.html#minkit.Parameter" title="minkit.Parameter">Parameter</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="minkit.pdfs.PDF.backend">
+<code class="sig-name descname">backend</code><a class="headerlink" href="#minkit.pdfs.PDF.backend" title="Permalink to this definition">¶</a></dt>
+<dd><p>Backend interface.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="minkit.Backend.html#minkit.Backend" title="minkit.Backend">Backend</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="minkit.pdfs.PDF.cache">
+<code class="sig-name descname">cache</code><a class="headerlink" href="#minkit.pdfs.PDF.cache" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the cached values for this PDF.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="minkit.pdfs.PDF.cache_type">
+<code class="sig-name descname">cache_type</code><a class="headerlink" href="#minkit.pdfs.PDF.cache_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Cache type being used.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a> or <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.8)">None</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="minkit.pdfs.PDF.constant">
+<code class="sig-name descname">constant</code><a class="headerlink" href="#minkit.pdfs.PDF.constant" title="Permalink to this definition">¶</a></dt>
+<dd><p>Whether this is a constant <a class="reference internal" href="#minkit.pdfs.PDF" title="minkit.pdfs.PDF"><code class="xref py py-class docutils literal notranslate"><span class="pre">PDF</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="minkit.pdfs.PDF.data_pars">
+<code class="sig-name descname">data_pars</code><a class="headerlink" href="#minkit.pdfs.PDF.data_pars" title="Permalink to this definition">¶</a></dt>
+<dd><p>Data parameters this object directly depends on.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="minkit.Registry.html#minkit.Registry" title="minkit.Registry">Registry</a>(<a class="reference internal" href="minkit.Parameter.html#minkit.Parameter" title="minkit.Parameter">Parameter</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="minkit.pdfs.PDF.dependent">
+<code class="sig-name descname">dependent</code><em class="property"> = False</em><a class="headerlink" href="#minkit.pdfs.PDF.dependent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p class="rubric">Methods Documentation</p>
+<dl class="method">
+<dt id="minkit.pdfs.PDF.__call__">
+<code class="sig-name descname">__call__</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">range='full'</em>, <em class="sig-param">normalized=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/pdfs/pdf_core.html#PDF.__call__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.pdfs.PDF.__call__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Call the PDF in the given set of data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<a class="reference internal" href="minkit.DataSet.html#minkit.DataSet" title="minkit.DataSet"><em>DataSet</em></a><em> or </em><a class="reference internal" href="minkit.BinnedDataSet.html#minkit.BinnedDataSet" title="minkit.BinnedDataSet"><em>BinnedDataSet</em></a>) – data to evaluate.</p></li>
+<li><p><strong>range</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – normalization range.</p></li>
+<li><p><strong>normalized</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – whether to return a normalized output.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Evaluation of the PDF.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="minkit.darray.html#minkit.darray" title="minkit.darray">darray</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.pdfs.PDF.bind">
+<code class="sig-name descname">bind</code><span class="sig-paren">(</span><em class="sig-param">range='full'</em>, <em class="sig-param">normalized=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/pdfs/pdf_core.html#PDF.bind"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.pdfs.PDF.bind" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prepare an object that will be called many times with the same set of
+values.
+This is usefull for PDFs using a cache, to avoid creating it many times
+in sucessive calls to <a class="reference internal" href="#minkit.pdfs.PDF.__call__" title="minkit.pdfs.PDF.__call__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">PDF.__call__()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>range</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – normalization range.</p></li>
+<li><p><strong>normalized</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – whether to return a normalized output.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.pdfs.PDF.evaluate_binned">
+<code class="sig-name descname">evaluate_binned</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">norm_to_data=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/pdfs/pdf_core.html#PDF.evaluate_binned"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.pdfs.PDF.evaluate_binned" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluate the PDF over a binned sample.
+If “norm_to_data” is provided, then the number of entries is normalized
+to the sum of values in the data sample.
+Otherwise it is normalized to the sum of the data values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<a class="reference internal" href="minkit.BinnedDataSet.html#minkit.BinnedDataSet" title="minkit.BinnedDataSet"><em>BinnedDataSet</em></a>) – input data.</p></li>
+<li><p><strong>norm_to_data</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – possible normalization value.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Values from the evaluation.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="minkit.farray.html#minkit.farray" title="minkit.farray">farray</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.pdfs.PDF.from_json_object">
+<em class="property">classmethod </em><code class="sig-name descname">from_json_object</code><span class="sig-paren">(</span><em class="sig-param">obj</em>, <em class="sig-param">pars</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/pdfs/pdf_core.html#PDF.from_json_object"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.pdfs.PDF.from_json_object" title="Permalink to this definition">¶</a></dt>
+<dd><p>Build a PDF from a JSON object.
+This object must represent the internal structure of the PDF.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>obj</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – JSON object.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>This type of PDF constructed together with its parameters.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.pdfs.PDF.generate">
+<code class="sig-name descname">generate</code><span class="sig-paren">(</span><em class="sig-param">size=10000</em>, <em class="sig-param">mapsize=100</em>, <em class="sig-param">gensize=10000</em>, <em class="sig-param">safe_factor=1.1</em>, <em class="sig-param">range='full'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/pdfs/pdf_core.html#PDF.generate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.pdfs.PDF.generate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate random data.
+A call to <a class="reference internal" href="#minkit.pdfs.PDF.bind" title="minkit.pdfs.PDF.bind"><code class="xref py py-meth docutils literal notranslate"><span class="pre">PDF.bind()</span></code></a> is implicit, since several calls will be done
+to the PDF with the same sets of values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – size (or minimum size) of the output sample.</p></li>
+<li><p><strong>mapsize</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – number of points to consider per dimension (data parameter)         in order to calculate the maximum value of the PDF.</p></li>
+<li><p><strong>gensize</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – number of entries to generate per iteration.</p></li>
+<li><p><strong>safe_factor</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – additional factor to multiply the numerically calculated         maximum of the function. In general this must be modified if the function is         not well-behaved.</p></li>
+<li><p><strong>range</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – range of the data parameters where to generate data.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Output sample.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="minkit.DataSet.html#minkit.DataSet" title="minkit.DataSet">DataSet</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.pdfs.PDF.get_values">
+<code class="sig-name descname">get_values</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/pdfs/pdf_core.html#PDF.get_values"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.pdfs.PDF.get_values" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the values of the parameters within this object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Dictionary with the values of the parameters.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)">dict</a>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.pdfs.PDF.integral">
+<code class="sig-name descname">integral</code><span class="sig-paren">(</span><em class="sig-param">integral_range='full'</em>, <em class="sig-param">range='full'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/pdfs/pdf_core.html#PDF.integral"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.pdfs.PDF.integral" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the integral of a <a class="reference internal" href="#minkit.pdfs.PDF" title="minkit.pdfs.PDF"><code class="xref py py-class docutils literal notranslate"><span class="pre">PDF</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>integral_range</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – range of the integral to compute.</p></li>
+<li><p><strong>range</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – normalization range to consider.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Integral of the PDF in the range defined by “integral_range” normalized to “range”.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.pdfs.PDF.norm">
+<code class="sig-name descname">norm</code><span class="sig-paren">(</span><em class="sig-param">range='full'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/pdfs/pdf_core.html#PDF.norm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.pdfs.PDF.norm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the normalization of the PDF.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>range</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – normalization range to consider.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Value of the normalization.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.pdfs.PDF.numerical_integral">
+<code class="sig-name descname">numerical_integral</code><span class="sig-paren">(</span><em class="sig-param">integral_range='full'</em>, <em class="sig-param">range='full'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/pdfs/pdf_core.html#PDF.numerical_integral"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.pdfs.PDF.numerical_integral" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the integral of a <a class="reference internal" href="#minkit.pdfs.PDF" title="minkit.pdfs.PDF"><code class="xref py py-class docutils literal notranslate"><span class="pre">PDF</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>integral_range</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – range of the integral to compute.</p></li>
+<li><p><strong>range</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – normalization range to consider.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Integral of the PDF in the range defined by “integral_range” normalized to “range”.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.pdfs.PDF.numerical_normalization">
+<code class="sig-name descname">numerical_normalization</code><span class="sig-paren">(</span><em class="sig-param">range='full'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/pdfs/pdf_core.html#PDF.numerical_normalization"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.pdfs.PDF.numerical_normalization" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate a numerical normalization.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>range</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – normalization range.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Normalization.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.pdfs.PDF.set_values">
+<code class="sig-name descname">set_values</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/pdfs/pdf_core.html#PDF.set_values"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.pdfs.PDF.set_values" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the values of the parameters associated to this PDF.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a><em>)</em>) – keyword arguments with “name”/”value”.</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Any PDF sharing parameters with this will also change its behaviour.</p>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.pdfs.PDF.to_backend">
+<code class="sig-name descname">to_backend</code><span class="sig-paren">(</span><em class="sig-param">backend</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/pdfs/pdf_core.html#PDF.to_backend"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.pdfs.PDF.to_backend" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize this class in a different backend.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>backend</strong> (<a class="reference internal" href="minkit.Backend.html#minkit.Backend" title="minkit.Backend"><em>Backend</em></a>) – new backend.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>An instance of this class in the new backend.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.pdfs.PDF.to_json_object">
+<code class="sig-name descname">to_json_object</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/pdfs/pdf_core.html#PDF.to_json_object"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.pdfs.PDF.to_json_object" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dump the PDF information into a JSON object.
+The PDF can be constructed at any time by calling <a class="reference internal" href="#minkit.pdfs.PDF.from_json_object" title="minkit.pdfs.PDF.from_json_object"><code class="xref py py-meth docutils literal notranslate"><span class="pre">PDF.from_json_object()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Object that can be saved into a JSON file.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.pdfs.PDF.using_cache">
+<code class="sig-name descname">using_cache</code><span class="sig-paren">(</span><em class="sig-param">ctype</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/pdfs/pdf_core.html#PDF.using_cache"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.pdfs.PDF.using_cache" title="Permalink to this definition">¶</a></dt>
+<dd><p>Safe method to enable a cache of the PDF. There are two types of cache:</p>
+<ul class="simple">
+<li><p><em>const</em>: it means that we plan to call the <a class="reference internal" href="#minkit.pdfs.PDF" title="minkit.pdfs.PDF"><code class="xref py py-class docutils literal notranslate"><span class="pre">PDF</span></code></a> consecutively
+in the same data set, but the value of the parameters that are not
+constant is allowed to change. This means that any <a class="reference internal" href="#minkit.pdfs.PDF" title="minkit.pdfs.PDF"><code class="xref py py-class docutils literal notranslate"><span class="pre">PDF</span></code></a> that
+has all its arguments as constant is assumed to have the same value
+in each evaluation.</p></li>
+<li><p><em>bind</em>: this is reserved for those processes where the normalization
+range will be the same, as well as the values of the parameters of the
+<a class="reference internal" href="#minkit.pdfs.PDF" title="minkit.pdfs.PDF"><code class="xref py py-class docutils literal notranslate"><span class="pre">PDF</span></code></a>. However, the function can be called in different data
+sets.</p></li>
+</ul>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>It is responsibility of the user to ensure that the            conditions for the cache to be valid are preserved.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>ctype</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – cache type.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="minkit.pdfs.Polynomial.html" class="btn btn-neutral float-right" title="Polynomial" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="minkit.pdfs.MultiPDF.html" class="btn btn-neutral float-left" title="MultiPDF" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Miguel Ramos Pernas
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

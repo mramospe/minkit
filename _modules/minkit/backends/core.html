@@ -1,0 +1,332 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>minkit.backends.core &mdash; minkit 0.0.0.dev0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../../_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> minkit
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.0.0.dev0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../user.html">User guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference.html">MinKit reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../performance.html">Performance</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">minkit</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+          <li><a href="../../minkit.html">minkit</a> &raquo;</li>
+        
+      <li>minkit.backends.core</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for minkit.backends.core</h1><div class="highlight"><pre>
+<span></span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Accessors to PDF in code.</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">PACKAGE_PATH</span>
+
+<span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;add_pdf_src&#39;</span><span class="p">]</span>
+
+<span class="c1"># CPU backend</span>
+<span class="n">CPU</span> <span class="o">=</span> <span class="s1">&#39;cpu&#39;</span>
+<span class="c1"># OpenCL backend</span>
+<span class="n">OPENCL</span> <span class="o">=</span> <span class="s1">&#39;opencl&#39;</span>
+<span class="c1"># CUDA backend</span>
+<span class="n">CUDA</span> <span class="o">=</span> <span class="s1">&#39;cuda&#39;</span>
+<span class="c1"># Internl use only</span>
+<span class="n">GPU</span> <span class="o">=</span> <span class="s1">&#39;gpu&#39;</span>
+
+<span class="c1"># Define the default object to do array operations</span>
+<span class="n">DEFAULT_AOP</span> <span class="o">=</span> <span class="kc">None</span>
+
+<span class="c1"># Path to directories where to search for PDFs</span>
+<span class="n">PDF_PATHS</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">PACKAGE_PATH</span><span class="p">,</span> <span class="s1">&#39;src&#39;</span><span class="p">,</span> <span class="s1">&#39;xml&#39;</span><span class="p">)]</span>
+
+<span class="c1"># This class is meant to store run-time compiled functions</span>
+<span class="n">FunctionsProxy</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">namedtuple</span><span class="p">(</span><span class="s1">&#39;FunctionsProxy&#39;</span><span class="p">,</span> <span class="p">[</span>
+                                        <span class="s1">&#39;function&#39;</span><span class="p">,</span> <span class="s1">&#39;integral&#39;</span><span class="p">,</span> <span class="s1">&#39;evaluate&#39;</span><span class="p">,</span> <span class="s1">&#39;evaluate_binned&#39;</span><span class="p">,</span> <span class="s1">&#39;evaluate_binned_numerical&#39;</span><span class="p">,</span> <span class="s1">&#39;numerical_integral&#39;</span><span class="p">])</span>
+
+
+<div class="viewcode-block" id="add_pdf_src"><a class="viewcode-back" href="../../../api/minkit.add_pdf_src.html#minkit.add_pdf_src">[docs]</a><span class="k">def</span> <span class="nf">add_pdf_src</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    This function adds a new path where to look for user-defined PDFs.</span>
+<span class="sd">    PDFs are searched for in paths opposite to the order they are appended</span>
+<span class="sd">    (PDFs are taken from the last appended paths first).</span>
+
+<span class="sd">    :param path: new path to be considered.</span>
+<span class="sd">    :type path: str</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">PDF_PATHS</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span></div>
+
+
+<span class="k">def</span> <span class="nf">document_operations_method</span><span class="p">(</span><span class="n">method</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Build the documentation of the given method.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">method</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">=</span> <span class="n">f</span><span class="s1">&#39;&#39;&#39;</span>
+<span class="s1">This function resolves the :method:`ArrayOperations.</span><span class="si">{method.__name__}</span><span class="s1">` method</span>
+<span class="s1">in this backend.</span>
+<span class="s1">&#39;&#39;&#39;</span>
+    <span class="k">return</span> <span class="n">method</span>
+
+
+<span class="k">def</span> <span class="nf">common_backend</span><span class="p">(</span><span class="n">objects</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Check whether the input objets have the same backend and return it.</span>
+
+<span class="sd">    :param objects: objects with the &quot;backend&quot; attribute defined.</span>
+<span class="sd">    :type objects: list</span>
+<span class="sd">    :returns: common backend.</span>
+<span class="sd">    :rtype: Backend</span>
+<span class="sd">    :raises RuntimeError: If the objects do not have a common backend.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="n">objects</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">backend</span>
+    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="ow">not</span> <span class="n">o</span><span class="o">.</span><span class="n">backend</span> <span class="ow">is</span> <span class="n">b</span> <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">objects</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;The provided objects do not have the same backend&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">b</span>
+
+
+<span class="k">def</span> <span class="nf">get_pdf_src</span><span class="p">():</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Get the list of paths to search for PDFs.</span>
+
+<span class="sd">    :returns: list of directories.</span>
+<span class="sd">    :rtype: list(str)</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">return</span> <span class="n">PDF_PATHS</span>
+
+
+<span class="k">def</span> <span class="nf">is_gpu_backend</span><span class="p">(</span><span class="n">backend</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Return whether the backend is of GPU type.</span>
+
+<span class="sd">    :param backend: backend type.</span>
+<span class="sd">    :type backend: str</span>
+<span class="sd">    :returns: whether the backend is of GPU type or not.</span>
+<span class="sd">    :rtype: bool</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">return</span> <span class="n">backend</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span><span class="n">backend</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">!=</span> <span class="n">CPU</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">parse_backend</span><span class="p">(</span><span class="n">backend</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Function to parse a backend an return the object to do array operations.</span>
+
+<span class="sd">    :param backend: input backend.</span>
+<span class="sd">    :type backend: Backend or None</span>
+<span class="sd">    :returns: object to do array operations.</span>
+<span class="sd">    :rtype: CPUOperations or GPUOperations</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">backend</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">DEFAULT_AOP</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                <span class="s1">&#39;Default object to do operations on arrays is not defined, and it should be automatically done; please report the bug&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">DEFAULT_AOP</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">backend</span><span class="o">.</span><span class="n">aop</span>
+
+
+<span class="k">def</span> <span class="nf">parse_module_name</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">nvar_arg_pars</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Parse the module name for a given number of variable arguments.</span>
+
+<span class="sd">    :param name: name of the module.</span>
+<span class="sd">    :type name: str</span>
+<span class="sd">    :param nvar_arg_pars: number of variable arguments.</span>
+<span class="sd">    :type nvar_arg_pars: int</span>
+<span class="sd">    :returns: name of the module.</span>
+<span class="sd">    :rtype: str</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">return</span> <span class="n">name</span> <span class="k">if</span> <span class="n">nvar_arg_pars</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">f</span><span class="s1">&#39;</span><span class="si">{name}{nvar_arg_pars}</span><span class="s1">&#39;</span>
+
+
+<span class="k">def</span> <span class="nf">set_default_aop</span><span class="p">(</span><span class="n">aop</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Set the default object to do operations on arrays.</span>
+
+<span class="sd">    :param aop: object to do operations on arrays.</span>
+<span class="sd">    :type aop: CPUOperations or GPUOperations</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">global</span> <span class="n">DEFAULT_AOP</span>
+    <span class="n">DEFAULT_AOP</span> <span class="o">=</span> <span class="n">aop</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Miguel Ramos Pernas
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

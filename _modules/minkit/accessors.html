@@ -312,7 +312,7 @@
     <span class="n">PDF_PATHS</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span></div>
 
 
-<span class="k">def</span> <span class="nf">create_cpu_function_proxies</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">ndata_pars</span><span class="p">,</span> <span class="n">narg_pars</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">nvar_arg_pars</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">create_cpu_function_proxies</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">ndata_pars</span><span class="p">,</span> <span class="n">nvar_arg_pars</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Create proxies for C++ that handle correctly the input and output data</span>
 <span class="sd">    types of a function.</span>
@@ -321,11 +321,9 @@
 <span class="sd">    :type module: module</span>
 <span class="sd">    :param ndata_pars: number of data parameters.</span>
 <span class="sd">    :type ndata_pars: int</span>
-<span class="sd">    :param narg_pars: number of fixed argument parameters.</span>
-<span class="sd">    :type narg_pars: int</span>
 <span class="sd">    :param nvar_arg_pars: number of variable argument parameters.</span>
 <span class="sd">    :type nvar_arg_pars: int</span>
-<span class="sd">    :returns: proxies for the function, the array-like function and normalization.</span>
+<span class="sd">    :returns: proxies for the function, the array-like function and integral.</span>
 <span class="sd">    :rtype: function, function, function</span>
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="c1"># Get the functions</span>
@@ -337,161 +335,117 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="n">evaluate_binned</span> <span class="o">=</span> <span class="kc">None</span>
 
-    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="s1">&#39;normalization&#39;</span><span class="p">):</span>
-        <span class="n">normalization</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="n">normalization</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="s1">&#39;integral&#39;</span><span class="p">):</span>
+        <span class="n">integral</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="n">integral</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">normalization</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">integral</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="c1"># Define the types of the input arguments</span>
-    <span class="n">partypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">types</span><span class="o">.</span><span class="n">c_double</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">narg_pars</span><span class="p">)]</span>
-
     <span class="k">if</span> <span class="n">nvar_arg_pars</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">partypes</span> <span class="o">+=</span> <span class="p">[</span><span class="n">types</span><span class="o">.</span><span class="n">c_int</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">c_double_p</span><span class="p">]</span>
+        <span class="n">partypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">types</span><span class="o">.</span><span class="n">c_int</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">c_double_p</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">partypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">types</span><span class="o">.</span><span class="n">c_double_p</span><span class="p">]</span>
 
     <span class="c1"># Define the types passed to the function</span>
-    <span class="n">functiontypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">types</span><span class="o">.</span><span class="n">c_double</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ndata_pars</span><span class="p">)]</span>
-    <span class="n">functiontypes</span> <span class="o">+=</span> <span class="n">partypes</span>
-    <span class="n">function</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="n">functiontypes</span>
+    <span class="n">function</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">types</span><span class="o">.</span><span class="n">c_double_p</span><span class="p">]</span> <span class="o">+</span> <span class="n">partypes</span>
     <span class="n">function</span><span class="o">.</span><span class="n">restype</span> <span class="o">=</span> <span class="n">types</span><span class="o">.</span><span class="n">c_double</span>
 
     <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">function</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">__function</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__function</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Internal wrapper.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">dv</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">ctypes</span><span class="o">.</span><span class="n">data_as</span><span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">c_double_p</span><span class="p">)</span>
+        <span class="n">ac</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">ctypes</span><span class="o">.</span><span class="n">data_as</span><span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">c_double_p</span><span class="p">)</span>
+
         <span class="k">if</span> <span class="n">nvar_arg_pars</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">nvar_arg_pars</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">var_arg_pars</span> <span class="o">=</span> <span class="n">types</span><span class="o">.</span><span class="n">cpu_type</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="o">-</span><span class="n">nvar_arg_pars</span><span class="p">:])</span>
-                <span class="n">pos_args</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
-                    <span class="nb">map</span><span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">c_double</span><span class="p">,</span> <span class="n">args</span><span class="p">[</span><span class="n">ndata_pars</span><span class="p">:</span><span class="o">-</span><span class="n">nvar_arg_pars</span><span class="p">]))</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">var_arg_pars</span> <span class="o">=</span> <span class="n">types</span><span class="o">.</span><span class="n">cpu_type</span><span class="p">([])</span>
-                <span class="n">pos_args</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">c_double</span><span class="p">,</span> <span class="n">args</span><span class="p">[</span><span class="n">ndata_pars</span><span class="p">:]))</span>
-
-            <span class="n">vals</span> <span class="o">=</span> <span class="n">pos_args</span> <span class="o">+</span> <span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">c_int</span><span class="p">(</span><span class="n">nvar_arg_pars</span><span class="p">),</span>
-                               <span class="n">var_arg_pars</span><span class="o">.</span><span class="n">ctypes</span><span class="o">.</span><span class="n">data_as</span><span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">c_double_p</span><span class="p">))</span>
+            <span class="k">return</span> <span class="n">function</span><span class="p">(</span><span class="n">dv</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">c_int</span><span class="p">(</span><span class="n">nvar_arg_pars</span><span class="p">),</span> <span class="n">ac</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">vals</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">c_double</span><span class="p">,</span> <span class="n">args</span><span class="p">))</span>
-
-        <span class="k">return</span> <span class="n">function</span><span class="p">(</span><span class="o">*</span><span class="n">vals</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">function</span><span class="p">(</span><span class="n">dv</span><span class="p">,</span> <span class="n">ac</span><span class="p">)</span>
 
     <span class="c1"># Define the types for the arguments passed to the evaluate function</span>
-    <span class="n">argtypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">types</span><span class="o">.</span><span class="n">c_int</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">c_double_p</span><span class="p">]</span>
-    <span class="n">argtypes</span> <span class="o">+=</span> <span class="p">[</span><span class="n">types</span><span class="o">.</span><span class="n">c_double_p</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ndata_pars</span><span class="p">)]</span>
-    <span class="n">argtypes</span> <span class="o">+=</span> <span class="n">partypes</span>
-    <span class="n">evaluate</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="n">argtypes</span>
+    <span class="n">evaluate</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">types</span><span class="o">.</span><span class="n">c_int</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">c_double_p</span><span class="p">,</span>
+                         <span class="n">types</span><span class="o">.</span><span class="n">c_int_p</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">c_double_p</span><span class="p">]</span> <span class="o">+</span> <span class="n">partypes</span>
 
     <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">evaluate</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">__evaluate</span><span class="p">(</span><span class="n">output_array</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__evaluate</span><span class="p">(</span><span class="n">output_array</span><span class="p">,</span> <span class="n">data_idx</span><span class="p">,</span> <span class="n">input_array</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Internal wrapper.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="n">op</span> <span class="o">=</span> <span class="n">output_array</span><span class="o">.</span><span class="n">ctypes</span><span class="o">.</span><span class="n">data_as</span><span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">c_double_p</span><span class="p">)</span>
-        <span class="n">ips</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">ctypes</span><span class="o">.</span><span class="n">data_as</span><span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">c_double_p</span><span class="p">)</span>
-                    <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">args</span><span class="p">[:</span><span class="n">ndata_pars</span><span class="p">])</span>
+        <span class="n">ip</span> <span class="o">=</span> <span class="n">input_array</span><span class="o">.</span><span class="n">ctypes</span><span class="o">.</span><span class="n">data_as</span><span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">c_double_p</span><span class="p">)</span>
+        <span class="n">di</span> <span class="o">=</span> <span class="n">data_idx</span><span class="o">.</span><span class="n">ctypes</span><span class="o">.</span><span class="n">data_as</span><span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">c_int_p</span><span class="p">)</span>
+        <span class="n">ac</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">ctypes</span><span class="o">.</span><span class="n">data_as</span><span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">c_double_p</span><span class="p">)</span>
+
+        <span class="n">l</span> <span class="o">=</span> <span class="n">types</span><span class="o">.</span><span class="n">c_int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">output_array</span><span class="p">))</span>
 
         <span class="k">if</span> <span class="n">nvar_arg_pars</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-
-            <span class="k">if</span> <span class="n">nvar_arg_pars</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">var_arg_pars</span> <span class="o">=</span> <span class="n">types</span><span class="o">.</span><span class="n">cpu_type</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="o">-</span><span class="n">nvar_arg_pars</span><span class="p">:])</span>
-                <span class="n">pos_args</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
-                    <span class="nb">map</span><span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">c_double</span><span class="p">,</span> <span class="n">args</span><span class="p">[</span><span class="n">ndata_pars</span><span class="p">:</span><span class="o">-</span><span class="n">nvar_arg_pars</span><span class="p">]))</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">var_arg_pars</span> <span class="o">=</span> <span class="n">types</span><span class="o">.</span><span class="n">cpu_type</span><span class="p">([])</span>
-                <span class="n">pos_args</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">c_double</span><span class="p">,</span> <span class="n">args</span><span class="p">[</span><span class="n">ndata_pars</span><span class="p">:]))</span>
-
-            <span class="n">vals</span> <span class="o">=</span> <span class="n">pos_args</span> <span class="o">+</span> <span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">c_int</span><span class="p">(</span><span class="n">nvar_arg_pars</span><span class="p">),</span>
-                               <span class="n">var_arg_pars</span><span class="o">.</span><span class="n">ctypes</span><span class="o">.</span><span class="n">data_as</span><span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">c_double_p</span><span class="p">))</span>
-
+            <span class="k">return</span> <span class="n">evaluate</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">op</span><span class="p">,</span> <span class="n">di</span><span class="p">,</span> <span class="n">ip</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">c_int</span><span class="p">(</span><span class="n">nvar_arg_pars</span><span class="p">),</span> <span class="n">ac</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">vals</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">c_double</span><span class="p">,</span> <span class="n">args</span><span class="p">[</span><span class="n">ndata_pars</span><span class="p">:]))</span>
+            <span class="k">return</span> <span class="n">evaluate</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">op</span><span class="p">,</span> <span class="n">di</span><span class="p">,</span> <span class="n">ip</span><span class="p">,</span> <span class="n">ac</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">evaluate</span><span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">c_int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">output_array</span><span class="p">)),</span> <span class="n">op</span><span class="p">,</span> <span class="o">*</span><span class="n">ips</span><span class="p">,</span> <span class="o">*</span><span class="n">vals</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">normalization</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">evaluate_binned</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="c1"># Check the functions that need the integral to be defined</span>
+    <span class="k">if</span> <span class="n">integral</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">evaluate_binned</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-            <span class="s1">&#39;If you are able to define a normalization function you can also provide an evaluation for binned data sets.&#39;</span><span class="p">)</span>
+            <span class="s1">&#39;If you are able to define a integral function you can also provide an evaluation for binned data sets.&#39;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">evaluate_binned</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
 
-        <span class="n">argtypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">types</span><span class="o">.</span><span class="n">c_int</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">c_double_p</span><span class="p">]</span>
-        <span class="n">argtypes</span> <span class="o">+=</span> <span class="n">partypes</span>
-        <span class="n">argtypes</span> <span class="o">+=</span> <span class="p">[</span><span class="n">types</span><span class="o">.</span><span class="n">c_int</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">ndata_pars</span><span class="p">)]</span>
-        <span class="n">argtypes</span> <span class="o">+=</span> <span class="p">[</span><span class="n">types</span><span class="o">.</span><span class="n">c_double_p</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ndata_pars</span><span class="p">)]</span>
-        <span class="n">evaluate_binned</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="n">argtypes</span>
+        <span class="c1"># Define the types for the arguments passed to the evaluate_binned function</span>
+        <span class="n">evaluate_binned</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">types</span><span class="o">.</span><span class="n">c_int</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">c_double_p</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">c_int</span><span class="p">,</span>
+                                    <span class="n">types</span><span class="o">.</span><span class="n">c_int_p</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">c_int_p</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">c_double_p</span><span class="p">]</span> <span class="o">+</span> <span class="n">partypes</span>
 
         <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">evaluate_binned</span><span class="p">)</span>
-        <span class="k">def</span> <span class="nf">__evaluate_binned</span><span class="p">(</span><span class="n">output_array</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">__evaluate_binned</span><span class="p">(</span><span class="n">output_array</span><span class="p">,</span> <span class="n">gaps_idx</span><span class="p">,</span> <span class="n">gaps</span><span class="p">,</span> <span class="n">edges</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
             <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">            Internal wrapper.</span>
 <span class="sd">            &#39;&#39;&#39;</span>
             <span class="n">op</span> <span class="o">=</span> <span class="n">output_array</span><span class="o">.</span><span class="n">ctypes</span><span class="o">.</span><span class="n">data_as</span><span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">c_double_p</span><span class="p">)</span>
+            <span class="n">ed</span> <span class="o">=</span> <span class="n">edges</span><span class="o">.</span><span class="n">ctypes</span><span class="o">.</span><span class="n">data_as</span><span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">c_double_p</span><span class="p">)</span>
+            <span class="n">gi</span> <span class="o">=</span> <span class="n">gaps_idx</span><span class="o">.</span><span class="n">ctypes</span><span class="o">.</span><span class="n">data_as</span><span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">c_int_p</span><span class="p">)</span>
+            <span class="n">gp</span> <span class="o">=</span> <span class="n">gaps</span><span class="o">.</span><span class="n">ctypes</span><span class="o">.</span><span class="n">data_as</span><span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">c_int_p</span><span class="p">)</span>
+            <span class="n">ac</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">ctypes</span><span class="o">.</span><span class="n">data_as</span><span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">c_double_p</span><span class="p">)</span>
 
-            <span class="n">bs</span> <span class="o">=</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">ndata_pars</span>
+            <span class="n">l</span> <span class="o">=</span> <span class="n">types</span><span class="o">.</span><span class="n">c_int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">output_array</span><span class="p">))</span>
+
+            <span class="n">vals</span> <span class="o">=</span> <span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">op</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">c_int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">gaps</span><span class="p">)),</span> <span class="n">gi</span><span class="p">,</span> <span class="n">gp</span><span class="p">,</span> <span class="n">ed</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">nvar_arg_pars</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-
-                <span class="n">var_arg_pars</span> <span class="o">=</span> <span class="n">types</span><span class="o">.</span><span class="n">cpu_type</span><span class="p">(</span>
-                    <span class="n">args</span><span class="p">[</span><span class="o">-</span><span class="n">bs</span> <span class="o">-</span> <span class="n">nvar_arg_pars</span><span class="p">:</span> <span class="o">-</span><span class="n">bs</span><span class="p">])</span>
-
-                <span class="c1"># Normal arguments are parsed first</span>
-                <span class="n">vals</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
-                    <span class="nb">map</span><span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">c_double</span><span class="p">,</span> <span class="n">args</span><span class="p">[:</span><span class="o">-</span><span class="n">nvar_arg_pars</span> <span class="o">-</span> <span class="n">bs</span><span class="p">]))</span>
-                <span class="c1"># Variable number of arguments follow</span>
-                <span class="n">vals</span> <span class="o">+=</span> <span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">c_int</span><span class="p">(</span><span class="n">nvar_arg_pars</span><span class="p">),</span>
-                         <span class="n">var_arg_pars</span><span class="o">.</span><span class="n">ctypes</span><span class="o">.</span><span class="n">data_as</span><span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">c_double_p</span><span class="p">))</span>
-                <span class="c1"># Add the number of edges and gap values</span>
-                <span class="n">vals</span> <span class="o">+=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">c_int</span><span class="p">,</span> <span class="n">args</span><span class="p">[</span><span class="o">-</span><span class="n">bs</span><span class="p">:</span><span class="o">-</span><span class="n">ndata_pars</span><span class="p">]))</span>
-                <span class="c1"># Finally, the integration limits must be specified</span>
-                <span class="n">vals</span> <span class="o">+=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">ctypes</span><span class="o">.</span><span class="n">data_as</span><span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">c_double_p</span><span class="p">)</span>
-                              <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">args</span><span class="p">[</span><span class="o">-</span><span class="n">ndata_pars</span><span class="p">:])</span>
-
+                <span class="k">return</span> <span class="n">evaluate_binned</span><span class="p">(</span><span class="o">*</span><span class="n">vals</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">c_int</span><span class="p">(</span><span class="n">nvar_arg_pars</span><span class="p">),</span> <span class="n">ac</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">vals</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">c_double</span><span class="p">,</span> <span class="n">args</span><span class="p">[:</span><span class="o">-</span><span class="n">bs</span><span class="p">]))</span> <span class="o">+</span> <span class="nb">tuple</span><span class="p">(</span>
-                    <span class="nb">map</span><span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">c_int</span><span class="p">,</span> <span class="n">args</span><span class="p">[</span><span class="o">-</span><span class="n">bs</span><span class="p">:</span><span class="o">-</span><span class="n">ndata_pars</span><span class="p">]))</span> <span class="o">+</span> <span class="nb">tuple</span><span class="p">(</span>
-                    <span class="n">a</span><span class="o">.</span><span class="n">ctypes</span><span class="o">.</span><span class="n">data_as</span><span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">c_double_p</span><span class="p">)</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">args</span><span class="p">[</span><span class="o">-</span><span class="n">ndata_pars</span><span class="p">:])</span>
-
-            <span class="k">return</span> <span class="n">evaluate_binned</span><span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">c_int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">output_array</span><span class="p">)),</span> <span class="n">op</span><span class="p">,</span> <span class="o">*</span><span class="n">vals</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">evaluate_binned</span><span class="p">(</span><span class="o">*</span><span class="n">vals</span><span class="p">,</span> <span class="n">ac</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">__evaluate_binned</span> <span class="o">=</span> <span class="kc">None</span>
 
-    <span class="k">if</span> <span class="n">normalization</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">integral</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
 
-        <span class="c1"># Define the types passed to the normalization function</span>
-        <span class="n">normtypes</span> <span class="o">=</span> <span class="n">partypes</span>
-        <span class="n">normtypes</span> <span class="o">+=</span> <span class="p">[</span><span class="n">types</span><span class="o">.</span><span class="n">c_double</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">ndata_pars</span><span class="p">)]</span>
-        <span class="n">normalization</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="n">normtypes</span>
-        <span class="n">normalization</span><span class="o">.</span><span class="n">restype</span> <span class="o">=</span> <span class="n">types</span><span class="o">.</span><span class="n">c_double</span>
+        <span class="c1"># Define the types passed to the integral function</span>
+        <span class="n">integral</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">types</span><span class="o">.</span><span class="n">c_double_p</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">c_double_p</span><span class="p">]</span> <span class="o">+</span> <span class="n">partypes</span>
+        <span class="n">integral</span><span class="o">.</span><span class="n">restype</span> <span class="o">=</span> <span class="n">types</span><span class="o">.</span><span class="n">c_double</span>
 
-        <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">normalization</span><span class="p">)</span>
-        <span class="k">def</span> <span class="nf">__normalization</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">integral</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">__integral</span><span class="p">(</span><span class="n">lb</span><span class="p">,</span> <span class="n">ub</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
             <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">            Internal wrapper.</span>
 <span class="sd">            &#39;&#39;&#39;</span>
+            <span class="k">if</span> <span class="n">lb</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">lb</span><span class="p">,</span> <span class="n">ub</span> <span class="o">=</span> <span class="n">types</span><span class="o">.</span><span class="n">float_array</span><span class="p">(</span><span class="n">lb</span><span class="p">),</span> <span class="n">types</span><span class="o">.</span><span class="n">float_array</span><span class="p">(</span><span class="n">ub</span><span class="p">)</span>
+
+            <span class="n">lb</span> <span class="o">=</span> <span class="n">lb</span><span class="o">.</span><span class="n">ctypes</span><span class="o">.</span><span class="n">data_as</span><span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">c_double_p</span><span class="p">)</span>
+            <span class="n">ub</span> <span class="o">=</span> <span class="n">ub</span><span class="o">.</span><span class="n">ctypes</span><span class="o">.</span><span class="n">data_as</span><span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">c_double_p</span><span class="p">)</span>
+            <span class="n">ac</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">ctypes</span><span class="o">.</span><span class="n">data_as</span><span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">c_double_p</span><span class="p">)</span>
+
             <span class="k">if</span> <span class="n">nvar_arg_pars</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-
-                <span class="n">bs</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">ndata_pars</span>
-
-                <span class="n">var_arg_pars</span> <span class="o">=</span> <span class="n">types</span><span class="o">.</span><span class="n">cpu_type</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="o">-</span><span class="n">bs</span> <span class="o">-</span> <span class="n">nvar_arg_pars</span><span class="p">:</span> <span class="o">-</span><span class="n">bs</span><span class="p">])</span>
-
-                <span class="c1"># Normal arguments are parse first</span>
-                <span class="n">vals</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">c_double</span><span class="p">,</span> <span class="n">args</span><span class="p">[:</span><span class="o">-</span><span class="n">nvar_arg_pars</span> <span class="o">-</span> <span class="n">bs</span><span class="p">]))</span>
-                <span class="c1"># Variable number of arguments follow</span>
-                <span class="n">vals</span> <span class="o">+=</span> <span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">c_int</span><span class="p">(</span><span class="n">nvar_arg_pars</span><span class="p">),</span>
-                         <span class="n">var_arg_pars</span><span class="o">.</span><span class="n">ctypes</span><span class="o">.</span><span class="n">data_as</span><span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">c_double_p</span><span class="p">))</span>
-                <span class="c1"># Finally, the integration limits must be specified</span>
-                <span class="n">vals</span> <span class="o">+=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">c_double</span><span class="p">,</span> <span class="n">args</span><span class="p">[</span><span class="o">-</span><span class="n">bs</span><span class="p">:]))</span>
+                <span class="k">return</span> <span class="n">integral</span><span class="p">(</span><span class="n">lb</span><span class="p">,</span> <span class="n">ub</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">c_int</span><span class="p">(</span><span class="n">nvar_arg_pars</span><span class="p">),</span> <span class="n">ac</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">vals</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">c_double</span><span class="p">,</span> <span class="n">args</span><span class="p">))</span>
-
-            <span class="k">return</span> <span class="n">normalization</span><span class="p">(</span><span class="o">*</span><span class="n">vals</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">integral</span><span class="p">(</span><span class="n">lb</span><span class="p">,</span> <span class="n">ub</span><span class="p">,</span> <span class="n">ac</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">__normalization</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">__integral</span> <span class="o">=</span> <span class="kc">None</span>
 
-    <span class="k">return</span> <span class="n">__function</span><span class="p">,</span> <span class="n">__evaluate</span><span class="p">,</span> <span class="n">__evaluate_binned</span><span class="p">,</span> <span class="n">__normalization</span>
+    <span class="k">return</span> <span class="n">__function</span><span class="p">,</span> <span class="n">__evaluate</span><span class="p">,</span> <span class="n">__evaluate_binned</span><span class="p">,</span> <span class="n">__integral</span>
 
 
-<span class="k">def</span> <span class="nf">create_gpu_function_proxy</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">ndata_pars</span><span class="p">,</span> <span class="n">narg_pars</span><span class="p">,</span> <span class="n">nvar_arg_pars</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">create_gpu_function_proxy</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">ndata_pars</span><span class="p">,</span> <span class="n">nvar_arg_pars</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Creates a proxy for a function writen in GPU.</span>
 
@@ -499,8 +453,6 @@
 <span class="sd">    :type module: module</span>
 <span class="sd">    :param ndata_pars: number of data parameters.</span>
 <span class="sd">    :type ndata_pars: int</span>
-<span class="sd">    :param narg_pars: number of fixed argument parameters.</span>
-<span class="sd">    :type narg_pars: int</span>
 <span class="sd">    :param nvar_arg_pars: number of variable argument parameters.</span>
 <span class="sd">    :type nvar_arg_pars: int</span>
 <span class="sd">    :returns: proxy for the array-like function.</span>
@@ -516,67 +468,54 @@
         <span class="n">evaluate_binned</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">evaluate</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">__evaluate</span><span class="p">(</span><span class="n">output_array</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__evaluate</span><span class="p">(</span><span class="n">output_array</span><span class="p">,</span> <span class="n">data_idx</span><span class="p">,</span> <span class="n">input_array</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Internal wrapper.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="n">ips</span> <span class="o">=</span> <span class="n">args</span><span class="p">[:</span><span class="n">ndata_pars</span><span class="p">]</span>
+        <span class="n">ic</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">aop</span><span class="o">.</span><span class="n">data_array</span><span class="p">(</span><span class="n">data_idx</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">types</span><span class="o">.</span><span class="n">cpu_int</span><span class="p">,</span> <span class="n">convert</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># It seems we can not pass a null pointer in OpenCL</span>
+            <span class="n">ac</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">aop</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ac</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">aop</span><span class="o">.</span><span class="n">data_array</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">types</span><span class="o">.</span><span class="n">cpu_type</span><span class="p">,</span> <span class="n">convert</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">nvar_arg_pars</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-
-            <span class="c1"># Variable arguments must be the last in the list</span>
-            <span class="k">if</span> <span class="n">nvar_arg_pars</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">var_arg_pars</span> <span class="o">=</span> <span class="n">types</span><span class="o">.</span><span class="n">cpu_type</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="o">-</span><span class="n">nvar_arg_pars</span><span class="p">:])</span>
-                <span class="n">pos_args</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
-                    <span class="nb">map</span><span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">cpu_type</span><span class="p">,</span> <span class="n">args</span><span class="p">[</span><span class="n">ndata_pars</span><span class="p">:</span><span class="o">-</span><span class="n">nvar_arg_pars</span><span class="p">]))</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="c1"># This is necessary because arrays with zero size are not allowed</span>
-                <span class="c1"># in reikna</span>
-                <span class="n">var_arg_pars</span> <span class="o">=</span> <span class="n">types</span><span class="o">.</span><span class="n">cpu_type</span><span class="p">([</span><span class="mi">0</span><span class="p">])</span>
-                <span class="n">pos_args</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">cpu_type</span><span class="p">,</span> <span class="n">args</span><span class="p">[</span><span class="n">ndata_pars</span><span class="p">:]))</span>
-
-            <span class="n">vals</span> <span class="o">=</span> <span class="n">pos_args</span> <span class="o">+</span> <span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">cpu_int</span><span class="p">(</span><span class="n">nvar_arg_pars</span><span class="p">),</span>
-                               <span class="n">core</span><span class="o">.</span><span class="n">aop</span><span class="o">.</span><span class="n">data_array</span><span class="p">(</span><span class="n">var_arg_pars</span><span class="p">))</span>
+            <span class="n">vals</span> <span class="o">=</span> <span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">cpu_int</span><span class="p">(</span><span class="n">nvar_arg_pars</span><span class="p">),</span> <span class="n">ac</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">vals</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">cpu_type</span><span class="p">,</span> <span class="n">args</span><span class="p">[</span><span class="n">ndata_pars</span><span class="p">:]))</span>
+            <span class="n">vals</span> <span class="o">=</span> <span class="p">(</span><span class="n">ac</span><span class="p">,)</span>
 
         <span class="n">global_size</span><span class="p">,</span> <span class="n">local_size</span> <span class="o">=</span> <span class="n">gpu_core</span><span class="o">.</span><span class="n">get_sizes</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">output_array</span><span class="p">))</span>
 
-        <span class="k">return</span> <span class="n">evaluate</span><span class="p">(</span><span class="n">output_array</span><span class="p">,</span> <span class="o">*</span><span class="n">ips</span><span class="p">,</span> <span class="o">*</span><span class="n">vals</span><span class="p">,</span> <span class="n">global_size</span><span class="o">=</span><span class="n">global_size</span><span class="p">,</span> <span class="n">local_size</span><span class="o">=</span><span class="n">local_size</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">evaluate</span><span class="p">(</span><span class="n">output_array</span><span class="p">,</span> <span class="n">ic</span><span class="p">,</span> <span class="n">input_array</span><span class="p">,</span> <span class="o">*</span><span class="n">vals</span><span class="p">,</span> <span class="n">global_size</span><span class="o">=</span><span class="n">global_size</span><span class="p">,</span> <span class="n">local_size</span><span class="o">=</span><span class="n">local_size</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">evaluate_binned</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
 
         <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">evaluate_binned</span><span class="p">)</span>
-        <span class="k">def</span> <span class="nf">__evaluate_binned</span><span class="p">(</span><span class="n">output_array</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">__evaluate_binned</span><span class="p">(</span><span class="n">output_array</span><span class="p">,</span> <span class="n">gaps_idx</span><span class="p">,</span> <span class="n">gaps</span><span class="p">,</span> <span class="n">edges</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
             <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">            Internal wrapper.</span>
 <span class="sd">            &#39;&#39;&#39;</span>
-            <span class="n">bs</span> <span class="o">=</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">ndata_pars</span>
+            <span class="n">gi</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">aop</span><span class="o">.</span><span class="n">data_array</span><span class="p">(</span>
+                <span class="n">gaps_idx</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">types</span><span class="o">.</span><span class="n">cpu_int</span><span class="p">,</span> <span class="n">convert</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">gp</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">aop</span><span class="o">.</span><span class="n">data_array</span><span class="p">(</span><span class="n">gaps</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">types</span><span class="o">.</span><span class="n">cpu_int</span><span class="p">,</span> <span class="n">convert</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">nd</span> <span class="o">=</span> <span class="n">types</span><span class="o">.</span><span class="n">cpu_int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">gaps</span><span class="p">))</span>
+
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="c1"># It seems we can not pass a null pointer in OpenCL</span>
+                <span class="n">ac</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">aop</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">ac</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">aop</span><span class="o">.</span><span class="n">data_array</span><span class="p">(</span>
+                    <span class="n">args</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">types</span><span class="o">.</span><span class="n">cpu_type</span><span class="p">,</span> <span class="n">convert</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">nvar_arg_pars</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-
-                <span class="n">var_arg_pars</span> <span class="o">=</span> <span class="n">types</span><span class="o">.</span><span class="n">cpu_type</span><span class="p">(</span>
-                    <span class="n">args</span><span class="p">[</span><span class="o">-</span><span class="n">bs</span> <span class="o">-</span> <span class="n">nvar_arg_pars</span><span class="p">:</span> <span class="o">-</span><span class="n">bs</span><span class="p">])</span>
-
-                <span class="c1"># Normal arguments are parse first</span>
-                <span class="n">vals</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
-                    <span class="nb">map</span><span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">cpu_type</span><span class="p">,</span> <span class="n">args</span><span class="p">[:</span><span class="o">-</span><span class="n">nvar_arg_pars</span> <span class="o">-</span> <span class="n">bs</span><span class="p">]))</span>
-                <span class="c1"># Variable number of arguments follow</span>
-                <span class="n">vals</span> <span class="o">+=</span> <span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">cpu_int</span><span class="p">(</span><span class="n">nvar_arg_pars</span><span class="p">),</span>
-                         <span class="n">core</span><span class="o">.</span><span class="n">aop</span><span class="o">.</span><span class="n">data_array</span><span class="p">(</span><span class="n">var_arg_pars</span><span class="p">))</span>
-                <span class="c1"># Add the number of edges and gap values</span>
-                <span class="n">vals</span> <span class="o">+=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">c_int</span><span class="p">,</span> <span class="n">args</span><span class="p">[</span><span class="o">-</span><span class="n">bs</span><span class="p">:</span><span class="o">-</span><span class="n">ndata_pars</span><span class="p">]))</span>
-                <span class="c1"># Finally, the integration limits must be specified</span>
-                <span class="n">vals</span> <span class="o">+=</span> <span class="n">args</span><span class="p">[</span><span class="o">-</span><span class="n">ndata_pars</span><span class="p">:]</span>
-
+                <span class="n">vals</span> <span class="o">=</span> <span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">cpu_int</span><span class="p">(</span><span class="n">nvar_arg_pars</span><span class="p">),</span> <span class="n">ac</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">vals</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span>
-                    <span class="n">types</span><span class="o">.</span><span class="n">cpu_type</span><span class="p">,</span> <span class="n">args</span><span class="p">[:</span><span class="o">-</span><span class="n">bs</span><span class="p">]))</span> <span class="o">+</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span>
-                        <span class="n">types</span><span class="o">.</span><span class="n">cpu_int</span><span class="p">,</span> <span class="n">args</span><span class="p">[</span><span class="o">-</span><span class="n">bs</span><span class="p">:</span><span class="o">-</span><span class="n">ndata_pars</span><span class="p">]))</span> <span class="o">+</span> <span class="n">args</span><span class="p">[</span><span class="o">-</span><span class="n">ndata_pars</span><span class="p">:]</span>
+                <span class="n">vals</span> <span class="o">=</span> <span class="p">(</span><span class="n">ac</span><span class="p">,)</span>
 
             <span class="n">global_size</span><span class="p">,</span> <span class="n">local_size</span> <span class="o">=</span> <span class="n">gpu_core</span><span class="o">.</span><span class="n">get_sizes</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">output_array</span><span class="p">))</span>
 
-            <span class="k">return</span> <span class="n">evaluate_binned</span><span class="p">(</span><span class="n">output_array</span><span class="p">,</span> <span class="o">*</span><span class="n">vals</span><span class="p">,</span> <span class="n">global_size</span><span class="o">=</span><span class="n">global_size</span><span class="p">,</span> <span class="n">local_size</span><span class="o">=</span><span class="n">local_size</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">evaluate_binned</span><span class="p">(</span><span class="n">output_array</span><span class="p">,</span> <span class="n">nd</span><span class="p">,</span> <span class="n">gi</span><span class="p">,</span> <span class="n">gp</span><span class="p">,</span> <span class="n">edges</span><span class="p">,</span> <span class="o">*</span><span class="n">vals</span><span class="p">,</span> <span class="n">global_size</span><span class="o">=</span><span class="n">global_size</span><span class="p">,</span> <span class="n">local_size</span><span class="o">=</span><span class="n">local_size</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">__evaluate_binned</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -584,7 +523,7 @@
 
 
 <span class="nd">@core</span><span class="o">.</span><span class="n">with_backend</span>
-<span class="k">def</span> <span class="nf">access_pdf</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">ndata_pars</span><span class="p">,</span> <span class="n">narg_pars</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">nvar_arg_pars</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">access_pdf</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">ndata_pars</span><span class="p">,</span> <span class="n">nvar_arg_pars</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Access a PDF with the given name and number of data and parameter arguments.</span>
 
@@ -592,11 +531,9 @@
 <span class="sd">    :type name: str</span>
 <span class="sd">    :param ndata_pars: number of data parameters.</span>
 <span class="sd">    :type ndata_pars: int</span>
-<span class="sd">    :param narg_pars: number of fixed argument parameters.</span>
-<span class="sd">    :type narg_pars: int</span>
 <span class="sd">    :param nvar_arg_pars: number of variable argument parameters.</span>
 <span class="sd">    :type nvar_arg_pars: int</span>
-<span class="sd">    :returns: PDF and normalization function.</span>
+<span class="sd">    :returns: PDF and integral function.</span>
 <span class="sd">    :rtype: tuple(function, function)</span>
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="k">global</span> <span class="n">CPU_PDF_MODULE_CACHE</span>
@@ -613,7 +550,7 @@
             <span class="n">cpu_output</span> <span class="o">=</span> <span class="n">CPU_PDF_CACHE</span><span class="p">[</span><span class="n">modname</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">cpu_output</span> <span class="o">=</span> <span class="n">create_cpu_function_proxies</span><span class="p">(</span>
-                <span class="n">cpu_module</span><span class="p">,</span> <span class="n">ndata_pars</span><span class="p">,</span> <span class="n">narg_pars</span><span class="p">,</span> <span class="n">nvar_arg_pars</span><span class="p">)</span>
+                <span class="n">cpu_module</span><span class="p">,</span> <span class="n">ndata_pars</span><span class="p">,</span> <span class="n">nvar_arg_pars</span><span class="p">)</span>
             <span class="n">CPU_PDF_CACHE</span><span class="p">[</span><span class="n">modname</span><span class="p">]</span> <span class="o">=</span> <span class="n">cpu_output</span>
 
     <span class="k">except</span> <span class="ne">AttributeError</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
@@ -626,8 +563,8 @@
 
     <span class="k">elif</span> <span class="n">core</span><span class="o">.</span><span class="n">BACKEND</span> <span class="o">==</span> <span class="n">core</span><span class="o">.</span><span class="n">CUDA</span> <span class="ow">or</span> <span class="n">core</span><span class="o">.</span><span class="n">BACKEND</span> <span class="o">==</span> <span class="n">core</span><span class="o">.</span><span class="n">OPENCL</span><span class="p">:</span>
 
-        <span class="c1"># Function and normalization are taken from the C++ version</span>
-        <span class="n">function</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">normalization</span> <span class="o">=</span> <span class="n">cpu_output</span>
+        <span class="c1"># Function and integral are taken from the C++ version</span>
+        <span class="n">function</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">integral</span> <span class="o">=</span> <span class="n">cpu_output</span>
 
         <span class="c1"># Get the &quot;evaluate&quot; function from source</span>
         <span class="k">if</span> <span class="n">modname</span> <span class="ow">in</span> <span class="n">GPU_PDF_CACHE</span><span class="p">:</span>
@@ -637,10 +574,10 @@
             <span class="n">gpu_module</span> <span class="o">=</span> <span class="n">access_gpu_module</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
 
             <span class="n">evaluate</span><span class="p">,</span> <span class="n">evaluate_binned</span> <span class="o">=</span> <span class="n">create_gpu_function_proxy</span><span class="p">(</span>
-                <span class="n">gpu_module</span><span class="p">,</span> <span class="n">ndata_pars</span><span class="p">,</span> <span class="n">narg_pars</span><span class="p">,</span> <span class="n">nvar_arg_pars</span><span class="p">)</span>
+                <span class="n">gpu_module</span><span class="p">,</span> <span class="n">ndata_pars</span><span class="p">,</span> <span class="n">nvar_arg_pars</span><span class="p">)</span>
             <span class="n">GPU_PDF_CACHE</span><span class="p">[</span><span class="n">modname</span><span class="p">]</span> <span class="o">=</span> <span class="n">evaluate</span><span class="p">,</span> <span class="n">evaluate_binned</span>
 
-        <span class="k">return</span> <span class="n">function</span><span class="p">,</span> <span class="n">evaluate</span><span class="p">,</span> <span class="n">evaluate_binned</span><span class="p">,</span> <span class="n">normalization</span>
+        <span class="k">return</span> <span class="n">function</span><span class="p">,</span> <span class="n">evaluate</span><span class="p">,</span> <span class="n">evaluate_binned</span><span class="p">,</span> <span class="n">integral</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
             <span class="n">f</span><span class="s1">&#39;Function not implemented for backend &quot;</span><span class="si">{core.BACKEND}</span><span class="s1">&quot;&#39;</span><span class="p">)</span>

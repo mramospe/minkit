@@ -39,7 +39,7 @@
   <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="pdf_centers_values" href="minkit.pdf_centers_values.html" />
+    <link rel="next" title="pdf_from_json" href="minkit.pdf_from_json.html" />
     <link rel="prev" title="minimizer" href="minkit.minimizer.html" /> 
 </head>
 
@@ -89,19 +89,18 @@
             
             
               <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../user.html">User guide</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../reference.html">MinKit reference</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="../reference.html#functions">Functions</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="minkit.add_pdf_src.html">add_pdf_src</a></li>
-<li class="toctree-l3"><a class="reference internal" href="minkit.as_ndarray.html">as_ndarray</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.binned_chisquare.html">binned_chisquare</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.binned_maximum_likelihood.html">binned_maximum_likelihood</a></li>
-<li class="toctree-l3"><a class="reference internal" href="minkit.free_cache.html">free_cache</a></li>
-<li class="toctree-l3"><a class="reference internal" href="minkit.initialize.html">initialize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.data_plotting_arrays.html">data_plotting_arrays</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.minimizer.html">minimizer</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">minuit_to_registry</a></li>
-<li class="toctree-l3"><a class="reference internal" href="minkit.pdf_centers_values.html">pdf_centers_values</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.pdf_from_json.html">pdf_from_json</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.pdf_plotting_arrays.html">pdf_plotting_arrays</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.pdf_to_json.html">pdf_to_json</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.register_pdf.html">register_pdf</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.simultaneous_minimizer.html">simultaneous_minimizer</a></li>
@@ -211,17 +210,17 @@
 <h1>minuit_to_registry<a class="headerlink" href="#minuit-to-registry" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
 <dt id="minkit.minuit_to_registry">
-<code class="sig-prename descclassname">minkit.</code><code class="sig-name descname">minuit_to_registry</code><span class="sig-paren">(</span><em class="sig-param">params</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/minimizers.html#minuit_to_registry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.minuit_to_registry" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">minkit.</code><code class="sig-name descname">minuit_to_registry</code><span class="sig-paren">(</span><em class="sig-param">params</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/minimization/minimizers.html#minuit_to_registry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.minuit_to_registry" title="Permalink to this definition">¶</a></dt>
 <dd><p>Transform the parameters from a call to Minuit into a <a class="reference internal" href="minkit.Registry.html#minkit.Registry" title="minkit.Registry"><code class="xref py py-class docutils literal notranslate"><span class="pre">Registry</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>result</strong> (<a class="reference external" href="https://iminuit.readthedocs.io/en/latest/reference.html#iminuit.util.Params" title="(in iminuit v1.3.8)"><em>iminuit.util.Params</em></a>) – result from a migrad call.</p>
+<dd class="field-odd"><p><strong>result</strong> (<a class="reference external" href="https://iminuit.readthedocs.io/en/latest/reference.html#iminuit.util.Params" title="(in iminuit v1.3.10)"><em>iminuit.util.Params</em></a>) – result from a migrad call.</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>registry of parameters with the result from Migrad.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="minkit.Registry.html#minkit.Registry" title="minkit.Registry">Registry</a>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>, <a class="reference internal" href="minkit.Parameter.html#minkit.Parameter" title="minkit.Parameter">Parameter</a>)</p>
+<dd class="field-odd"><p><a class="reference internal" href="minkit.Registry.html#minkit.Registry" title="minkit.Registry">Registry</a>(<a class="reference internal" href="minkit.Parameter.html#minkit.Parameter" title="minkit.Parameter">Parameter</a>)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -236,7 +235,7 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="minkit.pdf_centers_values.html" class="btn btn-neutral float-right" title="pdf_centers_values" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="minkit.pdf_from_json.html" class="btn btn-neutral float-right" title="pdf_from_json" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="minkit.minimizer.html" class="btn btn-neutral float-left" title="minimizer" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

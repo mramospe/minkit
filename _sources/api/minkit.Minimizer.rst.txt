@@ -1,0 +1,17 @@
+Minimizer
+=========
+
+.. currentmodule:: minkit
+
+.. autoclass:: Minimizer
+   :show-inheritance:
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+
+      ~Minimizer.result_to_registry
+
+   .. rubric:: Methods Documentation
+
+   .. automethod:: result_to_registry

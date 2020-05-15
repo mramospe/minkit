@@ -1,0 +1,7 @@
+Landau
+======
+
+.. currentmodule:: minkit
+
+.. autoclass:: Landau
+   :show-inheritance:

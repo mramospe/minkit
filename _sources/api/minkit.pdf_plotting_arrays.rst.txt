@@ -1,0 +1,6 @@
+pdf_plotting_arrays
+===================
+
+.. currentmodule:: minkit
+
+.. autofunction:: pdf_plotting_arrays

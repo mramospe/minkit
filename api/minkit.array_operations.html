@@ -1,0 +1,1266 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>array_operations &mdash; minkit 0.0.0.dev0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="barray" href="minkit.barray.html" />
+    <link rel="prev" title="UnbinnedEvaluator" href="minkit.UnbinnedEvaluator.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> minkit
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.0.0.dev0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user.html">User guide</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../reference.html">MinKit reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../reference.html#functions">Functions</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../reference.html#classes">Classes</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="minkit.AddPDFs.html">AddPDFs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.Amoroso.html">Amoroso</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.Backend.html">Backend</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.BinnedDataSet.html">BinnedDataSet</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.BinnedEvaluator.html">BinnedEvaluator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.Category.html">Category</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.Chebyshev.html">Chebyshev</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.ConvPDFs.html">ConvPDFs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.CrystalBall.html">CrystalBall</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.DataSet.html">DataSet</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.Evaluator.html">Evaluator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.Exponential.html">Exponential</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.Formula.html">Formula</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.Gaussian.html">Gaussian</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.Minimizer.html">Minimizer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.MinuitMinimizer.html">MinuitMinimizer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.MultiPDF.html">MultiPDF</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.PDF.html">PDF</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.Parameter.html">Parameter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.Polynomial.html">Polynomial</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.PowerLaw.html">PowerLaw</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.ProdPDFs.html">ProdPDFs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.Registry.html">Registry</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.SciPyMinimizer.html">SciPyMinimizer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.SimultaneousEvaluator.html">SimultaneousEvaluator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.SourcePDF.html">SourcePDF</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.UnbinnedEvaluator.html">UnbinnedEvaluator</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">array_operations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.barray.html">barray</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.carray.html">carray</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.darray.html">darray</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.farray.html">farray</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.iarray.html">iarray</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.marray.html">marray</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../reference.html#class-inheritance-diagram">Class Inheritance Diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../performance.html">Performance</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">minkit</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../reference.html">MinKit reference</a> &raquo;</li>
+        
+      <li>array_operations</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/api/minkit.array_operations.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="array-operations">
+<h1>array_operations<a class="headerlink" href="#array-operations" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="minkit.array_operations">
+<em class="property">class </em><code class="sig-prename descclassname">minkit.</code><code class="sig-name descname">array_operations</code><span class="sig-paren">(</span><em class="sig-param">backend</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/backends/aop.html#array_operations"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.array_operations" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Build the object to do operations within a backend. Only the necessary
+operators have been defined.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>btype</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – backend type (‘cpu’, ‘cuda’, ‘opencl’).</p></li>
+<li><p><strong>kwargs</strong> – arguments forwarded to the backend constructor         (cuda and opencl backends only). It can contain any of the following         keys:         * device:         * interactive:         :type kwargs: dict</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Attributes Summary</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.array_operations.backend" title="minkit.array_operations.backend"><code class="xref py py-obj docutils literal notranslate"><span class="pre">backend</span></code></a></p></td>
+<td><p>Backend interface.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#minkit.array_operations.bool_type" title="minkit.array_operations.bool_type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool_type</span></code></a></p></td>
+<td><p>Data type used for boolean comparisons.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Methods Summary</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.array_operations.access_pdf" title="minkit.array_operations.access_pdf"><code class="xref py py-obj docutils literal notranslate"><span class="pre">access_pdf</span></code></a>(name, ndata_pars[, nvar_arg_pars])</p></td>
+<td><p>Access the PDF with the given name.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#minkit.array_operations.bempty" title="minkit.array_operations.bempty"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bempty</span></code></a>(size)</p></td>
+<td><p>Create an empty <a class="reference internal" href="minkit.barray.html#minkit.barray" title="minkit.barray"><code class="xref py py-class docutils literal notranslate"><span class="pre">barray</span></code></a> instance with the given length.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.array_operations.bones" title="minkit.array_operations.bones"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bones</span></code></a>(size)</p></td>
+<td><p>Create an array of “true” values of the given size.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#minkit.array_operations.bzeros" title="minkit.array_operations.bzeros"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bzeros</span></code></a>(size)</p></td>
+<td><p>Create an array of “false” values of the given size.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.array_operations.carange" title="minkit.array_operations.carange"><code class="xref py py-obj docutils literal notranslate"><span class="pre">carange</span></code></a>(n)</p></td>
+<td><p>Create an array of elements from 0 to n.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#minkit.array_operations.cexp" title="minkit.array_operations.cexp"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cexp</span></code></a>(a)</p></td>
+<td><p>Calculate the exponential of an array of numbers.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.array_operations.concatenate" title="minkit.array_operations.concatenate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">concatenate</span></code></a>(arrays[, maximum])</p></td>
+<td><p>Concatenate several arrays.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#minkit.array_operations.count_nonzero" title="minkit.array_operations.count_nonzero"><code class="xref py py-obj docutils literal notranslate"><span class="pre">count_nonzero</span></code></a>(a)</p></td>
+<td><p>Count the number of elements that are different from zero.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.array_operations.fempty" title="minkit.array_operations.fempty"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fempty</span></code></a>(size)</p></td>
+<td><p>Create an empty <a class="reference internal" href="minkit.farray.html#minkit.farray" title="minkit.farray"><code class="xref py py-class docutils literal notranslate"><span class="pre">farray</span></code></a> instance with the given length.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#minkit.array_operations.fexp" title="minkit.array_operations.fexp"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fexp</span></code></a>(a)</p></td>
+<td><p>Calculate the exponential of an array of numbers.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.array_operations.fftconvolve" title="minkit.array_operations.fftconvolve"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fftconvolve</span></code></a>(a, b, data)</p></td>
+<td><p>Calculate the convolution of two arrays that correspond to the output from the evaluation of two PDFs in the given data.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#minkit.array_operations.fones" title="minkit.array_operations.fones"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fones</span></code></a>(size)</p></td>
+<td><p>Create an array of the given size filled with ones.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.array_operations.fzeros" title="minkit.array_operations.fzeros"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fzeros</span></code></a>(size)</p></td>
+<td><p>Create an array of the given size filled with zeros.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#minkit.array_operations.ge" title="minkit.array_operations.ge"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ge</span></code></a>(a, b)</p></td>
+<td><p>Compare two arrays <span class="math notranslate nohighlight">\(a \geq b\)</span>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.array_operations.iarange" title="minkit.array_operations.iarange"><code class="xref py py-obj docutils literal notranslate"><span class="pre">iarange</span></code></a>(n)</p></td>
+<td><p>Create an array of elements from 0 to n.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#minkit.array_operations.iempty" title="minkit.array_operations.iempty"><code class="xref py py-obj docutils literal notranslate"><span class="pre">iempty</span></code></a>(size)</p></td>
+<td><p>Create an empty <a class="reference internal" href="minkit.iarray.html#minkit.iarray" title="minkit.iarray"><code class="xref py py-class docutils literal notranslate"><span class="pre">iarray</span></code></a> instance with the given length.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.array_operations.interpolate_linear" title="minkit.array_operations.interpolate_linear"><code class="xref py py-obj docutils literal notranslate"><span class="pre">interpolate_linear</span></code></a>(ndim, idx, x, xp, yp)</p></td>
+<td><p>Do a linear interpolation.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#minkit.array_operations.is_bool" title="minkit.array_operations.is_bool"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_bool</span></code></a>(a)</p></td>
+<td><p>Check whether the data type of the given array is of boolean type.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.array_operations.is_complex" title="minkit.array_operations.is_complex"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_complex</span></code></a>(a)</p></td>
+<td><p>Check whether the data type of the given array is of complex type.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#minkit.array_operations.is_float" title="minkit.array_operations.is_float"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_float</span></code></a>(a)</p></td>
+<td><p>Check whether the data type of the given array is of floating point type.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.array_operations.is_inside" title="minkit.array_operations.is_inside"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_inside</span></code></a>(data, lb, ub)</p></td>
+<td><p>Return the decision whether the input data is within the given bounds or not.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#minkit.array_operations.is_int" title="minkit.array_operations.is_int"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_int</span></code></a>(a)</p></td>
+<td><p>Check whether the data type of the given array is of integral type.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.array_operations.le" title="minkit.array_operations.le"><code class="xref py py-obj docutils literal notranslate"><span class="pre">le</span></code></a>(a, b)</p></td>
+<td><p>Compare two arrays <span class="math notranslate nohighlight">\(a \leq b\)</span>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#minkit.array_operations.linspace" title="minkit.array_operations.linspace"><code class="xref py py-obj docutils literal notranslate"><span class="pre">linspace</span></code></a>(vmin, vmax, size)</p></td>
+<td><p>Create an array where the values are in increasing order by a constant step.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.array_operations.log" title="minkit.array_operations.log"><code class="xref py py-obj docutils literal notranslate"><span class="pre">log</span></code></a>(a)</p></td>
+<td><p>Calculate the logarithm of an array of numbers.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#minkit.array_operations.logical_and" title="minkit.array_operations.logical_and"><code class="xref py py-obj docutils literal notranslate"><span class="pre">logical_and</span></code></a>(a, b[, out])</p></td>
+<td><p>Do the logical “and” operation element by element.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.array_operations.logical_or" title="minkit.array_operations.logical_or"><code class="xref py py-obj docutils literal notranslate"><span class="pre">logical_or</span></code></a>(a, b[, out])</p></td>
+<td><p>Do the logical “or” operation element by element.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#minkit.array_operations.lt" title="minkit.array_operations.lt"><code class="xref py py-obj docutils literal notranslate"><span class="pre">lt</span></code></a>(a, b)</p></td>
+<td><p>Compare two arrays <span class="math notranslate nohighlight">\(a &lt; b\)</span>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.array_operations.max" title="minkit.array_operations.max"><code class="xref py py-obj docutils literal notranslate"><span class="pre">max</span></code></a>(a)</p></td>
+<td><p>Calculate the maximum value in an array.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#minkit.array_operations.meshgrid" title="minkit.array_operations.meshgrid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">meshgrid</span></code></a>(lb, ub, size)</p></td>
+<td><p>Create a grid of values using the given set of bounds.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.array_operations.min" title="minkit.array_operations.min"><code class="xref py py-obj docutils literal notranslate"><span class="pre">min</span></code></a>(a)</p></td>
+<td><p>Calculate the minimum value in an array.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#minkit.array_operations.ndarray_to_backend" title="minkit.array_operations.ndarray_to_backend"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ndarray_to_backend</span></code></a>(a)</p></td>
+<td><p>Create an array in the backend of this object.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.array_operations.random_grid" title="minkit.array_operations.random_grid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">random_grid</span></code></a>(lb, ub, size)</p></td>
+<td><p>Create a random grid using the given bounds.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#minkit.array_operations.random_uniform" title="minkit.array_operations.random_uniform"><code class="xref py py-obj docutils literal notranslate"><span class="pre">random_uniform</span></code></a>(vmin, vmax, size)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.array_operations.restrict_data_size" title="minkit.array_operations.restrict_data_size"><code class="xref py py-obj docutils literal notranslate"><span class="pre">restrict_data_size</span></code></a>(maximum, ndim, data)</p></td>
+<td><p>Drop the last elements of an array of data.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#minkit.array_operations.shuffling_index" title="minkit.array_operations.shuffling_index"><code class="xref py py-obj docutils literal notranslate"><span class="pre">shuffling_index</span></code></a>(n)</p></td>
+<td><p>Calculate a set of indices to shuffle an array.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.array_operations.slice_from_boolean" title="minkit.array_operations.slice_from_boolean"><code class="xref py py-obj docutils literal notranslate"><span class="pre">slice_from_boolean</span></code></a>(a, v[, ndim])</p></td>
+<td><p>Get a slice of the given array using a mask array.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#minkit.array_operations.slice_from_integer" title="minkit.array_operations.slice_from_integer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">slice_from_integer</span></code></a>(a, i[, ndim])</p></td>
+<td><p>Get a slice of the given array using an array of indices.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.array_operations.sum" title="minkit.array_operations.sum"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sum</span></code></a>(a)</p></td>
+<td><p>Sum the elements of the given array.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#minkit.array_operations.sum_arrays" title="minkit.array_operations.sum_arrays"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sum_arrays</span></code></a>(arrays)</p></td>
+<td><p>Sum arrays element by element.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.array_operations.sum_inside" title="minkit.array_operations.sum_inside"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sum_inside</span></code></a>(indices, gaps, centers, edges[, …])</p></td>
+<td><p>Sum the occurrences inside the given bounds.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#minkit.array_operations.take_each" title="minkit.array_operations.take_each"><code class="xref py py-obj docutils literal notranslate"><span class="pre">take_each</span></code></a>(a, n[, start])</p></td>
+<td><p>Take elements of the array using a period.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.array_operations.take_slice" title="minkit.array_operations.take_slice"><code class="xref py py-obj docutils literal notranslate"><span class="pre">take_slice</span></code></a>(a[, start, end])</p></td>
+<td><p>Take a slice of entries from the array.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes Documentation</p>
+<dl class="attribute">
+<dt id="minkit.array_operations.backend">
+<code class="sig-name descname">backend</code><a class="headerlink" href="#minkit.array_operations.backend" title="Permalink to this definition">¶</a></dt>
+<dd><p>Backend interface.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="minkit.array_operations.bool_type">
+<code class="sig-name descname">bool_type</code><a class="headerlink" href="#minkit.array_operations.bool_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Data type used for boolean comparisons.</p>
+</dd></dl>
+
+<p class="rubric">Methods Documentation</p>
+<dl class="method">
+<dt id="minkit.array_operations.access_pdf">
+<code class="sig-name descname">access_pdf</code><span class="sig-paren">(</span><em class="sig-param">name</em>, <em class="sig-param">ndata_pars</em>, <em class="sig-param">nvar_arg_pars=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/backends/aop.html#array_operations.access_pdf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.array_operations.access_pdf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Access the PDF with the given name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – name of the PDF.</p></li>
+<li><p><strong>ndata_pars</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – number of data parameters.</p></li>
+<li><p><strong>nvar_arg_pars</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – number of variable arguments.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>proxy for the different evaluation functions.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>FunctionsProxy</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.array_operations.bempty">
+<code class="sig-name descname">bempty</code><span class="sig-paren">(</span><em class="sig-param">size</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/backends/aop.html#array_operations.bempty"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.array_operations.bempty" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create an empty <a class="reference internal" href="minkit.barray.html#minkit.barray" title="minkit.barray"><code class="xref py py-class docutils literal notranslate"><span class="pre">barray</span></code></a> instance with the given length.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – length of the output array.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>empty array.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="minkit.barray.html#minkit.barray" title="minkit.barray">barray</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.array_operations.bones">
+<code class="sig-name descname">bones</code><span class="sig-paren">(</span><em class="sig-param">size</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/backends/aop.html#array_operations.bones"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.array_operations.bones" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create an array of “true” values of the given size.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – length of the output array.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>array of “true”.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="minkit.barray.html#minkit.barray" title="minkit.barray">barray</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.array_operations.bzeros">
+<code class="sig-name descname">bzeros</code><span class="sig-paren">(</span><em class="sig-param">size</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/backends/aop.html#array_operations.bzeros"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.array_operations.bzeros" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create an array of “false” values of the given size.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – length of the output array.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>array of “false”.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="minkit.barray.html#minkit.barray" title="minkit.barray">barray</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.array_operations.carange">
+<code class="sig-name descname">carange</code><span class="sig-paren">(</span><em class="sig-param">n</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/backends/aop.html#array_operations.carange"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.array_operations.carange" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create an array of elements from 0 to n.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>n</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – the next to last item in the array.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>output array.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="minkit.carray.html#minkit.carray" title="minkit.carray">carray</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.array_operations.cexp">
+<code class="sig-name descname">cexp</code><span class="sig-paren">(</span><em class="sig-param">a</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/backends/aop.html#array_operations.cexp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.array_operations.cexp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the exponential of an array of numbers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>a</strong> (<a class="reference internal" href="minkit.carray.html#minkit.carray" title="minkit.carray"><em>carray</em></a>) – input array.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>exponential values.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="minkit.carray.html#minkit.carray" title="minkit.carray">carray</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.array_operations.concatenate">
+<code class="sig-name descname">concatenate</code><span class="sig-paren">(</span><em class="sig-param">arrays</em>, <em class="sig-param">maximum=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/backends/aop.html#array_operations.concatenate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.array_operations.concatenate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Concatenate several arrays. If “maximum” is specified, the last elements
+will be dropped, so the length of the output array is “maximum”.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>arrays</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)"><em>tuple</em></a><em>(</em><a class="reference internal" href="minkit.farray.html#minkit.farray" title="minkit.farray"><em>farray</em></a><em>)</em>) – collection of arrays.</p></li>
+<li><p><strong>maximum</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – possible maximum length of the output array.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>concatenated array.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="minkit.farray.html#minkit.farray" title="minkit.farray">farray</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.array_operations.count_nonzero">
+<code class="sig-name descname">count_nonzero</code><span class="sig-paren">(</span><em class="sig-param">a</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/backends/aop.html#array_operations.count_nonzero"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.array_operations.count_nonzero" title="Permalink to this definition">¶</a></dt>
+<dd><p>Count the number of elements that are different from zero.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>a</strong> (<a class="reference internal" href="minkit.barray.html#minkit.barray" title="minkit.barray"><em>barray</em></a>) – input array.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>number of elements that are different from zero.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.array_operations.fempty">
+<code class="sig-name descname">fempty</code><span class="sig-paren">(</span><em class="sig-param">size</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/backends/aop.html#array_operations.fempty"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.array_operations.fempty" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create an empty <a class="reference internal" href="minkit.farray.html#minkit.farray" title="minkit.farray"><code class="xref py py-class docutils literal notranslate"><span class="pre">farray</span></code></a> instance with the given length.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – length of the output array.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>empty array.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="minkit.farray.html#minkit.farray" title="minkit.farray">farray</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.array_operations.fexp">
+<code class="sig-name descname">fexp</code><span class="sig-paren">(</span><em class="sig-param">a</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/backends/aop.html#array_operations.fexp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.array_operations.fexp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the exponential of an array of numbers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>a</strong> (<a class="reference internal" href="minkit.darray.html#minkit.darray" title="minkit.darray"><em>darray</em></a>) – input array.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>exponential values.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="minkit.darray.html#minkit.darray" title="minkit.darray">darray</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.array_operations.fftconvolve">
+<code class="sig-name descname">fftconvolve</code><span class="sig-paren">(</span><em class="sig-param">a</em>, <em class="sig-param">b</em>, <em class="sig-param">data</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/backends/aop.html#array_operations.fftconvolve"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.array_operations.fftconvolve" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the convolution of two arrays that correspond to the output
+from the evaluation of two PDFs in the given data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>a</strong> (<a class="reference internal" href="minkit.farray.html#minkit.farray" title="minkit.farray"><em>farray</em></a>) – first array.</p></li>
+<li><p><strong>b</strong> (<a class="reference internal" href="minkit.farray.html#minkit.farray" title="minkit.farray"><em>farray</em></a>) – second array.</p></li>
+<li><p><strong>data</strong> (<a class="reference internal" href="minkit.farray.html#minkit.farray" title="minkit.farray"><em>farray</em></a>) – array of data (only 1D is supported).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>convolution of the two arrays.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="minkit.farray.html#minkit.farray" title="minkit.farray">farray</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.array_operations.fones">
+<code class="sig-name descname">fones</code><span class="sig-paren">(</span><em class="sig-param">size</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/backends/aop.html#array_operations.fones"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.array_operations.fones" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create an array of the given size filled with ones.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – length of the output array.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>array of ones.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="minkit.farray.html#minkit.farray" title="minkit.farray">farray</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.array_operations.fzeros">
+<code class="sig-name descname">fzeros</code><span class="sig-paren">(</span><em class="sig-param">size</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/backends/aop.html#array_operations.fzeros"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.array_operations.fzeros" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create an array of the given size filled with zeros.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – length of the output array.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>array of zeros.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="minkit.farray.html#minkit.farray" title="minkit.farray">farray</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.array_operations.ge">
+<code class="sig-name descname">ge</code><span class="sig-paren">(</span><em class="sig-param">a</em>, <em class="sig-param">b</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/backends/aop.html#array_operations.ge"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.array_operations.ge" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compare two arrays <span class="math notranslate nohighlight">\(a \geq b\)</span>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>a</strong> (<a class="reference internal" href="minkit.farray.html#minkit.farray" title="minkit.farray"><em>farray</em></a>) – first array.</p></li>
+<li><p><strong>b</strong> (<a class="reference internal" href="minkit.farray.html#minkit.farray" title="minkit.farray"><em>farray</em></a>) – second array.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>result of the comparison.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="minkit.barray.html#minkit.barray" title="minkit.barray">barray</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.array_operations.iarange">
+<code class="sig-name descname">iarange</code><span class="sig-paren">(</span><em class="sig-param">n</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/backends/aop.html#array_operations.iarange"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.array_operations.iarange" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create an array of elements from 0 to n.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>n</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – the next to last item in the array.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>output array.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="minkit.iarray.html#minkit.iarray" title="minkit.iarray">iarray</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.array_operations.iempty">
+<code class="sig-name descname">iempty</code><span class="sig-paren">(</span><em class="sig-param">size</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/backends/aop.html#array_operations.iempty"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.array_operations.iempty" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create an empty <a class="reference internal" href="minkit.iarray.html#minkit.iarray" title="minkit.iarray"><code class="xref py py-class docutils literal notranslate"><span class="pre">iarray</span></code></a> instance with the given length.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – length of the output array.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>empty array.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="minkit.iarray.html#minkit.iarray" title="minkit.iarray">iarray</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.array_operations.interpolate_linear">
+<code class="sig-name descname">interpolate_linear</code><span class="sig-paren">(</span><em class="sig-param">ndim</em>, <em class="sig-param">idx</em>, <em class="sig-param">x</em>, <em class="sig-param">xp</em>, <em class="sig-param">yp</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/backends/aop.html#array_operations.interpolate_linear"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.array_operations.interpolate_linear" title="Permalink to this definition">¶</a></dt>
+<dd><p>Do a linear interpolation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>idx</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a>) – indices of the data to evaluate.</p></li>
+<li><p><strong>x</strong> (<a class="reference internal" href="minkit.farray.html#minkit.farray" title="minkit.farray"><em>farray</em></a>) – points to interpolate.</p></li>
+<li><p><strong>xp</strong> (<a class="reference internal" href="minkit.farray.html#minkit.farray" title="minkit.farray"><em>farray</em></a>) – reference points in the x axis.</p></li>
+<li><p><strong>yp</strong> (<a class="reference internal" href="minkit.farray.html#minkit.farray" title="minkit.farray"><em>farray</em></a>) – reference points in the y axis.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>interpolation.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="minkit.farray.html#minkit.farray" title="minkit.farray">farray</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.array_operations.is_bool">
+<code class="sig-name descname">is_bool</code><span class="sig-paren">(</span><em class="sig-param">a</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/backends/aop.html#array_operations.is_bool"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.array_operations.is_bool" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check whether the data type of the given array is of boolean type.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>a</strong> (<a class="reference internal" href="minkit.marray.html#minkit.marray" title="minkit.marray"><em>marray</em></a><em>, </em><a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a><em> or </em><a class="reference external" href="http://reikna.publicfields.net/en/latest/api/cluda.html#reikna.cluda.api.Array" title="(in reikna v0.8.0)"><em>reikna.cluda.api.Array</em></a>) – input array.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>decision.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.array_operations.is_complex">
+<code class="sig-name descname">is_complex</code><span class="sig-paren">(</span><em class="sig-param">a</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/backends/aop.html#array_operations.is_complex"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.array_operations.is_complex" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check whether the data type of the given array is of complex type.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>a</strong> (<a class="reference internal" href="minkit.marray.html#minkit.marray" title="minkit.marray"><em>marray</em></a><em>, </em><a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a><em> or </em><a class="reference external" href="http://reikna.publicfields.net/en/latest/api/cluda.html#reikna.cluda.api.Array" title="(in reikna v0.8.0)"><em>reikna.cluda.api.Array</em></a>) – input array.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>decision.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.array_operations.is_float">
+<code class="sig-name descname">is_float</code><span class="sig-paren">(</span><em class="sig-param">a</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/backends/aop.html#array_operations.is_float"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.array_operations.is_float" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check whether the data type of the given array is of floating point type.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>a</strong> (<a class="reference internal" href="minkit.marray.html#minkit.marray" title="minkit.marray"><em>marray</em></a><em>, </em><a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a><em> or </em><a class="reference external" href="http://reikna.publicfields.net/en/latest/api/cluda.html#reikna.cluda.api.Array" title="(in reikna v0.8.0)"><em>reikna.cluda.api.Array</em></a>) – input array.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>decision.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.array_operations.is_inside">
+<code class="sig-name descname">is_inside</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">lb</em>, <em class="sig-param">ub</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/backends/aop.html#array_operations.is_inside"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.array_operations.is_inside" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the decision whether the input data is within the given bounds
+or not.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<a class="reference internal" href="minkit.farray.html#minkit.farray" title="minkit.farray"><em>farray</em></a>) – input data array.</p></li>
+<li><p><strong>lb</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a>) – lower bounds.</p></li>
+<li><p><strong>ub</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a>) – upper bounds.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>array with the decisions.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="minkit.barray.html#minkit.barray" title="minkit.barray">barray</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.array_operations.is_int">
+<code class="sig-name descname">is_int</code><span class="sig-paren">(</span><em class="sig-param">a</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/backends/aop.html#array_operations.is_int"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.array_operations.is_int" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check whether the data type of the given array is of integral type.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>a</strong> (<a class="reference internal" href="minkit.marray.html#minkit.marray" title="minkit.marray"><em>marray</em></a><em>, </em><a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a><em> or </em><a class="reference external" href="http://reikna.publicfields.net/en/latest/api/cluda.html#reikna.cluda.api.Array" title="(in reikna v0.8.0)"><em>reikna.cluda.api.Array</em></a>) – input array.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>decision.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.array_operations.le">
+<code class="sig-name descname">le</code><span class="sig-paren">(</span><em class="sig-param">a</em>, <em class="sig-param">b</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/backends/aop.html#array_operations.le"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.array_operations.le" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compare two arrays <span class="math notranslate nohighlight">\(a \leq b\)</span>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>a</strong> (<a class="reference internal" href="minkit.farray.html#minkit.farray" title="minkit.farray"><em>farray</em></a>) – first array.</p></li>
+<li><p><strong>b</strong> (<a class="reference internal" href="minkit.farray.html#minkit.farray" title="minkit.farray"><em>farray</em></a>) – second array.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>result of the comparison.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="minkit.barray.html#minkit.barray" title="minkit.barray">barray</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.array_operations.linspace">
+<code class="sig-name descname">linspace</code><span class="sig-paren">(</span><em class="sig-param">vmin</em>, <em class="sig-param">vmax</em>, <em class="sig-param">size</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/backends/aop.html#array_operations.linspace"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.array_operations.linspace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create an array where the values are in increasing order by a constant
+step. Points in “vmin” and “vmax” are included.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>vmin</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – where to start generating values.</p></li>
+<li><p><strong>vmax</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – where to end generating values.</p></li>
+<li><p><strong>size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – length of the output array.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>array.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="minkit.farray.html#minkit.farray" title="minkit.farray">farray</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.array_operations.log">
+<code class="sig-name descname">log</code><span class="sig-paren">(</span><em class="sig-param">a</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/backends/aop.html#array_operations.log"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.array_operations.log" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the logarithm of an array of numbers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>a</strong> (<a class="reference internal" href="minkit.farray.html#minkit.farray" title="minkit.farray"><em>farray</em></a>) – input array.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>logarithm values.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="minkit.farray.html#minkit.farray" title="minkit.farray">farray</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.array_operations.logical_and">
+<code class="sig-name descname">logical_and</code><span class="sig-paren">(</span><em class="sig-param">a</em>, <em class="sig-param">b</em>, <em class="sig-param">out=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/backends/aop.html#array_operations.logical_and"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.array_operations.logical_and" title="Permalink to this definition">¶</a></dt>
+<dd><p>Do the logical “and” operation element by element.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>a</strong> (<a class="reference internal" href="minkit.farray.html#minkit.farray" title="minkit.farray"><em>farray</em></a>) – first array.</p></li>
+<li><p><strong>b</strong> (<a class="reference internal" href="minkit.farray.html#minkit.farray" title="minkit.farray"><em>farray</em></a>) – second array.</p></li>
+<li><p><strong>out</strong> (<a class="reference internal" href="minkit.barray.html#minkit.barray" title="minkit.barray"><em>barray</em></a>) – possible output array to write the data.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>array of decisions.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="minkit.barray.html#minkit.barray" title="minkit.barray">barray</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.array_operations.logical_or">
+<code class="sig-name descname">logical_or</code><span class="sig-paren">(</span><em class="sig-param">a</em>, <em class="sig-param">b</em>, <em class="sig-param">out=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/backends/aop.html#array_operations.logical_or"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.array_operations.logical_or" title="Permalink to this definition">¶</a></dt>
+<dd><p>Do the logical “or” operation element by element.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>a</strong> (<a class="reference internal" href="minkit.farray.html#minkit.farray" title="minkit.farray"><em>farray</em></a>) – first array.</p></li>
+<li><p><strong>b</strong> (<a class="reference internal" href="minkit.farray.html#minkit.farray" title="minkit.farray"><em>farray</em></a>) – second array.</p></li>
+<li><p><strong>out</strong> (<a class="reference internal" href="minkit.barray.html#minkit.barray" title="minkit.barray"><em>barray</em></a>) – possible output array to write the data.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>array of decisions.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="minkit.barray.html#minkit.barray" title="minkit.barray">barray</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.array_operations.lt">
+<code class="sig-name descname">lt</code><span class="sig-paren">(</span><em class="sig-param">a</em>, <em class="sig-param">b</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/backends/aop.html#array_operations.lt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.array_operations.lt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compare two arrays <span class="math notranslate nohighlight">\(a &lt; b\)</span>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>a</strong> (<a class="reference internal" href="minkit.farray.html#minkit.farray" title="minkit.farray"><em>farray</em></a>) – first array.</p></li>
+<li><p><strong>b</strong> (<a class="reference internal" href="minkit.farray.html#minkit.farray" title="minkit.farray"><em>farray</em></a>) – second array.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>result of the comparison.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="minkit.barray.html#minkit.barray" title="minkit.barray">barray</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.array_operations.max">
+<code class="sig-name descname">max</code><span class="sig-paren">(</span><em class="sig-param">a</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/backends/aop.html#array_operations.max"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.array_operations.max" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the maximum value in an array.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>a</strong> (<a class="reference internal" href="minkit.farray.html#minkit.farray" title="minkit.farray"><em>farray</em></a>) – input array.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>maximum value.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.array_operations.meshgrid">
+<code class="sig-name descname">meshgrid</code><span class="sig-paren">(</span><em class="sig-param">lb</em>, <em class="sig-param">ub</em>, <em class="sig-param">size</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/backends/aop.html#array_operations.meshgrid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.array_operations.meshgrid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a grid of values using the given set of bounds. The size can
+be specified as a single value or as a set of sizes for each dimension.
+If it is a single value, then the output array will be of length
+<span class="math notranslate nohighlight">\(size     imes size       imes ...\)</span>, depending on the number of dimensions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lb</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a>) – lower bounds.</p></li>
+<li><p><strong>ub</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a>) – upper bounds.</p></li>
+<li><p><strong>size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a><em> or </em><a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a>) – size of the grid to generate.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.array_operations.min">
+<code class="sig-name descname">min</code><span class="sig-paren">(</span><em class="sig-param">a</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/backends/aop.html#array_operations.min"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.array_operations.min" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the minimum value in an array.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>a</strong> (<a class="reference internal" href="minkit.farray.html#minkit.farray" title="minkit.farray"><em>farray</em></a>) – input array.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>minimum value.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.array_operations.ndarray_to_backend">
+<code class="sig-name descname">ndarray_to_backend</code><span class="sig-paren">(</span><em class="sig-param">a</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/backends/aop.html#array_operations.ndarray_to_backend"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.array_operations.ndarray_to_backend" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create an array in the backend of this object. This will directly
+create an object of the underlying array type of the <a class="reference internal" href="minkit.barray.html#minkit.barray" title="minkit.barray"><code class="xref py py-class docutils literal notranslate"><span class="pre">minkit.barray</span></code></a>,
+<a class="reference internal" href="minkit.farray.html#minkit.farray" title="minkit.farray"><code class="xref py py-class docutils literal notranslate"><span class="pre">minkit.farray</span></code></a> or <a class="reference internal" href="minkit.iarray.html#minkit.iarray" title="minkit.iarray"><code class="xref py py-class docutils literal notranslate"><span class="pre">minkit.iarray</span></code></a> instance.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>a</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a>) – input array.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>array representation in the given backend.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)">numpy.ndarray</a> or <a class="reference external" href="http://reikna.publicfields.net/en/latest/api/cluda.html#reikna.cluda.api.Array" title="(in reikna v0.8.0)">reikna.cluda.api.Array</a></p>
+</dd>
+</dl>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This function must be used carefully since the output array            does not track to which backend it belongs.</p>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.array_operations.random_grid">
+<code class="sig-name descname">random_grid</code><span class="sig-paren">(</span><em class="sig-param">lb</em>, <em class="sig-param">ub</em>, <em class="sig-param">size</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/backends/aop.html#array_operations.random_grid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.array_operations.random_grid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a random grid using the given bounds. The size can be specified
+as a single value or as a set of sizes for each dimension. If it is a
+single value, then the output array will be of length
+<span class="math notranslate nohighlight">\(size     imes size       imes ...\)</span>, depending on the number of dimensions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lb</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a>) – lower bounds.</p></li>
+<li><p><strong>ub</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a>) – upper bounds.</p></li>
+<li><p><strong>size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a><em> or </em><a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a>) – size of the grid.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>random grid.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="minkit.farray.html#minkit.farray" title="minkit.farray">farray</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.array_operations.random_uniform">
+<code class="sig-name descname">random_uniform</code><span class="sig-paren">(</span><em class="sig-param">vmin</em>, <em class="sig-param">vmax</em>, <em class="sig-param">size</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/backends/aop.html#array_operations.random_uniform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.array_operations.random_uniform" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="minkit.array_operations.restrict_data_size">
+<code class="sig-name descname">restrict_data_size</code><span class="sig-paren">(</span><em class="sig-param">maximum</em>, <em class="sig-param">ndim</em>, <em class="sig-param">data</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/backends/aop.html#array_operations.restrict_data_size"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.array_operations.restrict_data_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Drop the last elements of an array of data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>maximum</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – maximum length of the data sample.</p></li>
+<li><p><strong>ndim</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – number of dimensions.</p></li>
+<li><p><strong>data</strong> (<a class="reference internal" href="minkit.farray.html#minkit.farray" title="minkit.farray"><em>farray</em></a>) – data sample.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>reduced data array.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="minkit.farray.html#minkit.farray" title="minkit.farray">farray</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.array_operations.shuffling_index">
+<code class="sig-name descname">shuffling_index</code><span class="sig-paren">(</span><em class="sig-param">n</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/backends/aop.html#array_operations.shuffling_index"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.array_operations.shuffling_index" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate a set of indices to shuffle an array.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>n</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – length of the array.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>array of indices.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="minkit.iarray.html#minkit.iarray" title="minkit.iarray">iarray</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.array_operations.slice_from_boolean">
+<code class="sig-name descname">slice_from_boolean</code><span class="sig-paren">(</span><em class="sig-param">a</em>, <em class="sig-param">v</em>, <em class="sig-param">ndim=1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/backends/aop.html#array_operations.slice_from_boolean"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.array_operations.slice_from_boolean" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a slice of the given array using a mask array.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>a</strong> (<a class="reference internal" href="minkit.farray.html#minkit.farray" title="minkit.farray"><em>farray</em></a>) – input data array.</p></li>
+<li><p><strong>v</strong> (<a class="reference internal" href="minkit.barray.html#minkit.barray" title="minkit.barray"><em>barray</em></a>) – mask array.</p></li>
+<li><p><strong>ndim</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – number of dimensions.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>slice of the array.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="minkit.farray.html#minkit.farray" title="minkit.farray">farray</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.array_operations.slice_from_integer">
+<code class="sig-name descname">slice_from_integer</code><span class="sig-paren">(</span><em class="sig-param">a</em>, <em class="sig-param">i</em>, <em class="sig-param">ndim=1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/backends/aop.html#array_operations.slice_from_integer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.array_operations.slice_from_integer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a slice of the given array using an array of indices.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>a</strong> (<a class="reference internal" href="minkit.farray.html#minkit.farray" title="minkit.farray"><em>farray</em></a>) – input data array.</p></li>
+<li><p><strong>i</strong> (<a class="reference internal" href="minkit.iarray.html#minkit.iarray" title="minkit.iarray"><em>iarray</em></a>) – array of indices.</p></li>
+<li><p><strong>ndim</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – number of dimensions.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>slice of the array.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="minkit.farray.html#minkit.farray" title="minkit.farray">farray</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.array_operations.sum">
+<code class="sig-name descname">sum</code><span class="sig-paren">(</span><em class="sig-param">a</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/backends/aop.html#array_operations.sum"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.array_operations.sum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sum the elements of the given array.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>a</strong> (<a class="reference internal" href="minkit.farray.html#minkit.farray" title="minkit.farray"><em>farray</em></a>) – input array.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>sum of elements.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.array_operations.sum_arrays">
+<code class="sig-name descname">sum_arrays</code><span class="sig-paren">(</span><em class="sig-param">arrays</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/backends/aop.html#array_operations.sum_arrays"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.array_operations.sum_arrays" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sum arrays element by element.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>arrays</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)"><em>tuple</em></a><em>(</em><a class="reference internal" href="minkit.farray.html#minkit.farray" title="minkit.farray"><em>farray</em></a><em>)</em>) – set of arrays.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>array with the sum.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="minkit.farray.html#minkit.farray" title="minkit.farray">farray</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.array_operations.sum_inside">
+<code class="sig-name descname">sum_inside</code><span class="sig-paren">(</span><em class="sig-param">indices</em>, <em class="sig-param">gaps</em>, <em class="sig-param">centers</em>, <em class="sig-param">edges</em>, <em class="sig-param">values=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/backends/aop.html#array_operations.sum_inside"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.array_operations.sum_inside" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sum the occurrences inside the given bounds. If “values” is specified,
+then the values in it are used instead.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>indices</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a>) – array of indices.</p></li>
+<li><p><strong>gaps</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a>) – gaps to access the data.</p></li>
+<li><p><strong>centers</strong> (<a class="reference internal" href="minkit.farray.html#minkit.farray" title="minkit.farray"><em>farray</em></a>) – centers corresponding to a data sample.</p></li>
+<li><p><strong>edges</strong> (<a class="reference internal" href="minkit.farray.html#minkit.farray" title="minkit.farray"><em>farray</em></a>) – edges defining the bins.</p></li>
+<li><p><strong>values</strong> (<a class="reference internal" href="minkit.farray.html#minkit.farray" title="minkit.farray"><em>farray</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.8)"><em>None</em></a>) – possible values (or weights) associated to the data sample.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>sum inside each bin.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="minkit.farray.html#minkit.farray" title="minkit.farray">farray</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.array_operations.take_each">
+<code class="sig-name descname">take_each</code><span class="sig-paren">(</span><em class="sig-param">a</em>, <em class="sig-param">n</em>, <em class="sig-param">start=0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/backends/aop.html#array_operations.take_each"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.array_operations.take_each" title="Permalink to this definition">¶</a></dt>
+<dd><p>Take elements of the array using a period.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – period to get elements.</p></li>
+<li><p><strong>start</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – where to start to take elements.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>reduced array.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="minkit.marray.html#minkit.marray" title="minkit.marray">marray</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.array_operations.take_slice">
+<code class="sig-name descname">take_slice</code><span class="sig-paren">(</span><em class="sig-param">a</em>, <em class="sig-param">start=0</em>, <em class="sig-param">end=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/backends/aop.html#array_operations.take_slice"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.array_operations.take_slice" title="Permalink to this definition">¶</a></dt>
+<dd><p>Take a slice of entries from the array.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>start</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – where to start taking entries.</p></li>
+<li><p><strong>end</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – where to end taking entries.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>slice of the array.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="minkit.marray.html#minkit.marray" title="minkit.marray">marray</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="minkit.barray.html" class="btn btn-neutral float-right" title="barray" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="minkit.UnbinnedEvaluator.html" class="btn btn-neutral float-left" title="UnbinnedEvaluator" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Miguel Ramos Pernas
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

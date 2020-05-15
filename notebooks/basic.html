@@ -89,6 +89,7 @@
             
             
               <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../user.html">User guide</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="datasets.html">Creating data sets</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Basic example</a><ul>
@@ -100,6 +101,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="minimization.html">Minimization with MinKit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fit_stability.html">Determining the stability of the fits</a></li>
 <li class="toctree-l2"><a class="reference internal" href="multidimensional.html">Working in more than one dimension</a></li>
 <li class="toctree-l2"><a class="reference internal" href="extension.html">Adding custom PDFs</a></li>
 </ul>
@@ -396,7 +398,7 @@ div.rendered_html tbody tr:hover {
 </style>
 <div class="section" id="Basic-example">
 <h1>Basic example<a class="headerlink" href="#Basic-example" title="Permalink to this headline">¶</a></h1>
-<p>In this tutorial, it will be shown how to create data set from any source of data. It will also be shown how to create PDF object from a given set of parameters, and how to generate sample from it and fit it accordingly. Before doing any operation with the minkit package, it is recommended to impot it an call the “initialize” function. This will define the backend where the operations will be done (CPU, CUDA or OpenCL). By default it runs on CPU.</p>
+<p>In this tutorial, it will be shown how to create data set from any source of data. It will also be shown how to create PDF object from a given set of parameters, and how to generate a sample from it and fit it accordingly.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
@@ -404,13 +406,13 @@ div.rendered_html tbody tr:hover {
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="o">%</span><span class="k">matplotlib</span> inline
 <span class="kn">import</span> <span class="nn">minkit</span>
-<span class="n">minkit</span><span class="o">.</span><span class="n">initialize</span><span class="p">()</span>
+
 </pre></div>
 </div>
 </div>
 <div class="section" id="Creating-a-data-set">
 <h2>Creating a data set<a class="headerlink" href="#Creating-a-data-set" title="Permalink to this headline">¶</a></h2>
-<p>Data sets can be constructed in many different manners. In this tutorial we will work in the 1-D case, which is also the most common situation. First we need to define the parameter associated to the data. In our case, it will be considered to have values between -5 and +5. These bounds will define the valid range for the different operations of the PDF involving it. The data set can be easily constructed using calling</p>
+<p>Data sets can be constructed in many different manners. In this tutorial we will work in the 1-D case, which is also the most common situation. First we need to define the parameter associated to the data. In our case, it will be considered to have values between -5 and +5. These bounds will define the valid range for the different operations of the PDF involving it. The data set can be easily constructed from a numpy array as follows:</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
@@ -419,7 +421,7 @@ div.rendered_html tbody tr:hover {
 <span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="n">x</span> <span class="o">=</span> <span class="n">minkit</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="o">+</span><span class="mi">5</span><span class="p">))</span>
 <span class="n">raw</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">10000</span><span class="p">)</span>
-<span class="n">real_data</span> <span class="o">=</span> <span class="n">minkit</span><span class="o">.</span><span class="n">DataSet</span><span class="o">.</span><span class="n">from_array</span><span class="p">(</span><span class="n">raw</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+<span class="n">real_data</span> <span class="o">=</span> <span class="n">minkit</span><span class="o">.</span><span class="n">DataSet</span><span class="o">.</span><span class="n">from_ndarray</span><span class="p">(</span><span class="n">raw</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -442,10 +444,10 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Parameter(name=x, value=None, bounds=[-5.  5.], error=0.0, constant=False)
+Parameter(name=x, value=None, bounds=[-5.  5.], error=0.0, asym_errors=None, constant=False)
 </pre></div></div>
 </div>
-<p>As you can see, the created parameter has information about the name, value, bounds, its error, and whether it must be considered as constant (something important when doing fits). We will now create a Gaussian function. A Gaussian function also needs a parameter corresponding to the center, and another for the standard deviation.</p>
+<p>As you can see, the created parameter has information about the name, value, bounds, its error, a possible set of asymmetric errors, and whether it must be considered as constant. We will now create a Gaussian function with two additional parameters: one corresponding to the center, and another for the standard deviation.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
@@ -456,7 +458,7 @@ Parameter(name=x, value=None, bounds=[-5.  5.], error=0.0, constant=False)
 </pre></div>
 </div>
 </div>
-<p>The PDF is constructed taking these parameters as input arguments, together with a name, that identifies the new PDF object.</p>
+<p>The PDF is constructed taking the parameters as input arguments, together with a name, that identifies the new PDF object.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
@@ -469,7 +471,7 @@ Parameter(name=x, value=None, bounds=[-5.  5.], error=0.0, constant=False)
 </div>
 <div class="section" id="Generating-data">
 <h2>Generating data<a class="headerlink" href="#Generating-data" title="Permalink to this headline">¶</a></h2>
-<p>Let’s now create some data, which can be easily done using the “generate” method of the newly created PDF.</p>
+<p>Let’s now create some data, which can be easily done using the <em>generate</em> method of the newly created PDF.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
@@ -494,18 +496,21 @@ Parameter(name=x, value=None, bounds=[-5.  5.], error=0.0, constant=False)
 </pre></div>
 </div>
 <div class="output_area highlight-none notranslate"><div class="highlight"><pre>
-<span></span>array([ 0.43702071,  0.9841823 , -1.27114678, ...,  0.27339015,
-       -0.5077469 ,  1.67052995])
+<span></span>dtype  = &lt;class &#39;numpy.float64&#39;&gt;
+length = 10000
+ndim   = 1
+array  = [ 1.72411658  0.39013052 -1.08542796 ... -0.34548134  3.46264603
+ -0.08042297]
 </pre></div>
 </div>
 </div>
-<p>It is important to note that if we are working on a backend involving GPUs, then it is necessary to copy the contents to the CPU before working with numpy or matplotlib. This can be done with the “as_ndarray” function, and is a good practice to use it wherever we work with exclusively CPU operations, since changing from one backend to the other will become trivial. In this case, the returned object will be the same as in the previous operation.</p>
+<p>It is important to note that if we are working on a backend involving GPUs, then it is necessary to copy the contents to the CPU before working with numpy or matplotlib. This can be done with the <em>as_ndarray</em> method of the returned object, and is a good practice to use it wherever we plan to work with exclusive CPU operations, since changing from one backend to the other will become trivial. In this case, the returned object will be the same as in the previous operation.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">minkit</span><span class="o">.</span><span class="n">as_ndarray</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">])</span>
+<span></span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">as_ndarray</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -514,23 +519,25 @@ Parameter(name=x, value=None, bounds=[-5.  5.], error=0.0, constant=False)
 </pre></div>
 </div>
 <div class="output_area highlight-none notranslate"><div class="highlight"><pre>
-<span></span>array([ 0.43702071,  0.9841823 , -1.27114678, ...,  0.27339015,
-       -0.5077469 ,  1.67052995])
+<span></span>array([ 1.72411658,  0.39013052, -1.08542796, ..., -0.34548134,
+        3.46264603, -0.08042297])
 </pre></div>
 </div>
 </div>
 </div>
 <div class="section" id="Plotting-the-results">
 <h2>Plotting the results<a class="headerlink" href="#Plotting-the-results" title="Permalink to this headline">¶</a></h2>
-<p>In order to overlay the PDF, it must be renormalized. This is done with “pdf_centers_values”, in such a way that we can define as many points as we want to evaluate the PDF, since the PDF will always appear normalized.</p>
+<p>In order to handle the data correctly when displaying the results, it is recommended to use the <em>data_plotting_arrays</em> function. On the other hand, in order to plot the result of the PDF it is necessary to call <em>pdf_plotting_arrays</em>, so the PDF is correctly normalized to the data.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="n">values</span><span class="p">,</span> <span class="n">edges</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">minkit</span><span class="o">.</span><span class="n">as_ndarray</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]),</span> <span class="n">bins</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">bounds</span><span class="p">,</span> <span class="n">histtype</span><span class="o">=</span><span class="s1">&#39;step&#39;</span><span class="p">)</span> <span class="c1"># Plot the data</span>
-<span class="n">gf</span><span class="p">,</span> <span class="n">sf</span> <span class="o">=</span> <span class="n">minkit</span><span class="o">.</span><span class="n">pdf_centers_values</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">edges</span><span class="p">)</span>
+<span class="n">values</span><span class="p">,</span> <span class="n">edges</span> <span class="o">=</span> <span class="n">minkit</span><span class="o">.</span><span class="n">data_plotting_arrays</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<span class="n">centers</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">edges</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">+</span> <span class="n">edges</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">centers</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="n">edges</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">values</span><span class="p">,</span> <span class="n">histtype</span><span class="o">=</span><span class="s1">&#39;step&#39;</span><span class="p">)</span> <span class="c1"># Plot the data</span>
+<span class="n">gf</span><span class="p">,</span> <span class="n">sf</span> <span class="o">=</span> <span class="n">minkit</span><span class="o">.</span><span class="n">pdf_plotting_arrays</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">edges</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">gf</span><span class="p">,</span> <span class="n">sf</span><span class="p">);</span> <span class="c1"># Plot the PDF</span>
 </pre></div>
 </div>
@@ -545,8 +552,8 @@ Parameter(name=x, value=None, bounds=[-5.  5.], error=0.0, constant=False)
 </div>
 <div class="section" id="Running-a-simple-fit">
 <h2>Running a simple fit<a class="headerlink" href="#Running-a-simple-fit" title="Permalink to this headline">¶</a></h2>
-<p>Let’s now fit the data. The process of generating a sample following a distribution from a PDF and fitting it afterwards to the same function is very common in order to test for fit estability. In order to do this, first we must initialize a minimizer. These are declared within a context, since some machinery is activated behind your back in order to enable caches for constant PDFs or interpolation maps. It is very important that we do not modify the values of our PDF within this context, since
-it may lead to undefined behaviour.</p>
+<p>Let’s now fit the data. The process of generating a sample following a distribution from a PDF and fitting it afterwards to the same function is very common in order to do tests of fit estability. In order to do this, first we must initialize a minimizer. These are declared within a context, since some machinery is activated behind your back in order to enable caches for constant PDFs or interpolation maps. It is very important that we do not modify the constness of the values or the data set
+within this context, since it may lead to an undefined behaviour.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
@@ -567,8 +574,8 @@ it may lead to undefined behaviour.</p>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 ------------------------------------------------------------------
-| FCN = 2.846E+04               |      Ncalls=51 (51 total)      |
-| EDM = 0.000312 (Goal: 1E-05)  |            up = 1.0            |
+| FCN = 2.85E+04                |      Ncalls=52 (52 total)      |
+| EDM = 0.00159 (Goal: 1E-05)   |            up = 1.0            |
 ------------------------------------------------------------------
 |  Valid Min.   | Valid Param.  | Above EDM | Reached call limit |
 ------------------------------------------------------------------
@@ -581,18 +588,18 @@ it may lead to undefined behaviour.</p>
 ------------------------------------------------------------------------------------------
 |   | Name |   Value   | Hesse Err | Minos Err- | Minos Err+ | Limit-  | Limit+  | Fixed |
 ------------------------------------------------------------------------------------------
-| 0 | c    | -0.000E-4 |  1.490E-4 |            |            |   -1    |    1    |       |
-| 1 | s    |   1.004   |   0.007   |            |            |   0.1   |    5    |       |
+| 0 | c    |  -0.000   |   0.010   |            |            |   -1    |    1    |       |
+| 1 | s    |   1.006   |   0.007   |            |            |   0.1   |    5    |       |
 ------------------------------------------------------------------------------------------
 </pre></div></div>
 </div>
-<p>The first argument to “minimizer” is the FCN type, which defines the figure of merit to minimize. The second is the PDF and the third is the data set. For this case, the Minuit minimizer is used, so “minimizer” becomes the “Minuit” class from the iminuit package. We can extract the values of the parameters by calling</p>
+<p>The first argument to <em>minimizer</em> is the FCN type, which defines the figure of merit to minimize. The second is the PDF and the third is the data set. For this case, the Minuit minimizer is used, so the result of <em>minimizer</em> becomes an interface to the <em>Minuit</em> class from the <em>iminuit</em> package. The minimizer works in such a way that the values of the parameters are automatically set to the result of the minimization process. We can extract the values of the parameters by calling</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">reg</span> <span class="o">=</span> <span class="n">minkit</span><span class="o">.</span><span class="n">minuit_to_registry</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">params</span><span class="p">)</span>
+<span></span><span class="n">reg</span> <span class="o">=</span> <span class="n">minimizer</span><span class="o">.</span><span class="n">result_to_registry</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">params</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">reg</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -602,10 +609,10 @@ it may lead to undefined behaviour.</p>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-[Parameter(name=c, value=-2.88693797756423e-08, bounds=[-1.  1.], error=0.00014901161629332638, constant=False), Parameter(name=s, value=1.004042709774396, bounds=[0.1 5. ], error=0.007100110162938489, constant=False)]
+[Parameter(name=c, value=-2.567945855957987e-13, bounds=[-1.  1.], error=0.010062672571108877, asym_errors=None, constant=False), Parameter(name=s, value=1.0062930639292242, bounds=[0.1 5. ], error=0.007116333022511467, asym_errors=None, constant=False)]
 </pre></div></div>
 </div>
-<p>This object will allow us to treat the information from new Parameter objects.</p>
+<p>The resulting registry is a new set of parameters that are not linked to those that were minimized (despite they have the same name).</p>
 </div>
 </div>
 

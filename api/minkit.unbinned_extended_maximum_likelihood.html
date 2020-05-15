@@ -89,21 +89,23 @@
             
             
               <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../user.html">User guide</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../reference.html">MinKit reference</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="../reference.html#functions">Functions</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="minkit.add_pdf_src.html">add_pdf_src</a></li>
-<li class="toctree-l3"><a class="reference internal" href="minkit.as_ndarray.html">as_ndarray</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.binned_chisquare.html">binned_chisquare</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.binned_extended_chisquare.html">binned_extended_chisquare</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.binned_extended_maximum_likelihood.html">binned_extended_maximum_likelihood</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.binned_maximum_likelihood.html">binned_maximum_likelihood</a></li>
-<li class="toctree-l3"><a class="reference internal" href="minkit.free_cache.html">free_cache</a></li>
-<li class="toctree-l3"><a class="reference internal" href="minkit.initialize.html">initialize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.data_plotting_arrays.html">data_plotting_arrays</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.fcn_profile.html">fcn_profile</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.minimizer.html">minimizer</a></li>
-<li class="toctree-l3"><a class="reference internal" href="minkit.minuit_to_registry.html">minuit_to_registry</a></li>
-<li class="toctree-l3"><a class="reference internal" href="minkit.pdf_centers_values.html">pdf_centers_values</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.pdf_from_json.html">pdf_from_json</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.pdf_plotting_arrays.html">pdf_plotting_arrays</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.pdf_to_json.html">pdf_to_json</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.register_pdf.html">register_pdf</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.simultaneous_fcn_profile.html">simultaneous_fcn_profile</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.simultaneous_minimizer.html">simultaneous_minimizer</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.sweights.html">sweights</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.sweights_u.html">sweights_u</a></li>
@@ -211,17 +213,23 @@
 <h1>unbinned_extended_maximum_likelihood<a class="headerlink" href="#unbinned-extended-maximum-likelihood" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
 <dt id="minkit.unbinned_extended_maximum_likelihood">
-<code class="sig-prename descclassname">minkit.</code><code class="sig-name descname">unbinned_extended_maximum_likelihood</code><span class="sig-paren">(</span><em class="sig-param">pdf</em>, <em class="sig-param">data</em>, <em class="sig-param">range='full'</em>, <em class="sig-param">constraints=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/fcns.html#unbinned_extended_maximum_likelihood"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.unbinned_extended_maximum_likelihood" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">minkit.</code><code class="sig-name descname">unbinned_extended_maximum_likelihood</code><span class="sig-paren">(</span><em class="sig-param">pdf</em>, <em class="sig-param">data</em>, <em class="sig-param">range='full'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/minimization/fcns.html#unbinned_extended_maximum_likelihood"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.unbinned_extended_maximum_likelihood" title="Permalink to this definition">¶</a></dt>
 <dd><p>Definition of the unbinned extended maximum likelihood FCN.
 In this case, entries in data are assumed to follow a Poissonian distribution.
-The given <a class="reference internal" href="minkit.PDF.html#minkit.PDF" title="minkit.PDF"><code class="xref py py-class docutils literal notranslate"><span class="pre">PDF</span></code></a> must be of “extended” type.</p>
+The given <a class="reference internal" href="minkit.PDF.html#minkit.PDF" title="minkit.PDF"><code class="xref py py-class docutils literal notranslate"><span class="pre">PDF</span></code></a> must be of <em>extended</em> type.
+The output is two times the logarithm of the likelihood, and is computed as</p>
+<div class="math notranslate nohighlight">
+\[\text{FCN} = -2 \times \left[\sum_{i=0}^N \log f(\vec{x}_i;\vec{\theta}) - A(\vec{\theta})\right],\]</div>
+<p>where <span class="math notranslate nohighlight">\(f(\vec{x}_i;\vec{\theta})\)</span> is the function to minimize (without
+normalization), <span class="math notranslate nohighlight">\(\vec{x}_i\)</span> are the data points, <span class="math notranslate nohighlight">\(\vec{\theta}\)</span>
+are the function parameters and <span class="math notranslate nohighlight">\(A(\vec{\theta})\)</span> is the normalization
+value.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>pdf</strong> (<a class="reference internal" href="minkit.PDF.html#minkit.PDF" title="minkit.PDF"><em>PDF</em></a>) – function to evaluate.</p></li>
 <li><p><strong>data</strong> (<a class="reference internal" href="minkit.DataSet.html#minkit.DataSet" title="minkit.DataSet"><em>DataSet</em></a>) – data to evaluate.</p></li>
 <li><p><strong>range</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – normalization range of the PDF.</p></li>
-<li><p><strong>constraints</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a><em>(</em><a class="reference internal" href="minkit.PDF.html#minkit.PDF" title="minkit.PDF"><em>PDF</em></a><em>)</em>) – PDFs with the constraints for paramters in “pdf”.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>

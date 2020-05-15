@@ -1,0 +1,113 @@
+array_operations
+================
+
+.. currentmodule:: minkit
+
+.. autoclass:: array_operations
+   :show-inheritance:
+
+   .. rubric:: Attributes Summary
+
+   .. autosummary::
+
+      ~array_operations.backend
+      ~array_operations.bool_type
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+
+      ~array_operations.access_pdf
+      ~array_operations.bempty
+      ~array_operations.bones
+      ~array_operations.bzeros
+      ~array_operations.carange
+      ~array_operations.cexp
+      ~array_operations.concatenate
+      ~array_operations.count_nonzero
+      ~array_operations.fempty
+      ~array_operations.fexp
+      ~array_operations.fftconvolve
+      ~array_operations.fones
+      ~array_operations.fzeros
+      ~array_operations.ge
+      ~array_operations.iarange
+      ~array_operations.iempty
+      ~array_operations.interpolate_linear
+      ~array_operations.is_bool
+      ~array_operations.is_complex
+      ~array_operations.is_float
+      ~array_operations.is_inside
+      ~array_operations.is_int
+      ~array_operations.le
+      ~array_operations.linspace
+      ~array_operations.log
+      ~array_operations.logical_and
+      ~array_operations.logical_or
+      ~array_operations.lt
+      ~array_operations.max
+      ~array_operations.meshgrid
+      ~array_operations.min
+      ~array_operations.ndarray_to_backend
+      ~array_operations.random_grid
+      ~array_operations.random_uniform
+      ~array_operations.restrict_data_size
+      ~array_operations.shuffling_index
+      ~array_operations.slice_from_boolean
+      ~array_operations.slice_from_integer
+      ~array_operations.sum
+      ~array_operations.sum_arrays
+      ~array_operations.sum_inside
+      ~array_operations.take_each
+      ~array_operations.take_slice
+
+   .. rubric:: Attributes Documentation
+
+   .. autoattribute:: backend
+   .. autoattribute:: bool_type
+
+   .. rubric:: Methods Documentation
+
+   .. automethod:: access_pdf
+   .. automethod:: bempty
+   .. automethod:: bones
+   .. automethod:: bzeros
+   .. automethod:: carange
+   .. automethod:: cexp
+   .. automethod:: concatenate
+   .. automethod:: count_nonzero
+   .. automethod:: fempty
+   .. automethod:: fexp
+   .. automethod:: fftconvolve
+   .. automethod:: fones
+   .. automethod:: fzeros
+   .. automethod:: ge
+   .. automethod:: iarange
+   .. automethod:: iempty
+   .. automethod:: interpolate_linear
+   .. automethod:: is_bool
+   .. automethod:: is_complex
+   .. automethod:: is_float
+   .. automethod:: is_inside
+   .. automethod:: is_int
+   .. automethod:: le
+   .. automethod:: linspace
+   .. automethod:: log
+   .. automethod:: logical_and
+   .. automethod:: logical_or
+   .. automethod:: lt
+   .. automethod:: max
+   .. automethod:: meshgrid
+   .. automethod:: min
+   .. automethod:: ndarray_to_backend
+   .. automethod:: random_grid
+   .. automethod:: random_uniform
+   .. automethod:: restrict_data_size
+   .. automethod:: shuffling_index
+   .. automethod:: slice_from_boolean
+   .. automethod:: slice_from_integer
+   .. automethod:: sum
+   .. automethod:: sum_arrays
+   .. automethod:: sum_inside
+   .. automethod:: take_each
+   .. automethod:: take_slice

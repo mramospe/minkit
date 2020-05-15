@@ -1,0 +1,17 @@
+carray
+======
+
+.. currentmodule:: minkit
+
+.. autoclass:: carray
+   :show-inheritance:
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+
+      ~carray.from_ndarray
+
+   .. rubric:: Methods Documentation
+
+   .. automethod:: from_ndarray

@@ -40,7 +40,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="SciPyMinimizer" href="minkit.SciPyMinimizer.html" />
-    <link rel="prev" title="Range" href="minkit.Range.html" /> 
+    <link rel="prev" title="ProdPDFs" href="minkit.ProdPDFs.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -89,30 +89,49 @@
             
             
               <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../user.html">User guide</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../reference.html">MinKit reference</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="../reference.html#functions">Functions</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="../reference.html#classes">Classes</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="minkit.AddPDFs.html">AddPDFs</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.Amoroso.html">Amoroso</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.Argus.html">Argus</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.ArrayOperations.html">ArrayOperations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.Backend.html">Backend</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.BinnedDataSet.html">BinnedDataSet</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.BinnedEvaluator.html">BinnedEvaluator</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.Category.html">Category</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.Chebyshev.html">Chebyshev</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.ConvPDFs.html">ConvPDFs</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.CrystalBall.html">CrystalBall</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.DataSet.html">DataSet</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.Evaluator.html">Evaluator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.ExpPoly.html">ExpPoly</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.Exponential.html">Exponential</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.Formula.html">Formula</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.Gaussian.html">Gaussian</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.Landau.html">Landau</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.Minimizer.html">Minimizer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.MinuitMinimizer.html">MinuitMinimizer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.MultiPDF.html">MultiPDF</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.PDF.html">PDF</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.Parameter.html">Parameter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.ParameterBase.html">ParameterBase</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.Polynomial.html">Polynomial</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.PowerLaw.html">PowerLaw</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.ProdPDFs.html">ProdPDFs</a></li>
-<li class="toctree-l3"><a class="reference internal" href="minkit.Range.html">Range</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">Registry</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.SciPyMinimizer.html">SciPyMinimizer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.SimultaneousEvaluator.html">SimultaneousEvaluator</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.SourcePDF.html">SourcePDF</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.UnbinnedEvaluator.html">UnbinnedEvaluator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.barray.html">barray</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.carray.html">carray</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.darray.html">darray</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.farray.html">farray</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.iarray.html">iarray</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.marray.html">marray</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../reference.html#class-inheritance-diagram">Class Inheritance Diagram</a></li>
@@ -213,10 +232,10 @@
 <h1>Registry<a class="headerlink" href="#registry" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="minkit.Registry">
-<em class="property">class </em><code class="sig-prename descclassname">minkit.</code><code class="sig-name descname">Registry</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/parameters.html#Registry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.Registry" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">minkit.</code><code class="sig-name descname">Registry</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/base/parameters.html#Registry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.Registry" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a></p>
 <p>Extension of list to hold information used in <a class="reference internal" href="../reference.html#module-minkit" title="minkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">minkit</span></code></a>.
-It represents a collection of objects with the attribute “name”, providing a unique
+It represents a collection of objects with the attribute <em>name</em>, providing a unique
 identifier (each object is assumed to be identified by its name).
 Any attempt to add a new element to the registry with the same name as one already
 existing will skip the process, as long as the two objects are the same.
@@ -230,7 +249,7 @@ Constructor is directly forwarded to <a class="reference external" href="https:/
 </colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#minkit.Registry.names" title="minkit.Registry.names"><code class="xref py py-obj docutils literal notranslate"><span class="pre">names</span></code></a></p></td>
-<td><p>Get the names in the current registry.</p></td>
+<td><p>Names in the current registry.</p></td>
 </tr>
 </tbody>
 </table>
@@ -248,13 +267,13 @@ Constructor is directly forwarded to <a class="reference external" href="https:/
 <td><p>Build the parameter from a JSON object (a dictionary).</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#minkit.Registry.get" title="minkit.Registry.get"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get</span></code></a>(name)</p></td>
-<td><p>Return the object with name “name” in this registry.</p></td>
+<td><p>Return the object with name <em>name</em> in this registry.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#minkit.Registry.index" title="minkit.Registry.index"><code class="xref py py-obj docutils literal notranslate"><span class="pre">index</span></code></a>(name)</p></td>
 <td><p>Get the position in the registry of the parameter with the given name.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#minkit.Registry.insert" title="minkit.Registry.insert"><code class="xref py py-obj docutils literal notranslate"><span class="pre">insert</span></code></a>(i, p)</p></td>
-<td><p>Insert an object before index “i”.</p></td>
+<td><p>Insert an object before index <em>i</em>.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#minkit.Registry.reduce" title="minkit.Registry.reduce"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reduce</span></code></a>(names)</p></td>
 <td><p>Create a new <a class="reference internal" href="#minkit.Registry" title="minkit.Registry"><code class="xref py py-class docutils literal notranslate"><span class="pre">Registry</span></code></a> object keeping only the given names.</p></td>
@@ -271,13 +290,10 @@ Constructor is directly forwarded to <a class="reference external" href="https:/
 <dl class="attribute">
 <dt id="minkit.Registry.names">
 <code class="sig-name descname">names</code><a class="headerlink" href="#minkit.Registry.names" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get the names in the current registry.</p>
+<dd><p>Names in the current registry.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>names in the current registry.</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)">list</a>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>)</p>
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)">list</a>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -285,7 +301,7 @@ Constructor is directly forwarded to <a class="reference external" href="https:/
 <p class="rubric">Methods Documentation</p>
 <dl class="method">
 <dt id="minkit.Registry.append">
-<code class="sig-name descname">append</code><span class="sig-paren">(</span><em class="sig-param">el</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/parameters.html#Registry.append"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.Registry.append" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">append</code><span class="sig-paren">(</span><em class="sig-param">el</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/base/parameters.html#Registry.append"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.Registry.append" title="Permalink to this definition">¶</a></dt>
 <dd><p>Append a new element to the registry.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -296,7 +312,7 @@ Constructor is directly forwarded to <a class="reference external" href="https:/
 
 <dl class="method">
 <dt id="minkit.Registry.from_json_object">
-<em class="property">classmethod </em><code class="sig-name descname">from_json_object</code><span class="sig-paren">(</span><em class="sig-param">obj</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/parameters.html#Registry.from_json_object"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.Registry.from_json_object" title="Permalink to this definition">¶</a></dt>
+<em class="property">classmethod </em><code class="sig-name descname">from_json_object</code><span class="sig-paren">(</span><em class="sig-param">obj</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/base/parameters.html#Registry.from_json_object"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.Registry.from_json_object" title="Permalink to this definition">¶</a></dt>
 <dd><p>Build the parameter from a JSON object (a dictionary).
 This is meant to be used together with the <a class="reference external" href="https://docs.python.org/3/library/json.html#module-json" title="(in Python v3.8)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">json</span></code></a> module.</p>
 <dl class="field-list simple">
@@ -314,8 +330,8 @@ This is meant to be used together with the <a class="reference external" href="h
 
 <dl class="method">
 <dt id="minkit.Registry.get">
-<code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param">name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/parameters.html#Registry.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.Registry.get" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return the object with name “name” in this registry.</p>
+<code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param">name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/base/parameters.html#Registry.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.Registry.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the object with name <em>name</em> in this registry.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – name of the object.</p>
@@ -331,7 +347,7 @@ This is meant to be used together with the <a class="reference external" href="h
 
 <dl class="method">
 <dt id="minkit.Registry.index">
-<code class="sig-name descname">index</code><span class="sig-paren">(</span><em class="sig-param">name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/parameters.html#Registry.index"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.Registry.index" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">index</code><span class="sig-paren">(</span><em class="sig-param">name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/base/parameters.html#Registry.index"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.Registry.index" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the position in the registry of the parameter with the given name.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -351,8 +367,8 @@ This is meant to be used together with the <a class="reference external" href="h
 
 <dl class="method">
 <dt id="minkit.Registry.insert">
-<code class="sig-name descname">insert</code><span class="sig-paren">(</span><em class="sig-param">i</em>, <em class="sig-param">p</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/parameters.html#Registry.insert"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.Registry.insert" title="Permalink to this definition">¶</a></dt>
-<dd><p>Insert an object before index “i”.</p>
+<code class="sig-name descname">insert</code><span class="sig-paren">(</span><em class="sig-param">i</em>, <em class="sig-param">p</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/base/parameters.html#Registry.insert"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.Registry.insert" title="Permalink to this definition">¶</a></dt>
+<dd><p>Insert an object before index <em>i</em>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -365,7 +381,7 @@ This is meant to be used together with the <a class="reference external" href="h
 
 <dl class="method">
 <dt id="minkit.Registry.reduce">
-<code class="sig-name descname">reduce</code><span class="sig-paren">(</span><em class="sig-param">names</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/parameters.html#Registry.reduce"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.Registry.reduce" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">reduce</code><span class="sig-paren">(</span><em class="sig-param">names</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/base/parameters.html#Registry.reduce"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.Registry.reduce" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a new <a class="reference internal" href="#minkit.Registry" title="minkit.Registry"><code class="xref py py-class docutils literal notranslate"><span class="pre">Registry</span></code></a> object keeping only the given names.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -382,7 +398,7 @@ This is meant to be used together with the <a class="reference external" href="h
 
 <dl class="method">
 <dt id="minkit.Registry.to_json_object">
-<code class="sig-name descname">to_json_object</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/parameters.html#Registry.to_json_object"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.Registry.to_json_object" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">to_json_object</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/base/parameters.html#Registry.to_json_object"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.Registry.to_json_object" title="Permalink to this definition">¶</a></dt>
 <dd><p>Represent this class as a JSON-like object.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -396,7 +412,7 @@ This is meant to be used together with the <a class="reference external" href="h
 
 <dl class="method">
 <dt id="minkit.Registry.values">
-<code class="sig-name descname">values</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/parameters.html#Registry.values"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.Registry.values" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">values</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/base/parameters.html#Registry.values"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.Registry.values" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get a dictionary with the values of the different parameters.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -423,7 +439,7 @@ This is meant to be used together with the <a class="reference external" href="h
         <a href="minkit.SciPyMinimizer.html" class="btn btn-neutral float-right" title="SciPyMinimizer" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="minkit.Range.html" class="btn btn-neutral float-left" title="Range" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="minkit.ProdPDFs.html" class="btn btn-neutral float-left" title="ProdPDFs" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

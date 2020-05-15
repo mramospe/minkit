@@ -1,0 +1,37 @@
+Parameter
+=========
+
+.. currentmodule:: minkit.base
+
+.. autoclass:: Parameter
+   :show-inheritance:
+
+   .. rubric:: Attributes Summary
+
+   .. autosummary::
+
+      ~Parameter.bounds
+      ~Parameter.constant
+      ~Parameter.value
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+
+      ~Parameter.from_json_object
+      ~Parameter.get_range
+      ~Parameter.set_range
+      ~Parameter.to_json_object
+
+   .. rubric:: Attributes Documentation
+
+   .. autoattribute:: bounds
+   .. autoattribute:: constant
+   .. autoattribute:: value
+
+   .. rubric:: Methods Documentation
+
+   .. automethod:: from_json_object
+   .. automethod:: get_range
+   .. automethod:: set_range
+   .. automethod:: to_json_object

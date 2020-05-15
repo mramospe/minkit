@@ -1,0 +1,121 @@
+ArrayOperations
+===============
+
+.. currentmodule:: minkit
+
+.. autoclass:: ArrayOperations
+   :show-inheritance:
+
+   .. rubric:: Attributes Summary
+
+   .. autosummary::
+
+      ~ArrayOperations.backend
+      ~ArrayOperations.bool_type
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+
+      ~ArrayOperations.access_pdf
+      ~ArrayOperations.bempty
+      ~ArrayOperations.bones
+      ~ArrayOperations.bzeros
+      ~ArrayOperations.carange
+      ~ArrayOperations.cexp
+      ~ArrayOperations.concatenate
+      ~ArrayOperations.count_nonzero
+      ~ArrayOperations.fempty
+      ~ArrayOperations.fexp
+      ~ArrayOperations.fftconvolve
+      ~ArrayOperations.fones
+      ~ArrayOperations.fzeros
+      ~ArrayOperations.ge
+      ~ArrayOperations.iarange
+      ~ArrayOperations.iempty
+      ~ArrayOperations.is_bool
+      ~ArrayOperations.is_complex
+      ~ArrayOperations.is_float
+      ~ArrayOperations.is_inside
+      ~ArrayOperations.is_int
+      ~ArrayOperations.le
+      ~ArrayOperations.linspace
+      ~ArrayOperations.log
+      ~ArrayOperations.logical_and
+      ~ArrayOperations.logical_or
+      ~ArrayOperations.lt
+      ~ArrayOperations.make_linear_interpolator
+      ~ArrayOperations.make_spline_interpolator
+      ~ArrayOperations.max
+      ~ArrayOperations.meshgrid
+      ~ArrayOperations.min
+      ~ArrayOperations.ndarray_to_backend
+      ~ArrayOperations.product_by_zero_is_zero
+      ~ArrayOperations.random_grid
+      ~ArrayOperations.random_uniform
+      ~ArrayOperations.restrict_data_size
+      ~ArrayOperations.set_rndm_seed
+      ~ArrayOperations.shuffling_index
+      ~ArrayOperations.slice_from_boolean
+      ~ArrayOperations.slice_from_integer
+      ~ArrayOperations.sum
+      ~ArrayOperations.sum_arrays
+      ~ArrayOperations.sum_inside
+      ~ArrayOperations.take_column
+      ~ArrayOperations.take_slice
+      ~ArrayOperations.using_caches
+
+   .. rubric:: Attributes Documentation
+
+   .. autoattribute:: backend
+   .. autoattribute:: bool_type
+
+   .. rubric:: Methods Documentation
+
+   .. automethod:: access_pdf
+   .. automethod:: bempty
+   .. automethod:: bones
+   .. automethod:: bzeros
+   .. automethod:: carange
+   .. automethod:: cexp
+   .. automethod:: concatenate
+   .. automethod:: count_nonzero
+   .. automethod:: fempty
+   .. automethod:: fexp
+   .. automethod:: fftconvolve
+   .. automethod:: fones
+   .. automethod:: fzeros
+   .. automethod:: ge
+   .. automethod:: iarange
+   .. automethod:: iempty
+   .. automethod:: is_bool
+   .. automethod:: is_complex
+   .. automethod:: is_float
+   .. automethod:: is_inside
+   .. automethod:: is_int
+   .. automethod:: le
+   .. automethod:: linspace
+   .. automethod:: log
+   .. automethod:: logical_and
+   .. automethod:: logical_or
+   .. automethod:: lt
+   .. automethod:: make_linear_interpolator
+   .. automethod:: make_spline_interpolator
+   .. automethod:: max
+   .. automethod:: meshgrid
+   .. automethod:: min
+   .. automethod:: ndarray_to_backend
+   .. automethod:: product_by_zero_is_zero
+   .. automethod:: random_grid
+   .. automethod:: random_uniform
+   .. automethod:: restrict_data_size
+   .. automethod:: set_rndm_seed
+   .. automethod:: shuffling_index
+   .. automethod:: slice_from_boolean
+   .. automethod:: slice_from_integer
+   .. automethod:: sum
+   .. automethod:: sum_arrays
+   .. automethod:: sum_inside
+   .. automethod:: take_column
+   .. automethod:: take_slice
+   .. automethod:: using_caches

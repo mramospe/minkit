@@ -89,30 +89,49 @@
             
             
               <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../user.html">User guide</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../reference.html">MinKit reference</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="../reference.html#functions">Functions</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="../reference.html#classes">Classes</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="minkit.AddPDFs.html">AddPDFs</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.Amoroso.html">Amoroso</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.Argus.html">Argus</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.ArrayOperations.html">ArrayOperations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.Backend.html">Backend</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.BinnedDataSet.html">BinnedDataSet</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.BinnedEvaluator.html">BinnedEvaluator</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.Category.html">Category</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">Chebyshev</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.ConvPDFs.html">ConvPDFs</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.CrystalBall.html">CrystalBall</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.DataSet.html">DataSet</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.Evaluator.html">Evaluator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.ExpPoly.html">ExpPoly</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.Exponential.html">Exponential</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.Formula.html">Formula</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.Gaussian.html">Gaussian</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.Landau.html">Landau</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.Minimizer.html">Minimizer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.MinuitMinimizer.html">MinuitMinimizer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.MultiPDF.html">MultiPDF</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.PDF.html">PDF</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.Parameter.html">Parameter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.ParameterBase.html">ParameterBase</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.Polynomial.html">Polynomial</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.PowerLaw.html">PowerLaw</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.ProdPDFs.html">ProdPDFs</a></li>
-<li class="toctree-l3"><a class="reference internal" href="minkit.Range.html">Range</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.Registry.html">Registry</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.SciPyMinimizer.html">SciPyMinimizer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.SimultaneousEvaluator.html">SimultaneousEvaluator</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.SourcePDF.html">SourcePDF</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.UnbinnedEvaluator.html">UnbinnedEvaluator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.barray.html">barray</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.carray.html">carray</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.darray.html">darray</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.farray.html">farray</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.iarray.html">iarray</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.marray.html">marray</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../reference.html#class-inheritance-diagram">Class Inheritance Diagram</a></li>
@@ -213,8 +232,8 @@
 <h1>Chebyshev<a class="headerlink" href="#chebyshev" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="minkit.Chebyshev">
-<em class="property">class </em><code class="sig-prename descclassname">minkit.</code><code class="sig-name descname">Chebyshev</code><span class="sig-paren">(</span><em class="sig-param">name</em>, <em class="sig-param">x</em>, <em class="sig-param">*coeffs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/pdfs.html#Chebyshev"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.Chebyshev" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="minkit.SourcePDF.html#minkit.SourcePDF" title="minkit.pdf_core.SourcePDF"><code class="docutils literal notranslate"><span class="pre">minkit.SourcePDF</span></code></a></p>
+<em class="property">class </em><code class="sig-prename descclassname">minkit.</code><code class="sig-name descname">Chebyshev</code><span class="sig-paren">(</span><em class="sig-param">name</em>, <em class="sig-param">x</em>, <em class="sig-param">*coeffs</em>, <em class="sig-param">backend=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/pdfs/pdfs.html#Chebyshev"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.Chebyshev" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="minkit.SourcePDF.html#minkit.SourcePDF" title="minkit.pdfs.pdf_core.SourcePDF"><code class="docutils literal notranslate"><span class="pre">minkit.SourcePDF</span></code></a></p>
 <p>Build the class given the name, parameter related to data and coefficients.
 Coefficients must be sorted from lower to higher order.
 Due to the normalization requirement, the first coefficient corresponds to the

@@ -1,0 +1,19 @@
+Backend
+=======
+
+.. currentmodule:: minkit
+
+.. autoclass:: Backend
+   :show-inheritance:
+
+   .. rubric:: Attributes Summary
+
+   .. autosummary::
+
+      ~Backend.aop
+      ~Backend.btype
+
+   .. rubric:: Attributes Documentation
+
+   .. autoattribute:: aop
+   .. autoattribute:: btype

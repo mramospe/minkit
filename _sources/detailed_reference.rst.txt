@@ -1,0 +1,11 @@
+Detailed reference
+==================
+
+In this section, the classes and functions of the Minkit package are displayed
+according to its use.
+
+.. automodapi:: minkit.base
+   :no-heading:
+
+.. automodapi:: minkit.pdfs
+  :no-heading:

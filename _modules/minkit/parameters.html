@@ -162,7 +162,7 @@
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Parameter&#39;</span><span class="p">,</span> <span class="s1">&#39;Formula&#39;</span><span class="p">,</span> <span class="s1">&#39;Range&#39;</span><span class="p">,</span> <span class="s1">&#39;Registry&#39;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Parameter&#39;</span><span class="p">,</span> <span class="s1">&#39;Formula&#39;</span><span class="p">,</span> <span class="s1">&#39;Registry&#39;</span><span class="p">]</span>
 
 <span class="c1"># Default range</span>
 <span class="n">FULL</span> <span class="o">=</span> <span class="s1">&#39;full&#39;</span>
@@ -185,7 +185,7 @@
 <span class="sd">        :type name: str</span>
 <span class="sd">        :param value: initial value.</span>
 <span class="sd">        :type value: float</span>
-<span class="sd">        :param bounds: bounds for the parameter. This defines the &quot;full&quot; range.</span>
+<span class="sd">        :param bounds: bounds for the parameter. This defines the *full* range.</span>
 <span class="sd">        :type bounds: tuple or tuple(tuple, ...)</span>
 <span class="sd">        :param ranges: possible ranges</span>
 <span class="sd">        :type ranges: dict(str, tuple) or dict(str, tuple(tuple, ...))</span>
@@ -204,10 +204,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span> <span class="o">=</span> <span class="n">bounds</span>  <span class="c1"># This sets the FULL range</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">error</span> <span class="o">=</span> <span class="n">error</span>
 
-        <span class="c1"># Set the ranges skipping the FULL range, since it is determined by the bounds</span>
-        <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">r</span> <span class="ow">in</span> <span class="p">(</span><span class="n">ranges</span> <span class="ow">or</span> <span class="p">{})</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="k">if</span> <span class="n">n</span> <span class="o">!=</span> <span class="n">FULL</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">__ranges</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">Range</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ranges</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">ranges</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">set_range</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">r</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
@@ -222,14 +221,14 @@
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Bounds of the parameter, defining the &quot;full&quot; range.</span>
+<span class="sd">        Bounds of the parameter, defining the *full* range.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__bounds</span>
 
     <span class="nd">@bounds</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Set the bounds of the parameter, which also modifies the &quot;full&quot; range.</span>
+<span class="sd">        Set the bounds of the parameter, which also modifies the *full* range.</span>
 
 <span class="sd">        :param values: bounds to set.</span>
 <span class="sd">        :type values: tuple or tuple(tuple, ...)</span>
@@ -238,7 +237,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">__bounds</span> <span class="o">=</span> <span class="n">values</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__bounds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">types</span><span class="o">.</span><span class="n">cpu_type</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__ranges</span><span class="p">[</span><span class="n">FULL</span><span class="p">]</span> <span class="o">=</span> <span class="n">Range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__bounds</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__ranges</span><span class="p">[</span><span class="n">FULL</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__bounds</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">constant</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -254,7 +253,7 @@
     <span class="nd">@constant</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">constant</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Define the &quot;constant&quot; status of the class.</span>
+<span class="sd">        Define the *constant* status of the class.</span>
 
 <span class="sd">        :param v: value determining whether this object must be considered as constant or not.</span>
 <span class="sd">        :type v: bool</span>
@@ -283,14 +282,14 @@
 <span class="sd">        :param name: name of the range.</span>
 <span class="sd">        :type name: str</span>
 <span class="sd">        :returns: attached range.</span>
-<span class="sd">        :rtype: Range</span>
+<span class="sd">        :rtype: numpy.ndarray</span>
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__ranges</span><span class="p">[</span><span class="n">name</span><span class="p">]</span></div>
 
 <div class="viewcode-block" id="Parameter.set_range"><a class="viewcode-back" href="../../api/minkit.Parameter.html#minkit.Parameter.set_range">[docs]</a>    <span class="k">def</span> <span class="nf">set_range</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Define the range with name &quot;name&quot;.</span>
-<span class="sd">        Must not be &quot;full&quot;.</span>
+<span class="sd">        Define the range with name *name*.</span>
+<span class="sd">        Must not be *full*.</span>
 
 <span class="sd">        :param name: name of the range.</span>
 <span class="sd">        :type name: str</span>
@@ -300,7 +299,7 @@
         <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="n">FULL</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                 <span class="n">f</span><span class="s1">&#39;Range name &quot;</span><span class="si">{name}</span><span class="s1">&quot; is protected; can not be used&#39;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__ranges</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">Range</span><span class="p">(</span><span class="n">values</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__ranges</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">types</span><span class="o">.</span><span class="n">cpu_type</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Parameter.to_json_object"><a class="viewcode-back" href="../../api/minkit.Parameter.html#minkit.Parameter.to_json_object">[docs]</a>    <span class="k">def</span> <span class="nf">to_json_object</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
@@ -317,7 +316,7 @@
         <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
                 <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
                 <span class="s1">&#39;bounds&#39;</span><span class="p">:</span> <span class="n">bounds</span><span class="p">,</span>
-                <span class="s1">&#39;ranges&#39;</span><span class="p">:</span> <span class="p">{</span><span class="n">n</span><span class="p">:</span> <span class="n">r</span><span class="o">.</span><span class="n">bounds</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span> <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">r</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__ranges</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">n</span> <span class="o">!=</span> <span class="n">FULL</span><span class="p">},</span>
+                <span class="s1">&#39;ranges&#39;</span><span class="p">:</span> <span class="p">{</span><span class="n">n</span><span class="p">:</span> <span class="n">r</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span> <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">r</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__ranges</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">n</span> <span class="o">!=</span> <span class="n">FULL</span><span class="p">},</span>
                 <span class="s1">&#39;error&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">error</span><span class="p">,</span>
                 <span class="s1">&#39;constant&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">constant</span><span class="p">}</span></div>
 
@@ -434,60 +433,17 @@
         <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;formula&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__formula</span><span class="p">,</span> <span class="s1">&#39;pars&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">names</span><span class="p">}</span></div></div>
 
 
-<div class="viewcode-block" id="Range"><a class="viewcode-back" href="../../api/minkit.Range.html#minkit.Range">[docs]</a><span class="k">class</span> <span class="nc">Range</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">range_is_disjoint</span><span class="p">(</span><span class="n">r</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Return whether this range is composed by more than one subrange (with no</span>
+<span class="sd">    common borders.</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bounds</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Object to define bounds for a parameter.</span>
-
-<span class="sd">        :param bounds: bounds of the range.</span>
-<span class="sd">        :type bounds: tuple or tuple(tuple, ...)</span>
-<span class="sd">        &#39;&#39;&#39;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__bounds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">bounds</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">types</span><span class="o">.</span><span class="n">cpu_type</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Return the number of bounds.</span>
-
-<span class="sd">        :return: number of bounds.</span>
-<span class="sd">        :rtype: int</span>
-<span class="sd">        &#39;&#39;&#39;</span>
-        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__bounds</span><span class="p">)</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Bounds of the range.</span>
-
-<span class="sd">        :returns: bounds of the range.</span>
-<span class="sd">        :rtype: numpy.ndarray</span>
-<span class="sd">        &#39;&#39;&#39;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__bounds</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">disjoint</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Return whether this range is composed by more than one subrange (with no</span>
-<span class="sd">        common borders.</span>
-
-<span class="sd">        :returns: whether the range is disjoint.</span>
-<span class="sd">        :rtype: bool</span>
-<span class="sd">        &#39;&#39;&#39;</span>
-        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__bounds</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Return the size of the range.</span>
-<span class="sd">        This corresponds to the sum of the areas of any subrange.</span>
-
-<span class="sd">        :returns: size of the range.</span>
-<span class="sd">        :rtype: float</span>
-<span class="sd">        &#39;&#39;&#39;</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__bounds</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">__bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">fromiter</span><span class="p">(((</span><span class="n">s</span> <span class="o">-</span> <span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__bounds</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">types</span><span class="o">.</span><span class="n">cpu_type</span><span class="p">))</span></div>
+<span class="sd">    :param r: range to process.</span>
+<span class="sd">    :type r: numpy.ndarray</span>
+<span class="sd">    :returns: whether the range is disjoint or not.</span>
+<span class="sd">    :rtype: bool</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span>
 
 
 <div class="viewcode-block" id="Registry"><a class="viewcode-back" href="../../api/minkit.Registry.html#minkit.Registry">[docs]</a><span class="k">class</span> <span class="nc">Registry</span><span class="p">(</span><span class="nb">list</span><span class="p">):</span>
@@ -495,7 +451,7 @@
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Extension of list to hold information used in :py:mod:`minkit`.</span>
-<span class="sd">        It represents a collection of objects with the attribute &quot;name&quot;, providing a unique</span>
+<span class="sd">        It represents a collection of objects with the attribute *name*, providing a unique</span>
 <span class="sd">        identifier (each object is assumed to be identified by its name).</span>
 <span class="sd">        Any attempt to add a new element to the registry with the same name as one already</span>
 <span class="sd">        existing will skip the process, as long as the two objects are the same.</span>
@@ -579,7 +535,7 @@
 
 <div class="viewcode-block" id="Registry.get"><a class="viewcode-back" href="../../api/minkit.Registry.html#minkit.Registry.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Return the object with name &quot;name&quot; in this registry.</span>
+<span class="sd">        Return the object with name *name* in this registry.</span>
 
 <span class="sd">        :param name: name of the object.</span>
 <span class="sd">        :type name: str</span>
@@ -608,7 +564,7 @@
 
 <div class="viewcode-block" id="Registry.insert"><a class="viewcode-back" href="../../api/minkit.Registry.html#minkit.Registry.insert">[docs]</a>    <span class="k">def</span> <span class="nf">insert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Insert an object before index &quot;i&quot;.</span>
+<span class="sd">        Insert an object before index *i*.</span>
 
 <span class="sd">        :param i: index where to insert the object.</span>
 <span class="sd">        :type i: int</span>
@@ -666,7 +622,7 @@
     <span class="n">multi_bounds</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">()</span>
     <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">data_pars</span><span class="p">:</span>
         <span class="n">r</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">get_range</span><span class="p">(</span><span class="nb">range</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">disjoint</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">range_is_disjoint</span><span class="p">(</span><span class="n">r</span><span class="p">):</span>
             <span class="n">multi_bounds</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">r</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">single_bounds</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">r</span>
@@ -674,7 +630,8 @@
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">multi_bounds</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="c1"># Simple case, all data parameters have only one set of bounds</span>
         <span class="c1"># for this normalization range</span>
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">r</span><span class="o">.</span><span class="n">bounds</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">single_bounds</span><span class="o">.</span><span class="n">values</span><span class="p">()])</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">r</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">single_bounds</span><span class="o">.</span><span class="n">values</span><span class="p">()])</span><span class="o">.</span><span class="n">T</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">t</span><span class="p">])</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="c1"># Must calculate all the combinations of normalization ranges</span>
         <span class="c1"># for every data parameter.</span>
@@ -682,18 +639,20 @@
         <span class="n">maxs</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">data_pars</span><span class="o">.</span><span class="n">names</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">single_bounds</span><span class="p">:</span>
-                <span class="n">mins</span><span class="p">[</span><span class="n">n</span><span class="p">],</span> <span class="n">maxs</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">single_bounds</span><span class="p">[</span><span class="n">n</span><span class="p">]</span><span class="o">.</span><span class="n">bounds</span><span class="o">.</span><span class="n">T</span>
+                <span class="n">mins</span><span class="p">[</span><span class="n">n</span><span class="p">],</span> <span class="n">maxs</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">single_bounds</span><span class="p">[</span><span class="n">n</span><span class="p">]</span>
             <span class="k">elif</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">multi_bounds</span><span class="p">:</span>
-                <span class="n">mins</span><span class="p">[</span><span class="n">n</span><span class="p">],</span> <span class="n">maxs</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">multi_bounds</span><span class="p">[</span><span class="n">n</span><span class="p">]</span><span class="o">.</span><span class="n">bounds</span><span class="o">.</span><span class="n">T</span>
+                <span class="n">mins</span><span class="p">[</span><span class="n">n</span><span class="p">],</span> <span class="n">maxs</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">multi_bounds</span><span class="p">[</span><span class="n">n</span><span class="p">]</span><span class="o">.</span><span class="n">T</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
                     <span class="s1">&#39;Internal error detected; please report the bug&#39;</span><span class="p">)</span>
 
         <span class="c1"># Get all the combinations of minimum and maximum values for the bounds of each variable</span>
-        <span class="n">mmins</span> <span class="o">=</span> <span class="p">[</span><span class="n">m</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="o">*</span><span class="p">[</span><span class="n">b</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">mins</span><span class="o">.</span><span class="n">values</span><span class="p">()])]</span>
-        <span class="n">mmaxs</span> <span class="o">=</span> <span class="p">[</span><span class="n">m</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="o">*</span><span class="p">[</span><span class="n">b</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">maxs</span><span class="o">.</span><span class="n">values</span><span class="p">()])]</span>
+        <span class="n">mmins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">m</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+                          <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="o">*</span><span class="p">[</span><span class="n">b</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">mins</span><span class="o">.</span><span class="n">values</span><span class="p">()])])</span><span class="o">.</span><span class="n">T</span>
+        <span class="n">mmaxs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">m</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+                          <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="o">*</span><span class="p">[</span><span class="n">b</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">maxs</span><span class="o">.</span><span class="n">values</span><span class="p">()])])</span><span class="o">.</span><span class="n">T</span>
 
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">mi</span><span class="p">,</span> <span class="n">ma</span><span class="p">])</span><span class="o">.</span><span class="n">T</span> <span class="k">for</span> <span class="n">mi</span><span class="p">,</span> <span class="n">ma</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">mmins</span><span class="p">,</span> <span class="n">mmaxs</span><span class="p">)],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([(</span><span class="n">lb</span><span class="p">,</span> <span class="n">ub</span><span class="p">)</span> <span class="k">for</span> <span class="n">lb</span><span class="p">,</span> <span class="n">ub</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">mmins</span><span class="p">,</span> <span class="n">mmaxs</span><span class="p">)])</span>
 </pre></div>
 
            </div>

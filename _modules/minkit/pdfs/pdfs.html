@@ -1,0 +1,486 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>minkit.pdfs.pdfs &mdash; minkit 0.0.0.dev0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../../_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> minkit
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.0.0.dev0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../user.html">User guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference.html">MinKit reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../performance.html">Performance</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">minkit</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+          <li><a href="../../minkit.html">minkit</a> &raquo;</li>
+        
+      <li>minkit.pdfs.pdfs</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for minkit.pdfs.pdfs</h1><div class="highlight"><pre>
+<span></span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Definition of PDFs based in C, OpenCL or CUDA.</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">pdf_core</span>
+
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Amoroso&#39;</span><span class="p">,</span> <span class="s1">&#39;Argus&#39;</span><span class="p">,</span> <span class="s1">&#39;Chebyshev&#39;</span><span class="p">,</span> <span class="s1">&#39;CrystalBall&#39;</span><span class="p">,</span>
+           <span class="s1">&#39;Exponential&#39;</span><span class="p">,</span> <span class="s1">&#39;ExpPoly&#39;</span><span class="p">,</span> <span class="s1">&#39;Gaussian&#39;</span><span class="p">,</span> <span class="s1">&#39;Landau&#39;</span><span class="p">,</span> <span class="s1">&#39;Polynomial&#39;</span><span class="p">,</span> <span class="s1">&#39;PowerLaw&#39;</span><span class="p">]</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="Amoroso"><a class="viewcode-back" href="../../../api/minkit.Amoroso.html#minkit.Amoroso">[docs]</a><span class="nd">@pdf_core</span><span class="o">.</span><span class="n">register_pdf</span>
+<span class="k">class</span> <span class="nc">Amoroso</span><span class="p">(</span><span class="n">pdf_core</span><span class="o">.</span><span class="n">SourcePDF</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Create a new PDF with the name, parameter related to the data and the argument parameters.</span>
+<span class="sd">        The amoroso distribution is defined as</span>
+
+<span class="sd">        .. math:: f\left(x;a,\theta,\alpha,\beta\right) = \left(\frac{x - a}{\theta}\right)^{\alpha\beta - 1} e^{-\left(\frac{x - a}{\theta}\right)^\beta}</span>
+
+<span class="sd">        :param name: name of the PDF.</span>
+<span class="sd">        :type name: str</span>
+<span class="sd">        :param x: data parameter.</span>
+<span class="sd">        :type x: Parameter</span>
+<span class="sd">        :param a: center of the distribution.</span>
+<span class="sd">        :type a: Parameter</span>
+<span class="sd">        :param theta: parameter related to the width of the distribution.</span>
+<span class="sd">        :type theta: Parameter</span>
+<span class="sd">        :param alpha: power for the distance with respect to the center. Must be greater than zero.</span>
+<span class="sd">        :type alpha: Parameter</span>
+<span class="sd">        :param beta: power of the exponential.</span>
+<span class="sd">        :type beta: Parameter</span>
+
+<span class="sd">        .. warning: This function is unstable and the evaluation can explode easily for certain combination of parameters, as the normalization is currently done numerically.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="n">alpha</span><span class="o">.</span><span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s1">&#39;Parameter &quot;alpha&quot; for the </span><span class="si">{self.__class__.__name__}</span><span class="s1"> PDF must be greater than zero; check its initial value&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">alpha</span><span class="o">.</span><span class="n">bounds</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">alpha</span><span class="o">.</span><span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s1">&#39;Parameter &quot;alpha&quot; for the </span><span class="si">{self.__class__.__name__}</span><span class="s1"> PDF must be greater than zero; check its bounds&#39;</span><span class="p">)</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">name</span><span class="p">,</span> <span class="p">[</span><span class="n">x</span><span class="p">],</span> <span class="p">[</span><span class="n">a</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">beta</span><span class="p">],</span> <span class="n">backend</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Argus"><a class="viewcode-back" href="../../../api/minkit.Argus.html#minkit.Argus">[docs]</a><span class="nd">@pdf_core</span><span class="o">.</span><span class="n">register_pdf</span>
+<span class="k">class</span> <span class="nc">Argus</span><span class="p">(</span><span class="n">pdf_core</span><span class="o">.</span><span class="n">SourcePDF</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Create a new PDF with the name, parameter related to the data and the argument parameters.</span>
+<span class="sd">        If :math:`p = 0.5`, the Amoroso distribution can be simplified as</span>
+
+<span class="sd">        .. math:: f\left(x;\mu,c,p\right) = x \sqrt{1 - \frac{x^2}{\mu^2}} e^{- \frac{1}{2}\left(1 - \frac{x^2}{\mu^2}\right)}</span>
+
+<span class="sd">        :param name: name of the PDF.</span>
+<span class="sd">        :type name: str</span>
+<span class="sd">        :param x: data parameter.</span>
+<span class="sd">        :type x: Parameter</span>
+<span class="sd">        :param mu: cut-off of the distribution.</span>
+<span class="sd">        :type mu: Parameter</span>
+<span class="sd">        :param c: parameter ruling the curvature of the distribution.</span>
+<span class="sd">        :type c: Parameter</span>
+<span class="sd">        :param p: power ruling the peaking strength of the distribution.</span>
+<span class="sd">        :type p: Parameter</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="p">[</span><span class="n">x</span><span class="p">],</span> <span class="p">[</span><span class="n">mu</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">p</span><span class="p">],</span> <span class="n">backend</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Chebyshev"><a class="viewcode-back" href="../../../api/minkit.Chebyshev.html#minkit.Chebyshev">[docs]</a><span class="nd">@pdf_core</span><span class="o">.</span><span class="n">register_pdf</span>
+<span class="k">class</span> <span class="nc">Chebyshev</span><span class="p">(</span><span class="n">pdf_core</span><span class="o">.</span><span class="n">SourcePDF</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="o">*</span><span class="n">coeffs</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Build the class given the name, parameter related to data and coefficients.</span>
+<span class="sd">        Coefficients must be sorted from lower to higher order.</span>
+<span class="sd">        Due to the normalization requirement, the first coefficient corresponds to the</span>
+<span class="sd">        Chebyshev polynomial of n = 1, thus a straight line.</span>
+<span class="sd">        The Chebyshev polynomials are related through</span>
+
+<span class="sd">        .. math:: T_0(x) = 1</span>
+
+<span class="sd">        .. math:: T_1(x) = x</span>
+
+<span class="sd">        .. math:: T_{n + 1}(x) = 2xT_n(x) - T_{n - 1}(x)</span>
+
+<span class="sd">        :param name: name of the PDF.</span>
+<span class="sd">        :type name: str</span>
+<span class="sd">        :param x: data parameter.</span>
+<span class="sd">        :type x: Parameter</span>
+<span class="sd">        :param coeffs: coefficients for the polynomial</span>
+<span class="sd">        :type coeffs: tuple(Parameter)</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="p">[</span><span class="n">x</span><span class="p">],</span> <span class="kc">None</span><span class="p">,</span> <span class="n">coeffs</span><span class="p">,</span> <span class="n">backend</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="CrystalBall"><a class="viewcode-back" href="../../../api/minkit.CrystalBall.html#minkit.CrystalBall">[docs]</a><span class="nd">@pdf_core</span><span class="o">.</span><span class="n">register_pdf</span>
+<span class="k">class</span> <span class="nc">CrystalBall</span><span class="p">(</span><span class="n">pdf_core</span><span class="o">.</span><span class="n">SourcePDF</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Create a new PDF with the name, parameter related to the data and the argument parameters.</span>
+<span class="sd">        This PDF is expressed as</span>
+
+<span class="sd">        .. math:: f\left(x;c,\sigma,\alpha,n\right) = e^{- \frac{\left(x - c\right)^2}{2\sigma^2}}</span>
+
+<span class="sd">        for values of</span>
+
+<span class="sd">        .. math:: \frac{x - c}{\sigma} \geq - |\alpha|</span>
+
+<span class="sd">        otherwise, the power law</span>
+
+<span class="sd">        .. math:: \frac{A}{\left(B - \frac{x - c}{\sigma}\right)^n}</span>
+
+<span class="sd">        is used, where</span>
+
+<span class="sd">        .. math:: A = \left(\frac{n}{|\alpha|}\right)^n e^{- \frac{1}{2} |\alpha|^2}</span>
+
+<span class="sd">        .. math:: B = \frac{n}{|\alpha|} - |\alpha|</span>
+
+<span class="sd">        :param name: name of the PDF.</span>
+<span class="sd">        :type name: str</span>
+<span class="sd">        :param x: data parameter.</span>
+<span class="sd">        :type x: Parameter</span>
+<span class="sd">        :param c: center of the Gaussian core.</span>
+<span class="sd">        :type c: Parameter</span>
+<span class="sd">        :param s: standard deviation of the Gaussian core.</span>
+<span class="sd">        :type s: Parameter</span>
+<span class="sd">        :param a: number of standard deviations till the start of the power-law behaviour. A negative value implies the tail is on the right.</span>
+<span class="sd">        :type a: Parameter</span>
+<span class="sd">        :param n: power of the power-law.</span>
+<span class="sd">        :type n: Parameter</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="p">[</span><span class="n">x</span><span class="p">],</span> <span class="p">[</span><span class="n">c</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">n</span><span class="p">],</span> <span class="n">backend</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Exponential"><a class="viewcode-back" href="../../../api/minkit.Exponential.html#minkit.Exponential">[docs]</a><span class="nd">@pdf_core</span><span class="o">.</span><span class="n">register_pdf</span>
+<span class="k">class</span> <span class="nc">Exponential</span><span class="p">(</span><span class="n">pdf_core</span><span class="o">.</span><span class="n">SourcePDF</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Create a new PDF with the parameters related to the data and the slope parameter.</span>
+<span class="sd">        The PDF is defined as.</span>
+
+<span class="sd">        .. math:: f\left(x;k\right) = e^{k x}</span>
+
+<span class="sd">        :param name: name of the PDF.</span>
+<span class="sd">        :type name: str</span>
+<span class="sd">        :param x: data parameter.</span>
+<span class="sd">        :type x: Parameter</span>
+<span class="sd">        :param k: parameter of the exponential.</span>
+<span class="sd">        :type k: Parameter</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="p">[</span><span class="n">x</span><span class="p">],</span> <span class="p">[</span><span class="n">k</span><span class="p">],</span> <span class="n">backend</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ExpPoly"><a class="viewcode-back" href="../../../api/minkit.ExpPoly.html#minkit.ExpPoly">[docs]</a><span class="nd">@pdf_core</span><span class="o">.</span><span class="n">register_pdf</span>
+<span class="k">class</span> <span class="nc">ExpPoly</span><span class="p">(</span><span class="n">pdf_core</span><span class="o">.</span><span class="n">SourcePDF</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="o">*</span><span class="n">coeffs</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Create a new PDF with the parameters related to the data and the slope parameter.</span>
+<span class="sd">        The PDF is defined as</span>
+
+<span class="sd">        .. math:: f\left(x;k\right) = \sum_{i = 0}^n \alpha_i x^i e^{k x},</span>
+
+<span class="sd">        where the first parameter :math:`\alpha_0` is set to one due to the</span>
+<span class="sd">        normalization requirement.</span>
+
+<span class="sd">        :param name: name of the PDF.</span>
+<span class="sd">        :type name: str</span>
+<span class="sd">        :param x: data parameter.</span>
+<span class="sd">        :type x: Parameter</span>
+<span class="sd">        :param k: parameter of the exponential.</span>
+<span class="sd">        :type k: Parameter</span>
+<span class="sd">        :param coeffs: coefficients for the polynomial</span>
+<span class="sd">        :type coeffs: tuple(Parameter)</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="p">[</span><span class="n">x</span><span class="p">],</span> <span class="p">[</span><span class="n">k</span><span class="p">],</span> <span class="n">coeffs</span><span class="p">,</span> <span class="n">backend</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Gaussian"><a class="viewcode-back" href="../../../api/minkit.Gaussian.html#minkit.Gaussian">[docs]</a><span class="nd">@pdf_core</span><span class="o">.</span><span class="n">register_pdf</span>
+<span class="k">class</span> <span class="nc">Gaussian</span><span class="p">(</span><span class="n">pdf_core</span><span class="o">.</span><span class="n">SourcePDF</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">center</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Create a new PDF with the parameters related to the data, center and standard</span>
+<span class="sd">        deviation.</span>
+<span class="sd">        The PDF is defined as</span>
+
+<span class="sd">        .. math:: f\left(x;c,\sigma\right) = e^{-\frac{\left(x - c\right)^2}{2\sigma^2}}</span>
+
+<span class="sd">        :param name: name of the PDF.</span>
+<span class="sd">        :type name: str</span>
+<span class="sd">        :param x: Parameter</span>
+<span class="sd">        :type x: data parameter.</span>
+<span class="sd">        :param center: center of the Gaussian.</span>
+<span class="sd">        :type center: Parameter</span>
+<span class="sd">        :param sigma: standard deviation.</span>
+<span class="sd">        :type sigma: Parameter</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="p">[</span><span class="n">x</span><span class="p">],</span> <span class="p">[</span><span class="n">center</span><span class="p">,</span> <span class="n">sigma</span><span class="p">],</span> <span class="n">backend</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Landau"><a class="viewcode-back" href="../../../api/minkit.Landau.html#minkit.Landau">[docs]</a><span class="nd">@pdf_core</span><span class="o">.</span><span class="n">register_pdf</span>
+<span class="k">class</span> <span class="nc">Landau</span><span class="p">(</span><span class="n">pdf_core</span><span class="o">.</span><span class="n">SourcePDF</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">center</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Create a Landau PDF with the parameters related to the data, center and</span>
+<span class="sd">        scale parameter. The PDF is defined as</span>
+
+<span class="sd">        .. math:: f\left(x;c,\sigma\right) = \frac{1}{2\pi i \sigma}\int_{a - i \infty}^{a + i \infty} e^{\lambda s + s \log s} ds,</span>
+
+<span class="sd">        where :math:`\lambda = \frac{x - c}{\sigma}` and *a* is an arbitrary</span>
+<span class="sd">        parameter.</span>
+
+<span class="sd">        :param name: name of the PDF.</span>
+<span class="sd">        :type name: str</span>
+<span class="sd">        :param x: Parameter</span>
+<span class="sd">        :type x: data parameter.</span>
+<span class="sd">        :param center: center of the Gaussian.</span>
+<span class="sd">        :type center: Parameter</span>
+<span class="sd">        :param sigma: scale parameter.</span>
+<span class="sd">        :type sigma: Parameter</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="p">[</span><span class="n">x</span><span class="p">],</span> <span class="p">[</span><span class="n">center</span><span class="p">,</span> <span class="n">sigma</span><span class="p">],</span> <span class="n">backend</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Polynomial"><a class="viewcode-back" href="../../../api/minkit.Polynomial.html#minkit.Polynomial">[docs]</a><span class="nd">@pdf_core</span><span class="o">.</span><span class="n">register_pdf</span>
+<span class="k">class</span> <span class="nc">Polynomial</span><span class="p">(</span><span class="n">pdf_core</span><span class="o">.</span><span class="n">SourcePDF</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="o">*</span><span class="n">coeffs</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Build the class given the name, parameter related to data and the coefficients.</span>
+<span class="sd">        Coefficients must be sorted from lower to higher order.</span>
+<span class="sd">        Due to the normalization condition, the first parameter is fixed to zero, if no</span>
+<span class="sd">        coefficients are provided the result is a constant function.</span>
+<span class="sd">        The PDF is expressed as</span>
+
+<span class="sd">        .. math:: f\left(x;a_1,a_2,...\right) = 1 + \sum_{i = 1}^n a_i x^i</span>
+
+<span class="sd">        :param name: name of the PDF.</span>
+<span class="sd">        :type name: str</span>
+<span class="sd">        :param x: data parameter.</span>
+<span class="sd">        :type x: Parameter</span>
+<span class="sd">        :param coeffs: coefficients for the polynomial</span>
+<span class="sd">        :type coeffs: tuple(Parameter)</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="p">[</span><span class="n">x</span><span class="p">],</span> <span class="kc">None</span><span class="p">,</span> <span class="n">coeffs</span><span class="p">,</span> <span class="n">backend</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="PowerLaw"><a class="viewcode-back" href="../../../api/minkit.PowerLaw.html#minkit.PowerLaw">[docs]</a><span class="nd">@pdf_core</span><span class="o">.</span><span class="n">register_pdf</span>
+<span class="k">class</span> <span class="nc">PowerLaw</span><span class="p">(</span><span class="n">pdf_core</span><span class="o">.</span><span class="n">SourcePDF</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Build the class given the name, parameter related to data and the coefficients.</span>
+<span class="sd">        This PDF is expressed as</span>
+
+<span class="sd">        .. math:: f\left(x;c,n\right) = \frac{1}{\left(x - c\right)^n}</span>
+
+<span class="sd">        :param name: name of the PDF.</span>
+<span class="sd">        :type name: str</span>
+<span class="sd">        :param x: data parameter.</span>
+<span class="sd">        :type x: Parameter</span>
+<span class="sd">        :param c: asymptote of the power-law.</span>
+<span class="sd">        :type c: Parameter</span>
+<span class="sd">        :param n: power of the function.</span>
+<span class="sd">        :type n: Parameter</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="n">c</span><span class="o">.</span><span class="n">value</span> <span class="o">&gt;</span> <span class="n">x</span><span class="o">.</span><span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="n">c</span><span class="o">.</span><span class="n">value</span> <span class="o">&lt;</span> <span class="n">x</span><span class="o">.</span><span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s1">&#39;Defining power law with an asymptote that lies in the middle of the integration range&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">c</span><span class="o">.</span><span class="n">bounds</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">x</span><span class="o">.</span><span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="n">c</span><span class="o">.</span><span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">x</span><span class="o">.</span><span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="ow">or</span> <span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">x</span><span class="o">.</span><span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="n">c</span><span class="o">.</span><span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">x</span><span class="o">.</span><span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                    <span class="s1">&#39;Defining power law with an asymptote that might lie in the middle of the range of interest&#39;</span><span class="p">)</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="p">[</span><span class="n">x</span><span class="p">],</span> <span class="p">[</span><span class="n">c</span><span class="p">,</span> <span class="n">n</span><span class="p">],</span> <span class="n">backend</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Miguel Ramos Pernas
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

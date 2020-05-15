@@ -88,6 +88,7 @@
             
             
               <ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="user.html">User guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="reference.html">MinKit reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="performance.html">Performance</a></li>
@@ -165,7 +166,9 @@
  | <a href="#E"><strong>E</strong></a>
  | <a href="#F"><strong>F</strong></a>
  | <a href="#G"><strong>G</strong></a>
+ | <a href="#H"><strong>H</strong></a>
  | <a href="#I"><strong>I</strong></a>
+ | <a href="#L"><strong>L</strong></a>
  | <a href="#M"><strong>M</strong></a>
  | <a href="#N"><strong>N</strong></a>
  | <a href="#P"><strong>P</strong></a>
@@ -175,6 +178,7 @@
  | <a href="#U"><strong>U</strong></a>
  | <a href="#V"><strong>V</strong></a>
  | <a href="#W"><strong>W</strong></a>
+ | <a href="#Y"><strong>Y</strong></a>
  
 </div>
 <h2 id="_">_</h2>
@@ -183,13 +187,21 @@
       <li><a href="api/minkit.AddPDFs.html#minkit.AddPDFs.__call__">__call__() (minkit.AddPDFs method)</a>
 
       <ul>
+        <li><a href="api/minkit.BinnedEvaluator.html#minkit.BinnedEvaluator.__call__">(minkit.BinnedEvaluator method)</a>
+</li>
         <li><a href="api/minkit.ConvPDFs.html#minkit.ConvPDFs.__call__">(minkit.ConvPDFs method)</a>
+</li>
+        <li><a href="api/minkit.Evaluator.html#minkit.Evaluator.__call__">(minkit.Evaluator method)</a>
 </li>
         <li><a href="api/minkit.PDF.html#minkit.PDF.__call__">(minkit.PDF method)</a>
 </li>
         <li><a href="api/minkit.ProdPDFs.html#minkit.ProdPDFs.__call__">(minkit.ProdPDFs method)</a>
 </li>
+        <li><a href="api/minkit.SimultaneousEvaluator.html#minkit.SimultaneousEvaluator.__call__">(minkit.SimultaneousEvaluator method)</a>
+</li>
         <li><a href="api/minkit.SourcePDF.html#minkit.SourcePDF.__call__">(minkit.SourcePDF method)</a>
+</li>
+        <li><a href="api/minkit.UnbinnedEvaluator.html#minkit.UnbinnedEvaluator.__call__">(minkit.UnbinnedEvaluator method)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -198,7 +210,7 @@
 <h2 id="A">A</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/minkit.DataSet.html#minkit.DataSet.add">add() (minkit.DataSet method)</a>
+      <li><a href="api/minkit.ArrayOperations.html#minkit.ArrayOperations.access_pdf">access_pdf() (minkit.ArrayOperations method)</a>
 </li>
       <li><a href="api/minkit.add_pdf_src.html#minkit.add_pdf_src">add_pdf_src() (in module minkit)</a>
 </li>
@@ -207,26 +219,62 @@
       <li><a href="api/minkit.Formula.html#minkit.Formula.all_args">all_args (minkit.Formula attribute)</a>
 
       <ul>
+        <li><a href="api/minkit.MultiPDF.html#minkit.MultiPDF.all_args">(minkit.MultiPDF attribute)</a>
+</li>
         <li><a href="api/minkit.PDF.html#minkit.PDF.all_args">(minkit.PDF attribute)</a>
 </li>
       </ul></li>
-      <li><a href="api/minkit.PDF.html#minkit.PDF.all_pars">all_pars (minkit.PDF attribute)</a>
+      <li><a href="api/minkit.MultiPDF.html#minkit.MultiPDF.all_pars">all_pars (minkit.MultiPDF attribute)</a>
+
+      <ul>
+        <li><a href="api/minkit.PDF.html#minkit.PDF.all_pars">(minkit.PDF attribute)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
+      </ul></li>
+      <li><a href="api/minkit.MultiPDF.html#minkit.MultiPDF.all_pdfs">all_pdfs (minkit.MultiPDF attribute)</a>
+</li>
       <li><a href="api/minkit.PDF.html#minkit.PDF.all_real_args">all_real_args (minkit.PDF attribute)</a>
 </li>
       <li><a href="api/minkit.Amoroso.html#minkit.Amoroso">Amoroso (class in minkit)</a>
 </li>
-      <li><a href="api/minkit.Registry.html#minkit.Registry.append">append() (minkit.Registry method)</a>
-</li>
-      <li><a href="api/minkit.Formula.html#minkit.Formula.args">args (minkit.Formula attribute)</a>
+      <li><a href="api/minkit.Backend.html#minkit.Backend.aop">aop (minkit.Backend attribute)</a>
 
       <ul>
-        <li><a href="api/minkit.PDF.html#minkit.PDF.args">(minkit.PDF attribute)</a>
+        <li><a href="api/minkit.marray.html#minkit.marray.aop">(minkit.marray attribute)</a>
+</li>
+        <li><a href="api/minkit.PDF.html#minkit.PDF.aop">(minkit.PDF attribute)</a>
 </li>
       </ul></li>
-      <li><a href="api/minkit.as_ndarray.html#minkit.as_ndarray">as_ndarray() (in module minkit)</a>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/minkit.Registry.html#minkit.Registry.append">append() (minkit.Registry method)</a>
+</li>
+      <li><a href="api/minkit.BinnedEvaluator.html#minkit.BinnedEvaluator.args">args (minkit.BinnedEvaluator attribute)</a>
+
+      <ul>
+        <li><a href="api/minkit.Evaluator.html#minkit.Evaluator.args">(minkit.Evaluator attribute)</a>
+</li>
+        <li><a href="api/minkit.Formula.html#minkit.Formula.args">(minkit.Formula attribute)</a>
+</li>
+        <li><a href="api/minkit.PDF.html#minkit.PDF.args">(minkit.PDF attribute)</a>
+</li>
+        <li><a href="api/minkit.SimultaneousEvaluator.html#minkit.SimultaneousEvaluator.args">(minkit.SimultaneousEvaluator attribute)</a>
+</li>
+        <li><a href="api/minkit.UnbinnedEvaluator.html#minkit.UnbinnedEvaluator.args">(minkit.UnbinnedEvaluator attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="api/minkit.Argus.html#minkit.Argus">Argus (class in minkit)</a>
+</li>
+      <li><a href="api/minkit.ArrayOperations.html#minkit.ArrayOperations">ArrayOperations (class in minkit)</a>
+</li>
+      <li><a href="api/minkit.barray.html#minkit.barray.as_ndarray">as_ndarray() (minkit.barray method)</a>
+
+      <ul>
+        <li><a href="api/minkit.farray.html#minkit.farray.as_ndarray">(minkit.farray method)</a>
+</li>
+        <li><a href="api/minkit.marray.html#minkit.marray.as_ndarray">(minkit.marray method)</a>
+</li>
+      </ul></li>
+      <li><a href="api/minkit.farray.html#minkit.farray.astype">astype() (minkit.farray method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -234,26 +282,56 @@
 <h2 id="B">B</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/minkit.Backend.html#minkit.Backend">Backend (class in minkit)</a>
+</li>
+      <li><a href="api/minkit.ArrayOperations.html#minkit.ArrayOperations.backend">backend (minkit.ArrayOperations attribute)</a>
+
+      <ul>
+        <li><a href="api/minkit.marray.html#minkit.marray.backend">(minkit.marray attribute)</a>
+</li>
+        <li><a href="api/minkit.PDF.html#minkit.PDF.backend">(minkit.PDF attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="api/minkit.barray.html#minkit.barray">barray (class in minkit)</a>
+</li>
+      <li><a href="api/minkit.ArrayOperations.html#minkit.ArrayOperations.bempty">bempty() (minkit.ArrayOperations method)</a>
+</li>
       <li><a href="api/minkit.PDF.html#minkit.PDF.BIND">BIND (minkit.PDF attribute)</a>
 </li>
-      <li><a href="api/minkit.PDF.html#minkit.PDF.bind">bind() (minkit.PDF method)</a>
+      <li><a href="api/minkit.MultiPDF.html#minkit.MultiPDF.bind">bind() (minkit.MultiPDF method)</a>
+
+      <ul>
+        <li><a href="api/minkit.PDF.html#minkit.PDF.bind">(minkit.PDF method)</a>
 </li>
+      </ul></li>
       <li><a href="api/minkit.binned_chisquare.html#minkit.binned_chisquare">binned_chisquare() (in module minkit)</a>
-</li>
-      <li><a href="api/minkit.binned_maximum_likelihood.html#minkit.binned_maximum_likelihood">binned_maximum_likelihood() (in module minkit)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/minkit.binned_extended_chisquare.html#minkit.binned_extended_chisquare">binned_extended_chisquare() (in module minkit)</a>
+</li>
+      <li><a href="api/minkit.binned_extended_maximum_likelihood.html#minkit.binned_extended_maximum_likelihood">binned_extended_maximum_likelihood() (in module minkit)</a>
+</li>
+      <li><a href="api/minkit.binned_maximum_likelihood.html#minkit.binned_maximum_likelihood">binned_maximum_likelihood() (in module minkit)</a>
+</li>
       <li><a href="api/minkit.BinnedDataSet.html#minkit.BinnedDataSet">BinnedDataSet (class in minkit)</a>
+</li>
+      <li><a href="api/minkit.BinnedEvaluator.html#minkit.BinnedEvaluator">BinnedEvaluator (class in minkit)</a>
+</li>
+      <li><a href="api/minkit.ArrayOperations.html#minkit.ArrayOperations.bones">bones() (minkit.ArrayOperations method)</a>
+</li>
+      <li><a href="api/minkit.ArrayOperations.html#minkit.ArrayOperations.bool_type">bool_type (minkit.ArrayOperations attribute)</a>
 </li>
       <li><a href="api/minkit.BinnedDataSet.html#minkit.BinnedDataSet.bounds">bounds (minkit.BinnedDataSet attribute)</a>
 
       <ul>
         <li><a href="api/minkit.Parameter.html#minkit.Parameter.bounds">(minkit.Parameter attribute)</a>
 </li>
-        <li><a href="api/minkit.Range.html#minkit.Range.bounds">(minkit.Range attribute)</a>
-</li>
       </ul></li>
+      <li><a href="api/minkit.Backend.html#minkit.Backend.btype">btype (minkit.Backend attribute)</a>
+</li>
+      <li><a href="api/minkit.ArrayOperations.html#minkit.ArrayOperations.bzeros">bzeros() (minkit.ArrayOperations method)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -266,9 +344,19 @@
 </li>
       <li><a href="api/minkit.PDF.html#minkit.PDF.CACHE_TYPES">CACHE_TYPES (minkit.PDF attribute)</a>
 </li>
+      <li><a href="api/minkit.ArrayOperations.html#minkit.ArrayOperations.carange">carange() (minkit.ArrayOperations method)</a>
+</li>
+      <li><a href="api/minkit.carray.html#minkit.carray">carray (class in minkit)</a>
+</li>
       <li><a href="api/minkit.Category.html#minkit.Category">Category (class in minkit)</a>
 </li>
+      <li><a href="api/minkit.ArrayOperations.html#minkit.ArrayOperations.cexp">cexp() (minkit.ArrayOperations method)</a>
+</li>
       <li><a href="api/minkit.Chebyshev.html#minkit.Chebyshev">Chebyshev (class in minkit)</a>
+</li>
+      <li><a href="api/minkit.MultiPDF.html#minkit.MultiPDF.component">component() (minkit.MultiPDF method)</a>
+</li>
+      <li><a href="api/minkit.ArrayOperations.html#minkit.ArrayOperations.concatenate">concatenate() (minkit.ArrayOperations method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -284,6 +372,18 @@
 </li>
       <li><a href="api/minkit.ConvPDFs.html#minkit.ConvPDFs">ConvPDFs (class in minkit)</a>
 </li>
+      <li><a href="api/minkit.farray.html#minkit.farray.copy">copy() (minkit.farray method)</a>
+
+      <ul>
+        <li><a href="api/minkit.marray.html#minkit.marray.copy">(minkit.marray method)</a>
+</li>
+      </ul></li>
+      <li><a href="api/minkit.ArrayOperations.html#minkit.ArrayOperations.count_nonzero">count_nonzero() (minkit.ArrayOperations method)</a>
+
+      <ul>
+        <li><a href="api/minkit.barray.html#minkit.barray.count_nonzero">(minkit.barray method)</a>
+</li>
+      </ul></li>
       <li><a href="api/minkit.CrystalBall.html#minkit.CrystalBall">CrystalBall (class in minkit)</a>
 </li>
   </ul></td>
@@ -292,35 +392,41 @@
 <h2 id="D">D</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/minkit.BinnedDataSet.html#minkit.BinnedDataSet.data_pars">data_pars (minkit.BinnedDataSet attribute)</a>
-
-      <ul>
-        <li><a href="api/minkit.DataSet.html#minkit.DataSet.data_pars">(minkit.DataSet attribute)</a>
+      <li><a href="api/minkit.darray.html#minkit.darray">darray (class in minkit)</a>
 </li>
-        <li><a href="api/minkit.PDF.html#minkit.PDF.data_pars">(minkit.PDF attribute)</a>
+      <li><a href="api/minkit.PDF.html#minkit.PDF.data_pars">data_pars (minkit.PDF attribute)</a>
 </li>
-      </ul></li>
+      <li><a href="api/minkit.data_plotting_arrays.html#minkit.data_plotting_arrays">data_plotting_arrays() (in module minkit)</a>
+</li>
       <li><a href="api/minkit.DataSet.html#minkit.DataSet">DataSet (class in minkit)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/minkit.Formula.html#minkit.Formula.dependent">dependent (minkit.Formula attribute)</a>
 
       <ul>
-        <li><a href="api/minkit.Parameter.html#minkit.Parameter.dependent">(minkit.Parameter attribute)</a>
+        <li><a href="api/minkit.MultiPDF.html#minkit.MultiPDF.dependent">(minkit.MultiPDF attribute)</a>
+</li>
+        <li><a href="api/minkit.ParameterBase.html#minkit.ParameterBase.dependent">(minkit.ParameterBase attribute)</a>
 </li>
         <li><a href="api/minkit.PDF.html#minkit.PDF.dependent">(minkit.PDF attribute)</a>
 </li>
       </ul></li>
-      <li><a href="api/minkit.Range.html#minkit.Range.disjoint">disjoint (minkit.Range attribute)</a>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/minkit.barray.html#minkit.barray.dtype">dtype (minkit.barray attribute)</a>
+
+      <ul>
+        <li><a href="api/minkit.marray.html#minkit.marray.dtype">(minkit.marray attribute)</a>
 </li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
 <h2 id="E">E</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/minkit.PDF.html#minkit.PDF.enable_cache">enable_cache() (minkit.PDF method)</a>
+      <li><a href="api/minkit.BinnedDataSet.html#minkit.BinnedDataSet.edges">edges (minkit.BinnedDataSet attribute)</a>
+</li>
+      <li><a href="api/minkit.BinnedDataSet.html#minkit.BinnedDataSet.edges_indices">edges_indices (minkit.BinnedDataSet attribute)</a>
 </li>
       <li><a href="api/minkit.AddPDFs.html#minkit.AddPDFs.evaluate_binned">evaluate_binned() (minkit.AddPDFs method)</a>
 
@@ -336,7 +442,17 @@
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/minkit.Evaluator.html#minkit.Evaluator">Evaluator (class in minkit)</a>
+</li>
+      <li><a href="api/minkit.MinuitMinimizer.html#minkit.MinuitMinimizer.evaluator">evaluator (minkit.MinuitMinimizer attribute)</a>
+
+      <ul>
+        <li><a href="api/minkit.SciPyMinimizer.html#minkit.SciPyMinimizer.evaluator">(minkit.SciPyMinimizer attribute)</a>
+</li>
+      </ul></li>
       <li><a href="api/minkit.Exponential.html#minkit.Exponential">Exponential (class in minkit)</a>
+</li>
+      <li><a href="api/minkit.ExpPoly.html#minkit.ExpPoly">ExpPoly (class in minkit)</a>
 </li>
       <li><a href="api/minkit.AddPDFs.html#minkit.AddPDFs.extended">extended (minkit.AddPDFs attribute)</a>
 </li>
@@ -346,20 +462,20 @@
 <h2 id="F">F</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/minkit.farray.html#minkit.farray">farray (class in minkit)</a>
+</li>
+      <li><a href="api/minkit.fcn_profile.html#minkit.fcn_profile">fcn_profile() (in module minkit)</a>
+</li>
+      <li><a href="api/minkit.ArrayOperations.html#minkit.ArrayOperations.fempty">fempty() (minkit.ArrayOperations method)</a>
+</li>
+      <li><a href="api/minkit.ArrayOperations.html#minkit.ArrayOperations.fexp">fexp() (minkit.ArrayOperations method)</a>
+</li>
+      <li><a href="api/minkit.ArrayOperations.html#minkit.ArrayOperations.fftconvolve">fftconvolve() (minkit.ArrayOperations method)</a>
+</li>
+      <li><a href="api/minkit.ArrayOperations.html#minkit.ArrayOperations.fones">fones() (minkit.ArrayOperations method)</a>
+</li>
       <li><a href="api/minkit.Formula.html#minkit.Formula">Formula (class in minkit)</a>
 </li>
-      <li><a href="api/minkit.free_cache.html#minkit.free_cache">free_cache() (in module minkit)</a>
-
-      <ul>
-        <li><a href="api/minkit.PDF.html#minkit.PDF.free_cache">(minkit.PDF method)</a>
-</li>
-      </ul></li>
-      <li><a href="api/minkit.BinnedDataSet.html#minkit.BinnedDataSet.from_array">from_array() (minkit.BinnedDataSet class method)</a>
-
-      <ul>
-        <li><a href="api/minkit.DataSet.html#minkit.DataSet.from_array">(minkit.DataSet class method)</a>
-</li>
-      </ul></li>
       <li><a href="api/minkit.AddPDFs.html#minkit.AddPDFs.from_json_object">from_json_object() (minkit.AddPDFs class method)</a>
 
       <ul>
@@ -367,7 +483,11 @@
 </li>
         <li><a href="api/minkit.Formula.html#minkit.Formula.from_json_object">(minkit.Formula class method)</a>
 </li>
+        <li><a href="api/minkit.MultiPDF.html#minkit.MultiPDF.from_json_object">(minkit.MultiPDF class method)</a>
+</li>
         <li><a href="api/minkit.Parameter.html#minkit.Parameter.from_json_object">(minkit.Parameter class method)</a>
+</li>
+        <li><a href="api/minkit.ParameterBase.html#minkit.ParameterBase.from_json_object">(minkit.ParameterBase class method)</a>
 </li>
         <li><a href="api/minkit.PDF.html#minkit.PDF.from_json_object">(minkit.PDF class method)</a>
 </li>
@@ -380,9 +500,29 @@
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/minkit.barray.html#minkit.barray.from_ndarray">from_ndarray() (minkit.barray class method)</a>
+
+      <ul>
+        <li><a href="api/minkit.BinnedDataSet.html#minkit.BinnedDataSet.from_ndarray">(minkit.BinnedDataSet class method)</a>
+</li>
+        <li><a href="api/minkit.carray.html#minkit.carray.from_ndarray">(minkit.carray class method)</a>
+</li>
+        <li><a href="api/minkit.darray.html#minkit.darray.from_ndarray">(minkit.darray class method)</a>
+</li>
+        <li><a href="api/minkit.DataSet.html#minkit.DataSet.from_ndarray">(minkit.DataSet class method)</a>
+</li>
+        <li><a href="api/minkit.farray.html#minkit.farray.from_ndarray">(minkit.farray class method)</a>
+</li>
+        <li><a href="api/minkit.iarray.html#minkit.iarray.from_ndarray">(minkit.iarray class method)</a>
+</li>
+        <li><a href="api/minkit.marray.html#minkit.marray.from_ndarray">(minkit.marray class method)</a>
+</li>
+      </ul></li>
       <li><a href="api/minkit.DataSet.html#minkit.DataSet.from_records">from_records() (minkit.DataSet class method)</a>
 </li>
       <li><a href="api/minkit.SourcePDF.html#minkit.SourcePDF.function">function() (minkit.SourcePDF method)</a>
+</li>
+      <li><a href="api/minkit.ArrayOperations.html#minkit.ArrayOperations.fzeros">fzeros() (minkit.ArrayOperations method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -390,14 +530,22 @@
 <h2 id="G">G</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/minkit.BinnedDataSet.html#minkit.BinnedDataSet.gaps">gaps (minkit.BinnedDataSet attribute)</a>
+</li>
       <li><a href="api/minkit.Gaussian.html#minkit.Gaussian">Gaussian (class in minkit)</a>
+</li>
+      <li><a href="api/minkit.ArrayOperations.html#minkit.ArrayOperations.ge">ge() (minkit.ArrayOperations method)</a>
 </li>
       <li><a href="api/minkit.PDF.html#minkit.PDF.generate">generate() (minkit.PDF method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/minkit.Registry.html#minkit.Registry.get">get() (minkit.Registry method)</a>
+      <li><a href="api/minkit.marray.html#minkit.marray.get">get() (minkit.marray method)</a>
+
+      <ul>
+        <li><a href="api/minkit.Registry.html#minkit.Registry.get">(minkit.Registry method)</a>
 </li>
+      </ul></li>
       <li><a href="api/minkit.Parameter.html#minkit.Parameter.get_range">get_range() (minkit.Parameter method)</a>
 </li>
       <li><a href="api/minkit.PDF.html#minkit.PDF.get_values">get_values() (minkit.PDF method)</a>
@@ -405,18 +553,74 @@
   </ul></td>
 </tr></table>
 
+<h2 id="H">H</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/minkit.MinuitMinimizer.html#minkit.MinuitMinimizer.hesse">hesse() (minkit.MinuitMinimizer method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
 <h2 id="I">I</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/minkit.ArrayOperations.html#minkit.ArrayOperations.iarange">iarange() (minkit.ArrayOperations method)</a>
+</li>
+      <li><a href="api/minkit.iarray.html#minkit.iarray">iarray (class in minkit)</a>
+</li>
+      <li><a href="api/minkit.ArrayOperations.html#minkit.ArrayOperations.iempty">iempty() (minkit.ArrayOperations method)</a>
+</li>
       <li><a href="api/minkit.Registry.html#minkit.Registry.index">index() (minkit.Registry method)</a>
 </li>
-      <li><a href="api/minkit.initialize.html#minkit.initialize">initialize() (in module minkit)</a>
+      <li><a href="api/minkit.Registry.html#minkit.Registry.insert">insert() (minkit.Registry method)</a>
+</li>
+      <li><a href="api/minkit.AddPDFs.html#minkit.AddPDFs.integral">integral() (minkit.AddPDFs method)</a>
+
+      <ul>
+        <li><a href="api/minkit.PDF.html#minkit.PDF.integral">(minkit.PDF method)</a>
+</li>
+        <li><a href="api/minkit.ProdPDFs.html#minkit.ProdPDFs.integral">(minkit.ProdPDFs method)</a>
+</li>
+        <li><a href="api/minkit.SourcePDF.html#minkit.SourcePDF.integral">(minkit.SourcePDF method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/minkit.ConvPDFs.html#minkit.ConvPDFs.interpolation_method">interpolation_method (minkit.ConvPDFs attribute)</a>
+</li>
+      <li><a href="api/minkit.ArrayOperations.html#minkit.ArrayOperations.is_bool">is_bool() (minkit.ArrayOperations method)</a>
+</li>
+      <li><a href="api/minkit.ArrayOperations.html#minkit.ArrayOperations.is_complex">is_complex() (minkit.ArrayOperations method)</a>
+</li>
+      <li><a href="api/minkit.ArrayOperations.html#minkit.ArrayOperations.is_float">is_float() (minkit.ArrayOperations method)</a>
+</li>
+      <li><a href="api/minkit.ArrayOperations.html#minkit.ArrayOperations.is_inside">is_inside() (minkit.ArrayOperations method)</a>
+</li>
+      <li><a href="api/minkit.ArrayOperations.html#minkit.ArrayOperations.is_int">is_int() (minkit.ArrayOperations method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="L">L</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/minkit.Landau.html#minkit.Landau">Landau (class in minkit)</a>
+</li>
+      <li><a href="api/minkit.ArrayOperations.html#minkit.ArrayOperations.le">le() (minkit.ArrayOperations method)</a>
+</li>
+      <li><a href="api/minkit.marray.html#minkit.marray.length">length (minkit.marray attribute)</a>
+</li>
+      <li><a href="api/minkit.ArrayOperations.html#minkit.ArrayOperations.linspace">linspace() (minkit.ArrayOperations method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/minkit.Registry.html#minkit.Registry.insert">insert() (minkit.Registry method)</a>
+      <li><a href="api/minkit.ArrayOperations.html#minkit.ArrayOperations.log">log() (minkit.ArrayOperations method)</a>
 </li>
-      <li><a href="api/minkit.PDF.html#minkit.PDF.integral">integral() (minkit.PDF method)</a>
+      <li><a href="api/minkit.ArrayOperations.html#minkit.ArrayOperations.logical_and">logical_and() (minkit.ArrayOperations method)</a>
+</li>
+      <li><a href="api/minkit.ArrayOperations.html#minkit.ArrayOperations.logical_or">logical_or() (minkit.ArrayOperations method)</a>
+</li>
+      <li><a href="api/minkit.ArrayOperations.html#minkit.ArrayOperations.lt">lt() (minkit.ArrayOperations method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -426,17 +630,47 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/minkit.DataSet.html#minkit.DataSet.make_binned">make_binned() (minkit.DataSet method)</a>
 </li>
+      <li><a href="api/minkit.ArrayOperations.html#minkit.ArrayOperations.make_linear_interpolator">make_linear_interpolator() (minkit.ArrayOperations method)</a>
+</li>
+      <li><a href="api/minkit.ArrayOperations.html#minkit.ArrayOperations.make_spline_interpolator">make_spline_interpolator() (minkit.ArrayOperations method)</a>
+</li>
+      <li><a href="api/minkit.marray.html#minkit.marray">marray (class in minkit)</a>
+</li>
+      <li><a href="api/minkit.ArrayOperations.html#minkit.ArrayOperations.max">max() (minkit.ArrayOperations method)</a>
+
+      <ul>
+        <li><a href="api/minkit.darray.html#minkit.darray.max">(minkit.darray method)</a>
+</li>
+      </ul></li>
       <li><a href="api/minkit.DataSet.html#minkit.DataSet.merge">merge() (minkit.DataSet class method)</a>
 </li>
-      <li><a href="api/minkit.SciPyMinimizer.html#minkit.SciPyMinimizer.minimize">minimize() (minkit.SciPyMinimizer method)</a>
+      <li><a href="api/minkit.ArrayOperations.html#minkit.ArrayOperations.meshgrid">meshgrid() (minkit.ArrayOperations method)</a>
+</li>
+      <li><a href="api/minkit.MinuitMinimizer.html#minkit.MinuitMinimizer.migrad">migrad() (minkit.MinuitMinimizer method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/minkit.ArrayOperations.html#minkit.ArrayOperations.min">min() (minkit.ArrayOperations method)</a>
+
+      <ul>
+        <li><a href="api/minkit.darray.html#minkit.darray.min">(minkit.darray method)</a>
+</li>
+      </ul></li>
+      <li><a href="api/minkit.SciPyMinimizer.html#minkit.SciPyMinimizer.minimize">minimize() (minkit.SciPyMinimizer method)</a>
+</li>
+      <li><a href="api/minkit.Minimizer.html#minkit.Minimizer">Minimizer (class in minkit)</a>
+</li>
       <li><a href="api/minkit.minimizer.html#minkit.minimizer">minimizer() (in module minkit)</a>
 </li>
       <li><a href="reference.html#module-minkit">minkit (module)</a>
 </li>
-      <li><a href="api/minkit.minuit_to_registry.html#minkit.minuit_to_registry">minuit_to_registry() (in module minkit)</a>
+      <li><a href="api/minkit.MinuitMinimizer.html#minkit.MinuitMinimizer.minos">minos() (minkit.MinuitMinimizer method)</a>
+</li>
+      <li><a href="api/minkit.MinuitMinimizer.html#minkit.MinuitMinimizer.minuit">minuit (minkit.MinuitMinimizer attribute)</a>
+</li>
+      <li><a href="api/minkit.MinuitMinimizer.html#minkit.MinuitMinimizer">MinuitMinimizer (class in minkit)</a>
+</li>
+      <li><a href="api/minkit.MultiPDF.html#minkit.MultiPDF">MultiPDF (class in minkit)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -445,6 +679,10 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/minkit.Registry.html#minkit.Registry.names">names (minkit.Registry attribute)</a>
+</li>
+      <li><a href="api/minkit.ArrayOperations.html#minkit.ArrayOperations.ndarray_to_backend">ndarray_to_backend() (minkit.ArrayOperations method)</a>
+</li>
+      <li><a href="api/minkit.farray.html#minkit.farray.ndim">ndim (minkit.farray attribute)</a>
 </li>
       <li><a href="api/minkit.AddPDFs.html#minkit.AddPDFs.norm">norm() (minkit.AddPDFs method)</a>
 
@@ -460,6 +698,18 @@
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/minkit.AddPDFs.html#minkit.AddPDFs.numerical_integral">numerical_integral() (minkit.AddPDFs method)</a>
+
+      <ul>
+        <li><a href="api/minkit.ConvPDFs.html#minkit.ConvPDFs.numerical_integral">(minkit.ConvPDFs method)</a>
+</li>
+        <li><a href="api/minkit.PDF.html#minkit.PDF.numerical_integral">(minkit.PDF method)</a>
+</li>
+        <li><a href="api/minkit.ProdPDFs.html#minkit.ProdPDFs.numerical_integral">(minkit.ProdPDFs method)</a>
+</li>
+        <li><a href="api/minkit.SourcePDF.html#minkit.SourcePDF.numerical_integral">(minkit.SourcePDF method)</a>
+</li>
+      </ul></li>
       <li><a href="api/minkit.ConvPDFs.html#minkit.ConvPDFs.numerical_normalization">numerical_normalization() (minkit.ConvPDFs method)</a>
 
       <ul>
@@ -468,6 +718,8 @@
         <li><a href="api/minkit.ProdPDFs.html#minkit.ProdPDFs.numerical_normalization">(minkit.ProdPDFs method)</a>
 </li>
       </ul></li>
+      <li><a href="api/minkit.SourcePDF.html#minkit.SourcePDF.numint_config">numint_config (minkit.SourcePDF attribute)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -476,15 +728,19 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/minkit.Parameter.html#minkit.Parameter">Parameter (class in minkit)</a>
 </li>
+      <li><a href="api/minkit.ParameterBase.html#minkit.ParameterBase">ParameterBase (class in minkit)</a>
+</li>
       <li><a href="api/minkit.PDF.html#minkit.PDF">PDF (class in minkit)</a>
 </li>
-      <li><a href="api/minkit.pdf_centers_values.html#minkit.pdf_centers_values">pdf_centers_values() (in module minkit)</a>
-</li>
       <li><a href="api/minkit.pdf_from_json.html#minkit.pdf_from_json">pdf_from_json() (in module minkit)</a>
+</li>
+      <li><a href="api/minkit.pdf_plotting_arrays.html#minkit.pdf_plotting_arrays">pdf_plotting_arrays() (in module minkit)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/minkit.pdf_to_json.html#minkit.pdf_to_json">pdf_to_json() (in module minkit)</a>
+</li>
+      <li><a href="api/minkit.MultiPDF.html#minkit.MultiPDF.pdfs">pdfs (minkit.MultiPDF attribute)</a>
 </li>
       <li><a href="api/minkit.Polynomial.html#minkit.Polynomial">Polynomial (class in minkit)</a>
 </li>
@@ -492,47 +748,93 @@
 </li>
       <li><a href="api/minkit.ProdPDFs.html#minkit.ProdPDFs">ProdPDFs (class in minkit)</a>
 </li>
+      <li><a href="api/minkit.ArrayOperations.html#minkit.ArrayOperations.product_by_zero_is_zero">product_by_zero_is_zero() (minkit.ArrayOperations method)</a>
+</li>
   </ul></td>
 </tr></table>
 
 <h2 id="R">R</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/minkit.Range.html#minkit.Range">Range (class in minkit)</a>
+      <li><a href="api/minkit.ArrayOperations.html#minkit.ArrayOperations.random_grid">random_grid() (minkit.ArrayOperations method)</a>
+</li>
+      <li><a href="api/minkit.ArrayOperations.html#minkit.ArrayOperations.random_uniform">random_uniform() (minkit.ArrayOperations method)</a>
 </li>
       <li><a href="api/minkit.Registry.html#minkit.Registry.reduce">reduce() (minkit.Registry method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/minkit.register_pdf.html#minkit.register_pdf">register_pdf() (in module minkit)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/minkit.Registry.html#minkit.Registry">Registry (class in minkit)</a>
 </li>
-      <li><a href="api/minkit.SciPyMinimizer.html#minkit.SciPyMinimizer.result_to_registry">result_to_registry() (minkit.SciPyMinimizer method)</a>
+      <li><a href="api/minkit.ArrayOperations.html#minkit.ArrayOperations.restrict_data_size">restrict_data_size() (minkit.ArrayOperations method)</a>
 </li>
+      <li><a href="api/minkit.Minimizer.html#minkit.Minimizer.result_to_registry">result_to_registry() (minkit.Minimizer method)</a>
+
+      <ul>
+        <li><a href="api/minkit.MinuitMinimizer.html#minkit.MinuitMinimizer.result_to_registry">(minkit.MinuitMinimizer static method)</a>
+</li>
+        <li><a href="api/minkit.SciPyMinimizer.html#minkit.SciPyMinimizer.result_to_registry">(minkit.SciPyMinimizer method)</a>
+</li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
 <h2 id="S">S</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/minkit.BinnedDataSet.html#minkit.BinnedDataSet.sample_type">sample_type (minkit.BinnedDataSet attribute)</a>
+
+      <ul>
+        <li><a href="api/minkit.DataSet.html#minkit.DataSet.sample_type">(minkit.DataSet attribute)</a>
+</li>
+      </ul></li>
       <li><a href="api/minkit.SciPyMinimizer.html#minkit.SciPyMinimizer">SciPyMinimizer (class in minkit)</a>
 </li>
       <li><a href="api/minkit.Parameter.html#minkit.Parameter.set_range">set_range() (minkit.Parameter method)</a>
 </li>
+      <li><a href="api/minkit.ArrayOperations.html#minkit.ArrayOperations.set_rndm_seed">set_rndm_seed() (minkit.ArrayOperations method)</a>
+</li>
       <li><a href="api/minkit.PDF.html#minkit.PDF.set_values">set_values() (minkit.PDF method)</a>
 </li>
-      <li><a href="api/minkit.DataSet.html#minkit.DataSet.shuffle">shuffle() (minkit.DataSet method)</a>
+      <li><a href="api/minkit.farray.html#minkit.farray.shape">shape (minkit.farray attribute)</a>
+
+      <ul>
+        <li><a href="api/minkit.marray.html#minkit.marray.shape">(minkit.marray attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="api/minkit.ArrayOperations.html#minkit.ArrayOperations.shuffling_index">shuffling_index() (minkit.ArrayOperations method)</a>
+</li>
+      <li><a href="api/minkit.simultaneous_fcn_profile.html#minkit.simultaneous_fcn_profile">simultaneous_fcn_profile() (in module minkit)</a>
 </li>
       <li><a href="api/minkit.simultaneous_minimizer.html#minkit.simultaneous_minimizer">simultaneous_minimizer() (in module minkit)</a>
 </li>
+      <li><a href="api/minkit.SimultaneousEvaluator.html#minkit.SimultaneousEvaluator">SimultaneousEvaluator (class in minkit)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/minkit.Range.html#minkit.Range.size">size (minkit.Range attribute)</a>
+      <li><a href="api/minkit.farray.html#minkit.farray.size">size (minkit.farray attribute)</a>
+</li>
+      <li><a href="api/minkit.darray.html#minkit.darray.slice">slice() (minkit.darray method)</a>
+</li>
+      <li><a href="api/minkit.ArrayOperations.html#minkit.ArrayOperations.slice_from_boolean">slice_from_boolean() (minkit.ArrayOperations method)</a>
+</li>
+      <li><a href="api/minkit.ArrayOperations.html#minkit.ArrayOperations.slice_from_integer">slice_from_integer() (minkit.ArrayOperations method)</a>
 </li>
       <li><a href="api/minkit.SourcePDF.html#minkit.SourcePDF">SourcePDF (class in minkit)</a>
 </li>
       <li><a href="api/minkit.DataSet.html#minkit.DataSet.subset">subset() (minkit.DataSet method)</a>
+</li>
+      <li><a href="api/minkit.ArrayOperations.html#minkit.ArrayOperations.sum">sum() (minkit.ArrayOperations method)</a>
+
+      <ul>
+        <li><a href="api/minkit.darray.html#minkit.darray.sum">(minkit.darray method)</a>
+</li>
+      </ul></li>
+      <li><a href="api/minkit.ArrayOperations.html#minkit.ArrayOperations.sum_arrays">sum_arrays() (minkit.ArrayOperations method)</a>
+</li>
+      <li><a href="api/minkit.ArrayOperations.html#minkit.ArrayOperations.sum_inside">sum_inside() (minkit.ArrayOperations method)</a>
 </li>
       <li><a href="api/minkit.sweights.html#minkit.sweights">sweights() (in module minkit)</a>
 </li>
@@ -544,8 +846,42 @@
 <h2 id="T">T</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/minkit.ArrayOperations.html#minkit.ArrayOperations.take_column">take_column() (minkit.ArrayOperations method)</a>
+
+      <ul>
+        <li><a href="api/minkit.darray.html#minkit.darray.take_column">(minkit.darray method)</a>
+</li>
+      </ul></li>
+      <li><a href="api/minkit.ArrayOperations.html#minkit.ArrayOperations.take_slice">take_slice() (minkit.ArrayOperations method)</a>
+
+      <ul>
+        <li><a href="api/minkit.darray.html#minkit.darray.take_slice">(minkit.darray method)</a>
+</li>
+      </ul></li>
       <li><a href="api/minkit.timer.html#minkit.timer">timer() (in module minkit)</a>
 </li>
+      <li><a href="api/minkit.AddPDFs.html#minkit.AddPDFs.to_backend">to_backend() (minkit.AddPDFs method)</a>
+
+      <ul>
+        <li><a href="api/minkit.BinnedDataSet.html#minkit.BinnedDataSet.to_backend">(minkit.BinnedDataSet method)</a>
+</li>
+        <li><a href="api/minkit.ConvPDFs.html#minkit.ConvPDFs.to_backend">(minkit.ConvPDFs method)</a>
+</li>
+        <li><a href="api/minkit.DataSet.html#minkit.DataSet.to_backend">(minkit.DataSet method)</a>
+</li>
+        <li><a href="api/minkit.farray.html#minkit.farray.to_backend">(minkit.farray method)</a>
+</li>
+        <li><a href="api/minkit.marray.html#minkit.marray.to_backend">(minkit.marray method)</a>
+</li>
+        <li><a href="api/minkit.PDF.html#minkit.PDF.to_backend">(minkit.PDF method)</a>
+</li>
+        <li><a href="api/minkit.ProdPDFs.html#minkit.ProdPDFs.to_backend">(minkit.ProdPDFs method)</a>
+</li>
+        <li><a href="api/minkit.SourcePDF.html#minkit.SourcePDF.to_backend">(minkit.SourcePDF method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/minkit.AddPDFs.html#minkit.AddPDFs.to_json_object">to_json_object() (minkit.AddPDFs method)</a>
 
       <ul>
@@ -554,6 +890,8 @@
         <li><a href="api/minkit.Formula.html#minkit.Formula.to_json_object">(minkit.Formula method)</a>
 </li>
         <li><a href="api/minkit.Parameter.html#minkit.Parameter.to_json_object">(minkit.Parameter method)</a>
+</li>
+        <li><a href="api/minkit.ParameterBase.html#minkit.ParameterBase.to_json_object">(minkit.ParameterBase method)</a>
 </li>
         <li><a href="api/minkit.PDF.html#minkit.PDF.to_json_object">(minkit.PDF method)</a>
 </li>
@@ -564,8 +902,6 @@
         <li><a href="api/minkit.SourcePDF.html#minkit.SourcePDF.to_json_object">(minkit.SourcePDF method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/minkit.DataSet.html#minkit.DataSet.to_records">to_records() (minkit.DataSet method)</a>
 </li>
       <li><a href="api/minkit.AddPDFs.html#minkit.AddPDFs.two_components">two_components() (minkit.AddPDFs class method)</a>
@@ -576,12 +912,30 @@
 <h2 id="U">U</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/minkit.marray.html#minkit.marray.ua">ua (minkit.marray attribute)</a>
+</li>
       <li><a href="api/minkit.unbinned_extended_maximum_likelihood.html#minkit.unbinned_extended_maximum_likelihood">unbinned_extended_maximum_likelihood() (in module minkit)</a>
+</li>
+      <li><a href="api/minkit.unbinned_maximum_likelihood.html#minkit.unbinned_maximum_likelihood">unbinned_maximum_likelihood() (in module minkit)</a>
+</li>
+      <li><a href="api/minkit.UnbinnedEvaluator.html#minkit.UnbinnedEvaluator">UnbinnedEvaluator (class in minkit)</a>
+</li>
+      <li><a href="api/minkit.PDF.html#minkit.PDF.using_cache">using_cache() (minkit.PDF method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/minkit.unbinned_maximum_likelihood.html#minkit.unbinned_maximum_likelihood">unbinned_maximum_likelihood() (in module minkit)</a>
+      <li><a href="api/minkit.ArrayOperations.html#minkit.ArrayOperations.using_caches">using_caches() (minkit.ArrayOperations method)</a>
+
+      <ul>
+        <li><a href="api/minkit.BinnedEvaluator.html#minkit.BinnedEvaluator.using_caches">(minkit.BinnedEvaluator method)</a>
 </li>
+        <li><a href="api/minkit.Evaluator.html#minkit.Evaluator.using_caches">(minkit.Evaluator method)</a>
+</li>
+        <li><a href="api/minkit.SimultaneousEvaluator.html#minkit.SimultaneousEvaluator.using_caches">(minkit.SimultaneousEvaluator method)</a>
+</li>
+        <li><a href="api/minkit.UnbinnedEvaluator.html#minkit.UnbinnedEvaluator.using_caches">(minkit.UnbinnedEvaluator method)</a>
+</li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
@@ -593,11 +947,17 @@
       <ul>
         <li><a href="api/minkit.Parameter.html#minkit.Parameter.value">(minkit.Parameter attribute)</a>
 </li>
+        <li><a href="api/minkit.ParameterBase.html#minkit.ParameterBase.value">(minkit.ParameterBase attribute)</a>
+</li>
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/minkit.BinnedDataSet.html#minkit.BinnedDataSet.values">values (minkit.BinnedDataSet attribute)</a>
+
+      <ul>
+        <li><a href="api/minkit.DataSet.html#minkit.DataSet.values">(minkit.DataSet attribute)</a>
 </li>
+      </ul></li>
       <li><a href="api/minkit.Registry.html#minkit.Registry.values">values() (minkit.Registry method)</a>
 </li>
   </ul></td>
@@ -607,6 +967,14 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/minkit.DataSet.html#minkit.DataSet.weights">weights (minkit.DataSet attribute)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="Y">Y</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/minkit.AddPDFs.html#minkit.AddPDFs.yields">yields (minkit.AddPDFs attribute)</a>
 </li>
   </ul></td>
 </tr></table>

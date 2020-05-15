@@ -1,0 +1,31 @@
+barray
+======
+
+.. currentmodule:: minkit
+
+.. autoclass:: barray
+   :show-inheritance:
+
+   .. rubric:: Attributes Summary
+
+   .. autosummary::
+
+      ~barray.dtype
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+
+      ~barray.as_ndarray
+      ~barray.count_nonzero
+      ~barray.from_ndarray
+
+   .. rubric:: Attributes Documentation
+
+   .. autoattribute:: dtype
+
+   .. rubric:: Methods Documentation
+
+   .. automethod:: as_ndarray
+   .. automethod:: count_nonzero
+   .. automethod:: from_ndarray

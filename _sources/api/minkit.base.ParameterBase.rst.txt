@@ -1,0 +1,31 @@
+ParameterBase
+=============
+
+.. currentmodule:: minkit.base
+
+.. autoclass:: ParameterBase
+   :show-inheritance:
+
+   .. rubric:: Attributes Summary
+
+   .. autosummary::
+
+      ~ParameterBase.dependent
+      ~ParameterBase.value
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+
+      ~ParameterBase.from_json_object
+      ~ParameterBase.to_json_object
+
+   .. rubric:: Attributes Documentation
+
+   .. autoattribute:: dependent
+   .. autoattribute:: value
+
+   .. rubric:: Methods Documentation
+
+   .. automethod:: from_json_object
+   .. automethod:: to_json_object

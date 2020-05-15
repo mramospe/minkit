@@ -1,0 +1,39 @@
+MultiPDF
+========
+
+.. currentmodule:: minkit
+
+.. autoclass:: MultiPDF
+   :show-inheritance:
+
+   .. rubric:: Attributes Summary
+
+   .. autosummary::
+
+      ~MultiPDF.all_args
+      ~MultiPDF.all_pars
+      ~MultiPDF.all_pdfs
+      ~MultiPDF.dependent
+      ~MultiPDF.pdfs
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+
+      ~MultiPDF.bind
+      ~MultiPDF.component
+      ~MultiPDF.from_json_object
+
+   .. rubric:: Attributes Documentation
+
+   .. autoattribute:: all_args
+   .. autoattribute:: all_pars
+   .. autoattribute:: all_pdfs
+   .. autoattribute:: dependent
+   .. autoattribute:: pdfs
+
+   .. rubric:: Methods Documentation
+
+   .. automethod:: bind
+   .. automethod:: component
+   .. automethod:: from_json_object

@@ -39,8 +39,8 @@
   <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="pdf_to_json" href="minkit.pdf_to_json.html" />
-    <link rel="prev" title="pdf_centers_values" href="minkit.pdf_centers_values.html" /> 
+    <link rel="next" title="pdf_plotting_arrays" href="minkit.pdf_plotting_arrays.html" />
+    <link rel="prev" title="minimizer" href="minkit.minimizer.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -89,21 +89,23 @@
             
             
               <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../user.html">User guide</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../reference.html">MinKit reference</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="../reference.html#functions">Functions</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="minkit.add_pdf_src.html">add_pdf_src</a></li>
-<li class="toctree-l3"><a class="reference internal" href="minkit.as_ndarray.html">as_ndarray</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.binned_chisquare.html">binned_chisquare</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.binned_extended_chisquare.html">binned_extended_chisquare</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.binned_extended_maximum_likelihood.html">binned_extended_maximum_likelihood</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.binned_maximum_likelihood.html">binned_maximum_likelihood</a></li>
-<li class="toctree-l3"><a class="reference internal" href="minkit.free_cache.html">free_cache</a></li>
-<li class="toctree-l3"><a class="reference internal" href="minkit.initialize.html">initialize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.data_plotting_arrays.html">data_plotting_arrays</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.fcn_profile.html">fcn_profile</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.minimizer.html">minimizer</a></li>
-<li class="toctree-l3"><a class="reference internal" href="minkit.minuit_to_registry.html">minuit_to_registry</a></li>
-<li class="toctree-l3"><a class="reference internal" href="minkit.pdf_centers_values.html">pdf_centers_values</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">pdf_from_json</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.pdf_plotting_arrays.html">pdf_plotting_arrays</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.pdf_to_json.html">pdf_to_json</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.register_pdf.html">register_pdf</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.simultaneous_fcn_profile.html">simultaneous_fcn_profile</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.simultaneous_minimizer.html">simultaneous_minimizer</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.sweights.html">sweights</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.sweights_u.html">sweights_u</a></li>
@@ -211,14 +213,14 @@
 <h1>pdf_from_json<a class="headerlink" href="#pdf-from-json" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
 <dt id="minkit.pdf_from_json">
-<code class="sig-prename descclassname">minkit.</code><code class="sig-name descname">pdf_from_json</code><span class="sig-paren">(</span><em class="sig-param">obj</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/pdf_core.html#pdf_from_json"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.pdf_from_json" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">minkit.</code><code class="sig-name descname">pdf_from_json</code><span class="sig-paren">(</span><em class="sig-param">obj</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/pdfs/pdf_core.html#pdf_from_json"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.pdf_from_json" title="Permalink to this definition">¶</a></dt>
 <dd><p>Load a PDF from a JSON object.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>obj</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – JSON-like object.</p>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>a PDF with the configuration from the object.</p>
+<dd class="field-even"><p>A PDF with the configuration from the object.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p><a class="reference internal" href="minkit.PDF.html#minkit.PDF" title="minkit.PDF">PDF</a></p>
@@ -236,10 +238,10 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="minkit.pdf_to_json.html" class="btn btn-neutral float-right" title="pdf_to_json" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="minkit.pdf_plotting_arrays.html" class="btn btn-neutral float-right" title="pdf_plotting_arrays" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="minkit.pdf_centers_values.html" class="btn btn-neutral float-left" title="pdf_centers_values" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="minkit.minimizer.html" class="btn btn-neutral float-left" title="minimizer" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

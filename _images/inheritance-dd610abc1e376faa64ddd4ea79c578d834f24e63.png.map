@@ -1,0 +1,36 @@
+<map id="inheritance3b23ac3cc3" name="inheritance3b23ac3cc3">
+<area shape="rect" id="node1" href="api/minkit.AddPDFs.html#minkit.AddPDFs" target="_top" title="AddPDFs" alt="" coords="417,497,495,523"/>
+<area shape="rect" id="node2" href="api/minkit.MultiPDF.html#minkit.MultiPDF" target="_top" title="MultiPDF" alt="" coords="233,572,311,597"/>
+<area shape="rect" id="node11" href="api/minkit.ConvPDFs.html#minkit.ConvPDFs" target="_top" title="ConvPDFs" alt="" coords="413,547,499,572"/>
+<area shape="rect" id="node23" href="api/minkit.ProdPDFs.html#minkit.ProdPDFs" target="_top" title="ProdPDFs" alt="" coords="415,596,497,621"/>
+<area shape="rect" id="node3" href="api/minkit.Amoroso.html#minkit.Amoroso" target="_top" title="Amoroso" alt="" coords="416,645,496,671"/>
+<area shape="rect" id="node4" href="api/minkit.SourcePDF.html#minkit.SourcePDF" target="_top" title="SourcePDF" alt="" coords="227,783,317,808"/>
+<area shape="rect" id="node10" href="api/minkit.Chebyshev.html#minkit.Chebyshev" target="_top" title="Chebyshev" alt="" coords="409,695,503,720"/>
+<area shape="rect" id="node12" href="api/minkit.CrystalBall.html#minkit.CrystalBall" target="_top" title="CrystalBall" alt="" coords="409,744,503,769"/>
+<area shape="rect" id="node14" href="api/minkit.Exponential.html#minkit.Exponential" target="_top" title="Exponential" alt="" coords="407,793,505,819"/>
+<area shape="rect" id="node16" href="api/minkit.Gaussian.html#minkit.Gaussian" target="_top" title="Gaussian" alt="" coords="415,843,497,868"/>
+<area shape="rect" id="node21" href="api/minkit.Polynomial.html#minkit.Polynomial" target="_top" title="Polynomial" alt="" coords="409,892,503,917"/>
+<area shape="rect" id="node22" href="api/minkit.PowerLaw.html#minkit.PowerLaw" target="_top" title="PowerLaw" alt="" coords="412,941,500,967"/>
+<area shape="rect" id="node5" href="api/minkit.Backend.html#minkit.Backend" target="_top" title="Backend" alt="" coords="32,612,111,637"/>
+<area shape="rect" id="node6" href="api/minkit.BinnedDataSet.html#minkit.BinnedDataSet" target="_top" title="BinnedDataSet" alt="" coords="12,520,131,545"/>
+<area shape="rect" id="node7" href="api/minkit.BinnedEvaluator.html#minkit.BinnedEvaluator" target="_top" title="BinnedEvaluator" alt="" coords="207,400,337,425"/>
+<area shape="rect" id="node8" href="api/minkit.Evaluator.html#minkit.Evaluator" target="_top" title="Evaluator" alt="" coords="29,449,113,475"/>
+<area shape="rect" id="node26" href="api/minkit.SimultaneousEvaluator.html#minkit.SimultaneousEvaluator" target="_top" title="SimultaneousEvaluator" alt="" coords="185,449,359,475"/>
+<area shape="rect" id="node27" href="api/minkit.UnbinnedEvaluator.html#minkit.UnbinnedEvaluator" target="_top" title="UnbinnedEvaluator" alt="" coords="199,499,345,524"/>
+<area shape="rect" id="node9" href="api/minkit.Category.html#minkit.Category" target="_top" title="Object serving as a proxy for an FCN to be evaluated using a PDF on a data set." alt="" coords="31,400,112,425"/>
+<area shape="rect" id="node13" href="api/minkit.DataSet.html#minkit.DataSet" target="_top" title="DataSet" alt="" coords="34,351,109,376"/>
+<area shape="rect" id="node15" href="api/minkit.Formula.html#minkit.Formula" target="_top" title="Formula" alt="" coords="34,301,109,327"/>
+<area shape="rect" id="node17" href="api/minkit.Minimizer.html#minkit.Minimizer" target="_top" title="Minimizer" alt="" coords="28,252,115,277"/>
+<area shape="rect" id="node18" href="api/minkit.MinuitMinimizer.html#minkit.MinuitMinimizer" target="_top" title="MinuitMinimizer" alt="" coords="209,228,335,253"/>
+<area shape="rect" id="node25" href="api/minkit.SciPyMinimizer.html#minkit.SciPyMinimizer" target="_top" title="SciPyMinimizer" alt="" coords="211,277,333,303"/>
+<area shape="rect" id="node19" href="api/minkit.PDF.html#minkit.PDF" target="_top" title="PDF" alt="" coords="35,747,107,772"/>
+<area shape="rect" id="node20" href="api/minkit.Parameter.html#minkit.Parameter" target="_top" title="Parameter" alt="" coords="27,203,116,228"/>
+<area shape="rect" id="node24" href="api/minkit.Registry.html#minkit.Registry" target="_top" title="Registry" alt="" coords="34,153,109,179"/>
+<area shape="rect" id="node28" href="api/minkit.array_operations.html#minkit.array_operations" target="_top" title="array_operations" alt="" coords="5,104,137,129"/>
+<area shape="rect" id="node29" href="api/minkit.barray.html#minkit.barray" target="_top" title="barray" alt="" coords="236,5,308,31"/>
+<area shape="rect" id="node30" href="api/minkit.marray.html#minkit.marray" target="_top" title="marray" alt="" coords="35,55,107,80"/>
+<area shape="rect" id="node32" href="api/minkit.farray.html#minkit.farray" target="_top" title="farray" alt="" coords="236,55,308,80"/>
+<area shape="rect" id="node34" href="api/minkit.iarray.html#minkit.iarray" target="_top" title="iarray" alt="" coords="236,104,308,129"/>
+<area shape="rect" id="node31" href="api/minkit.carray.html#minkit.carray" target="_top" title="carray" alt="" coords="420,31,492,56"/>
+<area shape="rect" id="node33" href="api/minkit.darray.html#minkit.darray" target="_top" title="darray" alt="" coords="420,80,492,105"/>
+</map>

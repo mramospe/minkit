@@ -1,0 +1,440 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Detailed reference &mdash; minkit 0.0.0.dev0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="timer" href="api/minkit.base.timer.html" />
+    <link rel="prev" title="Adding custom PDFs" href="notebooks/extension.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> minkit
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.0.0.dev0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user.html">User guide</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Detailed reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#functions">Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/minkit.base.timer.html">timer</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#classes">Classes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/minkit.base.Formula.html">Formula</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/minkit.base.Parameter.html">Parameter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/minkit.base.ParameterBase.html">ParameterBase</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/minkit.base.Registry.html">Registry</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#class-inheritance-diagram">Class Inheritance Diagram</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id1">Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/minkit.pdfs.pdf_from_json.html">pdf_from_json</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/minkit.pdfs.pdf_to_json.html">pdf_to_json</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/minkit.pdfs.register_pdf.html">register_pdf</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/minkit.pdfs.rescale_weights.html">rescale_weights</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#id2">Classes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/minkit.pdfs.AddPDFs.html">AddPDFs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/minkit.pdfs.Amoroso.html">Amoroso</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/minkit.pdfs.Argus.html">Argus</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/minkit.pdfs.BinnedDataSet.html">BinnedDataSet</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/minkit.pdfs.Chebyshev.html">Chebyshev</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/minkit.pdfs.ConvPDFs.html">ConvPDFs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/minkit.pdfs.CrystalBall.html">CrystalBall</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/minkit.pdfs.DataSet.html">DataSet</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/minkit.pdfs.ExpPoly.html">ExpPoly</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/minkit.pdfs.Exponential.html">Exponential</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/minkit.pdfs.Gaussian.html">Gaussian</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/minkit.pdfs.Landau.html">Landau</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/minkit.pdfs.MultiPDF.html">MultiPDF</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/minkit.pdfs.PDF.html">PDF</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/minkit.pdfs.Polynomial.html">Polynomial</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/minkit.pdfs.PowerLaw.html">PowerLaw</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/minkit.pdfs.ProdPDFs.html">ProdPDFs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/minkit.pdfs.SourcePDF.html">SourcePDF</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#id3">Class Inheritance Diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="reference.html">MinKit reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="performance.html">Performance</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">minkit</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Detailed reference</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/detailed_reference.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="detailed-reference">
+<h1>Detailed reference<a class="headerlink" href="#detailed-reference" title="Permalink to this headline">¶</a></h1>
+<p>In this section, the classes and functions of the Minkit package are displayed
+according to its use.</p>
+<span class="target" id="module-minkit.base"></span><div class="section" id="functions">
+<h2>Functions<a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/minkit.base.timer.html#minkit.base.timer" title="minkit.base.timer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">timer</span></code></a>()</p></td>
+<td><p>Create an object that, on exit, displays the time elapsed.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="classes">
+<h2>Classes<a class="headerlink" href="#classes" title="Permalink to this headline">¶</a></h2>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/minkit.base.Formula.html#minkit.base.Formula" title="minkit.base.Formula"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Formula</span></code></a>(name, formula, pars)</p></td>
+<td><p>Parameter representing an operation of many parameters.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="api/minkit.base.Parameter.html#minkit.base.Parameter" title="minkit.base.Parameter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Parameter</span></code></a>(name[, value, bounds, ranges, …])</p></td>
+<td><p>Object to represent a parameter for a PDF.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/minkit.base.ParameterBase.html#minkit.base.ParameterBase" title="minkit.base.ParameterBase"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ParameterBase</span></code></a>()</p></td>
+<td><p>Abstract class for parameter objects.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="api/minkit.base.Registry.html#minkit.base.Registry" title="minkit.base.Registry"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Registry</span></code></a>(*args, **kwargs)</p></td>
+<td><p>Extension of list to hold information used in <a class="reference internal" href="reference.html#module-minkit" title="minkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">minkit</span></code></a>.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="class-inheritance-diagram">
+<h2>Class Inheritance Diagram<a class="headerlink" href="#class-inheritance-diagram" title="Permalink to this headline">¶</a></h2>
+<div class="graphviz"><img src="_images/inheritance-2e76462fb22fe34ceb593453c373ef5998e34bff.png" alt="Inheritance diagram of minkit.base.parameters.Formula, minkit.base.parameters.Parameter, minkit.base.parameters.ParameterBase, minkit.base.parameters.Registry" usemap="#inheritancef7187caba1" class="inheritance graphviz" /></div>
+<map id="inheritancef7187caba1" name="inheritancef7187caba1">
+<area shape="rect" id="node1" href="api/minkit.Formula.html#minkit.Formula" target="_top" title="Formula" alt="" coords="182,29,257,55"/>
+<area shape="rect" id="node2" href="api/minkit.ParameterBase.html#minkit.ParameterBase" target="_top" title="ParameterBase" alt="" coords="5,55,127,80"/>
+<area shape="rect" id="node3" href="api/minkit.Parameter.html#minkit.Parameter" target="_top" title="Parameter" alt="" coords="175,79,264,104"/>
+<area shape="rect" id="node4" href="api/minkit.Registry.html#minkit.Registry" target="_top" title="Registry" alt="" coords="29,5,103,31"/>
+</map><span class="target" id="module-minkit.pdfs"></span></div>
+<div class="section" id="id1">
+<h2>Functions<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/minkit.pdfs.pdf_from_json.html#minkit.pdfs.pdf_from_json" title="minkit.pdfs.pdf_from_json"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pdf_from_json</span></code></a>(obj)</p></td>
+<td><p>Load a PDF from a JSON object.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="api/minkit.pdfs.pdf_to_json.html#minkit.pdfs.pdf_to_json" title="minkit.pdfs.pdf_to_json"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pdf_to_json</span></code></a>(pdf)</p></td>
+<td><p>Dump a PDF to a JSON-like object.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/minkit.pdfs.register_pdf.html#minkit.pdfs.register_pdf" title="minkit.pdfs.register_pdf"><code class="xref py py-obj docutils literal notranslate"><span class="pre">register_pdf</span></code></a>(cl)</p></td>
+<td><p>Decorator to register PDF classes in the PDF_REGISTRY registry.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="api/minkit.pdfs.rescale_weights.html#minkit.pdfs.rescale_weights" title="minkit.pdfs.rescale_weights"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rescale_weights</span></code></a>(weights)</p></td>
+<td><p>Rescale the given weights so the statistical power is treated properly in <span class="math notranslate nohighlight">\(\log\mathcal{L}\)</span> FCNs.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="id2">
+<h2>Classes<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/minkit.pdfs.AddPDFs.html#minkit.pdfs.AddPDFs" title="minkit.pdfs.AddPDFs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AddPDFs</span></code></a>(name, pdfs, yields)</p></td>
+<td><p>This special PDF defines the sum of many different PDFs, where each of them is multiplied by a factor.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="api/minkit.pdfs.Amoroso.html#minkit.pdfs.Amoroso" title="minkit.pdfs.Amoroso"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Amoroso</span></code></a>(name, x, a, theta, alpha, beta[, …])</p></td>
+<td><p>Create a new PDF with the name, parameter related to the data and the argument parameters.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/minkit.pdfs.Argus.html#minkit.pdfs.Argus" title="minkit.pdfs.Argus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Argus</span></code></a>(name, x, mu, c, p[, backend])</p></td>
+<td><p>Create a new PDF with the name, parameter related to the data and the argument parameters.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="api/minkit.pdfs.BinnedDataSet.html#minkit.pdfs.BinnedDataSet" title="minkit.pdfs.BinnedDataSet"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BinnedDataSet</span></code></a>(edges, gaps, pars, values)</p></td>
+<td><p>A binned data set.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/minkit.pdfs.Chebyshev.html#minkit.pdfs.Chebyshev" title="minkit.pdfs.Chebyshev"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Chebyshev</span></code></a>(name, x, *coeffs[, backend])</p></td>
+<td><p>Build the class given the name, parameter related to data and coefficients.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="api/minkit.pdfs.ConvPDFs.html#minkit.pdfs.ConvPDFs" title="minkit.pdfs.ConvPDFs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ConvPDFs</span></code></a>(name, first, second[, range])</p></td>
+<td><p>Represent the convolution of two different PDFs.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/minkit.pdfs.CrystalBall.html#minkit.pdfs.CrystalBall" title="minkit.pdfs.CrystalBall"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CrystalBall</span></code></a>(name, x, c, s, a, n[, backend])</p></td>
+<td><p>Create a new PDF with the name, parameter related to the data and the argument parameters.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="api/minkit.pdfs.DataSet.html#minkit.pdfs.DataSet" title="minkit.pdfs.DataSet"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataSet</span></code></a>(data, pars[, weights])</p></td>
+<td><p>Definition of an unbinned data set to evaluate PDFs.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/minkit.pdfs.ExpPoly.html#minkit.pdfs.ExpPoly" title="minkit.pdfs.ExpPoly"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ExpPoly</span></code></a>(name, x, k, *coeffs[, backend])</p></td>
+<td><p>Create a new PDF with the parameters related to the data and the slope parameter.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="api/minkit.pdfs.Exponential.html#minkit.pdfs.Exponential" title="minkit.pdfs.Exponential"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Exponential</span></code></a>(name, x, k[, backend])</p></td>
+<td><p>Create a new PDF with the parameters related to the data and the slope parameter.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/minkit.pdfs.Gaussian.html#minkit.pdfs.Gaussian" title="minkit.pdfs.Gaussian"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Gaussian</span></code></a>(name, x, center, sigma[, backend])</p></td>
+<td><p>Create a new PDF with the parameters related to the data, center and standard deviation.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="api/minkit.pdfs.Landau.html#minkit.pdfs.Landau" title="minkit.pdfs.Landau"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Landau</span></code></a>(name, x, center, sigma[, backend])</p></td>
+<td><p>Create a Landau PDF with the parameters related to the data, center and scale parameter.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/minkit.pdfs.MultiPDF.html#minkit.pdfs.MultiPDF" title="minkit.pdfs.MultiPDF"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MultiPDF</span></code></a>(name, pdfs[, arg_pars])</p></td>
+<td><p>Base class owing many PDFs.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="api/minkit.pdfs.PDF.html#minkit.pdfs.PDF" title="minkit.pdfs.PDF"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PDF</span></code></a>(name, data_pars, args_pars[, backend])</p></td>
+<td><p>Build the class from a name, a set of data parameters and argument parameters.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/minkit.pdfs.Polynomial.html#minkit.pdfs.Polynomial" title="minkit.pdfs.Polynomial"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Polynomial</span></code></a>(name, x, *coeffs[, backend])</p></td>
+<td><p>Build the class given the name, parameter related to data and the coefficients.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="api/minkit.pdfs.PowerLaw.html#minkit.pdfs.PowerLaw" title="minkit.pdfs.PowerLaw"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PowerLaw</span></code></a>(name, x, c, n[, backend])</p></td>
+<td><p>Build the class given the name, parameter related to data and the coefficients.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/minkit.pdfs.ProdPDFs.html#minkit.pdfs.ProdPDFs" title="minkit.pdfs.ProdPDFs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ProdPDFs</span></code></a>(name, pdfs)</p></td>
+<td><p>This object represents the product of many PDFs where the data parameters are not shared among them.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="api/minkit.pdfs.SourcePDF.html#minkit.pdfs.SourcePDF" title="minkit.pdfs.SourcePDF"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SourcePDF</span></code></a>(name, data_pars[, arg_pars, …])</p></td>
+<td><p>This object defines a PDF built from source files (C++, PyOpenCL or CUDA), which depend on the backend to use.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="id3">
+<h2>Class Inheritance Diagram<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
+<div class="graphviz"><img src="_images/inheritance-fcc2fc4c12b9f739c2e5273d4c33ddfe9bbf5211.png" alt="Inheritance diagram of minkit.pdfs.pdf_core.AddPDFs, minkit.pdfs.pdfs.Amoroso, minkit.pdfs.pdfs.Argus, minkit.pdfs.dataset.BinnedDataSet, minkit.pdfs.pdfs.Chebyshev, minkit.pdfs.pdf_core.ConvPDFs, minkit.pdfs.pdfs.CrystalBall, minkit.pdfs.dataset.DataSet, minkit.pdfs.pdfs.ExpPoly, minkit.pdfs.pdfs.Exponential, minkit.pdfs.pdfs.Gaussian, minkit.pdfs.pdfs.Landau, minkit.pdfs.pdf_core.MultiPDF, minkit.pdfs.pdf_core.PDF, minkit.pdfs.pdfs.Polynomial, minkit.pdfs.pdfs.PowerLaw, minkit.pdfs.pdf_core.ProdPDFs, minkit.pdfs.pdf_core.SourcePDF" usemap="#inheritance102314e3da" class="inheritance graphviz" /></div>
+<map id="inheritance102314e3da" name="inheritance102314e3da">
+<area shape="rect" id="node1" href="api/minkit.AddPDFs.html#minkit.AddPDFs" target="_top" title="AddPDFs" alt="" coords="325,29,403,55"/>
+<area shape="rect" id="node2" href="api/minkit.MultiPDF.html#minkit.MultiPDF" target="_top" title="MultiPDF" alt="" coords="168,104,247,129"/>
+<area shape="rect" id="node9" href="api/minkit.ConvPDFs.html#minkit.ConvPDFs" target="_top" title="ConvPDFs" alt="" coords="321,79,407,104"/>
+<area shape="rect" id="node19" href="api/minkit.ProdPDFs.html#minkit.ProdPDFs" target="_top" title="ProdPDFs" alt="" coords="323,128,405,153"/>
+<area shape="rect" id="node3" href="api/minkit.Amoroso.html#minkit.Amoroso" target="_top" title="Amoroso" alt="" coords="324,177,404,203"/>
+<area shape="rect" id="node4" href="api/minkit.SourcePDF.html#minkit.SourcePDF" target="_top" title="SourcePDF" alt="" coords="162,375,253,400"/>
+<area shape="rect" id="node5" href="api/minkit.Argus.html#minkit.Argus" target="_top" title="Argus" alt="" coords="328,227,400,252"/>
+<area shape="rect" id="node8" href="api/minkit.Chebyshev.html#minkit.Chebyshev" target="_top" title="Chebyshev" alt="" coords="317,276,411,301"/>
+<area shape="rect" id="node10" href="api/minkit.CrystalBall.html#minkit.CrystalBall" target="_top" title="CrystalBall" alt="" coords="317,325,411,351"/>
+<area shape="rect" id="node12" href="api/minkit.ExpPoly.html#minkit.ExpPoly" target="_top" title="ExpPoly" alt="" coords="327,375,401,400"/>
+<area shape="rect" id="node13" href="api/minkit.Exponential.html#minkit.Exponential" target="_top" title="Exponential" alt="" coords="315,424,413,449"/>
+<area shape="rect" id="node14" href="api/minkit.Gaussian.html#minkit.Gaussian" target="_top" title="Gaussian" alt="" coords="323,473,405,499"/>
+<area shape="rect" id="node15" href="api/minkit.Landau.html#minkit.Landau" target="_top" title="Landau" alt="" coords="328,523,400,548"/>
+<area shape="rect" id="node17" href="api/minkit.Polynomial.html#minkit.Polynomial" target="_top" title="Polynomial" alt="" coords="317,572,411,597"/>
+<area shape="rect" id="node18" href="api/minkit.PowerLaw.html#minkit.PowerLaw" target="_top" title="PowerLaw" alt="" coords="320,621,408,647"/>
+<area shape="rect" id="node6" href="api/minkit.BinnedDataSet.html#minkit.BinnedDataSet" target="_top" title="BinnedDataSet" alt="" coords="148,5,267,31"/>
+<area shape="rect" id="node11" href="api/minkit.DataSet.html#minkit.DataSet" target="_top" title="DataSet" alt="" coords="170,55,245,80"/>
+<area shape="rect" id="node16" href="api/minkit.PDF.html#minkit.PDF" target="_top" title="PDF" alt="" coords="17,252,89,277"/>
+</map></div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="api/minkit.base.timer.html" class="btn btn-neutral float-right" title="timer" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="notebooks/extension.html" class="btn btn-neutral float-left" title="Adding custom PDFs" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Miguel Ramos Pernas
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

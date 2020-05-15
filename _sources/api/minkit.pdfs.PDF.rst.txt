@@ -1,0 +1,79 @@
+PDF
+===
+
+.. currentmodule:: minkit.pdfs
+
+.. autoclass:: PDF
+   :show-inheritance:
+
+   .. rubric:: Attributes Summary
+
+   .. autosummary::
+
+      ~PDF.BIND
+      ~PDF.CACHE_TYPES
+      ~PDF.CONST
+      ~PDF.all_args
+      ~PDF.all_pars
+      ~PDF.all_real_args
+      ~PDF.aop
+      ~PDF.args
+      ~PDF.backend
+      ~PDF.cache
+      ~PDF.cache_type
+      ~PDF.constant
+      ~PDF.data_pars
+      ~PDF.dependent
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+
+      ~PDF.__call__
+      ~PDF.bind
+      ~PDF.evaluate_binned
+      ~PDF.from_json_object
+      ~PDF.generate
+      ~PDF.get_values
+      ~PDF.integral
+      ~PDF.norm
+      ~PDF.numerical_integral
+      ~PDF.numerical_normalization
+      ~PDF.set_values
+      ~PDF.to_backend
+      ~PDF.to_json_object
+      ~PDF.using_cache
+
+   .. rubric:: Attributes Documentation
+
+   .. autoattribute:: BIND
+   .. autoattribute:: CACHE_TYPES
+   .. autoattribute:: CONST
+   .. autoattribute:: all_args
+   .. autoattribute:: all_pars
+   .. autoattribute:: all_real_args
+   .. autoattribute:: aop
+   .. autoattribute:: args
+   .. autoattribute:: backend
+   .. autoattribute:: cache
+   .. autoattribute:: cache_type
+   .. autoattribute:: constant
+   .. autoattribute:: data_pars
+   .. autoattribute:: dependent
+
+   .. rubric:: Methods Documentation
+
+   .. automethod:: __call__
+   .. automethod:: bind
+   .. automethod:: evaluate_binned
+   .. automethod:: from_json_object
+   .. automethod:: generate
+   .. automethod:: get_values
+   .. automethod:: integral
+   .. automethod:: norm
+   .. automethod:: numerical_integral
+   .. automethod:: numerical_normalization
+   .. automethod:: set_values
+   .. automethod:: to_backend
+   .. automethod:: to_json_object
+   .. automethod:: using_cache

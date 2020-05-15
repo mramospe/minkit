@@ -1,0 +1,6 @@
+rescale_weights
+===============
+
+.. currentmodule:: minkit.pdfs
+
+.. autofunction:: rescale_weights

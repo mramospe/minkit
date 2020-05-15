@@ -6,6 +6,12 @@ SourcePDF
 .. autoclass:: SourcePDF
    :show-inheritance:
 
+   .. rubric:: Attributes Summary
+
+   .. autosummary::
+
+      ~SourcePDF.numint_config
+
    .. rubric:: Methods Summary
 
    .. autosummary::
@@ -14,8 +20,15 @@ SourcePDF
       ~SourcePDF.evaluate_binned
       ~SourcePDF.from_json_object
       ~SourcePDF.function
+      ~SourcePDF.integral
       ~SourcePDF.norm
+      ~SourcePDF.numerical_integral
+      ~SourcePDF.to_backend
       ~SourcePDF.to_json_object
+
+   .. rubric:: Attributes Documentation
+
+   .. autoattribute:: numint_config
 
    .. rubric:: Methods Documentation
 
@@ -23,5 +36,8 @@ SourcePDF
    .. automethod:: evaluate_binned
    .. automethod:: from_json_object
    .. automethod:: function
+   .. automethod:: integral
    .. automethod:: norm
+   .. automethod:: numerical_integral
+   .. automethod:: to_backend
    .. automethod:: to_json_object

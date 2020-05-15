@@ -6,6 +6,12 @@ ConvPDFs
 .. autoclass:: ConvPDFs
    :show-inheritance:
 
+   .. rubric:: Attributes Summary
+
+   .. autosummary::
+
+      ~ConvPDFs.interpolation_method
+
    .. rubric:: Methods Summary
 
    .. autosummary::
@@ -15,8 +21,14 @@ ConvPDFs
       ~ConvPDFs.evaluate_binned
       ~ConvPDFs.from_json_object
       ~ConvPDFs.norm
+      ~ConvPDFs.numerical_integral
       ~ConvPDFs.numerical_normalization
+      ~ConvPDFs.to_backend
       ~ConvPDFs.to_json_object
+
+   .. rubric:: Attributes Documentation
+
+   .. autoattribute:: interpolation_method
 
    .. rubric:: Methods Documentation
 
@@ -25,5 +37,7 @@ ConvPDFs
    .. automethod:: evaluate_binned
    .. automethod:: from_json_object
    .. automethod:: norm
+   .. automethod:: numerical_integral
    .. automethod:: numerical_normalization
+   .. automethod:: to_backend
    .. automethod:: to_json_object

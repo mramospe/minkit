@@ -1,0 +1,6 @@
+sweights_u
+==========
+
+.. currentmodule:: minkit.plotting
+
+.. autofunction:: sweights_u

@@ -1,0 +1,7 @@
+Amoroso
+=======
+
+.. currentmodule:: minkit.pdfs
+
+.. autoclass:: Amoroso
+   :show-inheritance:

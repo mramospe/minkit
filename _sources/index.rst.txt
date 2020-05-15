@@ -18,6 +18,7 @@ following sections:
 .. toctree::
    :maxdepth: 2
 
+   installation
    user
    reference
    performance

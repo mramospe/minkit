@@ -89,10 +89,12 @@
             
             
               <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../user.html">User guide</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="datasets.html">Creating data sets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="basic.html">Basic example</a></li>
 <li class="toctree-l2"><a class="reference internal" href="minimization.html">Minimization with MinKit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fit_stability.html">Determining the stability of the fits</a></li>
 <li class="toctree-l2"><a class="reference internal" href="multidimensional.html">Working in more than one dimension</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Adding custom PDFs</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#Basic-example">Basic example</a></li>
@@ -397,7 +399,7 @@ div.rendered_html tbody tr:hover {
 automatically defined, which will boost both processes since no numerical calculations need to be done.</p>
 <div class="section" id="Basic-example">
 <h2>Basic example<a class="headerlink" href="#Basic-example" title="Permalink to this headline">¶</a></h2>
-<p>In order to add a new PDF for CPU, we must create a source XML file, and tell the “minkit” package to add its directory to the list of directories to search for PDFs. For this example, we will create a C++ file from python on a temporary directory.</p>
+<p>In order to add a new PDF for CPU, we must create a source XML file, and tell the MinKit package to add its directory to the list of directories to search for PDFs. For this example, we will create a C++ file from python on a temporary directory.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
@@ -407,8 +409,6 @@ automatically defined, which will boost both processes since no numerical calcul
 <span class="kn">import</span> <span class="nn">minkit</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">tempfile</span>
-
-<span class="n">minkit</span><span class="o">.</span><span class="n">initialize</span><span class="p">(</span><span class="n">backend</span><span class="o">=</span><span class="s1">&#39;cpu&#39;</span><span class="p">)</span>
 
 <span class="n">tmpdir</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">TemporaryDirectory</span><span class="p">()</span>
 
@@ -436,12 +436,12 @@ automatically defined, which will boost both processes since no numerical calcul
 </div>
 <p>The fields that are present are:</p>
 <ul class="simple">
-<li><p>“preamble” (optional): any kind of definition that needs to be added after the “include” directives.</p></li>
-<li><p>“parameters” (optional): defines the parameters that will be used as input arguments for both “function” and “integral”. The quoted values will be the actual names of the parameters</p></li>
-<li><p>“variable_parameters” (optional): this field controls the possible paramaters of a PDF which might vary in number, like for a polynomial PDF, for example. It must contain both the name of the variable referring to the number of parameters and that for the pointer to their values. More information about this kind of PDFs can be found in the next section.</p></li>
-<li><p>“function”: refers to the code used to evaluate the PDF. It must contain a field called “data”, with the different data parameters to use; and “code”, where the actual calculations are done. All the mathematical functions must be available in C.</p></li>
-<li><p>“integral” (optional): this field is optional, since not all the PDFs have an analytical expression for the integral. It is recommended to fill this field when possible, since otherwise MinKit relies on numerical calculations to evaluate binned samples and calculate the normalization. THis field must be composed of two parts: “bounds”, defining the names for the limits of the integration; and “code”, where the calculation of the integral is done. If working with more than one data parameter,
-“bounds” must contain the lower and upper bounds for each parameter, included consecutively (xmin, xmax, ymin, ymax, …).</p></li>
+<li><p><em>preamble</em> (optional): any kind of definition that needs to be added after the <em>include</em> directives.</p></li>
+<li><p><em>parameters</em> (optional): defines the parameters that will be used as input arguments for both <em>function</em> and <em>integral</em>. The quoted values will be the actual names of the parameters</p></li>
+<li><p><em>variable_parameters</em> (optional): this field controls the possible paramaters of a PDF which might vary in number, like for a polynomial PDF, for example. It must contain both the name of the variable referring to the number of parameters and that for the pointer to their values. More information about this kind of PDFs can be found in the next section.</p></li>
+<li><p><em>function</em>: refers to the code used to evaluate the PDF. It must contain a field called <em>data</em>, with the different data parameters to use; and <em>code</em>, where the actual calculations are done. All the mathematical functions must be available in C.</p></li>
+<li><p><em>integral</em> (optional): this field is optional, since not all the PDFs have an analytical expression for the integral. It is recommended to fill this field when possible, since otherwise MinKit relies on numerical calculations to evaluate binned samples and calculate the normalization. This field must be composed of two parts: <em>bounds</em>, defining the names for the limits of the integration; and <em>code</em>, where the calculation of the integral is done. If working with more than one data parameter,
+<em>bounds</em> must contain the lower and upper bounds for each parameter, included consecutively (xmin, xmax, ymin, ymax, …).</p></li>
 </ul>
 <p>Something very important to remember is that since we are dealing with XML format, the symbols &lt;, &gt;, &amp;, ” and ‘ are protected. We must use the escaped versions. Now we have to register the PDF. In order to be used in python, we must tell minkit to look for PDFs in the temporary directory.</p>
 <div class="nbinput nblast docutils container">
@@ -466,7 +466,7 @@ automatically defined, which will boost both processes since no numerical calcul
 </pre></div>
 </div>
 </div>
-<p>The “register_pdf” decorator is necessary if we want to save/load the PDF to/from JSON files. It is completely necessary that we call the function the same way we call the source file. The arguments to the “minkit.SourcePDF” constructor are the name of the PDF, the data parameters and the argument parameters. Now we can declare and use our function.</p>
+<p>The <em>register_pdf</em> decorator is necessary if we want to save/load the PDF to/from JSON files. It is completely necessary that we call the function the same way we call the source file. The arguments to the <em>minkit.SourcePDF</em> constructor are the name of the PDF, the data parameters and the argument parameters. Now we can declare and use our function.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
@@ -477,7 +477,7 @@ automatically defined, which will boost both processes since no numerical calcul
 <span class="n">pdf</span> <span class="o">=</span> <span class="n">CustomPDF</span><span class="p">(</span><span class="s1">&#39;pdf&#39;</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
 <span class="n">data</span> <span class="o">=</span> <span class="n">pdf</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="mi">10000</span><span class="p">)</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">minkit</span><span class="o">.</span><span class="n">as_ndarray</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]),</span> <span class="n">bins</span><span class="o">=</span><span class="mi">100</span><span class="p">);</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">as_ndarray</span><span class="p">(),</span> <span class="n">bins</span><span class="o">=</span><span class="mi">100</span><span class="p">);</span>
 </pre></div>
 </div>
 </div>
@@ -491,7 +491,7 @@ automatically defined, which will boost both processes since no numerical calcul
 </div>
 <div class="section" id="New-PDFs-with-a-variable-number-of-arguments">
 <h2>New PDFs with a variable number of arguments<a class="headerlink" href="#New-PDFs-with-a-variable-number-of-arguments" title="Permalink to this headline">¶</a></h2>
-<p>It might happen that one wants to define a general function, which depends on a list of parameters that can vary (for example, a polynomial) from one construction to another. This can be done on a similar way to that of the previous section, providing as a third argument to “minkit.SourcePDF” the list of extra arguments.</p>
+<p>It might happen that one wants to define a general function, which depends on a list of parameters that can vary (for example, a polynomial) from one construction to another. This can be done on a similar way to that of the previous section, providing as a third argument to <em>minkit.SourcePDF</em> the list of extra arguments.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
@@ -504,7 +504,7 @@ automatically defined, which will boost both processes since no numerical calcul
 </pre></div>
 </div>
 </div>
-<p>The XML file must be modified accordingly, using the field “variable_parameters”:</p>
+<p>The XML file must be modified accordingly, using the field <em>variable_parameters</em>:</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
@@ -535,7 +535,7 @@ automatically defined, which will boost both processes since no numerical calcul
 <span class="n">pdf</span> <span class="o">=</span> <span class="n">VarArgsCustomPDF</span><span class="p">(</span><span class="s1">&#39;pdf&#39;</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">p1</span><span class="p">)</span>
 <span class="n">data</span> <span class="o">=</span> <span class="n">pdf</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="mi">10000</span><span class="p">)</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">minkit</span><span class="o">.</span><span class="n">as_ndarray</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]),</span> <span class="n">bins</span><span class="o">=</span><span class="mi">100</span><span class="p">);</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">as_ndarray</span><span class="p">(),</span> <span class="n">bins</span><span class="o">=</span><span class="mi">100</span><span class="p">);</span>
 </pre></div>
 </div>
 </div>

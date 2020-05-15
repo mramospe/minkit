@@ -1,0 +1,29 @@
+UnbinnedEvaluator
+=================
+
+.. currentmodule:: minkit
+
+.. autoclass:: UnbinnedEvaluator
+   :show-inheritance:
+
+   .. rubric:: Attributes Summary
+
+   .. autosummary::
+
+      ~UnbinnedEvaluator.args
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+
+      ~UnbinnedEvaluator.__call__
+      ~UnbinnedEvaluator.using_caches
+
+   .. rubric:: Attributes Documentation
+
+   .. autoattribute:: args
+
+   .. rubric:: Methods Documentation
+
+   .. automethod:: __call__
+   .. automethod:: using_caches

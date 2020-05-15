@@ -1,0 +1,474 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>minkit.minimization.fcns &mdash; minkit 0.0.0.dev0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../../_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> minkit
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.0.0.dev0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../user.html">User guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference.html">MinKit reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../performance.html">Performance</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">minkit</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+          <li><a href="../../minkit.html">minkit</a> &raquo;</li>
+        
+      <li>minkit.minimization.fcns</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for minkit.minimization.fcns</h1><div class="highlight"><pre>
+<span></span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Definition of different minimization functions.</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="kn">from</span> <span class="nn">..base</span> <span class="k">import</span> <span class="n">parameters</span>
+<span class="kn">from</span> <span class="nn">..pdfs</span> <span class="k">import</span> <span class="n">dataset</span>
+
+<span class="kn">import</span> <span class="nn">functools</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;binned_chisquare&#39;</span><span class="p">,</span> <span class="s1">&#39;binned_maximum_likelihood&#39;</span><span class="p">,</span>
+           <span class="s1">&#39;binned_extended_chisquare&#39;</span><span class="p">,</span> <span class="s1">&#39;binned_extended_maximum_likelihood&#39;</span><span class="p">,</span>
+           <span class="s1">&#39;unbinned_maximum_likelihood&#39;</span><span class="p">,</span> <span class="s1">&#39;unbinned_extended_maximum_likelihood&#39;</span><span class="p">]</span>
+
+<span class="c1"># Names of different FCNs</span>
+<span class="n">BINNED_CHISQUARE</span> <span class="o">=</span> <span class="s1">&#39;chi2&#39;</span>
+<span class="n">BINNED_EXTENDED_CHISQUARE</span> <span class="o">=</span> <span class="s1">&#39;echi2&#39;</span>
+<span class="n">BINNED_MAXIMUM_LIKELIHOOD</span> <span class="o">=</span> <span class="s1">&#39;bml&#39;</span>
+<span class="n">BINNED_EXTENDED_MAXIMUM_LIKELIHOOD</span> <span class="o">=</span> <span class="s1">&#39;beml&#39;</span>
+<span class="n">UNBINNED_MAXIMUM_LIKELIHOOD</span> <span class="o">=</span> <span class="s1">&#39;uml&#39;</span>
+<span class="n">UNBINNED_EXTENDED_MAXIMUM_LIKELIHOOD</span> <span class="o">=</span> <span class="s1">&#39;ueml&#39;</span>
+
+
+<span class="k">def</span> <span class="nf">data_type_for_fcn</span><span class="p">(</span><span class="n">fcn</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Get the associated data type for a given FCN.</span>
+
+<span class="sd">    :param fcn: FCN to consider.</span>
+<span class="sd">    :type fcn: str</span>
+<span class="sd">    :returns: data type associated to the FCN.</span>
+<span class="sd">    :rtype: str</span>
+<span class="sd">    :raises ValueError: if the FCN is unknown.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">fcn</span> <span class="ow">in</span> <span class="p">(</span><span class="n">BINNED_CHISQUARE</span><span class="p">,</span> <span class="n">BINNED_EXTENDED_CHISQUARE</span><span class="p">,</span> <span class="n">BINNED_MAXIMUM_LIKELIHOOD</span><span class="p">,</span> <span class="n">BINNED_EXTENDED_MAXIMUM_LIKELIHOOD</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">dataset</span><span class="o">.</span><span class="n">BINNED</span>
+    <span class="k">elif</span> <span class="n">fcn</span> <span class="ow">in</span> <span class="p">(</span><span class="n">UNBINNED_MAXIMUM_LIKELIHOOD</span><span class="p">,</span>
+                 <span class="n">UNBINNED_EXTENDED_MAXIMUM_LIKELIHOOD</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">dataset</span><span class="o">.</span><span class="n">UNBINNED</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;Unknown FCN type &quot;</span><span class="si">{fcn}</span><span class="s1">&quot;&#39;</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">evaluate_constraints</span><span class="p">(</span><span class="n">constraints</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Calculate the values of the constraints, if any.</span>
+
+<span class="sd">    :param constraints: functions defining constraints to different parameters.</span>
+<span class="sd">    :type contraints: list(PDF)</span>
+<span class="sd">    :returns: evaluation of the product of constraints.</span>
+<span class="sd">    :rtype: float</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">constraints</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mf">0.</span>
+
+    <span class="n">res</span> <span class="o">=</span> <span class="mf">1.</span>
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">constraints</span><span class="p">:</span>
+        <span class="n">res</span> <span class="o">*=</span> <span class="n">c</span><span class="o">.</span><span class="n">function</span><span class="p">(</span><span class="n">normalized</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="o">-</span><span class="mf">2.</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">warn_if_nan</span><span class="p">(</span><span class="n">function</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Decorate an FCN so a warning is displayed if the result is nan.</span>
+<span class="sd">    This happens when the probability is zero or negative for at least one value.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">function</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__wrapper</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>
+            <span class="c1"># Get rid of the warnings for the calls to &quot;log&quot; with zero or negative</span>
+            <span class="c1"># values and the multiplication of the result by an array</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s1">&#39;ignore&#39;</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="ne">RuntimeWarning</span><span class="p">)</span>
+
+            <span class="n">v</span> <span class="o">=</span> <span class="n">function</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="s1">&#39;Evaluation of the PDF is zero or negative&#39;</span><span class="p">,</span> <span class="ne">RuntimeWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">v</span>
+
+    <span class="k">return</span> <span class="n">__wrapper</span>
+
+
+<div class="viewcode-block" id="binned_chisquare"><a class="viewcode-back" href="../../../api/minkit.binned_chisquare.html#minkit.binned_chisquare">[docs]</a><span class="nd">@warn_if_nan</span>
+<span class="k">def</span> <span class="nf">binned_chisquare</span><span class="p">(</span><span class="n">pdf</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">FULL</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Definition of the binned chi-square FCN. The returned values are directly</span>
+<span class="sd">    the :math:`\chi^2` of the PDF in the data sample, and it is computed as</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">       \text{FCN} = \sum_{b = 0}^M \frac{\left(n_b - f_b(\vec{p})\right)^2}{f_b(\vec{p})},</span>
+
+<span class="sd">    where :math:`n_b` is the number of entries in bin *b*, :math:`f(b;\vec{\theta})`</span>
+<span class="sd">    is the integral of the function to minimize in the bin *b*</span>
+<span class="sd">    (without normalization), :math:`\vec{\theta}` are the function parameters</span>
+
+<span class="sd">    :param pdf: function to evaluate.</span>
+<span class="sd">    :type pdf: PDF</span>
+<span class="sd">    :param data: data to evaluate.</span>
+<span class="sd">    :type data: BinnedDataSet</span>
+<span class="sd">    :param range: normalization range of the PDF.</span>
+<span class="sd">    :type range: str</span>
+<span class="sd">    :returns: value of the FCN.</span>
+<span class="sd">    :rtype: float</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="n">pdf</span><span class="o">.</span><span class="n">evaluate_binned</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">f</span> <span class="o">*=</span> <span class="n">data</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="k">return</span> <span class="p">((</span><span class="n">data</span><span class="o">.</span><span class="n">values</span> <span class="o">-</span> <span class="n">f</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="n">f</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="binned_extended_chisquare"><a class="viewcode-back" href="../../../api/minkit.binned_extended_chisquare.html#minkit.binned_extended_chisquare">[docs]</a><span class="nd">@warn_if_nan</span>
+<span class="k">def</span> <span class="nf">binned_extended_chisquare</span><span class="p">(</span><span class="n">pdf</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Definition of the binned chi-square FCN for extended PDFs. The returned</span>
+<span class="sd">    value is directly the :math:`\chi^2` of the PDF in the data sample, and it</span>
+<span class="sd">    is computed as</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">       \text{FCN} = \sum_{b = 0}^M \frac{\left(n_b - f_b(\vec{p})\right)^2}{f_b(\vec{p})},</span>
+
+<span class="sd">    where :math:`n_b` is the number of entries in bin *b*, :math:`f(b;\vec{\theta})`</span>
+<span class="sd">    is the integral of the function to minimize in the bin *b*</span>
+<span class="sd">    (without normalization), :math:`\vec{\theta}` are the function parameters</span>
+
+<span class="sd">    :param pdf: function to evaluate.</span>
+<span class="sd">    :type pdf: PDF</span>
+<span class="sd">    :param data: data to evaluate.</span>
+<span class="sd">    :type data: BinnedDataSet</span>
+<span class="sd">    :param range: normalization range of the PDF.</span>
+<span class="sd">    :type range: str</span>
+<span class="sd">    :returns: value of the FCN.</span>
+<span class="sd">    :rtype: float</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="n">pdf</span><span class="o">.</span><span class="n">evaluate_binned</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">normalized</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">((</span><span class="n">data</span><span class="o">.</span><span class="n">values</span> <span class="o">-</span> <span class="n">f</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="n">f</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="binned_maximum_likelihood"><a class="viewcode-back" href="../../../api/minkit.binned_maximum_likelihood.html#minkit.binned_maximum_likelihood">[docs]</a><span class="nd">@warn_if_nan</span>
+<span class="k">def</span> <span class="nf">binned_maximum_likelihood</span><span class="p">(</span><span class="n">pdf</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Definition of the binned maximum likelihood FCN.</span>
+<span class="sd">    The output is two times the logarithm of the likelihood, and is computed as</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">       \text{FCN} = -2 \times \left[\sum_{b=0}^M n_b \log\frac{n_b}{f(b;\vec{\theta})} + f(b;\vec{\theta}) - n_b\right],</span>
+
+<span class="sd">    where :math:`n_b` is the number of entries in bin *b*,</span>
+<span class="sd">    :math:`f(b;\vec{\theta})` is the integral of the function to minimize</span>
+<span class="sd">    in the bin *b* (without normalization), :math:`\vec{\theta}` are the function</span>
+<span class="sd">    parameters.</span>
+
+<span class="sd">    :param pdf: function to evaluate.</span>
+<span class="sd">    :type pdf: PDF</span>
+<span class="sd">    :param data: data to evaluate.</span>
+<span class="sd">    :type data: BinnedDataSet</span>
+<span class="sd">    :returns: value of the FCN.</span>
+<span class="sd">    :rtype: float</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="n">pdf</span><span class="o">.</span><span class="n">evaluate_binned</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">f</span> <span class="o">*=</span> <span class="n">data</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="k">return</span> <span class="mf">2.</span> <span class="o">*</span> <span class="p">(</span><span class="n">pdf</span><span class="o">.</span><span class="n">aop</span><span class="o">.</span><span class="n">product_by_zero_is_zero</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">pdf</span><span class="o">.</span><span class="n">aop</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">values</span> <span class="o">/</span> <span class="n">f</span><span class="p">))</span> <span class="o">+</span> <span class="n">f</span> <span class="o">-</span> <span class="n">data</span><span class="o">.</span><span class="n">values</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="binned_extended_maximum_likelihood"><a class="viewcode-back" href="../../../api/minkit.binned_extended_maximum_likelihood.html#minkit.binned_extended_maximum_likelihood">[docs]</a><span class="nd">@warn_if_nan</span>
+<span class="k">def</span> <span class="nf">binned_extended_maximum_likelihood</span><span class="p">(</span><span class="n">pdf</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Definition of the binned extended maximum likelihood FCN.</span>
+<span class="sd">    The output is two times the logarithm of the likelihood, and is computed as</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">       \text{FCN} = -2 \times \left[\sum_{b=0}^M n_b \log\frac{n_b}{f(b;\vec{\theta})} + f(b;\vec{\theta}) - n_b\right],</span>
+
+<span class="sd">    where :math:`n_b` is the number of entries in bin *b*,</span>
+<span class="sd">    :math:`f(b;\vec{\theta})` is the integral of the function to minimize</span>
+<span class="sd">    in the bin *b* (without normalization), :math:`\vec{\theta}` are the function</span>
+<span class="sd">    parameters.</span>
+
+<span class="sd">    :param pdf: function to evaluate.</span>
+<span class="sd">    :type pdf: PDF</span>
+<span class="sd">    :param data: data to evaluate.</span>
+<span class="sd">    :type data: BinnedDataSet</span>
+<span class="sd">    :returns: value of the FCN.</span>
+<span class="sd">    :rtype: float</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="n">pdf</span><span class="o">.</span><span class="n">evaluate_binned</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">normalized</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="k">return</span> <span class="mf">2.</span> <span class="o">*</span> <span class="p">(</span><span class="n">pdf</span><span class="o">.</span><span class="n">aop</span><span class="o">.</span><span class="n">product_by_zero_is_zero</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">pdf</span><span class="o">.</span><span class="n">aop</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">values</span> <span class="o">/</span> <span class="n">f</span><span class="p">))</span> <span class="o">+</span> <span class="n">f</span> <span class="o">-</span> <span class="n">data</span><span class="o">.</span><span class="n">values</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="unbinned_extended_maximum_likelihood"><a class="viewcode-back" href="../../../api/minkit.unbinned_extended_maximum_likelihood.html#minkit.unbinned_extended_maximum_likelihood">[docs]</a><span class="nd">@warn_if_nan</span>
+<span class="k">def</span> <span class="nf">unbinned_extended_maximum_likelihood</span><span class="p">(</span><span class="n">pdf</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">FULL</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Definition of the unbinned extended maximum likelihood FCN.</span>
+<span class="sd">    In this case, entries in data are assumed to follow a Poissonian distribution.</span>
+<span class="sd">    The given :class:`PDF` must be of *extended* type.</span>
+<span class="sd">    The output is two times the logarithm of the likelihood, and is computed as</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">       \text{FCN} = -2 \times \left[\sum_{i=0}^N \log f(\vec{x}_i;\vec{\theta}) - A(\vec{\theta})\right],</span>
+
+<span class="sd">    where :math:`f(\vec{x}_i;\vec{\theta})` is the function to minimize (without</span>
+<span class="sd">    normalization), :math:`\vec{x}_i` are the data points, :math:`\vec{\theta}`</span>
+<span class="sd">    are the function parameters and :math:`A(\vec{\theta})` is the normalization</span>
+<span class="sd">    value.</span>
+
+<span class="sd">    :param pdf: function to evaluate.</span>
+<span class="sd">    :type pdf: PDF</span>
+<span class="sd">    :param data: data to evaluate.</span>
+<span class="sd">    :type data: DataSet</span>
+<span class="sd">    :param range: normalization range of the PDF.</span>
+<span class="sd">    :type range: str</span>
+<span class="sd">    :returns: value of the FCN.</span>
+<span class="sd">    :rtype: float</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">lf</span> <span class="o">=</span> <span class="n">pdf</span><span class="o">.</span><span class="n">aop</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">pdf</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">range</span><span class="p">,</span> <span class="n">normalized</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">lf</span> <span class="o">*=</span> <span class="n">data</span><span class="o">.</span><span class="n">weights</span>
+    <span class="k">return</span> <span class="mf">2.</span> <span class="o">*</span> <span class="p">(</span><span class="n">pdf</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="nb">range</span><span class="p">)</span> <span class="o">-</span> <span class="n">lf</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span></div>
+
+
+<div class="viewcode-block" id="unbinned_maximum_likelihood"><a class="viewcode-back" href="../../../api/minkit.unbinned_maximum_likelihood.html#minkit.unbinned_maximum_likelihood">[docs]</a><span class="nd">@warn_if_nan</span>
+<span class="k">def</span> <span class="nf">unbinned_maximum_likelihood</span><span class="p">(</span><span class="n">pdf</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">FULL</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Definition of the unbinned maximum likelihood FCN.</span>
+<span class="sd">    The given :class:`PDF` must not be of *extended* type.</span>
+<span class="sd">    The output is two times the logarithm of the likelihood, and is computed as</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">       \text{FCN} = -2 \times \left[\sum_{i=0}^N \log \frac{f(\vec{x}_i;\vec{\theta})}{A(\vec{\theta})}\right],</span>
+
+<span class="sd">    where :math:`f(\vec{x}_i;\vec{\theta})` is the function to minimize (without</span>
+<span class="sd">    normalization), :math:`\vec{x}_i` are the data points, :math:`\vec{\theta}`</span>
+<span class="sd">    are the function parameters and :math:`A(\vec{\theta})` is the normalization</span>
+<span class="sd">    value.</span>
+
+<span class="sd">    :param pdf: function to evaluate.</span>
+<span class="sd">    :type pdf: PDF</span>
+<span class="sd">    :param data: data to evaluate.</span>
+<span class="sd">    :type data: DataSet</span>
+<span class="sd">    :param range: normalization range of the PDF.</span>
+<span class="sd">    :type range: str</span>
+<span class="sd">    :returns: value of the FCN.</span>
+<span class="sd">    :rtype: float</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">lf</span> <span class="o">=</span> <span class="n">pdf</span><span class="o">.</span><span class="n">aop</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">pdf</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">range</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">lf</span> <span class="o">*=</span> <span class="n">data</span><span class="o">.</span><span class="n">weights</span>
+    <span class="k">return</span> <span class="o">-</span><span class="mf">2.</span> <span class="o">*</span> <span class="n">lf</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span></div>
+
+
+<span class="k">def</span> <span class="nf">fcn_from_name</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Return the FCN associated to the given name.</span>
+
+<span class="sd">    :param name: name of the FCN.</span>
+<span class="sd">    :type name: str</span>
+<span class="sd">    :returns: associated function.</span>
+<span class="sd">    :rtype: function</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="n">BINNED_CHISQUARE</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">binned_chisquare</span>
+    <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="n">BINNED_EXTENDED_CHISQUARE</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">binned_extended_chisquare</span>
+    <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="n">BINNED_EXTENDED_MAXIMUM_LIKELIHOOD</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">binned_extended_maximum_likelihood</span>
+    <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="n">BINNED_MAXIMUM_LIKELIHOOD</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">binned_maximum_likelihood</span>
+    <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="n">UNBINNED_MAXIMUM_LIKELIHOOD</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">unbinned_maximum_likelihood</span>
+    <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="n">UNBINNED_EXTENDED_MAXIMUM_LIKELIHOOD</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">unbinned_extended_maximum_likelihood</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;Unknown FCN type &quot;</span><span class="si">{name}</span><span class="s1">&quot;&#39;</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Miguel Ramos Pernas
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

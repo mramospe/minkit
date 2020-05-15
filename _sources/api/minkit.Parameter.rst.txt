@@ -12,7 +12,6 @@ Parameter
 
       ~Parameter.bounds
       ~Parameter.constant
-      ~Parameter.dependent
       ~Parameter.value
 
    .. rubric:: Methods Summary
@@ -28,7 +27,6 @@ Parameter
 
    .. autoattribute:: bounds
    .. autoattribute:: constant
-   .. autoattribute:: dependent
    .. autoattribute:: value
 
    .. rubric:: Methods Documentation

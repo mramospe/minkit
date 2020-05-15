@@ -1,0 +1,7 @@
+ExpPoly
+=======
+
+.. currentmodule:: minkit
+
+.. autoclass:: ExpPoly
+   :show-inheritance:

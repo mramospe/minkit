@@ -1,0 +1,43 @@
+DataSet
+=======
+
+.. currentmodule:: minkit.pdfs
+
+.. autoclass:: DataSet
+   :show-inheritance:
+
+   .. rubric:: Attributes Summary
+
+   .. autosummary::
+
+      ~DataSet.sample_type
+      ~DataSet.values
+      ~DataSet.weights
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+
+      ~DataSet.from_ndarray
+      ~DataSet.from_records
+      ~DataSet.make_binned
+      ~DataSet.merge
+      ~DataSet.subset
+      ~DataSet.to_backend
+      ~DataSet.to_records
+
+   .. rubric:: Attributes Documentation
+
+   .. autoattribute:: sample_type
+   .. autoattribute:: values
+   .. autoattribute:: weights
+
+   .. rubric:: Methods Documentation
+
+   .. automethod:: from_ndarray
+   .. automethod:: from_records
+   .. automethod:: make_binned
+   .. automethod:: merge
+   .. automethod:: subset
+   .. automethod:: to_backend
+   .. automethod:: to_records

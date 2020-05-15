@@ -1,0 +1,35 @@
+MinuitMinimizer
+===============
+
+.. currentmodule:: minkit
+
+.. autoclass:: MinuitMinimizer
+   :show-inheritance:
+
+   .. rubric:: Attributes Summary
+
+   .. autosummary::
+
+      ~MinuitMinimizer.evaluator
+      ~MinuitMinimizer.minuit
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+
+      ~MinuitMinimizer.hesse
+      ~MinuitMinimizer.migrad
+      ~MinuitMinimizer.minos
+      ~MinuitMinimizer.result_to_registry
+
+   .. rubric:: Attributes Documentation
+
+   .. autoattribute:: evaluator
+   .. autoattribute:: minuit
+
+   .. rubric:: Methods Documentation
+
+   .. automethod:: hesse
+   .. automethod:: migrad
+   .. automethod:: minos
+   .. automethod:: result_to_registry

@@ -1,0 +1,6 @@
+register_pdf
+============
+
+.. currentmodule:: minkit.pdfs
+
+.. autofunction:: register_pdf

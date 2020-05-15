@@ -6,12 +6,22 @@ SciPyMinimizer
 .. autoclass:: SciPyMinimizer
    :show-inheritance:
 
+   .. rubric:: Attributes Summary
+
+   .. autosummary::
+
+      ~SciPyMinimizer.evaluator
+
    .. rubric:: Methods Summary
 
    .. autosummary::
 
       ~SciPyMinimizer.minimize
       ~SciPyMinimizer.result_to_registry
+
+   .. rubric:: Attributes Documentation
+
+   .. autoattribute:: evaluator
 
    .. rubric:: Methods Documentation
 

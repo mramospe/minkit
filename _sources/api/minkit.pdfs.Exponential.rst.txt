@@ -1,0 +1,7 @@
+Exponential
+===========
+
+.. currentmodule:: minkit.pdfs
+
+.. autoclass:: Exponential
+   :show-inheritance:

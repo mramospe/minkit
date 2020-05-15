@@ -10,34 +10,34 @@ DataSet
 
    .. autosummary::
 
-      ~DataSet.data_pars
+      ~DataSet.sample_type
+      ~DataSet.values
       ~DataSet.weights
 
    .. rubric:: Methods Summary
 
    .. autosummary::
 
-      ~DataSet.add
-      ~DataSet.from_array
+      ~DataSet.from_ndarray
       ~DataSet.from_records
       ~DataSet.make_binned
       ~DataSet.merge
-      ~DataSet.shuffle
       ~DataSet.subset
+      ~DataSet.to_backend
       ~DataSet.to_records
 
    .. rubric:: Attributes Documentation
 
-   .. autoattribute:: data_pars
+   .. autoattribute:: sample_type
+   .. autoattribute:: values
    .. autoattribute:: weights
 
    .. rubric:: Methods Documentation
 
-   .. automethod:: add
-   .. automethod:: from_array
+   .. automethod:: from_ndarray
    .. automethod:: from_records
    .. automethod:: make_binned
    .. automethod:: merge
-   .. automethod:: shuffle
    .. automethod:: subset
+   .. automethod:: to_backend
    .. automethod:: to_records

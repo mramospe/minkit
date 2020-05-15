@@ -1,0 +1,6 @@
+data_plotting_arrays
+====================
+
+.. currentmodule:: minkit.plotting
+
+.. autofunction:: data_plotting_arrays

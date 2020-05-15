@@ -1,0 +1,41 @@
+Registry
+========
+
+.. currentmodule:: minkit.base
+
+.. autoclass:: Registry
+   :show-inheritance:
+
+   .. rubric:: Attributes Summary
+
+   .. autosummary::
+
+      ~Registry.names
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+
+      ~Registry.append
+      ~Registry.from_json_object
+      ~Registry.get
+      ~Registry.index
+      ~Registry.insert
+      ~Registry.reduce
+      ~Registry.to_json_object
+      ~Registry.values
+
+   .. rubric:: Attributes Documentation
+
+   .. autoattribute:: names
+
+   .. rubric:: Methods Documentation
+
+   .. automethod:: append
+   .. automethod:: from_json_object
+   .. automethod:: get
+   .. automethod:: index
+   .. automethod:: insert
+   .. automethod:: reduce
+   .. automethod:: to_json_object
+   .. automethod:: values

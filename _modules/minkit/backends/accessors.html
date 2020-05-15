@@ -1,0 +1,607 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>minkit.backends.accessors &mdash; minkit 0.0.0.dev0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../../_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> minkit
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.0.0.dev0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../user.html">User guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference.html">MinKit reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../performance.html">Performance</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">minkit</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+          <li><a href="../../minkit.html">minkit</a> &raquo;</li>
+        
+      <li>minkit.backends.accessors</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for minkit.backends.accessors</h1><div class="highlight"><pre>
+<span></span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Accessors to PDF in code.</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">PACKAGE_PATH</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">autocode</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">gpu_core</span>
+<span class="kn">from</span> <span class="nn">.backend</span> <span class="k">import</span> <span class="n">CPU</span><span class="p">,</span> <span class="n">GPU</span><span class="p">,</span> <span class="n">CUDA</span><span class="p">,</span> <span class="n">OPENCL</span>
+<span class="kn">from</span> <span class="nn">..base</span> <span class="k">import</span> <span class="n">types</span>
+
+<span class="kn">from</span> <span class="nn">ctypes</span> <span class="k">import</span> <span class="n">cdll</span>
+<span class="kn">from</span> <span class="nn">distutils</span> <span class="k">import</span> <span class="n">ccompiler</span>
+<span class="kn">import</span> <span class="nn">functools</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">tempfile</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;add_pdf_src&#39;</span><span class="p">]</span>
+
+<span class="n">TMPDIR</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">TemporaryDirectory</span><span class="p">()</span>
+
+<span class="c1"># Path to directories where to search for PDFs</span>
+<span class="n">PDF_PATHS</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">PACKAGE_PATH</span><span class="p">,</span> <span class="s1">&#39;src&#39;</span><span class="p">,</span> <span class="s1">&#39;xml&#39;</span><span class="p">)]</span>
+
+<span class="c1"># Save the C-related flags to compile</span>
+<span class="n">CFLAGS</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;CFLAGS&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">access_cpu_module</span><span class="p">(</span><span class="n">ops_mgr</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Access a C++ module, compiling it if it has not been done yet.</span>
+
+<span class="sd">    :param name: name of the module.</span>
+<span class="sd">    :type name: str</span>
+<span class="sd">    :returns: compiled module.</span>
+<span class="sd">    :rtype: module</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">ops_mgr</span><span class="o">.</span><span class="n">cpu_module_cache</span><span class="p">:</span>
+        <span class="c1"># Do not compile again the PDF source if it has already been done</span>
+        <span class="n">module</span> <span class="o">=</span> <span class="n">ops_mgr</span><span class="o">.</span><span class="n">cpu_module_cache</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">xml_source</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># Check if it exists in any of the provided paths</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">PDF_PATHS</span><span class="p">:</span>
+            <span class="n">fp</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">f</span><span class="s1">&#39;</span><span class="si">{name}</span><span class="s1">.xml&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">fp</span><span class="p">):</span>
+                <span class="n">xml_source</span> <span class="o">=</span> <span class="n">fp</span>
+                <span class="k">break</span>
+
+        <span class="k">if</span> <span class="n">xml_source</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                <span class="n">f</span><span class="s1">&#39;XML file for function </span><span class="si">{name}</span><span class="s1"> not found in any of the provided paths: </span><span class="si">{PDF_PATHS}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Write the code</span>
+        <span class="n">source</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">TMPDIR</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">f</span><span class="s1">&#39;</span><span class="si">{name}</span><span class="s1">.cpp&#39;</span><span class="p">)</span>
+        <span class="n">code</span> <span class="o">=</span> <span class="n">autocode</span><span class="o">.</span><span class="n">generate_code</span><span class="p">(</span><span class="n">xml_source</span><span class="p">,</span> <span class="n">CPU</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="s1">&#39;wt&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+
+        <span class="c1"># Compile the C++ code and load the library</span>
+        <span class="n">compiler</span> <span class="o">=</span> <span class="n">ccompiler</span><span class="o">.</span><span class="n">new_compiler</span><span class="p">()</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">objects</span> <span class="o">=</span> <span class="n">compiler</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">source</span><span class="p">],</span> <span class="n">output_dir</span><span class="o">=</span><span class="n">TMPDIR</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">extra_preargs</span><span class="o">=</span><span class="n">CFLAGS</span><span class="p">)</span>
+            <span class="n">libname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">TMPDIR</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">f</span><span class="s1">&#39;lib</span><span class="si">{name}</span><span class="s1">.so&#39;</span><span class="p">)</span>
+            <span class="n">compiler</span><span class="o">.</span><span class="n">link</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;</span><span class="si">{name}</span><span class="s1"> library&#39;</span><span class="p">,</span> <span class="n">objects</span><span class="p">,</span> <span class="n">libname</span><span class="p">,</span>
+                          <span class="n">extra_preargs</span><span class="o">=</span><span class="n">CFLAGS</span><span class="p">,</span> <span class="n">libraries</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;stdc++&#39;</span><span class="p">])</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+            <span class="n">nl</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">code</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)))</span>
+            <span class="n">code</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;{i + 1:&gt;</span><span class="si">{nl}</span><span class="s1">}: </span><span class="si">{l}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span>
+                             <span class="n">l</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">code</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;Error found compiling:</span><span class="se">\n</span><span class="si">{code}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ex</span>
+
+        <span class="n">module</span> <span class="o">=</span> <span class="n">cdll</span><span class="o">.</span><span class="n">LoadLibrary</span><span class="p">(</span><span class="n">libname</span><span class="p">)</span>
+
+        <span class="n">ops_mgr</span><span class="o">.</span><span class="n">cpu_module_cache</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">module</span>
+
+    <span class="k">return</span> <span class="n">module</span>
+
+
+<span class="k">def</span> <span class="nf">access_gpu_module</span><span class="p">(</span><span class="n">ops_mgr</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Access a GPU module, compiling it if it has not been done yet.</span>
+
+<span class="sd">    :param name: name of the module.</span>
+<span class="sd">    :type name: str</span>
+<span class="sd">    :returns: compiled module.</span>
+<span class="sd">    :rtype: module</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">ops_mgr</span><span class="o">.</span><span class="n">gpu_module_cache</span><span class="p">:</span>
+        <span class="c1"># Do not compile again the PDF source if it has already been done</span>
+        <span class="n">module</span> <span class="o">=</span> <span class="n">ops_mgr</span><span class="o">.</span><span class="n">gpu_module_cache</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Check if it exists in any of the provided paths</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">PDF_PATHS</span><span class="p">:</span>
+            <span class="n">fp</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">f</span><span class="s1">&#39;</span><span class="si">{name}</span><span class="s1">.xml&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">fp</span><span class="p">):</span>
+                <span class="n">xml_source</span> <span class="o">=</span> <span class="n">fp</span>
+                <span class="k">break</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">xml_source</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                <span class="n">f</span><span class="s1">&#39;XML file for function </span><span class="si">{name}</span><span class="s1"> not found in any of the provided paths: </span><span class="si">{PDF_PATHS}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Write the code</span>
+        <span class="n">source</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">TMPDIR</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">f</span><span class="s1">&#39;</span><span class="si">{name}</span><span class="s1">.c&#39;</span><span class="p">)</span>
+        <span class="n">code</span> <span class="o">=</span> <span class="n">autocode</span><span class="o">.</span><span class="n">generate_code</span><span class="p">(</span><span class="n">xml_source</span><span class="p">,</span> <span class="n">GPU</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="s1">&#39;wt&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+
+        <span class="c1"># Compile the code</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">source</span><span class="p">)</span> <span class="k">as</span> <span class="n">fi</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">module</span> <span class="o">=</span> <span class="n">ops_mgr</span><span class="o">.</span><span class="n">thread</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">fi</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+                <span class="n">nl</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">code</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)))</span>
+                <span class="n">code</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;{i + 1:&gt;</span><span class="si">{nl}</span><span class="s1">}: </span><span class="si">{l}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span>
+                                 <span class="n">l</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">code</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)))</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;Error found compiling:</span><span class="se">\n</span><span class="si">{code}</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="n">ex</span>
+
+        <span class="n">ops_mgr</span><span class="o">.</span><span class="n">gpu_module_cache</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">module</span>
+
+    <span class="k">return</span> <span class="n">module</span>
+
+
+<div class="viewcode-block" id="add_pdf_src"><a class="viewcode-back" href="../../../api/minkit.add_pdf_src.html#minkit.add_pdf_src">[docs]</a><span class="k">def</span> <span class="nf">add_pdf_src</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    This function adds a new path where to look for user-defined PDFs.</span>
+<span class="sd">    PDFs are searched for in paths opposite to the order they are appended</span>
+<span class="sd">    (PDFs are taken from the last appended paths first).</span>
+
+<span class="sd">    :param path: new path to be considered.</span>
+<span class="sd">    :type path: str</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">PDF_PATHS</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span></div>
+
+
+<span class="k">def</span> <span class="nf">create_cpu_function_proxies</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">ndata_pars</span><span class="p">,</span> <span class="n">nvar_arg_pars</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Create proxies for C++ that handle correctly the input and output data</span>
+<span class="sd">    types of a function.</span>
+
+<span class="sd">    :param module: module where to load the functions from.</span>
+<span class="sd">    :type module: module</span>
+<span class="sd">    :param ndata_pars: number of data parameters.</span>
+<span class="sd">    :type ndata_pars: int</span>
+<span class="sd">    :param nvar_arg_pars: number of variable argument parameters.</span>
+<span class="sd">    :type nvar_arg_pars: int</span>
+<span class="sd">    :returns: proxies for the function, the array-like function and integral.</span>
+<span class="sd">    :rtype: function, function, function</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="c1"># Get the functions</span>
+    <span class="n">function</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="n">function</span>
+    <span class="n">evaluate</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="n">evaluate</span>
+
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="s1">&#39;evaluate_binned&#39;</span><span class="p">):</span>
+        <span class="n">evaluate_binned</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="n">evaluate_binned</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">evaluate_binned</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="s1">&#39;integral&#39;</span><span class="p">):</span>
+        <span class="n">integral</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="n">integral</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">integral</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="c1"># Define the types of the input arguments</span>
+    <span class="k">if</span> <span class="n">nvar_arg_pars</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">partypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">types</span><span class="o">.</span><span class="n">c_int</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">c_double_p</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">partypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">types</span><span class="o">.</span><span class="n">c_double_p</span><span class="p">]</span>
+
+    <span class="c1"># Define the types passed to the function</span>
+    <span class="n">function</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">types</span><span class="o">.</span><span class="n">c_double_p</span><span class="p">]</span> <span class="o">+</span> <span class="n">partypes</span>
+    <span class="n">function</span><span class="o">.</span><span class="n">restype</span> <span class="o">=</span> <span class="n">types</span><span class="o">.</span><span class="n">c_double</span>
+
+    <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">function</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__function</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Internal wrapper.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">dv</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">ctypes</span><span class="o">.</span><span class="n">data_as</span><span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">c_double_p</span><span class="p">)</span>
+        <span class="n">ac</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">ctypes</span><span class="o">.</span><span class="n">data_as</span><span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">c_double_p</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">nvar_arg_pars</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">function</span><span class="p">(</span><span class="n">dv</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">c_int</span><span class="p">(</span><span class="n">nvar_arg_pars</span><span class="p">),</span> <span class="n">ac</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">function</span><span class="p">(</span><span class="n">dv</span><span class="p">,</span> <span class="n">ac</span><span class="p">)</span>
+
+    <span class="c1"># Define the types for the arguments passed to the evaluate function</span>
+    <span class="n">evaluate</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">types</span><span class="o">.</span><span class="n">c_int</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">c_double_p</span><span class="p">,</span>
+                         <span class="n">types</span><span class="o">.</span><span class="n">c_int_p</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">c_double_p</span><span class="p">]</span> <span class="o">+</span> <span class="n">partypes</span>
+
+    <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">evaluate</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__evaluate</span><span class="p">(</span><span class="n">output_array</span><span class="p">,</span> <span class="n">data_idx</span><span class="p">,</span> <span class="n">input_array</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Internal wrapper.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">op</span> <span class="o">=</span> <span class="n">output_array</span><span class="o">.</span><span class="n">ctypes</span><span class="o">.</span><span class="n">data_as</span><span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">c_double_p</span><span class="p">)</span>
+        <span class="n">ip</span> <span class="o">=</span> <span class="n">input_array</span><span class="o">.</span><span class="n">ctypes</span><span class="o">.</span><span class="n">data_as</span><span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">c_double_p</span><span class="p">)</span>
+        <span class="n">di</span> <span class="o">=</span> <span class="n">data_idx</span><span class="o">.</span><span class="n">ctypes</span><span class="o">.</span><span class="n">data_as</span><span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">c_int_p</span><span class="p">)</span>
+        <span class="n">ac</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">ctypes</span><span class="o">.</span><span class="n">data_as</span><span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">c_double_p</span><span class="p">)</span>
+
+        <span class="n">l</span> <span class="o">=</span> <span class="n">types</span><span class="o">.</span><span class="n">c_int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">output_array</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">nvar_arg_pars</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">evaluate</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">op</span><span class="p">,</span> <span class="n">di</span><span class="p">,</span> <span class="n">ip</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">c_int</span><span class="p">(</span><span class="n">nvar_arg_pars</span><span class="p">),</span> <span class="n">ac</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">evaluate</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">op</span><span class="p">,</span> <span class="n">di</span><span class="p">,</span> <span class="n">ip</span><span class="p">,</span> <span class="n">ac</span><span class="p">)</span>
+
+    <span class="c1"># Check the functions that need the integral to be defined</span>
+    <span class="k">if</span> <span class="n">integral</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">evaluate_binned</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+            <span class="s1">&#39;If you are able to define a integral function you can also provide an evaluation for binned data sets.&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">evaluate_binned</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+
+        <span class="c1"># Define the types for the arguments passed to the evaluate_binned function</span>
+        <span class="n">evaluate_binned</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">types</span><span class="o">.</span><span class="n">c_int</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">c_double_p</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">c_int</span><span class="p">,</span>
+                                    <span class="n">types</span><span class="o">.</span><span class="n">c_int_p</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">c_int_p</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">c_double_p</span><span class="p">]</span> <span class="o">+</span> <span class="n">partypes</span>
+
+        <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">evaluate_binned</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">__evaluate_binned</span><span class="p">(</span><span class="n">output_array</span><span class="p">,</span> <span class="n">gaps_idx</span><span class="p">,</span> <span class="n">gaps</span><span class="p">,</span> <span class="n">edges</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+            <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">            Internal wrapper.</span>
+<span class="sd">            &#39;&#39;&#39;</span>
+            <span class="n">op</span> <span class="o">=</span> <span class="n">output_array</span><span class="o">.</span><span class="n">ctypes</span><span class="o">.</span><span class="n">data_as</span><span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">c_double_p</span><span class="p">)</span>
+            <span class="n">ed</span> <span class="o">=</span> <span class="n">edges</span><span class="o">.</span><span class="n">ctypes</span><span class="o">.</span><span class="n">data_as</span><span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">c_double_p</span><span class="p">)</span>
+            <span class="n">gi</span> <span class="o">=</span> <span class="n">gaps_idx</span><span class="o">.</span><span class="n">ctypes</span><span class="o">.</span><span class="n">data_as</span><span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">c_int_p</span><span class="p">)</span>
+            <span class="n">gp</span> <span class="o">=</span> <span class="n">gaps</span><span class="o">.</span><span class="n">ctypes</span><span class="o">.</span><span class="n">data_as</span><span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">c_int_p</span><span class="p">)</span>
+            <span class="n">ac</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">ctypes</span><span class="o">.</span><span class="n">data_as</span><span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">c_double_p</span><span class="p">)</span>
+
+            <span class="n">l</span> <span class="o">=</span> <span class="n">types</span><span class="o">.</span><span class="n">c_int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">output_array</span><span class="p">))</span>
+
+            <span class="n">vals</span> <span class="o">=</span> <span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">op</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">c_int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">gaps</span><span class="p">)),</span> <span class="n">gi</span><span class="p">,</span> <span class="n">gp</span><span class="p">,</span> <span class="n">ed</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">nvar_arg_pars</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">evaluate_binned</span><span class="p">(</span><span class="o">*</span><span class="n">vals</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">c_int</span><span class="p">(</span><span class="n">nvar_arg_pars</span><span class="p">),</span> <span class="n">ac</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">evaluate_binned</span><span class="p">(</span><span class="o">*</span><span class="n">vals</span><span class="p">,</span> <span class="n">ac</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">__evaluate_binned</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="n">integral</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+
+        <span class="c1"># Define the types passed to the integral function</span>
+        <span class="n">integral</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">types</span><span class="o">.</span><span class="n">c_double_p</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">c_double_p</span><span class="p">]</span> <span class="o">+</span> <span class="n">partypes</span>
+        <span class="n">integral</span><span class="o">.</span><span class="n">restype</span> <span class="o">=</span> <span class="n">types</span><span class="o">.</span><span class="n">c_double</span>
+
+        <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">integral</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">__integral</span><span class="p">(</span><span class="n">lb</span><span class="p">,</span> <span class="n">ub</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+            <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">            Internal wrapper.</span>
+<span class="sd">            &#39;&#39;&#39;</span>
+            <span class="k">if</span> <span class="n">lb</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">lb</span><span class="p">,</span> <span class="n">ub</span> <span class="o">=</span> <span class="n">types</span><span class="o">.</span><span class="n">float_array</span><span class="p">(</span><span class="n">lb</span><span class="p">),</span> <span class="n">types</span><span class="o">.</span><span class="n">float_array</span><span class="p">(</span><span class="n">ub</span><span class="p">)</span>
+
+            <span class="n">lb</span> <span class="o">=</span> <span class="n">lb</span><span class="o">.</span><span class="n">ctypes</span><span class="o">.</span><span class="n">data_as</span><span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">c_double_p</span><span class="p">)</span>
+            <span class="n">ub</span> <span class="o">=</span> <span class="n">ub</span><span class="o">.</span><span class="n">ctypes</span><span class="o">.</span><span class="n">data_as</span><span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">c_double_p</span><span class="p">)</span>
+            <span class="n">ac</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">ctypes</span><span class="o">.</span><span class="n">data_as</span><span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">c_double_p</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">nvar_arg_pars</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">integral</span><span class="p">(</span><span class="n">lb</span><span class="p">,</span> <span class="n">ub</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">c_int</span><span class="p">(</span><span class="n">nvar_arg_pars</span><span class="p">),</span> <span class="n">ac</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">integral</span><span class="p">(</span><span class="n">lb</span><span class="p">,</span> <span class="n">ub</span><span class="p">,</span> <span class="n">ac</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">__integral</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">return</span> <span class="n">__function</span><span class="p">,</span> <span class="n">__evaluate</span><span class="p">,</span> <span class="n">__evaluate_binned</span><span class="p">,</span> <span class="n">__integral</span>
+
+
+<span class="k">def</span> <span class="nf">create_gpu_function_proxy</span><span class="p">(</span><span class="n">aop</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="n">ndata_pars</span><span class="p">,</span> <span class="n">nvar_arg_pars</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Creates a proxy for a function writen in GPU.</span>
+
+<span class="sd">    :param module: module containing the function to wrap.</span>
+<span class="sd">    :type module: module</span>
+<span class="sd">    :param ndata_pars: number of data parameters.</span>
+<span class="sd">    :type ndata_pars: int</span>
+<span class="sd">    :param nvar_arg_pars: number of variable argument parameters.</span>
+<span class="sd">    :type nvar_arg_pars: int</span>
+<span class="sd">    :returns: proxy for the array-like function.</span>
+<span class="sd">    :rtype: function</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="c1"># Access the function in the module</span>
+    <span class="n">evaluate</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="n">evaluate</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Can not use &quot;hasattr&quot;</span>
+        <span class="n">evaluate_binned</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="n">evaluate_binned</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">evaluate_binned</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">evaluate</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__evaluate</span><span class="p">(</span><span class="n">output_array</span><span class="p">,</span> <span class="n">data_idx</span><span class="p">,</span> <span class="n">input_array</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Internal wrapper.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">ic</span> <span class="o">=</span> <span class="n">aop</span><span class="o">.</span><span class="n">args_to_array</span><span class="p">(</span><span class="n">data_idx</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">types</span><span class="o">.</span><span class="n">cpu_int</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># It seems we can not pass a null pointer in OpenCL</span>
+            <span class="n">ac</span> <span class="o">=</span> <span class="n">aop</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ac</span> <span class="o">=</span> <span class="n">aop</span><span class="o">.</span><span class="n">args_to_array</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">types</span><span class="o">.</span><span class="n">cpu_type</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">nvar_arg_pars</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">vals</span> <span class="o">=</span> <span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">cpu_int</span><span class="p">(</span><span class="n">nvar_arg_pars</span><span class="p">),</span> <span class="n">ac</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">vals</span> <span class="o">=</span> <span class="p">(</span><span class="n">ac</span><span class="p">,)</span>
+
+        <span class="n">global_size</span><span class="p">,</span> <span class="n">local_size</span> <span class="o">=</span> <span class="n">gpu_core</span><span class="o">.</span><span class="n">get_sizes</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">output_array</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">evaluate</span><span class="p">(</span><span class="n">output_array</span><span class="p">,</span> <span class="n">ic</span><span class="p">,</span> <span class="n">input_array</span><span class="p">,</span> <span class="o">*</span><span class="n">vals</span><span class="p">,</span> <span class="n">global_size</span><span class="o">=</span><span class="n">global_size</span><span class="p">,</span> <span class="n">local_size</span><span class="o">=</span><span class="n">local_size</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">evaluate_binned</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+
+        <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">evaluate_binned</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">__evaluate_binned</span><span class="p">(</span><span class="n">output_array</span><span class="p">,</span> <span class="n">gaps_idx</span><span class="p">,</span> <span class="n">gaps</span><span class="p">,</span> <span class="n">edges</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+            <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">            Internal wrapper.</span>
+<span class="sd">            &#39;&#39;&#39;</span>
+            <span class="n">gi</span> <span class="o">=</span> <span class="n">aop</span><span class="o">.</span><span class="n">args_to_array</span><span class="p">(</span>
+                <span class="n">gaps_idx</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">types</span><span class="o">.</span><span class="n">cpu_int</span><span class="p">)</span>
+            <span class="n">gp</span> <span class="o">=</span> <span class="n">aop</span><span class="o">.</span><span class="n">args_to_array</span><span class="p">(</span><span class="n">gaps</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">types</span><span class="o">.</span><span class="n">cpu_int</span><span class="p">)</span>
+            <span class="n">nd</span> <span class="o">=</span> <span class="n">types</span><span class="o">.</span><span class="n">cpu_int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">gaps</span><span class="p">))</span>
+
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="c1"># It seems we can not pass a null pointer in OpenCL</span>
+                <span class="n">ac</span> <span class="o">=</span> <span class="n">aop</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">ac</span> <span class="o">=</span> <span class="n">aop</span><span class="o">.</span><span class="n">args_to_array</span><span class="p">(</span>
+                    <span class="n">args</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">types</span><span class="o">.</span><span class="n">cpu_type</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">nvar_arg_pars</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">vals</span> <span class="o">=</span> <span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">cpu_int</span><span class="p">(</span><span class="n">nvar_arg_pars</span><span class="p">),</span> <span class="n">ac</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">vals</span> <span class="o">=</span> <span class="p">(</span><span class="n">ac</span><span class="p">,)</span>
+
+            <span class="n">global_size</span><span class="p">,</span> <span class="n">local_size</span> <span class="o">=</span> <span class="n">gpu_core</span><span class="o">.</span><span class="n">get_sizes</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">output_array</span><span class="p">))</span>
+
+            <span class="k">return</span> <span class="n">evaluate_binned</span><span class="p">(</span><span class="n">output_array</span><span class="p">,</span> <span class="n">nd</span><span class="p">,</span> <span class="n">gi</span><span class="p">,</span> <span class="n">gp</span><span class="p">,</span> <span class="n">edges</span><span class="p">,</span> <span class="o">*</span><span class="n">vals</span><span class="p">,</span> <span class="n">global_size</span><span class="o">=</span><span class="n">global_size</span><span class="p">,</span> <span class="n">local_size</span><span class="o">=</span><span class="n">local_size</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">__evaluate_binned</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">return</span> <span class="n">__evaluate</span><span class="p">,</span> <span class="n">__evaluate_binned</span>
+
+
+<span class="k">def</span> <span class="nf">access_pdf</span><span class="p">(</span><span class="n">backend</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">ndata_pars</span><span class="p">,</span> <span class="n">nvar_arg_pars</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Access a PDF with the given name and number of data and parameter arguments.</span>
+
+<span class="sd">    :param name: name of the PDF.</span>
+<span class="sd">    :type name: str</span>
+<span class="sd">    :param ndata_pars: number of data parameters.</span>
+<span class="sd">    :type ndata_pars: int</span>
+<span class="sd">    :param nvar_arg_pars: number of variable argument parameters.</span>
+<span class="sd">    :type nvar_arg_pars: int</span>
+<span class="sd">    :returns: PDF and integral function.</span>
+<span class="sd">    :rtype: tuple(function, function)</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="c1"># Access the C++ module</span>
+    <span class="n">cpu_module</span> <span class="o">=</span> <span class="n">access_cpu_module</span><span class="p">(</span><span class="n">backend</span><span class="o">.</span><span class="n">_aop</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+
+    <span class="c1"># Get the functions</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">modname</span> <span class="o">=</span> <span class="n">name</span> <span class="k">if</span> <span class="n">nvar_arg_pars</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">f</span><span class="s1">&#39;</span><span class="si">{name}{nvar_arg_pars}</span><span class="s1">&#39;</span>
+
+        <span class="k">if</span> <span class="n">modname</span> <span class="ow">in</span> <span class="n">backend</span><span class="o">.</span><span class="n">_aop</span><span class="o">.</span><span class="n">cpu_pdf_cache</span><span class="p">:</span>
+            <span class="n">cpu_output</span> <span class="o">=</span> <span class="n">backend</span><span class="o">.</span><span class="n">_aop</span><span class="o">.</span><span class="n">cpu_pdf_cache</span><span class="p">[</span><span class="n">modname</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">cpu_output</span> <span class="o">=</span> <span class="n">create_cpu_function_proxies</span><span class="p">(</span>
+                <span class="n">cpu_module</span><span class="p">,</span> <span class="n">ndata_pars</span><span class="p">,</span> <span class="n">nvar_arg_pars</span><span class="p">)</span>
+            <span class="n">backend</span><span class="o">.</span><span class="n">_aop</span><span class="o">.</span><span class="n">cpu_pdf_cache</span><span class="p">[</span><span class="n">modname</span><span class="p">]</span> <span class="o">=</span> <span class="n">cpu_output</span>
+
+    <span class="k">except</span> <span class="ne">AttributeError</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+            <span class="n">f</span><span class="s1">&#39;Error loading function &quot;</span><span class="si">{name}</span><span class="s1">&quot;; make sure that at least &quot;evaluate&quot; and &quot;function&quot; are defined inside the source file&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">backend</span><span class="o">.</span><span class="n">btype</span> <span class="o">==</span> <span class="n">CPU</span><span class="p">:</span>
+        <span class="c1"># Return the CPU version directly</span>
+        <span class="k">return</span> <span class="n">cpu_output</span>
+
+    <span class="k">elif</span> <span class="n">backend</span><span class="o">.</span><span class="n">btype</span> <span class="o">==</span> <span class="n">CUDA</span> <span class="ow">or</span> <span class="n">btype</span> <span class="o">==</span> <span class="n">OPENCL</span><span class="p">:</span>
+
+        <span class="c1"># Function and integral are taken from the C++ version</span>
+        <span class="n">function</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">integral</span> <span class="o">=</span> <span class="n">cpu_output</span>
+
+        <span class="c1"># Get the &quot;evaluate&quot; function from source</span>
+        <span class="k">if</span> <span class="n">modname</span> <span class="ow">in</span> <span class="n">backend</span><span class="o">.</span><span class="n">_aop</span><span class="o">.</span><span class="n">gpu_pdf_cache</span><span class="p">:</span>
+            <span class="n">evaluate</span><span class="p">,</span> <span class="n">evaluate_binned</span> <span class="o">=</span> <span class="n">backend</span><span class="o">.</span><span class="n">_aop</span><span class="o">.</span><span class="n">gpu_pdf_cache</span><span class="p">[</span><span class="n">modname</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Access the GPU module</span>
+            <span class="n">gpu_module</span> <span class="o">=</span> <span class="n">access_gpu_module</span><span class="p">(</span><span class="n">backend</span><span class="o">.</span><span class="n">_aop</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+
+            <span class="n">evaluate</span><span class="p">,</span> <span class="n">evaluate_binned</span> <span class="o">=</span> <span class="n">create_gpu_function_proxy</span><span class="p">(</span><span class="n">backend</span><span class="o">.</span><span class="n">_aop</span><span class="p">,</span>
+                                                                  <span class="n">gpu_module</span><span class="p">,</span> <span class="n">ndata_pars</span><span class="p">,</span> <span class="n">nvar_arg_pars</span><span class="p">)</span>
+            <span class="n">backend</span><span class="o">.</span><span class="n">_aop</span><span class="o">.</span><span class="n">gpu_pdf_cache</span><span class="p">[</span><span class="n">modname</span><span class="p">]</span> <span class="o">=</span> <span class="n">evaluate</span><span class="p">,</span> <span class="n">evaluate_binned</span>
+
+        <span class="k">return</span> <span class="n">function</span><span class="p">,</span> <span class="n">evaluate</span><span class="p">,</span> <span class="n">evaluate_binned</span><span class="p">,</span> <span class="n">integral</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+            <span class="n">f</span><span class="s1">&#39;Function not implemented for backend &quot;</span><span class="si">{btype}</span><span class="s1">&quot;&#39;</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Miguel Ramos Pernas
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

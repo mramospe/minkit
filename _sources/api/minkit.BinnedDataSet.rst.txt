@@ -11,21 +11,29 @@ BinnedDataSet
    .. autosummary::
 
       ~BinnedDataSet.bounds
-      ~BinnedDataSet.data_pars
+      ~BinnedDataSet.edges
+      ~BinnedDataSet.edges_indices
+      ~BinnedDataSet.gaps
+      ~BinnedDataSet.sample_type
       ~BinnedDataSet.values
 
    .. rubric:: Methods Summary
 
    .. autosummary::
 
-      ~BinnedDataSet.from_array
+      ~BinnedDataSet.from_ndarray
+      ~BinnedDataSet.to_backend
 
    .. rubric:: Attributes Documentation
 
    .. autoattribute:: bounds
-   .. autoattribute:: data_pars
+   .. autoattribute:: edges
+   .. autoattribute:: edges_indices
+   .. autoattribute:: gaps
+   .. autoattribute:: sample_type
    .. autoattribute:: values
 
    .. rubric:: Methods Documentation
 
-   .. automethod:: from_array
+   .. automethod:: from_ndarray
+   .. automethod:: to_backend

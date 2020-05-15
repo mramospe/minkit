@@ -194,12 +194,11 @@
 
 
 <span class="k">class</span> <span class="nc">BinnedEvaluator</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    Definition of a proxy class to evaluate an FCN with a PDF on a BinnedDataSet object.</span>
-<span class="sd">    &#39;&#39;&#39;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fcn</span><span class="p">,</span> <span class="n">pdf</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">constraints</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Proxy class to evaluate an FCN with a PDF on a BinnedDataSet object.</span>
+
 <span class="sd">        :param fcn: FCN to be used during minimization.</span>
 <span class="sd">        :type fcn: str</span>
 <span class="sd">        :param pdf: PDF to minimize.</span>
@@ -242,12 +241,11 @@
 
 
 <span class="k">class</span> <span class="nc">UnbinnedEvaluator</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    Definition of a proxy class to evaluate an FCN with a PDF.</span>
-<span class="sd">    &#39;&#39;&#39;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fcn</span><span class="p">,</span> <span class="n">pdf</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">FULL</span><span class="p">,</span> <span class="n">constraints</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">rescale_weights</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Proxy class to evaluate an FCN with a PDF.</span>
+
 <span class="sd">        :param fcn: FCN to be used during minimization.</span>
 <span class="sd">        :type fcn: str</span>
 <span class="sd">        :param pdf: PDF to minimize.</span>
@@ -265,9 +263,9 @@
             <span class="k">if</span> <span class="n">rescale_weights</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Rescaling weights for the fit&#39;</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">__data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">subset</span><span class="p">(</span>
-                    <span class="nb">range</span><span class="o">=</span><span class="nb">range</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">rescale_weights</span><span class="o">=</span><span class="n">rescale_weights</span><span class="p">,</span> <span class="n">trim</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                    <span class="nb">range</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">rescale_weights</span><span class="o">=</span><span class="n">rescale_weights</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">__data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">subset</span><span class="p">(</span><span class="nb">range</span><span class="o">=</span><span class="nb">range</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">trim</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">subset</span><span class="p">(</span><span class="nb">range</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">__fcn</span> <span class="o">=</span> <span class="n">fcn</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__pdf</span> <span class="o">=</span> <span class="n">pdf</span>
@@ -302,9 +300,6 @@
 
 
 <span class="k">class</span> <span class="nc">SimultaneousEvaluator</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    Definition of an evaluator of PDFs for simultaneous fits.</span>
-<span class="sd">    &#39;&#39;&#39;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">evaluators</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
@@ -435,7 +430,10 @@
 
         <span class="n">bounds</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">bounds</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">varargs</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">scipyopt</span><span class="o">.</span><span class="n">minimize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_evaluate</span><span class="p">,</span> <span class="n">initials</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="n">bounds</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="n">tol</span><span class="p">)</span></div>
+        <span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span>
+                <span class="s1">&#39;ignore&#39;</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="ne">UserWarning</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;.*_hessian_update_strategy&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">scipyopt</span><span class="o">.</span><span class="n">minimize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_evaluate</span><span class="p">,</span> <span class="n">initials</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="n">bounds</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="n">tol</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="SciPyMinimizer.result_to_registry"><a class="viewcode-back" href="../../api/minkit.SciPyMinimizer.html#minkit.SciPyMinimizer.result_to_registry">[docs]</a>    <span class="k">def</span> <span class="nf">result_to_registry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">result</span><span class="p">,</span> <span class="n">ignore_warnings</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
@@ -481,7 +479,7 @@
 <span class="k">def</span> <span class="nf">minimizer</span><span class="p">(</span><span class="n">fcn</span><span class="p">,</span> <span class="n">pdf</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">minimizer</span><span class="o">=</span><span class="n">MINUIT</span><span class="p">,</span> <span class="n">minimizer_config</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Create a new minimizer to be used within a context.</span>
-<span class="sd">    This represents a &quot;constant&quot; object, that is, parameters defining</span>
+<span class="sd">    This represents a *constant* object, that is, parameters defining</span>
 <span class="sd">    the PDFs must keep their constness during the context.</span>
 
 <span class="sd">    :param fcn: type of FCN to use for the minimization.</span>
@@ -493,7 +491,7 @@
 <span class="sd">    :param minimizer: name of the minimizer to use.</span>
 <span class="sd">    :type minimizer: str</span>
 <span class="sd">    :param minimizer_config: any extra configuration to be passed to the minimizer. For \</span>
-<span class="sd">    &quot;minuit&quot;, the argument &quot;forced_parameters&quot; is unavailable.</span>
+<span class="sd">    *minuit*, the argument *forced_parameters* is unavailable.</span>
 <span class="sd">    :type minimizer_config: dict</span>
 <span class="sd">    :param kwargs: extra arguments to the evaluator to use. Current allowed values are: \</span>
 <span class="sd">    * constraints: (:class:`list`(:class:`PDF`)) constraints for the FCN.\</span>
@@ -533,12 +531,12 @@
 <span class="k">def</span> <span class="nf">simultaneous_minimizer</span><span class="p">(</span><span class="n">categories</span><span class="p">,</span> <span class="n">minimizer</span><span class="o">=</span><span class="n">MINUIT</span><span class="p">,</span> <span class="n">minimizer_config</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">rescale_weights</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">FULL</span><span class="p">,</span> <span class="n">constraints</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Create a new instance of :class:`iminuit.Minuit`.</span>
-<span class="sd">    This represents a &quot;constant&quot; object, that is, parameters defining</span>
+<span class="sd">    This represents a *constant* object, that is, parameters defining</span>
 <span class="sd">    the PDFs are assumed to remain constant during all its lifetime.</span>
 
 <span class="sd">    :param categories: categories to process.</span>
 <span class="sd">    :type categories: list(Category)</span>
-<span class="sd">    :param minimizer: minimizer to use (only &quot;minuit&quot; is available for the moment).</span>
+<span class="sd">    :param minimizer: minimizer to use (only *minuit* is available for the moment).</span>
 <span class="sd">    :type minimizer: str</span>
 <span class="sd">    :param minimizer_config: (Minuit only) extra configuration passed to the minimizer.</span>
 <span class="sd">    :type minimizer_config: dict</span>
@@ -547,7 +545,7 @@
 <span class="sd">    :param constraints: set of constraints to consider in the minimization.</span>
 <span class="sd">    :type constraints: list(PDF)</span>
 <span class="sd">    :returns: minimizer to call.</span>
-<span class="sd">    :rtype: depends on the &quot;minimizer&quot; argument</span>
+<span class="sd">    :rtype: depends on the *minimizer* argument</span>
 
 <span class="sd">    .. warning: Do not change any attribute of the parameters defining the \</span>
 <span class="sd">    PDFs, since it will not be properly reflected during the minimization \</span>

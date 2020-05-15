@@ -1,0 +1,29 @@
+Evaluator
+=========
+
+.. currentmodule:: minkit
+
+.. autoclass:: Evaluator
+   :show-inheritance:
+
+   .. rubric:: Attributes Summary
+
+   .. autosummary::
+
+      ~Evaluator.args
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+
+      ~Evaluator.__call__
+      ~Evaluator.using_caches
+
+   .. rubric:: Attributes Documentation
+
+   .. autoattribute:: args
+
+   .. rubric:: Methods Documentation
+
+   .. automethod:: __call__
+   .. automethod:: using_caches

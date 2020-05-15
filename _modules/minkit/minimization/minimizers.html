@@ -1,0 +1,346 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>minkit.minimization.minimizers &mdash; minkit 0.0.0.dev0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../../_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> minkit
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.0.0.dev0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../user.html">User guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference.html">MinKit reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../performance.html">Performance</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">minkit</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+          <li><a href="../../minkit.html">minkit</a> &raquo;</li>
+        
+      <li>minkit.minimization.minimizers</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for minkit.minimization.minimizers</h1><div class="highlight"><pre>
+<span></span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">API for minimizers.</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">evaluators</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">fcns</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">minuit_api</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">scipy_api</span>
+<span class="kn">from</span> <span class="nn">..base</span> <span class="k">import</span> <span class="n">parameters</span>
+<span class="kn">from</span> <span class="nn">..pdfs</span> <span class="k">import</span> <span class="n">dataset</span>
+
+<span class="kn">import</span> <span class="nn">contextlib</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;minimizer&#39;</span><span class="p">,</span> <span class="s1">&#39;simultaneous_minimizer&#39;</span><span class="p">]</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<span class="c1"># Names for the minimizers</span>
+<span class="n">MINUIT</span> <span class="o">=</span> <span class="s1">&#39;minuit&#39;</span>
+<span class="n">SCIPY</span> <span class="o">=</span> <span class="s1">&#39;scipy&#39;</span>
+
+
+<div class="viewcode-block" id="minimizer"><a class="viewcode-back" href="../../../api/minkit.minimizer.html#minkit.minimizer">[docs]</a><span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
+<span class="k">def</span> <span class="nf">minimizer</span><span class="p">(</span><span class="n">fcn</span><span class="p">,</span> <span class="n">pdf</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">minimizer</span><span class="o">=</span><span class="n">MINUIT</span><span class="p">,</span> <span class="n">minimizer_config</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">constraints</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">FULL</span><span class="p">,</span> <span class="n">weights_treatment</span><span class="o">=</span><span class="n">evaluators</span><span class="o">.</span><span class="n">WGTS_RESCALE</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Create a new minimizer to be used within a context.</span>
+<span class="sd">    The bounds of the data parameters must not change in the process.</span>
+
+<span class="sd">    :param fcn: type of FCN to use for the minimization.</span>
+<span class="sd">    :type fcn: str</span>
+<span class="sd">    :param pdf: function to minimize.</span>
+<span class="sd">    :type pdf: PDF</span>
+<span class="sd">    :param data: data set to use.</span>
+<span class="sd">    :type data: UnbinnedDataSet or BinnedDataSet</span>
+<span class="sd">    :param minimizer: minimizer to use (*minuit* or *scipy*).</span>
+<span class="sd">    :type minimizer: str</span>
+<span class="sd">    :param minimizer_config: any extra configuration to be passed to the minimizer. For *minuit*, the argument *forced_parameters* is unavailable.</span>
+<span class="sd">    :type minimizer_config: dict</span>
+<span class="sd">    :param constraints: set of constraints to consider in the minimization.</span>
+<span class="sd">    :type constraints: list(PDF)</span>
+<span class="sd">    :param range: range of data to minimize (unbinned case only).</span>
+<span class="sd">    :type range: str</span>
+<span class="sd">    :param weights_treatment: what to do with weighted samples (see below for more information).</span>
+<span class="sd">    :type weights_treatment: str</span>
+<span class="sd">    :returns: minimizer to call.</span>
+
+<span class="sd">    The treatment of weights when calculating FCNs can lead to unreliable errors</span>
+<span class="sd">    for the parameters. In general there is no correct way of processing</span>
+<span class="sd">    the likelihoods. In this package the following methods are supported:</span>
+
+<span class="sd">    * *none*: the raw weights are used to calculate the FCN. This will lead to</span>
+<span class="sd">      completely incorrect uncertainties, since the statistical weight of the</span>
+<span class="sd">      events in the data sample will not be proportional to the sample weight.</span>
+<span class="sd">    * *rescale*: in this case the weights are rescaled so</span>
+<span class="sd">      :math:`\omega^\prime_i = \omega_i \times \frac{\sum_{j = 0}^n \omega_j}{\sum_{j = 0}^n \omega_j^2}`.</span>
+<span class="sd">      In this case the statistical weight of each event is proportional to the</span>
+<span class="sd">      sample weight, although the uncertainties will still be incorrect.</span>
+
+<span class="sd">    .. warning::</span>
+<span class="sd">       Do not change the bounds of the data parameters, since for unbinned data</span>
+<span class="sd">       sets a new sample is internally created with values falling in *range*.</span>
+<span class="sd">       The weights of the sample are also changed according to the *weights_treatment*</span>
+<span class="sd">       argument.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">mf</span> <span class="o">=</span> <span class="n">fcns</span><span class="o">.</span><span class="n">fcn_from_name</span><span class="p">(</span><span class="n">fcn</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">fcns</span><span class="o">.</span><span class="n">data_type_for_fcn</span><span class="p">(</span><span class="n">fcn</span><span class="p">)</span> <span class="o">==</span> <span class="n">dataset</span><span class="o">.</span><span class="n">BINNED</span><span class="p">:</span>
+        <span class="n">evaluator</span> <span class="o">=</span> <span class="n">evaluators</span><span class="o">.</span><span class="n">BinnedEvaluator</span><span class="p">(</span><span class="n">mf</span><span class="p">,</span> <span class="n">pdf</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">constraints</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">evaluator</span> <span class="o">=</span> <span class="n">evaluators</span><span class="o">.</span><span class="n">UnbinnedEvaluator</span><span class="p">(</span>
+            <span class="n">mf</span><span class="p">,</span> <span class="n">pdf</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="nb">range</span><span class="p">,</span> <span class="n">constraints</span><span class="p">,</span> <span class="n">weights_treatment</span><span class="p">)</span>
+
+    <span class="n">minimizer_config</span> <span class="o">=</span> <span class="n">minimizer_config</span> <span class="ow">or</span> <span class="p">{}</span>
+
+    <span class="k">if</span> <span class="n">minimizer</span> <span class="o">==</span> <span class="n">MINUIT</span><span class="p">:</span>
+        <span class="k">yield</span> <span class="n">minuit_api</span><span class="o">.</span><span class="n">MinuitMinimizer</span><span class="p">(</span><span class="n">evaluator</span><span class="p">,</span> <span class="o">**</span><span class="n">minimizer_config</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">minimizer</span> <span class="o">==</span> <span class="n">SCIPY</span><span class="p">:</span>
+        <span class="k">yield</span> <span class="n">scipy_api</span><span class="o">.</span><span class="n">SciPyMinimizer</span><span class="p">(</span><span class="n">evaluator</span><span class="p">,</span> <span class="o">**</span><span class="n">minimizer_config</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;Unknown minimizer &quot;</span><span class="si">{minimizer}</span><span class="s1">&quot;&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="simultaneous_minimizer"><a class="viewcode-back" href="../../../api/minkit.simultaneous_minimizer.html#minkit.simultaneous_minimizer">[docs]</a><span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
+<span class="k">def</span> <span class="nf">simultaneous_minimizer</span><span class="p">(</span><span class="n">categories</span><span class="p">,</span> <span class="n">minimizer</span><span class="o">=</span><span class="n">MINUIT</span><span class="p">,</span> <span class="n">minimizer_config</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">constraints</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">FULL</span><span class="p">,</span> <span class="n">weights_treatment</span><span class="o">=</span><span class="n">evaluators</span><span class="o">.</span><span class="n">WGTS_RESCALE</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Create a new object to minimizer a :class:`PDF`.</span>
+<span class="sd">    The bounds of the data parameters must not change in the process.</span>
+
+<span class="sd">    :param categories: categories to process.</span>
+<span class="sd">    :type categories: list(Category)</span>
+<span class="sd">    :param minimizer: minimizer to use (*minuit* or *scipy*).</span>
+<span class="sd">    :type minimizer: str</span>
+<span class="sd">    :param minimizer_config: any extra configuration to be passed to the minimizer. For *minuit*, the argument *forced_parameters* is unavailable.</span>
+<span class="sd">    :type minimizer_config: dict</span>
+<span class="sd">    :param constraints: set of constraints to consider in the minimization.</span>
+<span class="sd">    :type constraints: list(PDF)</span>
+<span class="sd">    :param range: range of data to minimize.</span>
+<span class="sd">    :type range: str</span>
+<span class="sd">    :param weights_treatment: what to do with weighted samples (see below for more information).</span>
+<span class="sd">    :type weights_treatment: str</span>
+<span class="sd">    :returns: minimizer to call.</span>
+
+<span class="sd">    The treatment of weights when calculating FCNs can lead to unreliable errors</span>
+<span class="sd">    for the parameters. In general there is no correct way of processing</span>
+<span class="sd">    the likelihoods. In this package the following methods are supported:</span>
+
+<span class="sd">    * *none*: the raw weights are used to calculate the FCN. This will lead to</span>
+<span class="sd">      completely incorrect uncertainties, since the statistical weight of the</span>
+<span class="sd">      events in the data sample will not be proportional to the sample weight.</span>
+<span class="sd">    * *rescale*: in this case the weights are rescaled so</span>
+<span class="sd">      :math:`\omega^\prime_i = \omega_i \times \frac{\sum_{j = 0}^n \omega_j}{\sum_{j = 0}^n \omega_j^2}`.</span>
+<span class="sd">      In this case the statistical weight of each event is proportional to the</span>
+<span class="sd">      sample weight, although the uncertainties will still be incorrect.</span>
+
+<span class="sd">    .. warning::</span>
+<span class="sd">       Do not change the bounds of the data parameters, since for unbinned data</span>
+<span class="sd">       sets a new sample is internally created with values falling in *range*.</span>
+<span class="sd">       The weights of the sample are also changed according to the *weights_treatment*</span>
+<span class="sd">       argument.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="c1"># Build the simultaneous evaluator</span>
+    <span class="n">evals</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">cat</span> <span class="ow">in</span> <span class="n">categories</span><span class="p">:</span>
+
+        <span class="n">fcn</span> <span class="o">=</span> <span class="n">fcns</span><span class="o">.</span><span class="n">fcn_from_name</span><span class="p">(</span><span class="n">cat</span><span class="o">.</span><span class="n">fcn</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">fcns</span><span class="o">.</span><span class="n">data_type_for_fcn</span><span class="p">(</span><span class="n">cat</span><span class="o">.</span><span class="n">fcn</span><span class="p">)</span> <span class="o">==</span> <span class="n">dataset</span><span class="o">.</span><span class="n">BINNED</span><span class="p">:</span>
+            <span class="n">e</span> <span class="o">=</span> <span class="n">evaluators</span><span class="o">.</span><span class="n">BinnedEvaluator</span><span class="p">(</span>
+                <span class="n">fcn</span><span class="p">,</span> <span class="n">cat</span><span class="o">.</span><span class="n">pdf</span><span class="p">,</span> <span class="n">cat</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">e</span> <span class="o">=</span> <span class="n">evaluators</span><span class="o">.</span><span class="n">UnbinnedEvaluator</span><span class="p">(</span>
+                <span class="n">fcn</span><span class="p">,</span> <span class="n">cat</span><span class="o">.</span><span class="n">pdf</span><span class="p">,</span> <span class="n">cat</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="nb">range</span><span class="p">,</span> <span class="n">weights_treatment</span><span class="o">=</span><span class="n">weights_treatment</span><span class="p">)</span>
+
+        <span class="n">evals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+
+    <span class="n">evaluator</span> <span class="o">=</span> <span class="n">evaluators</span><span class="o">.</span><span class="n">SimultaneousEvaluator</span><span class="p">(</span><span class="n">evals</span><span class="p">,</span> <span class="n">constraints</span><span class="p">)</span>
+
+    <span class="n">minimizer_config</span> <span class="o">=</span> <span class="n">minimizer_config</span> <span class="ow">or</span> <span class="p">{}</span>
+
+    <span class="c1"># Return the minimizer</span>
+    <span class="k">if</span> <span class="n">minimizer</span> <span class="o">==</span> <span class="n">MINUIT</span><span class="p">:</span>
+        <span class="k">yield</span> <span class="n">minuit_api</span><span class="o">.</span><span class="n">MinuitMinimizer</span><span class="p">(</span><span class="n">evaluator</span><span class="p">,</span> <span class="o">**</span><span class="n">minimizer_config</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">minimizer</span> <span class="o">==</span> <span class="n">SCIPY</span><span class="p">:</span>
+        <span class="k">yield</span> <span class="n">scipy_api</span><span class="o">.</span><span class="n">SciPyMinimizer</span><span class="p">(</span><span class="n">evaluator</span><span class="p">,</span> <span class="o">**</span><span class="n">minimizer_config</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;Unknown minimizer &quot;</span><span class="si">{minimizer}</span><span class="s1">&quot;&#39;</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Miguel Ramos Pernas
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

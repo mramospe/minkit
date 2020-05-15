@@ -1,0 +1,6 @@
+simultaneous_fcn_profile
+========================
+
+.. currentmodule:: minkit
+
+.. autofunction:: simultaneous_fcn_profile

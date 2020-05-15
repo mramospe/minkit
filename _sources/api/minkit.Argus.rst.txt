@@ -1,0 +1,7 @@
+Argus
+=====
+
+.. currentmodule:: minkit
+
+.. autoclass:: Argus
+   :show-inheritance:

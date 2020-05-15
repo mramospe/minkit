@@ -1,0 +1,7 @@
+Chebyshev
+=========
+
+.. currentmodule:: minkit.pdfs
+
+.. autoclass:: Chebyshev
+   :show-inheritance:

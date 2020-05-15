@@ -1,0 +1,17 @@
+iarray
+======
+
+.. currentmodule:: minkit
+
+.. autoclass:: iarray
+   :show-inheritance:
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+
+      ~iarray.from_ndarray
+
+   .. rubric:: Methods Documentation
+
+   .. automethod:: from_ndarray

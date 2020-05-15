@@ -1,0 +1,29 @@
+BinnedEvaluator
+===============
+
+.. currentmodule:: minkit
+
+.. autoclass:: BinnedEvaluator
+   :show-inheritance:
+
+   .. rubric:: Attributes Summary
+
+   .. autosummary::
+
+      ~BinnedEvaluator.args
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+
+      ~BinnedEvaluator.__call__
+      ~BinnedEvaluator.using_caches
+
+   .. rubric:: Attributes Documentation
+
+   .. autoattribute:: args
+
+   .. rubric:: Methods Documentation
+
+   .. automethod:: __call__
+   .. automethod:: using_caches

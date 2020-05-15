@@ -1,0 +1,6 @@
+rescale_weights
+===============
+
+.. currentmodule:: minkit
+
+.. autofunction:: rescale_weights

@@ -1,0 +1,29 @@
+SimultaneousEvaluator
+=====================
+
+.. currentmodule:: minkit
+
+.. autoclass:: SimultaneousEvaluator
+   :show-inheritance:
+
+   .. rubric:: Attributes Summary
+
+   .. autosummary::
+
+      ~SimultaneousEvaluator.args
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+
+      ~SimultaneousEvaluator.__call__
+      ~SimultaneousEvaluator.using_caches
+
+   .. rubric:: Attributes Documentation
+
+   .. autoattribute:: args
+
+   .. rubric:: Methods Documentation
+
+   .. automethod:: __call__
+   .. automethod:: using_caches

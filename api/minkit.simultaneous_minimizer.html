@@ -40,7 +40,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="sweights" href="minkit.sweights.html" />
-    <link rel="prev" title="register_pdf" href="minkit.register_pdf.html" /> 
+    <link rel="prev" title="simultaneous_fcn_profile" href="minkit.simultaneous_fcn_profile.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -89,21 +89,23 @@
             
             
               <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../user.html">User guide</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../reference.html">MinKit reference</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="../reference.html#functions">Functions</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="minkit.add_pdf_src.html">add_pdf_src</a></li>
-<li class="toctree-l3"><a class="reference internal" href="minkit.as_ndarray.html">as_ndarray</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.binned_chisquare.html">binned_chisquare</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.binned_extended_chisquare.html">binned_extended_chisquare</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.binned_extended_maximum_likelihood.html">binned_extended_maximum_likelihood</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.binned_maximum_likelihood.html">binned_maximum_likelihood</a></li>
-<li class="toctree-l3"><a class="reference internal" href="minkit.free_cache.html">free_cache</a></li>
-<li class="toctree-l3"><a class="reference internal" href="minkit.initialize.html">initialize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.data_plotting_arrays.html">data_plotting_arrays</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.fcn_profile.html">fcn_profile</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.minimizer.html">minimizer</a></li>
-<li class="toctree-l3"><a class="reference internal" href="minkit.minuit_to_registry.html">minuit_to_registry</a></li>
-<li class="toctree-l3"><a class="reference internal" href="minkit.pdf_centers_values.html">pdf_centers_values</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.pdf_from_json.html">pdf_from_json</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.pdf_plotting_arrays.html">pdf_plotting_arrays</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.pdf_to_json.html">pdf_to_json</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.register_pdf.html">register_pdf</a></li>
+<li class="toctree-l3"><a class="reference internal" href="minkit.simultaneous_fcn_profile.html">simultaneous_fcn_profile</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">simultaneous_minimizer</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.sweights.html">sweights</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.sweights_u.html">sweights_u</a></li>
@@ -211,27 +213,43 @@
 <h1>simultaneous_minimizer<a class="headerlink" href="#simultaneous-minimizer" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
 <dt id="minkit.simultaneous_minimizer">
-<code class="sig-prename descclassname">minkit.</code><code class="sig-name descname">simultaneous_minimizer</code><span class="sig-paren">(</span><em class="sig-param">categories</em>, <em class="sig-param">minimizer='minuit'</em>, <em class="sig-param">minimizer_config=None</em>, <em class="sig-param">rescale_weights=True</em>, <em class="sig-param">range='full'</em>, <em class="sig-param">constraints=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/minimizers.html#simultaneous_minimizer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.simultaneous_minimizer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create a new instance of <a class="reference external" href="https://iminuit.readthedocs.io/en/latest/reference.html#iminuit.Minuit" title="(in iminuit v1.3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">iminuit.Minuit</span></code></a>.
-This represents a “constant” object, that is, parameters defining
-the PDFs are assumed to remain constant during all its lifetime.</p>
+<code class="sig-prename descclassname">minkit.</code><code class="sig-name descname">simultaneous_minimizer</code><span class="sig-paren">(</span><em class="sig-param">categories</em>, <em class="sig-param">minimizer='minuit'</em>, <em class="sig-param">minimizer_config=None</em>, <em class="sig-param">constraints=None</em>, <em class="sig-param">range='full'</em>, <em class="sig-param">weights_treatment='rescale'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/minimization/minimizers.html#simultaneous_minimizer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.simultaneous_minimizer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new object to minimizer a <a class="reference internal" href="minkit.PDF.html#minkit.PDF" title="minkit.PDF"><code class="xref py py-class docutils literal notranslate"><span class="pre">PDF</span></code></a>.
+The bounds of the data parameters must not change in the process.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>categories</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a><em>(</em><a class="reference internal" href="minkit.Category.html#minkit.Category" title="minkit.Category"><em>Category</em></a><em>)</em>) – categories to process.</p></li>
-<li><p><strong>minimizer</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – minimizer to use (only “minuit” is available for the moment).</p></li>
-<li><p><strong>minimizer_config</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – (Minuit only) extra configuration passed to the minimizer.</p></li>
-<li><p><strong>range</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – range of data to minimize.</p></li>
+<li><p><strong>minimizer</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – minimizer to use (<em>minuit</em> or <em>scipy</em>).</p></li>
+<li><p><strong>minimizer_config</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – any extra configuration to be passed to the minimizer. For <em>minuit</em>, the argument <em>forced_parameters</em> is unavailable.</p></li>
 <li><p><strong>constraints</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a><em>(</em><a class="reference internal" href="minkit.PDF.html#minkit.PDF" title="minkit.PDF"><em>PDF</em></a><em>)</em>) – set of constraints to consider in the minimization.</p></li>
+<li><p><strong>range</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – range of data to minimize.</p></li>
+<li><p><strong>weights_treatment</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – what to do with weighted samples (see below for more information).</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>minimizer to call.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>depends on the “minimizer” argument</p>
-</dd>
 </dl>
+<p>The treatment of weights when calculating FCNs can lead to unreliable errors
+for the parameters. In general there is no correct way of processing
+the likelihoods. In this package the following methods are supported:</p>
+<ul class="simple">
+<li><p><em>none</em>: the raw weights are used to calculate the FCN. This will lead to
+completely incorrect uncertainties, since the statistical weight of the
+events in the data sample will not be proportional to the sample weight.</p></li>
+<li><p><em>rescale</em>: in this case the weights are rescaled so
+<span class="math notranslate nohighlight">\(\omega^\prime_i = \omega_i \times \frac{\sum_{j = 0}^n \omega_j}{\sum_{j = 0}^n \omega_j^2}\)</span>.
+In this case the statistical weight of each event is proportional to the
+sample weight, although the uncertainties will still be incorrect.</p></li>
+</ul>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Do not change the bounds of the data parameters, since for unbinned data
+sets a new sample is internally created with values falling in <em>range</em>.
+The weights of the sample are also changed according to the <em>weights_treatment</em>
+argument.</p>
+</div>
 </dd></dl>
 
 </div>
@@ -247,7 +265,7 @@ the PDFs are assumed to remain constant during all its lifetime.</p>
         <a href="minkit.sweights.html" class="btn btn-neutral float-right" title="sweights" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="minkit.register_pdf.html" class="btn btn-neutral float-left" title="register_pdf" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="minkit.simultaneous_fcn_profile.html" class="btn btn-neutral float-left" title="simultaneous_fcn_profile" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

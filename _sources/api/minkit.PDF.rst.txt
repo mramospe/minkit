@@ -16,7 +16,9 @@ PDF
       ~PDF.all_args
       ~PDF.all_pars
       ~PDF.all_real_args
+      ~PDF.aop
       ~PDF.args
+      ~PDF.backend
       ~PDF.cache
       ~PDF.cache_type
       ~PDF.constant
@@ -29,17 +31,18 @@ PDF
 
       ~PDF.__call__
       ~PDF.bind
-      ~PDF.enable_cache
       ~PDF.evaluate_binned
-      ~PDF.free_cache
       ~PDF.from_json_object
       ~PDF.generate
       ~PDF.get_values
       ~PDF.integral
       ~PDF.norm
+      ~PDF.numerical_integral
       ~PDF.numerical_normalization
       ~PDF.set_values
+      ~PDF.to_backend
       ~PDF.to_json_object
+      ~PDF.using_cache
 
    .. rubric:: Attributes Documentation
 
@@ -49,7 +52,9 @@ PDF
    .. autoattribute:: all_args
    .. autoattribute:: all_pars
    .. autoattribute:: all_real_args
+   .. autoattribute:: aop
    .. autoattribute:: args
+   .. autoattribute:: backend
    .. autoattribute:: cache
    .. autoattribute:: cache_type
    .. autoattribute:: constant
@@ -60,14 +65,15 @@ PDF
 
    .. automethod:: __call__
    .. automethod:: bind
-   .. automethod:: enable_cache
    .. automethod:: evaluate_binned
-   .. automethod:: free_cache
    .. automethod:: from_json_object
    .. automethod:: generate
    .. automethod:: get_values
    .. automethod:: integral
    .. automethod:: norm
+   .. automethod:: numerical_integral
    .. automethod:: numerical_normalization
    .. automethod:: set_values
+   .. automethod:: to_backend
    .. automethod:: to_json_object
+   .. automethod:: using_cache

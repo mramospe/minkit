@@ -39,7 +39,7 @@
   <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Working in more than one dimension" href="multidimensional.html" />
+    <link rel="next" title="Determining the stability of the fits" href="fit_stability.html" />
     <link rel="prev" title="Basic example" href="basic.html" /> 
 </head>
 
@@ -89,10 +89,12 @@
             
             
               <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../user.html">User guide</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="datasets.html">Creating data sets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="basic.html">Basic example</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Minimization with MinKit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fit_stability.html">Determining the stability of the fits</a></li>
 <li class="toctree-l2"><a class="reference internal" href="multidimensional.html">Working in more than one dimension</a></li>
 <li class="toctree-l2"><a class="reference internal" href="extension.html">Adding custom PDFs</a></li>
 </ul>
@@ -400,8 +402,6 @@ is needed or not. To give an idea of how the minimization is done with MinKit, l
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">minkit</span>
 
-<span class="n">minkit</span><span class="o">.</span><span class="n">initialize</span><span class="p">()</span>
-
 <span class="c1"># Build the PDF</span>
 <span class="n">x</span> <span class="o">=</span> <span class="n">minkit</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">))</span>
 <span class="n">c</span> <span class="o">=</span> <span class="n">minkit</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">))</span>
@@ -420,12 +420,16 @@ is needed or not. To give an idea of how the minimization is done with MinKit, l
 
 <span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
 
-<span class="n">g</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="o">**</span><span class="n">minkit</span><span class="o">.</span><span class="n">minuit_to_registry</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">params</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+<span class="n">g</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="o">**</span><span class="n">minimizer</span><span class="o">.</span><span class="n">result_to_registry</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">params</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
 
 <span class="c1"># Plot the results</span>
-<span class="n">values</span><span class="p">,</span> <span class="n">edges</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">minkit</span><span class="o">.</span><span class="n">as_ndarray</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]),</span> <span class="n">bins</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">bounds</span><span class="p">,</span> <span class="n">histtype</span><span class="o">=</span><span class="s1">&#39;step&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;data&#39;</span><span class="p">)</span>
+<span class="n">values</span><span class="p">,</span> <span class="n">edges</span> <span class="o">=</span> <span class="n">minkit</span><span class="o">.</span><span class="n">data_plotting_arrays</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
 
-<span class="n">gx</span><span class="p">,</span> <span class="n">pdf_values</span> <span class="o">=</span> <span class="n">minkit</span><span class="o">.</span><span class="n">pdf_centers_values</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">edges</span><span class="p">)</span>
+<span class="n">centers</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">edges</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">+</span> <span class="n">edges</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">centers</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="n">edges</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">values</span><span class="p">,</span> <span class="n">histtype</span><span class="o">=</span><span class="s1">&#39;step&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;data&#39;</span><span class="p">);</span>
+
+<span class="n">gx</span><span class="p">,</span> <span class="n">pdf_values</span> <span class="o">=</span> <span class="n">minkit</span><span class="o">.</span><span class="n">pdf_plotting_arrays</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">edges</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">gx</span><span class="p">,</span> <span class="n">pdf_values</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;blue&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;PDF&#39;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">();</span>
 
@@ -440,8 +444,8 @@ is needed or not. To give an idea of how the minimization is done with MinKit, l
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 ------------------------------------------------------------------
-| FCN = 2.835E+04               |     Ncalls=126 (126 total)     |
-| EDM = 3.07E-10 (Goal: 1E-05)  |            up = 1.0            |
+| FCN = 2.85E+04                |      Ncalls=67 (67 total)      |
+| EDM = 2.62E-08 (Goal: 1E-05)  |            up = 1.0            |
 ------------------------------------------------------------------
 |  Valid Min.   | Valid Param.  | Above EDM | Reached call limit |
 ------------------------------------------------------------------
@@ -454,8 +458,8 @@ is needed or not. To give an idea of how the minimization is done with MinKit, l
 ------------------------------------------------------------------------------------------
 |   | Name |   Value   | Hesse Err | Minos Err- | Minos Err+ | Limit-  | Limit+  | Fixed |
 ------------------------------------------------------------------------------------------
-| 0 | c    |  14.985   |   0.010   |            |            |   10    |   20    |       |
-| 1 | s    |   0.998   |   0.007   |            |            |   0.1   |    2    |       |
+| 0 | c    |  15.000   |   0.007   |            |            |   10    |   20    |       |
+| 1 | s    |   1.006   |   0.007   |            |            |   0.1   |    2    |       |
 ------------------------------------------------------------------------------------------
 </pre></div></div>
 </div>
@@ -466,7 +470,7 @@ is needed or not. To give an idea of how the minimization is done with MinKit, l
 <img alt="../_images/notebooks_minimization_1_1.png" src="../_images/notebooks_minimization_1_1.png" />
 </div>
 </div>
-<p>Note that we have called “minkit.minimizer” in order to create a context and do the minimization. The first argument is the FCN to use, an unbinned maximum likelihood in this case. It is very important that we do not change the properties of the PDF inside the “with” statement. This is because the PDF has enabled a cache. This means that, if the parameters have been set to constant, the evaluation of the PDF over the data values might have been kept in the cache, to reduce the execution time.</p>
+<p>Note that we have called <em>minkit.minimizer</em> in order to create a context and do the minimization. The first argument is the FCN to use, an unbinned maximum likelihood in this case. It is very important that we do not change the properties of the PDF inside the <em>with</em> statement. This is because the PDF has enabled a cache. This means that, if the parameters have been set to constant, the evaluation of the PDF over the data values might have been kept in the cache, to reduce the execution time.</p>
 <p>Let’s create a more complex model, adding a background-like contribution, using an exponential.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
@@ -494,11 +498,15 @@ is needed or not. To give an idea of how the minimization is done with MinKit, l
 
 <span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
 
-<span class="n">pdf</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="o">**</span><span class="n">minkit</span><span class="o">.</span><span class="n">minuit_to_registry</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">params</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+<span class="n">pdf</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="o">**</span><span class="n">minimizer</span><span class="o">.</span><span class="n">result_to_registry</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">params</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
 
-<span class="n">values</span><span class="p">,</span> <span class="n">edges</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">minkit</span><span class="o">.</span><span class="n">as_ndarray</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]),</span> <span class="n">bins</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">bounds</span><span class="p">,</span> <span class="n">histtype</span><span class="o">=</span><span class="s1">&#39;step&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;data&#39;</span><span class="p">)</span>
+<span class="n">values</span><span class="p">,</span> <span class="n">edges</span> <span class="o">=</span> <span class="n">minkit</span><span class="o">.</span><span class="n">data_plotting_arrays</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
 
-<span class="n">gx</span><span class="p">,</span> <span class="n">pdf_values</span> <span class="o">=</span> <span class="n">minkit</span><span class="o">.</span><span class="n">pdf_centers_values</span><span class="p">(</span><span class="n">pdf</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">edges</span><span class="p">)</span>
+<span class="n">centers</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">edges</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">+</span> <span class="n">edges</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">centers</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="n">edges</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">values</span><span class="p">,</span> <span class="n">histtype</span><span class="o">=</span><span class="s1">&#39;step&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;data&#39;</span><span class="p">);</span>
+
+<span class="n">gx</span><span class="p">,</span> <span class="n">pdf_values</span> <span class="o">=</span> <span class="n">minkit</span><span class="o">.</span><span class="n">pdf_plotting_arrays</span><span class="p">(</span><span class="n">pdf</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">edges</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">gx</span><span class="p">,</span> <span class="n">pdf_values</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;blue&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;PDF&#39;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">();</span>
 
@@ -513,24 +521,24 @@ is needed or not. To give an idea of how the minimization is done with MinKit, l
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 ------------------------------------------------------------------
-| FCN = 4.183E+04               |     Ncalls=108 (119 total)     |
-| EDM = 9.48E+06 (Goal: 1E-05)  |            up = 1.0            |
+| FCN = 4.192E+04               |      Ncalls=96 (96 total)      |
+| EDM = 2.8E-07 (Goal: 1E-05)   |            up = 1.0            |
 ------------------------------------------------------------------
 |  Valid Min.   | Valid Param.  | Above EDM | Reached call limit |
 ------------------------------------------------------------------
-|     False     |     True      |   True    |       False        |
+|     True      |     True      |   False   |       False        |
 ------------------------------------------------------------------
 | Hesse failed  |   Has cov.    | Accurate  | Pos. def. | Forced |
 ------------------------------------------------------------------
-|     False     |     True      |   False   |   False   |  True  |
+|     False     |     True      |   True    |   True    | False  |
 ------------------------------------------------------------------
 ------------------------------------------------------------------------------------------
 |   | Name |   Value   | Hesse Err | Minos Err- | Minos Err+ | Limit-  | Limit+  | Fixed |
 ------------------------------------------------------------------------------------------
-| 0 | y    |   0.500   |   0.000   |            |            |    0    |    1    |       |
-| 1 | c    |    15     |     7     |            |            |   10    |   20    |       |
-| 2 | s    |   0.996   |   0.000   |            |            |   0.1   |    2    |       |
-| 3 | k    | -1.045E-1 |  0.020E-1 |            |            |   -1    |    0    |       |
+| 0 | y    |   0.491   |   0.009   |            |            |    0    |    1    |       |
+| 1 | c    |  14.981   |   0.021   |            |            |   10    |   20    |       |
+| 2 | s    |   0.982   |   0.020   |            |            |   0.1   |    2    |       |
+| 3 | k    |  -0.092   |   0.005   |            |            |   -1    |    0    |       |
 ------------------------------------------------------------------------------------------
 </pre></div></div>
 </div>
@@ -541,7 +549,7 @@ is needed or not. To give an idea of how the minimization is done with MinKit, l
 <img alt="../_images/notebooks_minimization_3_1.png" src="../_images/notebooks_minimization_3_1.png" />
 </div>
 </div>
-<p>Easy, right? Let’s now assume we want to know the two yields of the PDFs. To do this we need to modify the model, and do and use an extended likelihood during the minimization.</p>
+<p>Let’s now assume we want to know the two yields of the PDFs. To do this we need to modify the model, and do and use an extended likelihood during the minimization.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
@@ -564,11 +572,15 @@ is needed or not. To give an idea of how the minimization is done with MinKit, l
 <span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
 
 <span class="c1"># Plot the results</span>
-<span class="n">pdf</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="o">**</span><span class="n">minkit</span><span class="o">.</span><span class="n">minuit_to_registry</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">params</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+<span class="n">pdf</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="o">**</span><span class="n">minimizer</span><span class="o">.</span><span class="n">result_to_registry</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">params</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
 
-<span class="n">values</span><span class="p">,</span> <span class="n">edges</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">minkit</span><span class="o">.</span><span class="n">as_ndarray</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]),</span> <span class="n">bins</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">bounds</span><span class="p">,</span> <span class="n">histtype</span><span class="o">=</span><span class="s1">&#39;step&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;data&#39;</span><span class="p">)</span>
+<span class="n">values</span><span class="p">,</span> <span class="n">edges</span> <span class="o">=</span> <span class="n">minkit</span><span class="o">.</span><span class="n">data_plotting_arrays</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
 
-<span class="n">gx</span><span class="p">,</span> <span class="n">pdf_values</span> <span class="o">=</span> <span class="n">minkit</span><span class="o">.</span><span class="n">pdf_centers_values</span><span class="p">(</span><span class="n">pdf</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">edges</span><span class="p">)</span>
+<span class="n">centers</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">edges</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">+</span> <span class="n">edges</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">centers</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="n">edges</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">values</span><span class="p">,</span> <span class="n">histtype</span><span class="o">=</span><span class="s1">&#39;step&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;data&#39;</span><span class="p">);</span>
+
+<span class="n">gx</span><span class="p">,</span> <span class="n">pdf_values</span> <span class="o">=</span> <span class="n">minkit</span><span class="o">.</span><span class="n">pdf_plotting_arrays</span><span class="p">(</span><span class="n">pdf</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">edges</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">gx</span><span class="p">,</span> <span class="n">pdf_values</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;blue&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;PDF&#39;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">();</span>
 
@@ -583,25 +595,25 @@ is needed or not. To give an idea of how the minimization is done with MinKit, l
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 ------------------------------------------------------------------
-| FCN = -1.223E+05              |     Ncalls=126 (137 total)     |
-| EDM = 7.83E+07 (Goal: 1E-05)  |            up = 1.0            |
+| FCN = -1.225E+05              |     Ncalls=127 (127 total)     |
+| EDM = 1.43E-05 (Goal: 1E-05)  |            up = 1.0            |
 ------------------------------------------------------------------
 |  Valid Min.   | Valid Param.  | Above EDM | Reached call limit |
 ------------------------------------------------------------------
-|     False     |     True      |   True    |       False        |
+|     True      |     True      |   False   |       False        |
 ------------------------------------------------------------------
 | Hesse failed  |   Has cov.    | Accurate  | Pos. def. | Forced |
 ------------------------------------------------------------------
-|     False     |     True      |   False   |   False   |  True  |
+|     False     |     True      |   True    |   True    | False  |
 ------------------------------------------------------------------
 ------------------------------------------------------------------------------------------
 |   | Name |   Value   | Hesse Err | Minos Err- | Minos Err+ | Limit-  | Limit+  | Fixed |
 ------------------------------------------------------------------------------------------
-| 0 | ng   |  0.500E4  |  0.001E4  |            |            |    0    |  10000  |       |
-| 1 | ne   |  0.500E4  |  0.000E4  |            |            |    0    |  10000  |       |
-| 2 | c    |    15     |     7     |            |            |   10    |   20    |       |
-| 3 | s    |   0.999   |   0.000   |            |            |   0.1   |    2    |       |
-| 4 | k    | -0.983E-1 |  0.003E-1 |            |            |   -1    |    0    |       |
+| 0 | ng   |  0.505E4  |  0.010E4  |            |            |    0    |  10000  |       |
+| 1 | ne   |  0.495E4  |  0.010E4  |            |            |    0    |  10000  |       |
+| 2 | c    |  15.016   |   0.020   |            |            |   10    |   20    |       |
+| 3 | s    |   0.986   |   0.019   |            |            |   0.1   |    2    |       |
+| 4 | k    |  -0.099   |   0.006   |            |            |   -1    |    0    |       |
 ------------------------------------------------------------------------------------------
 </pre></div></div>
 </div>
@@ -612,7 +624,7 @@ is needed or not. To give an idea of how the minimization is done with MinKit, l
 <img alt="../_images/notebooks_minimization_5_1.png" src="../_images/notebooks_minimization_5_1.png" />
 </div>
 </div>
-<p>Note that we have specified the “ueml” (unbinned extended maximum likelihood) FCN. If we set it to “uml”, we would get wrong values. Let’s now see what happens with binned data sets. In this case, we will use the “bml” FCN.</p>
+<p>Note that we have specified the <em>ueml</em> (unbinned extended maximum likelihood) FCN. If we set it to <em>uml</em>, we would get wrong values. Let’s now see what happens with binned data sets. In this case, we will use the <em>bml</em> FCN.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
@@ -620,22 +632,24 @@ is needed or not. To give an idea of how the minimization is done with MinKit, l
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
-<span class="n">values</span><span class="p">,</span> <span class="n">edges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">histogram</span><span class="p">(</span><span class="n">minkit</span><span class="o">.</span><span class="n">as_ndarray</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]),</span> <span class="n">bins</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">bounds</span><span class="p">)</span>
+<span class="n">values</span><span class="p">,</span> <span class="n">edges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">histogram</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">as_ndarray</span><span class="p">(),</span> <span class="n">bins</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">bounds</span><span class="p">)</span>
 
-<span class="n">centers</span> <span class="o">=</span> <span class="p">(</span><span class="n">edges</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">+</span> <span class="n">edges</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="mf">2.</span>
-
-<span class="n">binned_data</span> <span class="o">=</span> <span class="n">minkit</span><span class="o">.</span><span class="n">BinnedDataSet</span><span class="o">.</span><span class="n">from_array</span><span class="p">(</span><span class="n">edges</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">values</span><span class="p">)</span>
+<span class="n">binned_data</span> <span class="o">=</span> <span class="n">minkit</span><span class="o">.</span><span class="n">BinnedDataSet</span><span class="o">.</span><span class="n">from_ndarray</span><span class="p">(</span><span class="n">edges</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">values</span><span class="p">)</span>
 
 <span class="k">with</span> <span class="n">minkit</span><span class="o">.</span><span class="n">minimizer</span><span class="p">(</span><span class="s1">&#39;bml&#39;</span><span class="p">,</span> <span class="n">pdf</span><span class="p">,</span> <span class="n">binned_data</span><span class="p">)</span> <span class="k">as</span> <span class="n">minimizer</span><span class="p">:</span>
     <span class="n">result</span> <span class="o">=</span> <span class="n">minimizer</span><span class="o">.</span><span class="n">migrad</span><span class="p">()</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
 
-<span class="n">pdf</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="o">**</span><span class="n">minkit</span><span class="o">.</span><span class="n">minuit_to_registry</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">params</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+<span class="n">pdf</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="o">**</span><span class="n">minimizer</span><span class="o">.</span><span class="n">result_to_registry</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">params</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
 
-<span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">centers</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">values</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="n">edges</span><span class="p">,</span> <span class="n">histtype</span><span class="o">=</span><span class="s1">&#39;step&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;data&#39;</span><span class="p">);</span>
+<span class="n">values</span><span class="p">,</span> <span class="n">edges</span> <span class="o">=</span> <span class="n">minkit</span><span class="o">.</span><span class="n">data_plotting_arrays</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
 
-<span class="n">gx</span><span class="p">,</span> <span class="n">pdf_values</span> <span class="o">=</span> <span class="n">minkit</span><span class="o">.</span><span class="n">pdf_centers_values</span><span class="p">(</span><span class="n">pdf</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">edges</span><span class="p">)</span>
+<span class="n">centers</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">edges</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">+</span> <span class="n">edges</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">centers</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="n">edges</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">values</span><span class="p">,</span> <span class="n">histtype</span><span class="o">=</span><span class="s1">&#39;step&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;data&#39;</span><span class="p">);</span>
+
+<span class="n">gx</span><span class="p">,</span> <span class="n">pdf_values</span> <span class="o">=</span> <span class="n">minkit</span><span class="o">.</span><span class="n">pdf_plotting_arrays</span><span class="p">(</span><span class="n">pdf</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">edges</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">gx</span><span class="p">,</span> <span class="n">pdf_values</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;blue&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;PDF&#39;</span><span class="p">);</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">();</span>
 
@@ -650,8 +664,8 @@ is needed or not. To give an idea of how the minimization is done with MinKit, l
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 ------------------------------------------------------------------
-| FCN = -7.627E+04              |     Ncalls=224 (224 total)     |
-| EDM = 1.66E-06 (Goal: 1E-05)  |            up = 1.0            |
+| FCN = 112.4                   |      Ncalls=97 (97 total)      |
+| EDM = 4.1E-06 (Goal: 1E-05)   |            up = 1.0            |
 ------------------------------------------------------------------
 |  Valid Min.   | Valid Param.  | Above EDM | Reached call limit |
 ------------------------------------------------------------------
@@ -664,11 +678,11 @@ is needed or not. To give an idea of how the minimization is done with MinKit, l
 ------------------------------------------------------------------------------------------
 |   | Name |   Value   | Hesse Err | Minos Err- | Minos Err+ | Limit-  | Limit+  | Fixed |
 ------------------------------------------------------------------------------------------
-| 0 | ng   |  0.497E4  |  0.011E4  |            |            |    0    |  10000  |       |
-| 1 | ne   |  0.503E4  |  0.011E4  |            |            |    0    |  10000  |       |
-| 2 | c    |  14.973   |   0.020   |            |            |   10    |   20    |       |
-| 3 | s    |   0.995   |   0.020   |            |            |   0.1   |    2    |       |
-| 4 | k    |  -0.096   |   0.006   |            |            |   -1    |    0    |       |
+| 0 | ng   |   0.5E4   |   0.7E4   |            |            |    0    |  10000  |       |
+| 1 | ne   |   0.5E4   |   0.7E4   |            |            |    0    |  10000  |       |
+| 2 | c    |  15.016   |   0.020   |            |            |   10    |   20    |       |
+| 3 | s    |   0.987   |   0.019   |            |            |   0.1   |    2    |       |
+| 4 | k    |  -0.099   |   0.006   |            |            |   -1    |    0    |       |
 ------------------------------------------------------------------------------------------
 </pre></div></div>
 </div>
@@ -679,7 +693,7 @@ is needed or not. To give an idea of how the minimization is done with MinKit, l
 <img alt="../_images/notebooks_minimization_7_1.png" src="../_images/notebooks_minimization_7_1.png" />
 </div>
 </div>
-<p>Similarly, with the FCN “chi2” we would be doing a fit to the chi-square, that is, we would be assuming that the input values, instead of following a Poisson distribution, they follow a Gaussian.</p>
+<p>Similarly, with the FCN <em>chi2</em> we would be doing a fit to the chi-square, that is, we would be assuming that the input values, instead of following a Poisson distribution, they follow a Gaussian.</p>
 </div>
 
 
@@ -690,7 +704,7 @@ is needed or not. To give an idea of how the minimization is done with MinKit, l
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="multidimensional.html" class="btn btn-neutral float-right" title="Working in more than one dimension" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="fit_stability.html" class="btn btn-neutral float-right" title="Determining the stability of the fits" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="basic.html" class="btn btn-neutral float-left" title="Basic example" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

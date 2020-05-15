@@ -1,0 +1,7 @@
+Argus
+=====
+
+.. currentmodule:: minkit.pdfs
+
+.. autoclass:: Argus
+   :show-inheritance:

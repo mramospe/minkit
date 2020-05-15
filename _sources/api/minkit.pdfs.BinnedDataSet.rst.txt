@@ -1,0 +1,39 @@
+BinnedDataSet
+=============
+
+.. currentmodule:: minkit.pdfs
+
+.. autoclass:: BinnedDataSet
+   :show-inheritance:
+
+   .. rubric:: Attributes Summary
+
+   .. autosummary::
+
+      ~BinnedDataSet.bounds
+      ~BinnedDataSet.edges
+      ~BinnedDataSet.edges_indices
+      ~BinnedDataSet.gaps
+      ~BinnedDataSet.sample_type
+      ~BinnedDataSet.values
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+
+      ~BinnedDataSet.from_ndarray
+      ~BinnedDataSet.to_backend
+
+   .. rubric:: Attributes Documentation
+
+   .. autoattribute:: bounds
+   .. autoattribute:: edges
+   .. autoattribute:: edges_indices
+   .. autoattribute:: gaps
+   .. autoattribute:: sample_type
+   .. autoattribute:: values
+
+   .. rubric:: Methods Documentation
+
+   .. automethod:: from_ndarray
+   .. automethod:: to_backend
