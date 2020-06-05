@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>minkit.utils.splot &mdash; minkit 0.0.0.dev0 documentation</title>
+  <title>minkit.utils.splot &mdash; minkit 0.0.0.dev1 documentation</title>
   
 
   
@@ -62,7 +62,7 @@
             
             
               <div class="version">
-                0.0.0.dev0
+                0.0.0.dev1
               </div>
             
           
@@ -156,12 +156,17 @@
            <div itemprop="articleBody">
             
   <h1>Source code for minkit.utils.splot</h1><div class="highlight"><pre>
-<span></span><span class="sd">&#39;&#39;&#39;</span>
+<span></span><span class="c1">########################################</span>
+<span class="c1"># MIT License</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright (c) 2020 Miguel Ramos Pernas</span>
+<span class="c1">########################################</span>
+<span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">Functions and classes related to the s-plot technique.</span>
 <span class="sd">More information at: https://arxiv.org/abs/physics/0402083</span>
 <span class="sd">&#39;&#39;&#39;</span>
-<span class="kn">from</span> <span class="nn">..base</span> <span class="k">import</span> <span class="n">parameters</span>
-<span class="kn">from</span> <span class="nn">..base</span> <span class="k">import</span> <span class="n">data_types</span>
+<span class="kn">from</span> <span class="nn">..base</span> <span class="kn">import</span> <span class="n">parameters</span>
+<span class="kn">from</span> <span class="nn">..base</span> <span class="kn">import</span> <span class="n">data_types</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
@@ -183,7 +188,7 @@
 <span class="sd">    :param return_covariance: if set to True, it also returns the covariance matrix.</span>
 <span class="sd">    :type return_covariance: bool</span>
 <span class="sd">    :returns: Values of the s-weights for each specie and possible covariance matrix.</span>
-<span class="sd">    :rtype: list(numpy.ndarray), (numpy.ndarray)</span>
+<span class="sd">    :rtype: list(darray), (numpy.ndarray)</span>
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="n">l</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">yields</span><span class="p">)</span>
 
@@ -230,12 +235,23 @@
     <span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Get the uncertainty associated to the s-weights related to sample *a*.</span>
 <span class="sd">    Arguments are similar to those of :func:`numpy.histogram`.</span>
-<span class="sd">    By definition, the uncertainty on the s-weights (for plotting), is defined as the</span>
-<span class="sd">    sum of the squares of the weights in that bin, like</span>
+<span class="sd">    By definition, the uncertainty on the s-weights (for plotting), is defined</span>
+<span class="sd">    as the sum of the squares of the weights in that bin, like</span>
 
 <span class="sd">    .. math:: \sigma = \sqrt{\sum_{b \in \delta x} \omega^2}</span>
+
+<span class="sd">    :param a: array of data.</span>
+<span class="sd">    :type a: numpy.ndarray</span>
+<span class="sd">    :param sweights: array of weights.</span>
+<span class="sd">    :type sweights: numpy.ndarray</span>
+<span class="sd">    :param bins: bins for the histogram.</span>
+<span class="sd">    :type bins: int or numpy.ndarray</span>
+<span class="sd">    :param range: range of the histogram.</span>
+<span class="sd">    :type range: tuple(float, float) or None</span>
+<span class="sd">    :returns: Uncertainties for each bin of the histogram.</span>
+<span class="sd">    :rtype: numpy.ndarray</span>
 <span class="sd">    &#39;&#39;&#39;</span>
-    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">histogram</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="n">bins</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">sweights</span><span class="o">*</span><span class="n">sweights</span><span class="p">))</span></div>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">histogram</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="n">bins</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">sweights</span><span class="o">*</span><span class="n">sweights</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span></div>
 </pre></div>
 
            </div>

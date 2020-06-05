@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Registry &mdash; minkit 0.0.0.dev0 documentation</title>
+  <title>Registry &mdash; minkit 0.0.0.dev1 documentation</title>
   
 
   
@@ -64,7 +64,7 @@
             
             
               <div class="version">
-                0.0.0.dev0
+                0.0.0.dev1
               </div>
             
           
@@ -263,6 +263,18 @@ Constructor is directly forwarded to <a class="reference external" href="https:/
 <tr class="row-odd"><td><p><a class="reference internal" href="#minkit.Registry.append" title="minkit.Registry.append"><code class="xref py py-obj docutils literal notranslate"><span class="pre">append</span></code></a>(el)</p></td>
 <td><p>Append a new element to the registry.</p></td>
 </tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#minkit.Registry.clear" title="minkit.Registry.clear"><code class="xref py py-obj docutils literal notranslate"><span class="pre">clear</span></code></a>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.Registry.copy" title="minkit.Registry.copy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy</span></code></a>([contained_type])</p></td>
+<td><p>Create a copy of this instance.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#minkit.Registry.count" title="minkit.Registry.count"><code class="xref py py-obj docutils literal notranslate"><span class="pre">count</span></code></a>(value)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.Registry.extend" title="minkit.Registry.extend"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extend</span></code></a>(iterable)</p></td>
+<td><p></p></td>
+</tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#minkit.Registry.from_json_object" title="minkit.Registry.from_json_object"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_json_object</span></code></a>(obj)</p></td>
 <td><p>Build the parameter from a JSON object (a dictionary).</p></td>
 </tr>
@@ -275,14 +287,26 @@ Constructor is directly forwarded to <a class="reference external" href="https:/
 <tr class="row-odd"><td><p><a class="reference internal" href="#minkit.Registry.insert" title="minkit.Registry.insert"><code class="xref py py-obj docutils literal notranslate"><span class="pre">insert</span></code></a>(i, p)</p></td>
 <td><p>Insert an object before index <em>i</em>.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#minkit.Registry.reduce" title="minkit.Registry.reduce"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reduce</span></code></a>(names)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#minkit.Registry.pop" title="minkit.Registry.pop"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pop</span></code></a>([index])</p></td>
+<td><p>Raises IndexError if list is empty or index is out of range.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.Registry.reduce" title="minkit.Registry.reduce"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reduce</span></code></a>(names)</p></td>
 <td><p>Create a new <a class="reference internal" href="#minkit.Registry" title="minkit.Registry"><code class="xref py py-class docutils literal notranslate"><span class="pre">Registry</span></code></a> object keeping only the given names.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.Registry.to_json_object" title="minkit.Registry.to_json_object"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_json_object</span></code></a>()</p></td>
-<td><p>Represent this class as a JSON-like object.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#minkit.Registry.remove" title="minkit.Registry.remove"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove</span></code></a>(value)</p></td>
+<td><p>Raises ValueError if the value is not present.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#minkit.Registry.values" title="minkit.Registry.values"><code class="xref py py-obj docutils literal notranslate"><span class="pre">values</span></code></a>()</p></td>
-<td><p>Get a dictionary with the values of the different parameters.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.Registry.restoring_state" title="minkit.Registry.restoring_state"><code class="xref py py-obj docutils literal notranslate"><span class="pre">restoring_state</span></code></a>()</p></td>
+<td><p>Enter a context where the attributes of the parameter will be restored on exit.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#minkit.Registry.reverse" title="minkit.Registry.reverse"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reverse</span></code></a></p></td>
+<td><p>L.reverse() – reverse <em>IN PLACE</em></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.Registry.sort" title="minkit.Registry.sort"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sort</span></code></a>([key, reverse])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#minkit.Registry.to_json_object" title="minkit.Registry.to_json_object"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_json_object</span></code></a>()</p></td>
+<td><p>Represent this class as a JSON-like object.</p></td>
 </tr>
 </tbody>
 </table>
@@ -309,6 +333,35 @@ Constructor is directly forwarded to <a class="reference external" href="https:/
 </dd>
 </dl>
 </dd></dl>
+
+<dl class="method">
+<dt id="minkit.Registry.clear">
+<code class="sig-name descname">clear</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; None -- remove all items from L<a class="headerlink" href="#minkit.Registry.clear" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="minkit.Registry.copy">
+<code class="sig-name descname">copy</code><span class="sig-paren">(</span><em class="sig-param">contained_type='parameter'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/base/parameters.html#Registry.copy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.Registry.copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a copy of this instance.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Copy of this instance.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#minkit.Registry" title="minkit.Registry">Registry</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.Registry.count">
+<code class="sig-name descname">count</code><span class="sig-paren">(</span><em class="sig-param">value</em><span class="sig-paren">)</span> &#x2192; integer -- return number of occurrences of value<a class="headerlink" href="#minkit.Registry.count" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="minkit.Registry.extend">
+<code class="sig-name descname">extend</code><span class="sig-paren">(</span><em class="sig-param">iterable</em><span class="sig-paren">)</span> &#x2192; None -- extend list by appending elements from the iterable<a class="headerlink" href="#minkit.Registry.extend" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="minkit.Registry.from_json_object">
@@ -380,6 +433,12 @@ This is meant to be used together with the <a class="reference external" href="h
 </dd></dl>
 
 <dl class="method">
+<dt id="minkit.Registry.pop">
+<code class="sig-name descname">pop</code><span class="sig-paren">(</span><span class="optional">[</span><em class="sig-param">index</em><span class="optional">]</span><span class="sig-paren">)</span> &#x2192; item -- remove and return item at index (default last).<a class="headerlink" href="#minkit.Registry.pop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raises IndexError if list is empty or index is out of range.</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="minkit.Registry.reduce">
 <code class="sig-name descname">reduce</code><span class="sig-paren">(</span><em class="sig-param">names</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/base/parameters.html#Registry.reduce"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.Registry.reduce" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a new <a class="reference internal" href="#minkit.Registry" title="minkit.Registry"><code class="xref py py-class docutils literal notranslate"><span class="pre">Registry</span></code></a> object keeping only the given names.</p>
@@ -397,6 +456,30 @@ This is meant to be used together with the <a class="reference external" href="h
 </dd></dl>
 
 <dl class="method">
+<dt id="minkit.Registry.remove">
+<code class="sig-name descname">remove</code><span class="sig-paren">(</span><em class="sig-param">value</em><span class="sig-paren">)</span> &#x2192; None -- remove first occurrence of value.<a class="headerlink" href="#minkit.Registry.remove" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raises ValueError if the value is not present.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.Registry.restoring_state">
+<code class="sig-name descname">restoring_state</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/base/parameters.html#Registry.restoring_state"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.Registry.restoring_state" title="Permalink to this definition">¶</a></dt>
+<dd><p>Enter a context where the attributes of the parameter will be restored
+on exit.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.Registry.reverse">
+<code class="sig-name descname">reverse</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#minkit.Registry.reverse" title="Permalink to this definition">¶</a></dt>
+<dd><p>L.reverse() – reverse <em>IN PLACE</em></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.Registry.sort">
+<code class="sig-name descname">sort</code><span class="sig-paren">(</span><em class="sig-param">key=None</em>, <em class="sig-param">reverse=False</em><span class="sig-paren">)</span> &#x2192; None -- stable sort *IN PLACE*<a class="headerlink" href="#minkit.Registry.sort" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
 <dt id="minkit.Registry.to_json_object">
 <code class="sig-name descname">to_json_object</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/base/parameters.html#Registry.to_json_object"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.Registry.to_json_object" title="Permalink to this definition">¶</a></dt>
 <dd><p>Represent this class as a JSON-like object.</p>
@@ -406,20 +489,6 @@ This is meant to be used together with the <a class="reference external" href="h
 </dd>
 <dt class="field-even">Return type</dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)">dict</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="minkit.Registry.values">
-<code class="sig-name descname">values</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/base/parameters.html#Registry.values"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.Registry.values" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get a dictionary with the values of the different parameters.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>dictionary with the values.</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)">dict</a>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a>)</p>
 </dd>
 </dl>
 </dd></dl>

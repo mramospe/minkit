@@ -10,22 +10,38 @@ barray
 
    .. autosummary::
 
+      ~barray.aop
+      ~barray.backend
       ~barray.dtype
+      ~barray.length
+      ~barray.shape
+      ~barray.ua
 
    .. rubric:: Methods Summary
 
    .. autosummary::
 
       ~barray.as_ndarray
+      ~barray.copy
       ~barray.count_nonzero
       ~barray.from_ndarray
+      ~barray.get
+      ~barray.to_backend
 
    .. rubric:: Attributes Documentation
 
+   .. autoattribute:: aop
+   .. autoattribute:: backend
    .. autoattribute:: dtype
+   .. autoattribute:: length
+   .. autoattribute:: shape
+   .. autoattribute:: ua
 
    .. rubric:: Methods Documentation
 
    .. automethod:: as_ndarray
+   .. automethod:: copy
    .. automethod:: count_nonzero
    .. automethod:: from_ndarray
+   .. automethod:: get
+   .. automethod:: to_backend

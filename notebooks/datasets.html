@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Creating data sets &mdash; minkit 0.0.0.dev0 documentation</title>
+  <title>Creating data sets &mdash; minkit 0.0.0.dev1 documentation</title>
   
 
   
@@ -64,7 +64,7 @@
             
             
               <div class="version">
-                0.0.0.dev0
+                0.0.0.dev1
               </div>
             
           
@@ -98,6 +98,7 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="basic.html">Basic example</a></li>
 <li class="toctree-l2"><a class="reference internal" href="minimization.html">Minimization with MinKit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="uncertainties.html">Uncertainties</a></li>
 <li class="toctree-l2"><a class="reference internal" href="fit_stability.html">Determining the stability of the fits</a></li>
 <li class="toctree-l2"><a class="reference internal" href="multidimensional.html">Working in more than one dimension</a></li>
 <li class="toctree-l2"><a class="reference internal" href="extension.html">Adding custom PDFs</a></li>
@@ -405,7 +406,6 @@ div.rendered_html tbody tr:hover {
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">minkit</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-
 </pre></div>
 </div>
 </div>
@@ -433,13 +433,13 @@ div.rendered_html tbody tr:hover {
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="n">new_numpy_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;Length of primordial sample: {len(data)}&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Length of primordial sample: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
 <span class="n">new_data</span> <span class="o">=</span> <span class="n">minkit</span><span class="o">.</span><span class="n">DataSet</span><span class="o">.</span><span class="n">from_ndarray</span><span class="p">(</span><span class="n">new_numpy_data</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
 
 <span class="n">merged_data</span> <span class="o">=</span> <span class="n">minkit</span><span class="o">.</span><span class="n">DataSet</span><span class="o">.</span><span class="n">merge</span><span class="p">([</span><span class="n">data</span><span class="p">,</span> <span class="n">new_data</span><span class="p">])</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;Length of merged data sample: {len(merged_data)}&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Length of merged data sample: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">merged_data</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
 <span class="n">values</span><span class="p">,</span> <span class="n">edges</span> <span class="o">=</span> <span class="n">minkit</span><span class="o">.</span><span class="n">data_plotting_arrays</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
 

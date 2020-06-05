@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>minkit.pdfs.pdf_core &mdash; minkit 0.0.0.dev0 documentation</title>
+  <title>minkit.pdfs.pdf_core &mdash; minkit 0.0.0.dev1 documentation</title>
   
 
   
@@ -62,7 +62,7 @@
             
             
               <div class="version">
-                0.0.0.dev0
+                0.0.0.dev1
               </div>
             
           
@@ -156,18 +156,24 @@
            <div itemprop="articleBody">
             
   <h1>Source code for minkit.pdfs.pdf_core</h1><div class="highlight"><pre>
-<span></span><span class="sd">&#39;&#39;&#39;</span>
+<span></span><span class="c1">########################################</span>
+<span class="c1"># MIT License</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright (c) 2020 Miguel Ramos Pernas</span>
+<span class="c1">########################################</span>
+<span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">Base classes to define PDF data_types.</span>
 <span class="sd">&#39;&#39;&#39;</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">dataset</span>
-<span class="kn">from</span> <span class="nn">..backends</span> <span class="k">import</span> <span class="n">gsl_api</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">dataset</span>
+<span class="kn">from</span> <span class="nn">..backends</span> <span class="kn">import</span> <span class="n">gsl_api</span>
 
-<span class="kn">from</span> <span class="nn">..backends.core</span> <span class="k">import</span> <span class="n">common_backend</span><span class="p">,</span> <span class="n">parse_backend</span>
-<span class="kn">from</span> <span class="nn">..base</span> <span class="k">import</span> <span class="n">core</span>
-<span class="kn">from</span> <span class="nn">..base</span> <span class="k">import</span> <span class="n">bindings</span>
-<span class="kn">from</span> <span class="nn">..base</span> <span class="k">import</span> <span class="n">data_types</span>
-<span class="kn">from</span> <span class="nn">..base</span> <span class="k">import</span> <span class="n">exceptions</span>
-<span class="kn">from</span> <span class="nn">..base</span> <span class="k">import</span> <span class="n">parameters</span>
+<span class="kn">from</span> <span class="nn">..backends.core</span> <span class="kn">import</span> <span class="n">common_backend</span><span class="p">,</span> <span class="n">parse_backend</span>
+<span class="kn">from</span> <span class="nn">..base</span> <span class="kn">import</span> <span class="n">core</span>
+<span class="kn">from</span> <span class="nn">..base</span> <span class="kn">import</span> <span class="n">bindings</span>
+<span class="kn">from</span> <span class="nn">..base</span> <span class="kn">import</span> <span class="n">data_types</span>
+<span class="kn">from</span> <span class="nn">..base</span> <span class="kn">import</span> <span class="n">dependencies</span>
+<span class="kn">from</span> <span class="nn">..base</span> <span class="kn">import</span> <span class="n">exceptions</span>
+<span class="kn">from</span> <span class="nn">..base</span> <span class="kn">import</span> <span class="n">parameters</span>
 
 <span class="kn">import</span> <span class="nn">contextlib</span>
 <span class="kn">import</span> <span class="nn">functools</span>
@@ -186,7 +192,7 @@
 <span class="n">DEFAULT_CONV_SIZE</span> <span class="o">=</span> <span class="mi">10000</span>
 
 <span class="c1"># Default number of events to generate in a single step</span>
-<span class="n">DEFAULT_GEN_SIZE</span> <span class="o">=</span> <span class="mi">1000</span>
+<span class="n">DEFAULT_GEN_SIZE</span> <span class="o">=</span> <span class="mi">10000</span>
 
 <span class="c1"># Registry of PDF classes so they can be built by name</span>
 <span class="n">PDF_REGISTRY</span> <span class="o">=</span> <span class="p">{}</span>
@@ -289,7 +295,7 @@
     <span class="c1"># with this value set to &quot;True&quot; must have the property &quot;pdfs&quot; implemented.</span>
     <span class="n">dependent</span> <span class="o">=</span> <span class="kc">False</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">data_pars</span><span class="p">,</span> <span class="n">args_pars</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">data_pars</span><span class="p">,</span> <span class="n">args_pars</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Build the class from a name, a set of data parameters and argument parameters.</span>
 <span class="sd">        The first correspond to those that must be present on any :class:`DataSet` or</span>
@@ -320,7 +326,7 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
 <div class="viewcode-block" id="PDF.__call__"><a class="viewcode-back" href="../../../api/minkit.PDF.html#minkit.PDF.__call__">[docs]</a>    <span class="nd">@allows_const_cache</span>
-    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">FULL</span><span class="p">,</span> <span class="n">normalized</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">FULL</span><span class="p">,</span> <span class="n">normalized</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Call the PDF in the given set of data.</span>
 
@@ -335,11 +341,11 @@
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">MethodNotDefinedError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span> <span class="s1">&#39;__call__&#39;</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Attributes of the class as a string.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="n">out</span> <span class="o">=</span> <span class="n">f</span><span class="s1">&#39;</span><span class="si">{self.__class__.__name__}</span><span class="s1">(</span><span class="si">{self.name}</span><span class="s1">):</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">):</span><span class="se">\n</span><span class="s1">&#39;</span>
         <span class="n">out</span> <span class="o">+=</span> <span class="n">textwrap</span><span class="o">.</span><span class="n">indent</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
                                                <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">)),</span> <span class="s1">&#39; &#39;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">out</span>
@@ -374,7 +380,7 @@
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="k">if</span> <span class="n">ctype</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">PDF</span><span class="o">.</span><span class="n">CACHE_TYPES</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="n">f</span><span class="s1">&#39;Unknown cache type &quot;</span><span class="si">{ctype}</span><span class="s1">&quot;; select from: </span><span class="si">{PDF.CACHE_TYPES}</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="sa">f</span><span class="s1">&#39;Unknown cache type &quot;</span><span class="si">{</span><span class="n">ctype</span><span class="si">}</span><span class="s1">&quot;; select from: </span><span class="si">{</span><span class="n">PDF</span><span class="o">.</span><span class="n">CACHE_TYPES</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__cache</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__cache_type</span> <span class="o">=</span> <span class="n">ctype</span>
 
@@ -387,6 +393,16 @@
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__cache</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__cache_type</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="PDF.copy"><a class="viewcode-back" href="../../../api/minkit.PDF.html#minkit.PDF.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Create a copy of this PDF.</span>
+
+<span class="sd">        :param backend: new backend.</span>
+<span class="sd">        :type backend: Backend</span>
+<span class="sd">        :returns: A copy of this PDF.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="n">pdf_from_json</span><span class="p">(</span><span class="n">pdf_to_json</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="n">backend</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="PDF.evaluate_binned"><a class="viewcode-back" href="../../../api/minkit.PDF.html#minkit.PDF.evaluate_binned">[docs]</a>    <span class="nd">@allows_const_cache</span>
     <span class="k">def</span> <span class="nf">evaluate_binned</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">normalized</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
@@ -404,13 +420,17 @@
             <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span> <span class="s1">&#39;evaluate_binned&#39;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="PDF.from_json_object"><a class="viewcode-back" href="../../../api/minkit.PDF.html#minkit.PDF.from_json_object">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">from_json_object</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">pars</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">from_json_object</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">pars</span><span class="p">,</span> <span class="n">backend</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Build a PDF from a JSON object.</span>
 <span class="sd">        This object must represent the internal structure of the PDF.</span>
 
 <span class="sd">        :param obj: JSON object.</span>
 <span class="sd">        :type obj: dict</span>
+<span class="sd">        :param pars: parameter to build the PDF.</span>
+<span class="sd">        :type pars: Registry</span>
+<span class="sd">        :param backend: backend to build the PDF.</span>
+<span class="sd">        :type backend: Backend</span>
 <span class="sd">        :returns: This type of PDF constructed together with its parameters.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="n">class_name</span> <span class="o">=</span> <span class="n">obj</span><span class="p">[</span><span class="s1">&#39;class&#39;</span><span class="p">]</span>
@@ -419,8 +439,9 @@
         <span class="n">cl</span> <span class="o">=</span> <span class="n">PDF_REGISTRY</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">class_name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">cl</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
-                <span class="n">f</span><span class="s1">&#39;Class &quot;</span><span class="si">{class_name}</span><span class="s1">&quot; does not appear in the registry&#39;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">cl</span><span class="o">.</span><span class="n">from_json_object</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">pars</span><span class="p">)</span>  <span class="c1"># Use the correct constructor</span></div>
+                <span class="sa">f</span><span class="s1">&#39;Class &quot;</span><span class="si">{</span><span class="n">class_name</span><span class="si">}</span><span class="s1">&quot; does not appear in the registry&#39;</span><span class="p">)</span>
+        <span class="c1"># Use the correct constructor</span>
+        <span class="k">return</span> <span class="n">cl</span><span class="o">.</span><span class="n">from_json_object</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">pars</span><span class="p">,</span> <span class="n">backend</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">_generate_single_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">mapsize</span><span class="p">,</span> <span class="n">gensize</span><span class="p">,</span> <span class="n">safe_factor</span><span class="p">,</span> <span class="n">bounds</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
@@ -474,7 +495,10 @@
 
 <span class="sd">        :type: Registry(Parameter)</span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">args</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">Registry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="n">p</span><span class="o">.</span><span class="n">dependent</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">):</span>
+            <span class="n">args</span> <span class="o">+=</span> <span class="n">p</span><span class="o">.</span><span class="n">all_args</span>
+        <span class="k">return</span> <span class="n">args</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">all_pars</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -484,7 +508,7 @@
 
 <span class="sd">        :type: Registry(Parameter)</span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_pars</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">__arg_pars</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_pars</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">all_args</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">all_real_args</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -503,6 +527,15 @@
 <span class="sd">        :type: Registry(Parameter)</span>
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__arg_pars</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">real_args</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Arguments that do not depend on other arguments.</span>
+
+<span class="sd">        :type: Registry(Parameter)</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="n">parameters</span><span class="o">.</span><span class="n">Registry</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="ow">not</span> <span class="n">p</span><span class="o">.</span><span class="n">dependent</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__arg_pars</span><span class="p">))</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -734,12 +767,23 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_enable_cache</span><span class="p">(</span><span class="n">ctype</span><span class="p">)</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">aop</span><span class="o">.</span><span class="n">using_caches</span><span class="p">():</span>
             <span class="k">yield</span> <span class="bp">self</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_free_cache</span><span class="p">()</span></div></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_free_cache</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="PDF.restoring_state"><a class="viewcode-back" href="../../../api/minkit.PDF.html#minkit.PDF.restoring_state">[docs]</a>    <span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
+    <span class="k">def</span> <span class="nf">restoring_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Enter a context where the attributes of the parameters will be restored</span>
+<span class="sd">        on exit.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">with</span> <span class="n">contextlib</span><span class="o">.</span><span class="n">ExitStack</span><span class="p">()</span> <span class="k">as</span> <span class="n">stack</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">all_pars</span><span class="p">:</span>
+                <span class="n">stack</span><span class="o">.</span><span class="n">enter_context</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">restoring_state</span><span class="p">())</span>
+            <span class="k">yield</span> <span class="bp">self</span></div></div>
 
 
 <div class="viewcode-block" id="SourcePDF"><a class="viewcode-back" href="../../../api/minkit.SourcePDF.html#minkit.SourcePDF">[docs]</a><span class="k">class</span> <span class="nc">SourcePDF</span><span class="p">(</span><span class="n">PDF</span><span class="p">):</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">data_pars</span><span class="p">,</span> <span class="n">arg_pars</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">var_arg_pars</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">data_pars</span><span class="p">,</span> <span class="n">arg_pars</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">var_arg_pars</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        This object defines a PDF built from source files (C++, PyOpenCL or CUDA), which depend</span>
 <span class="sd">        on the backend to use.</span>
@@ -889,10 +933,10 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">__function_proxies</span><span class="o">.</span><span class="n">numerical_integral</span><span class="p">,</span> <span class="o">**</span><span class="n">dct</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="n">f</span><span class="s1">&#39;Unknown numerical integration method &quot;</span><span class="si">{method}</span><span class="s1">&quot;&#39;</span><span class="p">)</span>
+                <span class="sa">f</span><span class="s1">&#39;Unknown numerical integration method &quot;</span><span class="si">{</span><span class="n">method</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="p">)</span>
 
 <div class="viewcode-block" id="SourcePDF.__call__"><a class="viewcode-back" href="../../../api/minkit.SourcePDF.html#minkit.SourcePDF.__call__">[docs]</a>    <span class="nd">@allows_const_cache</span>
-    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">FULL</span><span class="p">,</span> <span class="n">normalized</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">FULL</span><span class="p">,</span> <span class="n">normalized</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 
         <span class="c1"># Determine the values to use</span>
         <span class="n">fvals</span> <span class="o">=</span> <span class="n">data_types</span><span class="o">.</span><span class="n">fromiter_float</span><span class="p">((</span><span class="n">v</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">))</span>
@@ -935,7 +979,7 @@
             <span class="k">return</span> <span class="n">out</span></div>
 
 <div class="viewcode-block" id="SourcePDF.from_json_object"><a class="viewcode-back" href="../../../api/minkit.SourcePDF.html#minkit.SourcePDF.from_json_object">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">from_json_object</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">pars</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">from_json_object</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">pars</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 
         <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;SourcePDF&#39;</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">MethodNotDefinedError</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;from_json_object&#39;</span><span class="p">)</span>
@@ -943,7 +987,7 @@
         <span class="n">data_pars</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">pars</span><span class="o">.</span><span class="n">get</span><span class="p">,</span> <span class="n">obj</span><span class="p">[</span><span class="s1">&#39;data_pars&#39;</span><span class="p">]))</span>
         <span class="n">arg_pars</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">pars</span><span class="o">.</span><span class="n">get</span><span class="p">,</span> <span class="n">obj</span><span class="p">[</span><span class="s1">&#39;arg_pars&#39;</span><span class="p">]))</span>
 
-        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">obj</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span> <span class="o">*</span><span class="n">data_pars</span><span class="p">,</span> <span class="o">*</span><span class="n">arg_pars</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">obj</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span> <span class="o">*</span><span class="n">data_pars</span><span class="p">,</span> <span class="o">*</span><span class="n">arg_pars</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="n">backend</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="SourcePDF.function"><a class="viewcode-back" href="../../../api/minkit.SourcePDF.html#minkit.SourcePDF.function">[docs]</a>    <span class="k">def</span> <span class="nf">function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">FULL</span><span class="p">,</span> <span class="n">normalized</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
@@ -1003,7 +1047,7 @@
             <span class="n">res</span> <span class="o">=</span> <span class="n">num</span> <span class="o">/</span> <span class="n">den</span>
             <span class="k">if</span> <span class="n">res</span> <span class="o">&gt;</span> <span class="mf">1.</span><span class="p">:</span>
                 <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                    <span class="n">f</span><span class="s1">&#39;Numerical integral for PDF </span><span class="si">{self.name}</span><span class="s1"> is out of bounds; returning one&#39;</span><span class="p">,</span> <span class="ne">RuntimeWarning</span><span class="p">)</span>
+                    <span class="sa">f</span><span class="s1">&#39;Numerical integral for PDF </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> is out of bounds; returning one&#39;</span><span class="p">,</span> <span class="ne">RuntimeWarning</span><span class="p">)</span>
                 <span class="k">return</span> <span class="mf">1.</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">res</span></div>
@@ -1026,7 +1070,7 @@
     <span class="c1"># with this value set to &quot;True&quot; must have the property &quot;pdfs&quot; implemented.</span>
     <span class="n">dependent</span> <span class="o">=</span> <span class="kc">True</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">pdfs</span><span class="p">,</span> <span class="n">arg_pars</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">pdfs</span><span class="p">,</span> <span class="n">arg_pars</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Base class owing many PDFs.</span>
 
@@ -1052,8 +1096,8 @@
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">data_pars</span><span class="p">,</span> <span class="n">arg_pars</span><span class="p">,</span> <span class="n">backend</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">out</span> <span class="o">=</span> <span class="n">f</span><span class="s1">&#39;</span><span class="si">{self.__class__.__name__}</span><span class="s1">(</span><span class="si">{self.name}</span><span class="s1">):&#39;</span>
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">):&#39;</span>
         <span class="n">out</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="n">textwrap</span><span class="o">.</span><span class="n">indent</span><span class="p">(</span><span class="s1">&#39;Parameters:</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="n">textwrap</span><span class="o">.</span><span class="n">indent</span><span class="p">(</span>
             <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">)),</span> <span class="s1">&#39; &#39;</span><span class="p">),</span> <span class="s1">&#39; &#39;</span><span class="p">)</span>
         <span class="n">out</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="n">textwrap</span><span class="o">.</span><span class="n">indent</span><span class="p">(</span><span class="s1">&#39;PDFs:</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="n">textwrap</span><span class="o">.</span><span class="n">indent</span><span class="p">(</span>
@@ -1089,6 +1133,15 @@
         <span class="k">return</span> <span class="n">pdfs</span>
 
     <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">dependencies</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Registry of PDFs this instance depends on.</span>
+
+<span class="sd">        :type: Registry(PDF)</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__pdfs</span>
+
+    <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">pdfs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Get the registry of PDFs within this class.</span>
@@ -1107,7 +1160,7 @@
         <span class="n">cl</span> <span class="o">=</span> <span class="n">PDF_REGISTRY</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">class_name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">cl</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
-                <span class="n">f</span><span class="s1">&#39;Class &quot;</span><span class="si">{class_name}</span><span class="s1">&quot; does not appear in the registry&#39;</span><span class="p">)</span>
+                <span class="sa">f</span><span class="s1">&#39;Class &quot;</span><span class="si">{</span><span class="n">class_name</span><span class="si">}</span><span class="s1">&quot; does not appear in the registry&#39;</span><span class="p">)</span>
         <span class="c1"># Use the correct constructor</span>
         <span class="k">return</span> <span class="n">cl</span><span class="o">.</span><span class="n">from_json_object</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">pars</span><span class="p">,</span> <span class="n">pdfs</span><span class="p">)</span></div>
 
@@ -1143,13 +1196,13 @@
         <span class="k">for</span> <span class="n">pdf</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__pdfs</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">pdf</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">name</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">pdf</span>
-        <span class="k">raise</span> <span class="ne">LookupError</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;No PDF with name &quot;</span><span class="si">{name}</span><span class="s1">&quot; hass been found&#39;</span><span class="p">)</span></div></div>
+        <span class="k">raise</span> <span class="ne">LookupError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;No PDF with name &quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">&quot; hass been found&#39;</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="AddPDFs"><a class="viewcode-back" href="../../../api/minkit.AddPDFs.html#minkit.AddPDFs">[docs]</a><span class="nd">@register_pdf</span>
 <span class="k">class</span> <span class="nc">AddPDFs</span><span class="p">(</span><span class="n">MultiPDF</span><span class="p">):</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">pdfs</span><span class="p">,</span> <span class="n">yields</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">pdfs</span><span class="p">,</span> <span class="n">yields</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        This special PDF defines the sum of many different PDFs, where each</span>
 <span class="sd">        of them is multiplied by a factor.</span>
@@ -1184,7 +1237,7 @@
         <span class="k">return</span> <span class="n">yields</span>
 
 <div class="viewcode-block" id="AddPDFs.__call__"><a class="viewcode-back" href="../../../api/minkit.AddPDFs.html#minkit.AddPDFs.__call__">[docs]</a>    <span class="nd">@allows_const_cache</span>
-    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">FULL</span><span class="p">,</span> <span class="n">normalized</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">FULL</span><span class="p">,</span> <span class="n">normalized</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 
         <span class="n">yields</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">yields</span>
 
@@ -1293,7 +1346,7 @@
 <div class="viewcode-block" id="ConvPDFs"><a class="viewcode-back" href="../../../api/minkit.ConvPDFs.html#minkit.ConvPDFs">[docs]</a><span class="nd">@register_pdf</span>
 <span class="k">class</span> <span class="nc">ConvPDFs</span><span class="p">(</span><span class="n">MultiPDF</span><span class="p">):</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">first</span><span class="p">,</span> <span class="n">second</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">first</span><span class="p">,</span> <span class="n">second</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Represent the convolution of two different PDFs.</span>
 
@@ -1319,8 +1372,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">range</span> <span class="o">=</span> <span class="nb">range</span> <span class="ow">or</span> <span class="n">parameters</span><span class="o">.</span><span class="n">FULL</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">conv_size</span> <span class="o">=</span> <span class="n">DEFAULT_CONV_SIZE</span>
 
-    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">out</span> <span class="o">=</span> <span class="n">f</span><span class="s1">&#39;</span><span class="si">{self.__class__.__name__}</span><span class="s1">(</span><span class="si">{self.name}</span><span class="s1">):</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">):</span><span class="se">\n</span><span class="s1">&#39;</span>
         <span class="n">out</span> <span class="o">+=</span> <span class="n">textwrap</span><span class="o">.</span><span class="n">indent</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
                                                <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pdfs</span><span class="p">)),</span> <span class="s1">&#39; &#39;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">out</span>
@@ -1369,10 +1422,10 @@
         <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;spline&#39;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__interp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">aop</span><span class="o">.</span><span class="n">make_spline_interpolator</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;Unknown interpolation method &quot;</span><span class="si">{method}</span><span class="s1">&quot;&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Unknown interpolation method &quot;</span><span class="si">{</span><span class="n">method</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="p">)</span>
 
 <div class="viewcode-block" id="ConvPDFs.__call__"><a class="viewcode-back" href="../../../api/minkit.ConvPDFs.html#minkit.ConvPDFs.__call__">[docs]</a>    <span class="nd">@allows_const_cache</span>
-    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">FULL</span><span class="p">,</span> <span class="n">normalized</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">FULL</span><span class="p">,</span> <span class="n">normalized</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 
         <span class="n">interpolator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">convolve</span><span class="p">(</span><span class="n">normalized</span><span class="p">)</span>
 
@@ -1489,7 +1542,7 @@
 <div class="viewcode-block" id="ProdPDFs"><a class="viewcode-back" href="../../../api/minkit.ProdPDFs.html#minkit.ProdPDFs">[docs]</a><span class="nd">@register_pdf</span>
 <span class="k">class</span> <span class="nc">ProdPDFs</span><span class="p">(</span><span class="n">MultiPDF</span><span class="p">):</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">pdfs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">pdfs</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        This object represents the product of many PDFs where the data parameters are</span>
 <span class="sd">        not shared among them.</span>
@@ -1502,7 +1555,7 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">pdfs</span><span class="p">,</span> <span class="p">[])</span>
 
 <div class="viewcode-block" id="ProdPDFs.__call__"><a class="viewcode-back" href="../../../api/minkit.ProdPDFs.html#minkit.ProdPDFs.__call__">[docs]</a>    <span class="nd">@allows_const_cache</span>
-    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">FULL</span><span class="p">,</span> <span class="n">normalized</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">FULL</span><span class="p">,</span> <span class="n">normalized</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 
         <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">aop</span><span class="o">.</span><span class="n">fones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
         <span class="k">for</span> <span class="n">pdf</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pdfs</span><span class="p">:</span>
@@ -1510,8 +1563,8 @@
 
         <span class="k">return</span> <span class="n">out</span></div>
 
-    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">out</span> <span class="o">=</span> <span class="n">f</span><span class="s1">&#39;</span><span class="si">{self.__class__.__name__}</span><span class="s1">(</span><span class="si">{self.name}</span><span class="s1">):</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">):</span><span class="se">\n</span><span class="s1">&#39;</span>
         <span class="n">out</span> <span class="o">+=</span> <span class="n">textwrap</span><span class="o">.</span><span class="n">indent</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
                                                <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pdfs</span><span class="p">)),</span> <span class="s1">&#39; &#39;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">out</span>
@@ -1571,12 +1624,14 @@
                 <span class="s1">&#39;pdfs&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">pdfs</span><span class="o">.</span><span class="n">names</span><span class="p">}</span></div></div>
 
 
-<div class="viewcode-block" id="pdf_from_json"><a class="viewcode-back" href="../../../api/minkit.pdf_from_json.html#minkit.pdf_from_json">[docs]</a><span class="k">def</span> <span class="nf">pdf_from_json</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
+<div class="viewcode-block" id="pdf_from_json"><a class="viewcode-back" href="../../../api/minkit.pdf_from_json.html#minkit.pdf_from_json">[docs]</a><span class="k">def</span> <span class="nf">pdf_from_json</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Load a PDF from a JSON object.</span>
 
 <span class="sd">    :param obj: JSON-like object.</span>
 <span class="sd">    :type obj: dict</span>
+<span class="sd">    :param backend: backend to build the PDF.</span>
+<span class="sd">    :type backend: Backend</span>
 <span class="sd">    :returns: A PDF with the configuration from the object.</span>
 <span class="sd">    :rtype: PDF</span>
 <span class="sd">    &#39;&#39;&#39;</span>
@@ -1589,39 +1644,13 @@
 
     <span class="c1"># Parse PDFs</span>
     <span class="n">pdfs</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">Registry</span><span class="p">(</span>
-        <span class="p">[</span><span class="n">PDF</span><span class="o">.</span><span class="n">from_json_object</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="n">pars</span><span class="p">)</span> <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">obj</span><span class="p">[</span><span class="s1">&#39;ipdfs&#39;</span><span class="p">]])</span>
+        <span class="p">[</span><span class="n">PDF</span><span class="o">.</span><span class="n">from_json_object</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="n">pars</span><span class="p">,</span> <span class="n">backend</span><span class="p">)</span> <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">obj</span><span class="p">[</span><span class="s1">&#39;ipdfs&#39;</span><span class="p">]])</span>
 
     <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">obj</span><span class="p">[</span><span class="s1">&#39;dpdfs&#39;</span><span class="p">]:</span>
         <span class="n">pdfs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">MultiPDF</span><span class="o">.</span><span class="n">from_json_object</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="n">pars</span><span class="p">,</span> <span class="n">pdfs</span><span class="p">))</span>
 
     <span class="c1"># Last PDF to be constructed is the main PDF</span>
     <span class="k">return</span> <span class="n">pdfs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span></div>
-
-
-<span class="k">def</span> <span class="nf">_solve_dependencies</span><span class="p">(</span><span class="n">objects</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    Get the resolution order for the given set of dependencies.</span>
-
-<span class="sd">    :param objects: names of the objects with their dependencies.</span>
-<span class="sd">    :type objects: list(tuple(str, list(str)))</span>
-<span class="sd">    :returns: Resolution order.</span>
-<span class="sd">    :rtype: list(str)</span>
-<span class="sd">    &#39;&#39;&#39;</span>
-    <span class="n">ntot</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">objects</span><span class="p">)</span>
-
-    <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
-
-    <span class="n">objects</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">objects</span><span class="p">)</span>
-    <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="o">!=</span> <span class="n">ntot</span><span class="p">:</span>
-        <span class="n">new_objects</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">lst</span> <span class="ow">in</span> <span class="n">objects</span><span class="p">:</span>
-            <span class="n">l</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">lst</span><span class="p">)</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">l</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">new_objects</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">name</span><span class="p">,</span> <span class="n">l</span><span class="p">))</span>
-        <span class="n">objects</span> <span class="o">=</span> <span class="n">new_objects</span>
-    <span class="k">return</span> <span class="n">result</span>
 
 
 <div class="viewcode-block" id="pdf_to_json"><a class="viewcode-back" href="../../../api/minkit.pdf_to_json.html#minkit.pdf_to_json">[docs]</a><span class="k">def</span> <span class="nf">pdf_to_json</span><span class="p">(</span><span class="n">pdf</span><span class="p">):</span>
@@ -1633,40 +1662,17 @@
 <span class="sd">    :returns: JSON-like object.</span>
 <span class="sd">    :rtype: dict</span>
 <span class="sd">    &#39;&#39;&#39;</span>
-    <span class="c1"># Declare some lambda functions to make code more readable</span>
-    <span class="k">def</span> <span class="nf">is_dependent</span><span class="p">(</span><span class="n">p</span><span class="p">):</span> <span class="k">return</span> <span class="n">p</span><span class="o">.</span><span class="n">dependent</span>
-    <span class="k">def</span> <span class="nf">not_dependent</span><span class="p">(</span><span class="n">p</span><span class="p">):</span> <span class="k">return</span> <span class="ow">not</span> <span class="n">p</span><span class="o">.</span><span class="n">dependent</span>
-
-    <span class="c1"># Solve dependencies for ParameterFormula objects</span>
-    <span class="n">pars</span> <span class="o">=</span> <span class="n">pdf</span><span class="o">.</span><span class="n">all_pars</span>
-    <span class="n">ipars</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">Registry</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="n">not_dependent</span><span class="p">,</span> <span class="n">pars</span><span class="p">))</span>
-    <span class="n">dpars</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">Registry</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="n">is_dependent</span><span class="p">,</span> <span class="n">pars</span><span class="p">))</span>
-    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">filter</span><span class="p">(</span><span class="n">is_dependent</span><span class="p">,</span> <span class="n">pars</span><span class="p">):</span>
-
-        <span class="n">pars</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">all_args</span>
-        <span class="n">ipars</span> <span class="o">+=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">Registry</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="n">not_dependent</span><span class="p">,</span> <span class="n">pars</span><span class="p">))</span>
-        <span class="n">dpars</span> <span class="o">+=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">Registry</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="n">is_dependent</span><span class="p">,</span> <span class="n">pars</span><span class="p">))</span>
-
-    <span class="n">ro</span> <span class="o">=</span> <span class="n">_solve_dependencies</span><span class="p">(</span>
-        <span class="p">[(</span><span class="n">d</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="nb">set</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">all_args</span><span class="o">.</span><span class="n">names</span><span class="p">)</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">ipars</span><span class="o">.</span><span class="n">names</span><span class="p">))</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">dpars</span><span class="p">])</span>
-
-    <span class="n">dpars</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">Registry</span><span class="p">([</span><span class="n">dpars</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">ro</span><span class="p">])</span>
+    <span class="c1"># Solve dependencies for parameters</span>
+    <span class="n">ipars</span><span class="p">,</span> <span class="n">dpars</span> <span class="o">=</span> <span class="n">dependencies</span><span class="o">.</span><span class="n">split_dependent_objects_with_resolution_order</span><span class="p">(</span>
+        <span class="n">pdf</span><span class="o">.</span><span class="n">all_pars</span><span class="p">)</span>
 
     <span class="c1"># Solve dependencies for PDF objects</span>
     <span class="k">if</span> <span class="n">pdf</span><span class="o">.</span><span class="n">dependent</span><span class="p">:</span>
-        <span class="n">pdfs</span> <span class="o">=</span> <span class="n">pdf</span><span class="o">.</span><span class="n">all_pdfs</span>
-        <span class="n">ipdfs</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">Registry</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="n">not_dependent</span><span class="p">,</span> <span class="n">pdfs</span><span class="p">))</span>
-        <span class="n">dpdfs</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">Registry</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="n">is_dependent</span><span class="p">,</span> <span class="n">pdfs</span><span class="p">))</span>
-
-        <span class="n">dpdfs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pdf</span><span class="p">)</span>  <span class="c1"># Do not forget to add itself</span>
-
-        <span class="n">ro</span> <span class="o">=</span> <span class="n">_solve_dependencies</span><span class="p">(</span>
-            <span class="p">[(</span><span class="n">d</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="nb">set</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">all_pdfs</span><span class="o">.</span><span class="n">names</span><span class="p">)</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">ipdfs</span><span class="o">.</span><span class="n">names</span><span class="p">))</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">dpdfs</span><span class="p">])</span>
-
-        <span class="n">dpdfs</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">Registry</span><span class="p">([</span><span class="n">dpdfs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">ro</span><span class="p">])</span>
+        <span class="n">ipdfs</span><span class="p">,</span> <span class="n">dpdfs</span> <span class="o">=</span> <span class="n">dependencies</span><span class="o">.</span><span class="n">split_dependent_objects_with_resolution_order</span><span class="p">(</span>
+            <span class="n">pdf</span><span class="o">.</span><span class="n">pdfs</span><span class="p">)</span>
+        <span class="n">dpdfs</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">pdf</span><span class="p">)</span>  <span class="c1"># must include this PDF</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">ipdfs</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">Registry</span><span class="p">([</span><span class="n">pdf</span><span class="p">])</span>
-        <span class="n">dpdfs</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">Registry</span><span class="p">()</span>
+        <span class="n">ipdfs</span><span class="p">,</span> <span class="n">dpdfs</span> <span class="o">=</span> <span class="p">[</span><span class="n">pdf</span><span class="p">],</span> <span class="p">[]</span>
 
     <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;dpdfs&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">pdf</span><span class="o">.</span><span class="n">to_json_object</span><span class="p">()</span> <span class="k">for</span> <span class="n">pdf</span> <span class="ow">in</span> <span class="n">dpdfs</span><span class="p">],</span>
             <span class="s1">&#39;ipdfs&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">pdf</span><span class="o">.</span><span class="n">to_json_object</span><span class="p">()</span> <span class="k">for</span> <span class="n">pdf</span> <span class="ow">in</span> <span class="n">ipdfs</span><span class="p">],</span>

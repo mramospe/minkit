@@ -5,3 +5,29 @@ Category
 
 .. autoclass:: Category
    :show-inheritance:
+
+   .. rubric:: Attributes Summary
+
+   .. autosummary::
+
+      ~Category.data
+      ~Category.fcn
+      ~Category.pdf
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+
+      ~Category.count
+      ~Category.index
+
+   .. rubric:: Attributes Documentation
+
+   .. autoattribute:: data
+   .. autoattribute:: fcn
+   .. autoattribute:: pdf
+
+   .. rubric:: Methods Documentation
+
+   .. automethod:: count
+   .. automethod:: index

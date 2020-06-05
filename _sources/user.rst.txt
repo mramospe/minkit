@@ -11,6 +11,7 @@ For a detailed description of the different functions and classes of the package
    notebooks/datasets
    notebooks/basic
    notebooks/minimization
+   notebooks/uncertainties
    notebooks/fit_stability
    notebooks/multidimensional
    notebooks/extension

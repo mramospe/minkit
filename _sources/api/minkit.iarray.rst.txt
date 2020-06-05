@@ -6,12 +6,40 @@ iarray
 .. autoclass:: iarray
    :show-inheritance:
 
+   .. rubric:: Attributes Summary
+
+   .. autosummary::
+
+      ~iarray.aop
+      ~iarray.backend
+      ~iarray.dtype
+      ~iarray.length
+      ~iarray.shape
+      ~iarray.ua
+
    .. rubric:: Methods Summary
 
    .. autosummary::
 
+      ~iarray.as_ndarray
+      ~iarray.copy
       ~iarray.from_ndarray
+      ~iarray.get
+      ~iarray.to_backend
+
+   .. rubric:: Attributes Documentation
+
+   .. autoattribute:: aop
+   .. autoattribute:: backend
+   .. autoattribute:: dtype
+   .. autoattribute:: length
+   .. autoattribute:: shape
+   .. autoattribute:: ua
 
    .. rubric:: Methods Documentation
 
+   .. automethod:: as_ndarray
+   .. automethod:: copy
    .. automethod:: from_ndarray
+   .. automethod:: get
+   .. automethod:: to_backend

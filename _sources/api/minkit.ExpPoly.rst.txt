@@ -5,3 +5,85 @@ ExpPoly
 
 .. autoclass:: ExpPoly
    :show-inheritance:
+
+   .. rubric:: Attributes Summary
+
+   .. autosummary::
+
+      ~ExpPoly.BIND
+      ~ExpPoly.CACHE_TYPES
+      ~ExpPoly.CONST
+      ~ExpPoly.all_args
+      ~ExpPoly.all_pars
+      ~ExpPoly.all_real_args
+      ~ExpPoly.aop
+      ~ExpPoly.args
+      ~ExpPoly.backend
+      ~ExpPoly.cache
+      ~ExpPoly.cache_type
+      ~ExpPoly.constant
+      ~ExpPoly.data_pars
+      ~ExpPoly.dependent
+      ~ExpPoly.numint_config
+      ~ExpPoly.real_args
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+
+      ~ExpPoly.__call__
+      ~ExpPoly.bind
+      ~ExpPoly.copy
+      ~ExpPoly.evaluate_binned
+      ~ExpPoly.from_json_object
+      ~ExpPoly.function
+      ~ExpPoly.generate
+      ~ExpPoly.get_values
+      ~ExpPoly.integral
+      ~ExpPoly.norm
+      ~ExpPoly.numerical_integral
+      ~ExpPoly.numerical_normalization
+      ~ExpPoly.restoring_state
+      ~ExpPoly.set_values
+      ~ExpPoly.to_backend
+      ~ExpPoly.to_json_object
+      ~ExpPoly.using_cache
+
+   .. rubric:: Attributes Documentation
+
+   .. autoattribute:: BIND
+   .. autoattribute:: CACHE_TYPES
+   .. autoattribute:: CONST
+   .. autoattribute:: all_args
+   .. autoattribute:: all_pars
+   .. autoattribute:: all_real_args
+   .. autoattribute:: aop
+   .. autoattribute:: args
+   .. autoattribute:: backend
+   .. autoattribute:: cache
+   .. autoattribute:: cache_type
+   .. autoattribute:: constant
+   .. autoattribute:: data_pars
+   .. autoattribute:: dependent
+   .. autoattribute:: numint_config
+   .. autoattribute:: real_args
+
+   .. rubric:: Methods Documentation
+
+   .. automethod:: __call__
+   .. automethod:: bind
+   .. automethod:: copy
+   .. automethod:: evaluate_binned
+   .. automethod:: from_json_object
+   .. automethod:: function
+   .. automethod:: generate
+   .. automethod:: get_values
+   .. automethod:: integral
+   .. automethod:: norm
+   .. automethod:: numerical_integral
+   .. automethod:: numerical_normalization
+   .. automethod:: restoring_state
+   .. automethod:: set_values
+   .. automethod:: to_backend
+   .. automethod:: to_json_object
+   .. automethod:: using_cache

@@ -17,10 +17,15 @@ MinuitMinimizer
 
    .. autosummary::
 
+      ~MinuitMinimizer.asymmetric_errors
+      ~MinuitMinimizer.fcn_profile
       ~MinuitMinimizer.hesse
       ~MinuitMinimizer.migrad
+      ~MinuitMinimizer.minimization_profile
+      ~MinuitMinimizer.minimize
       ~MinuitMinimizer.minos
-      ~MinuitMinimizer.result_to_registry
+      ~MinuitMinimizer.restoring_state
+      ~MinuitMinimizer.set_parameter_state
 
    .. rubric:: Attributes Documentation
 
@@ -29,7 +34,12 @@ MinuitMinimizer
 
    .. rubric:: Methods Documentation
 
+   .. automethod:: asymmetric_errors
+   .. automethod:: fcn_profile
    .. automethod:: hesse
    .. automethod:: migrad
+   .. automethod:: minimization_profile
+   .. automethod:: minimize
    .. automethod:: minos
-   .. automethod:: result_to_registry
+   .. automethod:: restoring_state
+   .. automethod:: set_parameter_state

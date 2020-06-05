@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pdf_from_json &mdash; minkit 0.0.0.dev0 documentation</title>
+  <title>pdf_from_json &mdash; minkit 0.0.0.dev1 documentation</title>
   
 
   
@@ -64,7 +64,7 @@
             
             
               <div class="version">
-                0.0.0.dev0
+                0.0.0.dev1
               </div>
             
           
@@ -99,13 +99,11 @@
 <li class="toctree-l3"><a class="reference internal" href="minkit.binned_extended_maximum_likelihood.html">binned_extended_maximum_likelihood</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.binned_maximum_likelihood.html">binned_maximum_likelihood</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.data_plotting_arrays.html">data_plotting_arrays</a></li>
-<li class="toctree-l3"><a class="reference internal" href="minkit.fcn_profile.html">fcn_profile</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.minimizer.html">minimizer</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">pdf_from_json</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.pdf_plotting_arrays.html">pdf_plotting_arrays</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.pdf_to_json.html">pdf_to_json</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.register_pdf.html">register_pdf</a></li>
-<li class="toctree-l3"><a class="reference internal" href="minkit.simultaneous_fcn_profile.html">simultaneous_fcn_profile</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.simultaneous_minimizer.html">simultaneous_minimizer</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.sweights.html">sweights</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.sweights_u.html">sweights_u</a></li>
@@ -213,11 +211,14 @@
 <h1>pdf_from_json<a class="headerlink" href="#pdf-from-json" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
 <dt id="minkit.pdf_from_json">
-<code class="sig-prename descclassname">minkit.</code><code class="sig-name descname">pdf_from_json</code><span class="sig-paren">(</span><em class="sig-param">obj</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/pdfs/pdf_core.html#pdf_from_json"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.pdf_from_json" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">minkit.</code><code class="sig-name descname">pdf_from_json</code><span class="sig-paren">(</span><em class="sig-param">obj</em>, <em class="sig-param">backend=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/pdfs/pdf_core.html#pdf_from_json"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.pdf_from_json" title="Permalink to this definition">¶</a></dt>
 <dd><p>Load a PDF from a JSON object.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>obj</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – JSON-like object.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>obj</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – JSON-like object.</p></li>
+<li><p><strong>backend</strong> (<a class="reference internal" href="minkit.Backend.html#minkit.Backend" title="minkit.Backend"><em>Backend</em></a>) – backend to build the PDF.</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>A PDF with the configuration from the object.</p>

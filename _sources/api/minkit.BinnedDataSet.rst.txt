@@ -10,10 +10,14 @@ BinnedDataSet
 
    .. autosummary::
 
+      ~BinnedDataSet.aop
+      ~BinnedDataSet.backend
       ~BinnedDataSet.bounds
+      ~BinnedDataSet.data_pars
       ~BinnedDataSet.edges
       ~BinnedDataSet.edges_indices
       ~BinnedDataSet.gaps
+      ~BinnedDataSet.ndim
       ~BinnedDataSet.sample_type
       ~BinnedDataSet.values
 
@@ -26,10 +30,14 @@ BinnedDataSet
 
    .. rubric:: Attributes Documentation
 
+   .. autoattribute:: aop
+   .. autoattribute:: backend
    .. autoattribute:: bounds
+   .. autoattribute:: data_pars
    .. autoattribute:: edges
    .. autoattribute:: edges_indices
    .. autoattribute:: gaps
+   .. autoattribute:: ndim
    .. autoattribute:: sample_type
    .. autoattribute:: values
 

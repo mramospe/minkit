@@ -5,3 +5,85 @@ Gaussian
 
 .. autoclass:: Gaussian
    :show-inheritance:
+
+   .. rubric:: Attributes Summary
+
+   .. autosummary::
+
+      ~Gaussian.BIND
+      ~Gaussian.CACHE_TYPES
+      ~Gaussian.CONST
+      ~Gaussian.all_args
+      ~Gaussian.all_pars
+      ~Gaussian.all_real_args
+      ~Gaussian.aop
+      ~Gaussian.args
+      ~Gaussian.backend
+      ~Gaussian.cache
+      ~Gaussian.cache_type
+      ~Gaussian.constant
+      ~Gaussian.data_pars
+      ~Gaussian.dependent
+      ~Gaussian.numint_config
+      ~Gaussian.real_args
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+
+      ~Gaussian.__call__
+      ~Gaussian.bind
+      ~Gaussian.copy
+      ~Gaussian.evaluate_binned
+      ~Gaussian.from_json_object
+      ~Gaussian.function
+      ~Gaussian.generate
+      ~Gaussian.get_values
+      ~Gaussian.integral
+      ~Gaussian.norm
+      ~Gaussian.numerical_integral
+      ~Gaussian.numerical_normalization
+      ~Gaussian.restoring_state
+      ~Gaussian.set_values
+      ~Gaussian.to_backend
+      ~Gaussian.to_json_object
+      ~Gaussian.using_cache
+
+   .. rubric:: Attributes Documentation
+
+   .. autoattribute:: BIND
+   .. autoattribute:: CACHE_TYPES
+   .. autoattribute:: CONST
+   .. autoattribute:: all_args
+   .. autoattribute:: all_pars
+   .. autoattribute:: all_real_args
+   .. autoattribute:: aop
+   .. autoattribute:: args
+   .. autoattribute:: backend
+   .. autoattribute:: cache
+   .. autoattribute:: cache_type
+   .. autoattribute:: constant
+   .. autoattribute:: data_pars
+   .. autoattribute:: dependent
+   .. autoattribute:: numint_config
+   .. autoattribute:: real_args
+
+   .. rubric:: Methods Documentation
+
+   .. automethod:: __call__
+   .. automethod:: bind
+   .. automethod:: copy
+   .. automethod:: evaluate_binned
+   .. automethod:: from_json_object
+   .. automethod:: function
+   .. automethod:: generate
+   .. automethod:: get_values
+   .. automethod:: integral
+   .. automethod:: norm
+   .. automethod:: numerical_integral
+   .. automethod:: numerical_normalization
+   .. automethod:: restoring_state
+   .. automethod:: set_values
+   .. automethod:: to_backend
+   .. automethod:: to_json_object
+   .. automethod:: using_cache

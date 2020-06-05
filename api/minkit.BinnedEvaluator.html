@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>BinnedEvaluator &mdash; minkit 0.0.0.dev0 documentation</title>
+  <title>BinnedEvaluator &mdash; minkit 0.0.0.dev1 documentation</title>
   
 
   
@@ -64,7 +64,7 @@
             
             
               <div class="version">
-                0.0.0.dev0
+                0.0.0.dev1
               </div>
             
           
@@ -267,7 +267,10 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#minkit.BinnedEvaluator.__call__" title="minkit.BinnedEvaluator.__call__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__call__</span></code></a>(*values)</p></td>
 <td><p>Evaluate the FCN.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#minkit.BinnedEvaluator.using_caches" title="minkit.BinnedEvaluator.using_caches"><code class="xref py py-obj docutils literal notranslate"><span class="pre">using_caches</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#minkit.BinnedEvaluator.fcn" title="minkit.BinnedEvaluator.fcn"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fcn</span></code></a>()</p></td>
+<td><p>Calculate the value of the FCN with the current set of values.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.BinnedEvaluator.using_caches" title="minkit.BinnedEvaluator.using_caches"><code class="xref py py-obj docutils literal notranslate"><span class="pre">using_caches</span></code></a>()</p></td>
 <td><p>Create a context where the cache of the PDF is activated.</p></td>
 </tr>
 </tbody>
@@ -299,6 +302,20 @@ Values must be provided sorted as <a class="reference internal" href="minkit.PDF
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.BinnedEvaluator.fcn">
+<code class="sig-name descname">fcn</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/minimization/evaluators.html#BinnedEvaluator.fcn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.BinnedEvaluator.fcn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the value of the FCN with the current set of values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Value of the FCN.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></p>
 </dd>
 </dl>
 </dd></dl>

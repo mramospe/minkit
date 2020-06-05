@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>minkit.base.parameters &mdash; minkit 0.0.0.dev0 documentation</title>
+  <title>minkit.base.parameters &mdash; minkit 0.0.0.dev1 documentation</title>
   
 
   
@@ -62,7 +62,7 @@
             
             
               <div class="version">
-                0.0.0.dev0
+                0.0.0.dev1
               </div>
             
           
@@ -156,14 +156,21 @@
            <div itemprop="articleBody">
             
   <h1>Source code for minkit.base.parameters</h1><div class="highlight"><pre>
-<span></span><span class="sd">&#39;&#39;&#39;</span>
+<span></span><span class="c1">########################################</span>
+<span class="c1"># MIT License</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright (c) 2020 Miguel Ramos Pernas</span>
+<span class="c1">########################################</span>
+<span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">Define classes and functions to work with parameters.</span>
 <span class="sd">&#39;&#39;&#39;</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">core</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">data_types</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">exceptions</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">core</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">data_types</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">dependencies</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">exceptions</span>
 
 <span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">import</span> <span class="nn">contextlib</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
@@ -182,11 +189,23 @@
     <span class="c1"># defined.</span>
     <span class="n">dependent</span> <span class="o">=</span> <span class="kc">False</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Abstract class for parameter objects.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+<div class="viewcode-block" id="ParameterBase.copy"><a class="viewcode-back" href="../../../api/minkit.ParameterBase.html#minkit.ParameterBase.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Create a copy of this instance.</span>
+
+<span class="sd">        .. warning::</span>
+
+<span class="sd">           Avoid calling this method directly for sets of parameters and use the</span>
+<span class="sd">           :meth:`Registry.copy` method instead, so the possible dependencies</span>
+<span class="sd">           among parameters are correctly solved.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">MethodNotDefinedError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span> <span class="s1">&#39;copy&#39;</span><span class="p">)</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -210,6 +229,14 @@
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">MethodNotDefinedError</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;from_json_object&#39;</span><span class="p">)</span></div>
 
+<div class="viewcode-block" id="ParameterBase.restoring_state"><a class="viewcode-back" href="../../../api/minkit.ParameterBase.html#minkit.ParameterBase.restoring_state">[docs]</a>    <span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
+    <span class="k">def</span> <span class="nf">restoring_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Enter a context where the attributes of the parameter will be restored</span>
+<span class="sd">        on exit.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">yield</span> <span class="bp">self</span></div>
+
 <div class="viewcode-block" id="ParameterBase.to_json_object"><a class="viewcode-back" href="../../../api/minkit.ParameterBase.html#minkit.ParameterBase.to_json_object">[docs]</a>    <span class="k">def</span> <span class="nf">to_json_object</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Represent this class as a JSON-like object.</span>
@@ -223,7 +250,7 @@
 
 <div class="viewcode-block" id="Parameter"><a class="viewcode-back" href="../../../api/minkit.Parameter.html#minkit.Parameter">[docs]</a><span class="k">class</span> <span class="nc">Parameter</span><span class="p">(</span><span class="n">ParameterBase</span><span class="p">):</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ranges</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">asym_errors</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ranges</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">asym_errors</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Object to represent a parameter for a PDF.</span>
 
@@ -253,13 +280,14 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span> <span class="o">=</span> <span class="n">bounds</span>  <span class="c1"># This sets the FULL range</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">error</span> <span class="o">=</span> <span class="n">error</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">asym_errors</span> <span class="o">=</span> <span class="n">asym_errors</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">asym_errors</span> <span class="o">=</span> <span class="n">asym_errors</span> <span class="k">if</span> <span class="n">asym_errors</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">tuple</span><span class="p">(</span>
+            <span class="n">asym_errors</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">ranges</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">ranges</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">set_range</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">r</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Rerpresent this class as a string, showing its attributes.</span>
 
@@ -305,6 +333,18 @@
     <span class="k">def</span> <span class="nf">constant</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__constant</span> <span class="o">=</span> <span class="n">v</span>
 
+<div class="viewcode-block" id="Parameter.copy"><a class="viewcode-back" href="../../../api/minkit.Parameter.html#minkit.Parameter.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># a copy is created during __init__ for bounds, ranges, and asym_errors</span>
+        <span class="n">ranges</span> <span class="o">=</span> <span class="p">{</span><span class="n">r</span><span class="p">:</span> <span class="n">n</span> <span class="k">for</span> <span class="n">r</span><span class="p">,</span> <span class="n">n</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__ranges</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">r</span> <span class="o">!=</span> <span class="n">FULL</span><span class="p">}</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__bounds</span><span class="p">,</span> <span class="n">ranges</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">error</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__constant</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">asym_errors</span><span class="p">)</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">ranges</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Names of the parameter ranges.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__ranges</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
 <div class="viewcode-block" id="Parameter.from_json_object"><a class="viewcode-back" href="../../../api/minkit.Parameter.html#minkit.Parameter.from_json_object">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_json_object</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
@@ -343,8 +383,16 @@
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="n">FULL</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="n">f</span><span class="s1">&#39;Range name &quot;</span><span class="si">{name}</span><span class="s1">&quot; is protected; can not be used&#39;</span><span class="p">)</span>
+                <span class="sa">f</span><span class="s1">&#39;Range name &quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">&quot; is protected; can not be used&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__ranges</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_types</span><span class="o">.</span><span class="n">array_float</span><span class="p">(</span><span class="n">values</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Parameter.restoring_state"><a class="viewcode-back" href="../../../api/minkit.Parameter.html#minkit.Parameter.restoring_state">[docs]</a>    <span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
+    <span class="k">def</span> <span class="nf">restoring_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">ranges</span> <span class="o">=</span> <span class="p">{</span><span class="n">n</span><span class="p">:</span> <span class="n">r</span> <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">r</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__ranges</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">n</span> <span class="o">!=</span> <span class="n">FULL</span><span class="p">}</span>
+        <span class="n">vals</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span><span class="p">,</span> <span class="n">ranges</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">error</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">constant</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">asym_errors</span><span class="p">)</span>
+        <span class="k">yield</span> <span class="bp">self</span>
+        <span class="bp">self</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">vals</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Parameter.to_json_object"><a class="viewcode-back" href="../../../api/minkit.Parameter.html#minkit.Parameter.to_json_object">[docs]</a>    <span class="k">def</span> <span class="nf">to_json_object</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
@@ -386,9 +434,16 @@
 
     <span class="n">dependent</span> <span class="o">=</span> <span class="kc">True</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">formula</span><span class="p">,</span> <span class="n">pars</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">formula</span><span class="p">,</span> <span class="n">pars</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Parameter representing an operation of many parameters.</span>
+<span class="sd">        The formula can be expressed as a function of parameter names, as a function</span>
+<span class="sd">        of indices or a mixture of the two, like:</span>
+
+<span class="sd">        * *Parameter names*: &quot;a * b&quot; will multiply *a* and *b*.</span>
+<span class="sd">        * *Indices*: &quot;{0} * {1}&quot; will multiply the first and second elements in *pars*.</span>
+<span class="sd">        * *Mixed*: &quot;{a} * {b} + {1}&quot; will multiply *a* and *b* and sum the second element \</span>
+<span class="sd">        in *pars*.</span>
 
 <span class="sd">        :param name: name of the parameter.</span>
 <span class="sd">        :type name: str</span>
@@ -400,21 +455,10 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__formula</span> <span class="o">=</span> <span class="n">formula</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__pars</span> <span class="o">=</span> <span class="n">Registry</span><span class="p">(</span><span class="n">pars</span><span class="p">)</span>
 
-        <span class="c1"># Replace the names of the parameters with brackets</span>
-        <span class="n">names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
-            <span class="nb">reversed</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">len</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__pars</span><span class="o">.</span><span class="n">names</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">__pars</span><span class="o">.</span><span class="n">names</span><span class="p">))))</span>
-        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">names</span><span class="p">):</span>
-            <span class="n">formula</span> <span class="o">=</span> <span class="n">formula</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="s1">&#39;{&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;}&#39;</span><span class="p">)</span>
-
-        <span class="c1"># Avoid partially replacing similar names</span>
-        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">names</span><span class="p">):</span>
-            <span class="n">formula</span> <span class="o">=</span> <span class="n">formula</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;{&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;}&#39;</span><span class="p">,</span> <span class="s1">&#39;{&#39;</span> <span class="o">+</span> <span class="n">n</span> <span class="o">+</span> <span class="s1">&#39;}&#39;</span><span class="p">)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">__formula</span> <span class="o">=</span> <span class="n">formula</span>
-
-    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Rerpresent this class as a string, showing its attributes.</span>
 
@@ -425,25 +469,34 @@
             <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__formula</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__pars</span><span class="o">.</span><span class="n">names</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">all_args</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">args</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        All argument parameters this object depends on.</span>
+<span class="sd">        Argument parameters this object directly depends on.</span>
 
 <span class="sd">        :type: Registry(Parameter)</span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="n">pars</span> <span class="o">=</span> <span class="n">Registry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__pars</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="n">p</span><span class="o">.</span><span class="n">dependent</span><span class="p">,</span> <span class="n">pars</span><span class="p">):</span>
-            <span class="n">pars</span> <span class="o">+=</span> <span class="n">p</span><span class="o">.</span><span class="n">all_args</span>
-        <span class="k">return</span> <span class="n">pars</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__pars</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">args</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">dependencies</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Registry of parameters this instance depends on.</span>
+
+<span class="sd">        :type: Registry(Parameter)</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__pars</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">all_args</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Argument parameters this object depends on.</span>
 
 <span class="sd">        :type: Registry(Parameter)</span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__pars</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="n">Registry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__pars</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="n">p</span><span class="o">.</span><span class="n">dependent</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+            <span class="n">args</span> <span class="o">+=</span> <span class="n">p</span><span class="o">.</span><span class="n">all_args</span>
+        <span class="k">return</span> <span class="n">args</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -455,6 +508,23 @@
         <span class="n">values</span> <span class="o">=</span> <span class="p">{</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">p</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">}</span>
         <span class="k">return</span> <span class="n">core</span><span class="o">.</span><span class="n">eval_math_expression</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__formula</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">**</span><span class="n">values</span><span class="p">))</span>
 
+<div class="viewcode-block" id="Formula.copy"><a class="viewcode-back" href="../../../api/minkit.Formula.html#minkit.Formula.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pars</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Create a copy of this instance.</span>
+
+<span class="sd">        :param pars: parameter to build the class.</span>
+<span class="sd">        :type pars: Registry</span>
+<span class="sd">        :returns: A copy of this instance.</span>
+<span class="sd">        :rtype: Formula</span>
+
+<span class="sd">        .. warning::</span>
+
+<span class="sd">           Avoid calling this method directly for sets of parameters and use the</span>
+<span class="sd">           :meth:`Registry.copy` method instead, so the possible dependencies</span>
+<span class="sd">           among parameters are correctly solved.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__formula</span><span class="p">,</span> <span class="n">pars</span><span class="p">)</span></div>
+
 <div class="viewcode-block" id="Formula.from_json_object"><a class="viewcode-back" href="../../../api/minkit.Formula.html#minkit.Formula.from_json_object">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_json_object</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">pars</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
@@ -463,6 +533,8 @@
 
 <span class="sd">        :param obj: object to use to construct the class.</span>
 <span class="sd">        :type obj: dict</span>
+<span class="sd">        :param pars: registry with the parameters this object depends on.</span>
+<span class="sd">        :type pars: Registry</span>
 <span class="sd">        :returns: parameter created from the JSON object.</span>
 <span class="sd">        :rtype: Parameter</span>
 <span class="sd">        &#39;&#39;&#39;</span>
@@ -494,7 +566,7 @@
 
 <div class="viewcode-block" id="Registry"><a class="viewcode-back" href="../../../api/minkit.Registry.html#minkit.Registry">[docs]</a><span class="k">class</span> <span class="nc">Registry</span><span class="p">(</span><span class="nb">list</span><span class="p">):</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Extension of list to hold information used in :py:mod:`minkit`.</span>
 <span class="sd">        It represents a collection of objects with the attribute *name*, providing a unique</span>
@@ -504,9 +576,9 @@
 <span class="sd">        If they are not, then an error is raised.</span>
 <span class="sd">        Constructor is directly forwarded to :class:`list`.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">Registry</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Add elements from another registry inplace.</span>
 <span class="sd">        Only elements with different names to those in the registry are added.</span>
@@ -519,7 +591,7 @@
         <span class="n">res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">res</span><span class="o">.</span><span class="fm">__iadd__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">__iadd__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__iadd__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Add elements from another registry inplace.</span>
 <span class="sd">        Only elements with different names to those in the registry are added.</span>
@@ -531,16 +603,7 @@
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">names</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_raise_if_not_same</span><span class="p">(</span><span class="n">el</span><span class="p">)</span>
-        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">Registry</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__iadd__</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">names</span><span class="p">,</span> <span class="n">other</span><span class="p">))</span>
-
-    <span class="k">def</span> <span class="nf">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Get the length of the registry.</span>
-
-<span class="sd">        :returns: length of the registry.</span>
-<span class="sd">        :rtype: int</span>
-<span class="sd">        &#39;&#39;&#39;</span>
-        <span class="k">return</span> <span class="n">data_types</span><span class="o">.</span><span class="n">cpu_int</span><span class="p">(</span><span class="nb">super</span><span class="p">(</span><span class="n">Registry</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__len__</span><span class="p">())</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__iadd__</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">names</span><span class="p">,</span> <span class="n">other</span><span class="p">))</span>
 
     <span class="k">def</span> <span class="nf">_raise_if_not_same</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">el</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
@@ -551,7 +614,7 @@
         <span class="n">curr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">el</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">curr</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">el</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="n">f</span><span class="s1">&#39;Attempt to add an element with name &quot;</span><span class="si">{el.name}</span><span class="s1">&quot; ({hex(id(el))}) to a registry with a different object associated to that name ({hex(id(curr))})&#39;</span><span class="p">)</span>
+                <span class="sa">f</span><span class="s1">&#39;Attempt to add an element with name &quot;</span><span class="si">{</span><span class="n">el</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&quot; (</span><span class="si">{</span><span class="nb">hex</span><span class="p">(</span><span class="nb">id</span><span class="p">(</span><span class="n">el</span><span class="p">))</span><span class="si">}</span><span class="s1">) to a registry with a different object associated to that name (</span><span class="si">{</span><span class="nb">hex</span><span class="p">(</span><span class="nb">id</span><span class="p">(</span><span class="n">curr</span><span class="p">))</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">names</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -583,9 +646,30 @@
 <span class="sd">        :type el: object</span>
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="k">if</span> <span class="n">el</span><span class="o">.</span><span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">names</span><span class="p">:</span>
-            <span class="nb">super</span><span class="p">(</span><span class="n">Registry</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">el</span><span class="p">)</span>
+            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">el</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_raise_if_not_same</span><span class="p">(</span><span class="n">el</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Registry.copy"><a class="viewcode-back" href="../../../api/minkit.Registry.html#minkit.Registry.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">contained_type</span><span class="o">=</span><span class="s1">&#39;parameter&#39;</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Create a copy of this instance.</span>
+
+<span class="sd">        :returns: Copy of this instance.</span>
+<span class="sd">        :rtype: Registry</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">iobjs</span><span class="p">,</span> <span class="n">dobjs</span> <span class="o">=</span> <span class="n">dependencies</span><span class="o">.</span><span class="n">split_dependent_objects_with_resolution_order</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">)</span>
+
+        <span class="n">objs</span> <span class="o">=</span> <span class="n">Registry</span><span class="p">([</span><span class="n">o</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span> <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">iobjs</span><span class="p">])</span>
+
+        <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">dobjs</span><span class="p">:</span>
+            <span class="n">objs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">o</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">objs</span><span class="p">))</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="n">Registry</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">*</span> <span class="p">[</span><span class="kc">None</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="n">result</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">objs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">result</span></div>
 
 <div class="viewcode-block" id="Registry.get"><a class="viewcode-back" href="../../../api/minkit.Registry.html#minkit.Registry.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
@@ -599,7 +683,7 @@
         <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">name</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">e</span>
-        <span class="k">raise</span> <span class="ne">LookupError</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;Object with name &quot;</span><span class="si">{name}</span><span class="s1">&quot; has not been found&#39;</span><span class="p">)</span></div>
+        <span class="k">raise</span> <span class="ne">LookupError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Object with name &quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">&quot; has not been found&#39;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Registry.index"><a class="viewcode-back" href="../../../api/minkit.Registry.html#minkit.Registry.index">[docs]</a>    <span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
@@ -614,7 +698,7 @@
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">name</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">i</span>
-        <span class="k">raise</span> <span class="ne">LookupError</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;Object with name &quot;</span><span class="si">{name}</span><span class="s1">&quot; has not been found&#39;</span><span class="p">)</span></div>
+        <span class="k">raise</span> <span class="ne">LookupError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Object with name &quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">&quot; has not been found&#39;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Registry.insert"><a class="viewcode-back" href="../../../api/minkit.Registry.html#minkit.Registry.insert">[docs]</a>    <span class="k">def</span> <span class="nf">insert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
@@ -629,7 +713,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_raise_if_not_same</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
             <span class="k">return</span> <span class="bp">self</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">Registry</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span></div>
+            <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Registry.reduce"><a class="viewcode-back" href="../../../api/minkit.Registry.html#minkit.Registry.reduce">[docs]</a>    <span class="k">def</span> <span class="nf">reduce</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">names</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
@@ -642,6 +726,17 @@
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span></div>
 
+<div class="viewcode-block" id="Registry.restoring_state"><a class="viewcode-back" href="../../../api/minkit.Registry.html#minkit.Registry.restoring_state">[docs]</a>    <span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
+    <span class="k">def</span> <span class="nf">restoring_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Enter a context where the attributes of the parameter will be restored</span>
+<span class="sd">        on exit.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">with</span> <span class="n">contextlib</span><span class="o">.</span><span class="n">ExitStack</span><span class="p">()</span> <span class="k">as</span> <span class="n">stack</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+                <span class="n">stack</span><span class="o">.</span><span class="n">enter_context</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">restoring_state</span><span class="p">())</span>
+            <span class="k">yield</span> <span class="bp">self</span></div>
+
 <div class="viewcode-block" id="Registry.to_json_object"><a class="viewcode-back" href="../../../api/minkit.Registry.html#minkit.Registry.to_json_object">[docs]</a>    <span class="k">def</span> <span class="nf">to_json_object</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Represent this class as a JSON-like object.</span>
@@ -649,16 +744,7 @@
 <span class="sd">        :returns: this class as a JSON-like object.</span>
 <span class="sd">        :rtype: dict</span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="k">return</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">to_json_object</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">]</span></div>
-
-<div class="viewcode-block" id="Registry.values"><a class="viewcode-back" href="../../../api/minkit.Registry.html#minkit.Registry.values">[docs]</a>    <span class="k">def</span> <span class="nf">values</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Get a dictionary with the values of the different parameters.</span>
-
-<span class="sd">        :returns: dictionary with the values.</span>
-<span class="sd">        :rtype: dict(str, float)</span>
-<span class="sd">        &#39;&#39;&#39;</span>
-        <span class="k">return</span> <span class="p">{</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">p</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">}</span></div></div>
+        <span class="k">return</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">to_json_object</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">]</span></div></div>
 
 
 <span class="k">def</span> <span class="nf">bounds_for_range</span><span class="p">(</span><span class="n">data_pars</span><span class="p">,</span> <span class="nb">range</span><span class="p">):</span>

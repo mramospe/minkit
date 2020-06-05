@@ -17,6 +17,7 @@ UnbinnedEvaluator
    .. autosummary::
 
       ~UnbinnedEvaluator.__call__
+      ~UnbinnedEvaluator.fcn
       ~UnbinnedEvaluator.using_caches
 
    .. rubric:: Attributes Documentation
@@ -26,4 +27,5 @@ UnbinnedEvaluator
    .. rubric:: Methods Documentation
 
    .. automethod:: __call__
+   .. automethod:: fcn
    .. automethod:: using_caches

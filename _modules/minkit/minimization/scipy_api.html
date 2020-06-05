@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>minkit.minimization.scipy_api &mdash; minkit 0.0.0.dev0 documentation</title>
+  <title>minkit.minimization.scipy_api &mdash; minkit 0.0.0.dev1 documentation</title>
   
 
   
@@ -62,7 +62,7 @@
             
             
               <div class="version">
-                0.0.0.dev0
+                0.0.0.dev1
               </div>
             
           
@@ -156,12 +156,17 @@
            <div itemprop="articleBody">
             
   <h1>Source code for minkit.minimization.scipy_api</h1><div class="highlight"><pre>
-<span></span><span class="sd">&#39;&#39;&#39;</span>
+<span></span><span class="c1">########################################</span>
+<span class="c1"># MIT License</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright (c) 2020 Miguel Ramos Pernas</span>
+<span class="c1">########################################</span>
+<span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">Definition of the interface functions and classes with :mod:`scipy`.</span>
 <span class="sd">&#39;&#39;&#39;</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">core</span>
-<span class="kn">from</span> <span class="nn">..base</span> <span class="k">import</span> <span class="n">data_types</span>
-<span class="kn">from</span> <span class="nn">..base</span> <span class="k">import</span> <span class="n">parameters</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">core</span>
+<span class="kn">from</span> <span class="nn">..base</span> <span class="kn">import</span> <span class="n">data_types</span>
+<span class="kn">from</span> <span class="nn">..base</span> <span class="kn">import</span> <span class="n">parameters</span>
 
 <span class="kn">import</span> <span class="nn">scipy.optimize</span> <span class="k">as</span> <span class="nn">scipyopt</span>
 
@@ -179,45 +184,27 @@
 
 <div class="viewcode-block" id="SciPyMinimizer"><a class="viewcode-back" href="../../../api/minkit.SciPyMinimizer.html#minkit.SciPyMinimizer">[docs]</a><span class="k">class</span> <span class="nc">SciPyMinimizer</span><span class="p">(</span><span class="n">core</span><span class="o">.</span><span class="n">Minimizer</span><span class="p">):</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">evaluator</span><span class="p">,</span> <span class="o">**</span><span class="n">minimizer_config</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">evaluator</span><span class="p">,</span> <span class="o">**</span><span class="n">minimizer_config</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Interface with the :func:`scipy.optimize.minimize` function.</span>
 
 <span class="sd">        :param evaluator: evaluator to be used in the minimization.</span>
 <span class="sd">        :type evaluator: UnbinnedEvaluator, BinnedEvaluator or SimultaneousEvaluator</span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">evaluator</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">__eval</span> <span class="o">=</span> <span class="n">evaluator</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__varids</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__values</span> <span class="o">=</span> <span class="n">data_types</span><span class="o">.</span><span class="n">empty_float</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">evaluator</span><span class="o">.</span><span class="n">args</span><span class="p">))</span>
-
-        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">evaluator</span><span class="o">.</span><span class="n">args</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">a</span><span class="o">.</span><span class="n">constant</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">__values</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">value</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">__varids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">_evaluate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+<div class="viewcode-block" id="SciPyMinimizer.minimize"><a class="viewcode-back" href="../../../api/minkit.SciPyMinimizer.html#minkit.SciPyMinimizer.minimize">[docs]</a>    <span class="k">def</span> <span class="nf">minimize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Evaluate the FCN, parsing the values provided by SciPy.</span>
+<span class="sd">        Minimize the FCN for the stored PDF and data sample. It returns a tuple</span>
+<span class="sd">        with the information whether the minimization succeded and the</span>
+<span class="sd">        covariance matrix.</span>
 
-<span class="sd">        :param args: arguments from SciPy.</span>
-<span class="sd">        :type args: tuple(float, ...)</span>
-<span class="sd">        :returns: value of the FCN.</span>
-<span class="sd">        :rtype: float</span>
+<span class="sd">        .. seealso:: scipy_minimize</span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__values</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">__varids</span><span class="p">]</span> <span class="o">=</span> <span class="n">args</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__eval</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">__values</span><span class="p">)</span>
+        <span class="n">res</span><span class="p">,</span> <span class="n">cov</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scipy_minimize</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">core</span><span class="o">.</span><span class="n">MinimizationResult</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">success</span><span class="p">,</span> <span class="n">res</span><span class="o">.</span><span class="n">fun</span><span class="p">,</span> <span class="n">cov</span><span class="p">)</span></div>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">evaluator</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Evaluator of the minimizer.</span>
-<span class="sd">        &#39;&#39;&#39;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__eval</span>
-
-<div class="viewcode-block" id="SciPyMinimizer.minimize"><a class="viewcode-back" href="../../../api/minkit.SciPyMinimizer.html#minkit.SciPyMinimizer.minimize">[docs]</a>    <span class="k">def</span> <span class="nf">minimize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">SCIPY_DEFAULT</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="SciPyMinimizer.scipy_minimize"><a class="viewcode-back" href="../../../api/minkit.SciPyMinimizer.html#minkit.SciPyMinimizer.scipy_minimize">[docs]</a>    <span class="k">def</span> <span class="nf">scipy_minimize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">SCIPY_DEFAULT</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">hessian_opts</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Minimize the PDF using the provided method and tolerance.</span>
 <span class="sd">        Only the methods (&#39;L-BFGS-B&#39;, &#39;TNC&#39;, &#39;SLSQP&#39;, &#39;trust-constr&#39;) are allowed.</span>
@@ -226,64 +213,60 @@
 <span class="sd">        :type method: str</span>
 <span class="sd">        :param tol: tolerance to be used in the minimization.</span>
 <span class="sd">        :type tol: float</span>
-<span class="sd">        :returns: result of the minimization.</span>
-<span class="sd">        :rtype: scipy.optimize.OptimizeResult</span>
+<span class="sd">        :param hessian_opts: options to be passed to :meth:`numdifftools.core.Hessian`.</span>
+<span class="sd">        :type hessian_opts: dict</span>
+<span class="sd">        :returns: result of the minimization and covariance matrix.</span>
+<span class="sd">        :rtype: scipy.optimize.OptimizeResult, numpy.ndarray</span>
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="k">if</span> <span class="n">method</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">SCIPY_CHOICES</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="n">f</span><span class="s1">&#39;Unknown minimization method &quot;</span><span class="si">{method}</span><span class="s1">&quot;; choose from </span><span class="si">{SCIPY_CHOICES}</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="sa">f</span><span class="s1">&#39;Unknown minimization method &quot;</span><span class="si">{</span><span class="n">method</span><span class="si">}</span><span class="s1">&quot;; choose from </span><span class="si">{</span><span class="n">SCIPY_CHOICES</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="n">hessian_opts</span> <span class="o">=</span> <span class="n">hessian_opts</span> <span class="ow">or</span> <span class="p">{}</span>
 
         <span class="n">varargs</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">Registry</span><span class="p">(</span>
-            <span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">v</span><span class="p">:</span> <span class="ow">not</span> <span class="n">v</span><span class="o">.</span><span class="n">constant</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__eval</span><span class="o">.</span><span class="n">args</span><span class="p">))</span>
+            <span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">v</span><span class="p">:</span> <span class="ow">not</span> <span class="n">v</span><span class="o">.</span><span class="n">constant</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">evaluator</span><span class="o">.</span><span class="n">args</span><span class="p">))</span>
 
         <span class="n">initials</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">varargs</span><span class="p">)</span>
 
         <span class="n">bounds</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">bounds</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">varargs</span><span class="p">)</span>
 
-        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">__eval</span><span class="o">.</span><span class="n">using_caches</span><span class="p">(),</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>
+        <span class="c1"># We must create an array with all the values</span>
+        <span class="n">varids</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">values</span> <span class="o">=</span> <span class="n">data_types</span><span class="o">.</span><span class="n">empty_float</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">evaluator</span><span class="o">.</span><span class="n">args</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">evaluator</span><span class="o">.</span><span class="n">args</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">a</span><span class="o">.</span><span class="n">constant</span><span class="p">:</span>
+                <span class="n">values</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">value</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">varids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">_evaluate</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>  <span class="c1"># set the non-constant argument values</span>
+            <span class="n">values</span><span class="p">[</span><span class="n">varids</span><span class="p">]</span> <span class="o">=</span> <span class="n">args</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">evaluator</span><span class="p">(</span><span class="o">*</span><span class="n">values</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">evaluator</span><span class="o">.</span><span class="n">using_caches</span><span class="p">(),</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>
             <span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span>
                 <span class="s1">&#39;ignore&#39;</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="ne">UserWarning</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;.*_hessian_update_strategy&#39;</span><span class="p">)</span>
             <span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s1">&#39;once&#39;</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="ne">RuntimeWarning</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">scipyopt</span><span class="o">.</span><span class="n">minimize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_evaluate</span><span class="p">,</span> <span class="n">initials</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="n">bounds</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="n">tol</span><span class="p">)</span></div>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">scipyopt</span><span class="o">.</span><span class="n">minimize</span><span class="p">(</span>
+                <span class="n">_evaluate</span><span class="p">,</span> <span class="n">initials</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="n">bounds</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="n">tol</span><span class="p">)</span>
 
-<div class="viewcode-block" id="SciPyMinimizer.result_to_registry"><a class="viewcode-back" href="../../../api/minkit.SciPyMinimizer.html#minkit.SciPyMinimizer.result_to_registry">[docs]</a>    <span class="k">def</span> <span class="nf">result_to_registry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">result</span><span class="p">,</span> <span class="n">ignore_warnings</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Transform the output of a minimization call done with any of the SciPy methods</span>
-<span class="sd">        to a :class:`minkit.Registry`.</span>
-<span class="sd">        This function uses :class:`numdifftools.Hessian` in order to calculate the Hessian</span>
-<span class="sd">        matrix of the FCN.</span>
-<span class="sd">        Uncertainties are extracted from the inverse of the Hessian, taking into account</span>
-<span class="sd">        the correlation among the variables.</span>
-
-<span class="sd">        :param result: result of the minimization.</span>
-<span class="sd">        :type result: scipy.optimize.OptimizeResult</span>
-<span class="sd">        :param ignore_warnings: whether to ignore the warnings during the evaluation \</span>
-<span class="sd">        of the Hessian or not.</span>
-<span class="sd">        :type ignore_warnings: bool</span>
-<span class="sd">        :param kwargs: keyword arguments to :class:`numdifftools.Hessian`</span>
-<span class="sd">        :type kwargs: dict</span>
-<span class="sd">        :returns: registry with new parameters with the values and errors defined.</span>
-<span class="sd">        :rtype: Registry</span>
-<span class="sd">        &#39;&#39;&#39;</span>
         <span class="c1"># Disable warnings, since &quot;numdifftools&quot; does not allow to set bounds</span>
         <span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>
             <span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s1">&#39;ignore&#39;</span><span class="p">)</span>
             <span class="n">hessian</span> <span class="o">=</span> <span class="n">numdifftools</span><span class="o">.</span><span class="n">Hessian</span><span class="p">(</span>
-                <span class="k">lambda</span> <span class="n">a</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_evaluate</span><span class="p">(</span><span class="o">*</span><span class="n">a</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                <span class="k">lambda</span> <span class="n">a</span><span class="p">:</span> <span class="n">_evaluate</span><span class="p">(</span><span class="o">*</span><span class="n">a</span><span class="p">),</span> <span class="o">**</span><span class="n">hessian_opts</span><span class="p">)</span>
             <span class="n">cov</span> <span class="o">=</span> <span class="mf">2.</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">hessian</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">x</span><span class="p">))</span>
 
         <span class="n">values</span> <span class="o">=</span> <span class="n">uncertainties</span><span class="o">.</span><span class="n">correlated_values</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">cov</span><span class="p">)</span>
 
-        <span class="n">reg</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">Registry</span><span class="p">()</span>
-        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__eval</span><span class="o">.</span><span class="n">args</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__varids</span><span class="p">:</span>
-                <span class="n">reg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">parameters</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span>
-                    <span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">values</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">nominal_value</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">bounds</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="n">values</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">std_dev</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">constant</span><span class="p">))</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">reg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">parameters</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span>
-                    <span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">bounds</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">error</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">constant</span><span class="p">))</span>
+        <span class="c1"># Update the values and errors of the parameters</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">evaluator</span><span class="o">.</span><span class="n">args</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">varids</span><span class="p">:</span>
+                <span class="n">p</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">error</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">nominal_value</span><span class="p">,</span> <span class="n">values</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">std_dev</span>
 
-        <span class="k">return</span> <span class="n">reg</span></div></div>
+        <span class="k">return</span> <span class="n">result</span><span class="p">,</span> <span class="n">cov</span></div></div>
 </pre></div>
 
            </div>

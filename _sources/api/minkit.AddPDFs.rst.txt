@@ -10,7 +10,25 @@ AddPDFs
 
    .. autosummary::
 
+      ~AddPDFs.BIND
+      ~AddPDFs.CACHE_TYPES
+      ~AddPDFs.CONST
+      ~AddPDFs.all_args
+      ~AddPDFs.all_pars
+      ~AddPDFs.all_pdfs
+      ~AddPDFs.all_real_args
+      ~AddPDFs.aop
+      ~AddPDFs.args
+      ~AddPDFs.backend
+      ~AddPDFs.cache
+      ~AddPDFs.cache_type
+      ~AddPDFs.constant
+      ~AddPDFs.data_pars
+      ~AddPDFs.dependencies
+      ~AddPDFs.dependent
       ~AddPDFs.extended
+      ~AddPDFs.pdfs
+      ~AddPDFs.real_args
       ~AddPDFs.yields
 
    .. rubric:: Methods Summary
@@ -18,28 +36,64 @@ AddPDFs
    .. autosummary::
 
       ~AddPDFs.__call__
+      ~AddPDFs.bind
+      ~AddPDFs.component
+      ~AddPDFs.copy
       ~AddPDFs.evaluate_binned
       ~AddPDFs.from_json_object
+      ~AddPDFs.generate
+      ~AddPDFs.get_values
       ~AddPDFs.integral
       ~AddPDFs.norm
       ~AddPDFs.numerical_integral
+      ~AddPDFs.numerical_normalization
+      ~AddPDFs.restoring_state
+      ~AddPDFs.set_values
       ~AddPDFs.to_backend
       ~AddPDFs.to_json_object
       ~AddPDFs.two_components
+      ~AddPDFs.using_cache
 
    .. rubric:: Attributes Documentation
 
+   .. autoattribute:: BIND
+   .. autoattribute:: CACHE_TYPES
+   .. autoattribute:: CONST
+   .. autoattribute:: all_args
+   .. autoattribute:: all_pars
+   .. autoattribute:: all_pdfs
+   .. autoattribute:: all_real_args
+   .. autoattribute:: aop
+   .. autoattribute:: args
+   .. autoattribute:: backend
+   .. autoattribute:: cache
+   .. autoattribute:: cache_type
+   .. autoattribute:: constant
+   .. autoattribute:: data_pars
+   .. autoattribute:: dependencies
+   .. autoattribute:: dependent
    .. autoattribute:: extended
+   .. autoattribute:: pdfs
+   .. autoattribute:: real_args
    .. autoattribute:: yields
 
    .. rubric:: Methods Documentation
 
    .. automethod:: __call__
+   .. automethod:: bind
+   .. automethod:: component
+   .. automethod:: copy
    .. automethod:: evaluate_binned
    .. automethod:: from_json_object
+   .. automethod:: generate
+   .. automethod:: get_values
    .. automethod:: integral
    .. automethod:: norm
    .. automethod:: numerical_integral
+   .. automethod:: numerical_normalization
+   .. automethod:: restoring_state
+   .. automethod:: set_values
    .. automethod:: to_backend
    .. automethod:: to_json_object
    .. automethod:: two_components
+   .. automethod:: using_cache

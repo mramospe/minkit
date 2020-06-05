@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>minkit &mdash; minkit 0.0.0.dev0 documentation</title>
+  <title>minkit &mdash; minkit 0.0.0.dev1 documentation</title>
   
 
   
@@ -62,7 +62,7 @@
             
             
               <div class="version">
-                0.0.0.dev0
+                0.0.0.dev1
               </div>
             
           
@@ -154,9 +154,14 @@
            <div itemprop="articleBody">
             
   <h1>Source code for minkit</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">.base.core</span> <span class="k">import</span> <span class="n">get_exposed_package_objects</span>
-<span class="kn">from</span> <span class="nn">.backends</span> <span class="k">import</span> <span class="n">core</span> <span class="k">as</span> <span class="n">backends_core</span>
-<span class="kn">from</span> <span class="nn">.backends</span> <span class="k">import</span> <span class="n">aop</span>
+<span></span><span class="c1">########################################</span>
+<span class="c1"># MIT License</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright (c) 2020 Miguel Ramos Pernas</span>
+<span class="c1">########################################</span>
+<span class="kn">from</span> <span class="nn">.base.core</span> <span class="kn">import</span> <span class="n">get_exposed_package_objects</span>
+<span class="kn">from</span> <span class="nn">.backends</span> <span class="kn">import</span> <span class="n">core</span> <span class="k">as</span> <span class="n">backends_core</span>
+<span class="kn">from</span> <span class="nn">.backends</span> <span class="kn">import</span> <span class="n">aop</span>
 
 <span class="kn">import</span> <span class="nn">inspect</span>
 <span class="kn">import</span> <span class="nn">os</span>
@@ -176,16 +181,10 @@
 
 <div class="viewcode-block" id="Backend"><a class="viewcode-back" href="../api/minkit.Backend.html#minkit.Backend">[docs]</a><span class="k">class</span> <span class="nc">Backend</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 
-    <span class="n">_objects_backend_dependent_with_init</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Amoroso&#39;</span><span class="p">,</span> <span class="s1">&#39;Chebyshev&#39;</span><span class="p">,</span>
-                                            <span class="s1">&#39;CrystalBall&#39;</span><span class="p">,</span> <span class="s1">&#39;Exponential&#39;</span><span class="p">,</span> <span class="s1">&#39;Gaussian&#39;</span><span class="p">,</span> <span class="s1">&#39;Polynomial&#39;</span><span class="p">,</span> <span class="s1">&#39;PowerLaw&#39;</span><span class="p">,</span> <span class="s1">&#39;PDF&#39;</span><span class="p">,</span>
-                                            <span class="s1">&#39;SourcePDF&#39;</span><span class="p">)</span>
+    <span class="n">_exposed_objects</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">n</span> <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">minkit_api</span><span class="o">.</span><span class="n">items</span><span class="p">(</span>
+    <span class="p">)</span> <span class="k">if</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isclass</span><span class="p">(</span><span class="n">c</span><span class="p">))</span>  <span class="c1"># loading all the classes</span>
 
-    <span class="n">_objects_backend_no_init</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;BinnedDataSet&#39;</span><span class="p">,</span> <span class="s1">&#39;DataSet&#39;</span><span class="p">)</span>
-
-    <span class="n">_objects_backend_dependent</span> <span class="o">=</span> <span class="n">_objects_backend_dependent_with_init</span> <span class="o">+</span> \
-        <span class="n">_objects_backend_no_init</span>
-
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">btype</span><span class="o">=</span><span class="n">backends_core</span><span class="o">.</span><span class="n">CPU</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">btype</span><span class="o">=</span><span class="n">backends_core</span><span class="o">.</span><span class="n">CPU</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Object used in order to do operations with objects of the :mod:`minkit`</span>
 <span class="sd">        module. Any object depending on a backend can be directly built using</span>
@@ -207,11 +206,8 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">__aop</span> <span class="o">=</span> <span class="n">aop</span><span class="o">.</span><span class="n">ArrayOperations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">Backend</span><span class="o">.</span><span class="n">_objects_backend_no_init</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">Backend</span><span class="o">.</span><span class="n">_exposed_objects</span><span class="p">:</span>
             <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">object_wrapper</span><span class="p">(</span><span class="n">minkit_api</span><span class="p">[</span><span class="n">n</span><span class="p">],</span> <span class="bp">self</span><span class="p">))</span>
-
-        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">Backend</span><span class="o">.</span><span class="n">_objects_backend_dependent_with_init</span><span class="p">:</span>
-            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">iobject_wrapper</span><span class="p">(</span><span class="n">minkit_api</span><span class="p">[</span><span class="n">n</span><span class="p">],</span> <span class="bp">self</span><span class="p">))</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">aop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -234,10 +230,7 @@
 
 <span class="k">class</span> <span class="nc">object_wrapper</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 
-    <span class="n">members_backend_dependent</span> <span class="o">=</span> <span class="p">{</span><span class="n">o</span><span class="p">:</span> <span class="p">{</span><span class="n">n</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getmembers</span><span class="p">(</span>
-        <span class="n">minkit_api</span><span class="p">[</span><span class="n">o</span><span class="p">],</span> <span class="n">inspect</span><span class="o">.</span><span class="n">ismethod</span><span class="p">)}</span> <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">Backend</span><span class="o">.</span><span class="n">_objects_backend_dependent</span><span class="p">}</span>
-
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">backend</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">backend</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Object to wrap the members of other objects so the backend is always</span>
 <span class="sd">        set to that provided to this class.</span>
@@ -248,11 +241,26 @@
 <span class="sd">        :type backend: Backend</span>
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">object_wrapper</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__cls</span> <span class="o">=</span> <span class="bp">cls</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__backend</span> <span class="o">=</span> <span class="n">backend</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__members</span> <span class="o">=</span> <span class="n">object_wrapper</span><span class="o">.</span><span class="n">members_backend_dependent</span><span class="p">[</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cls</span> <span class="o">=</span> <span class="bp">cls</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_backend</span> <span class="o">=</span> <span class="n">backend</span>
 
-    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__call_wrapper</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="s1">&#39;backend&#39;</span> <span class="ow">in</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getfullargspec</span><span class="p">(</span><span class="n">func</span><span class="p">)</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
+            <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_backend</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="n">wrapper</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">=</span> <span class="n">func</span><span class="o">.</span><span class="vm">__name__</span>
+        <span class="n">wrapper</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;&#39;&#39;</span>
+<span class="s1">Wrapper around the &quot;</span><span class="si">{</span><span class="n">func</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">&quot; function, which automatically sets the backend.</span>
+<span class="s1">&#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="n">wrapper</span>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Initialize the wrapped class.</span>
 
@@ -262,9 +270,9 @@
 <span class="sd">        :type kwargs: dict</span>
 <span class="sd">        :returns: Wrapped object.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cls</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__call_wrapper</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_cls</span><span class="p">)(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Get the given member of the object.</span>
 
@@ -273,58 +281,16 @@
 <span class="sd">        :returns: Wrapped function.</span>
 <span class="sd">        :rtype: function</span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__members</span><span class="p">[</span><span class="n">name</span><span class="p">](</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__backend</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="n">wrapper</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">=</span> <span class="n">name</span>
-        <span class="n">wrapper</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">=</span> <span class="n">f</span><span class="s1">&#39;&#39;&#39;</span>
-<span class="s1">Wrapper around the &quot;</span><span class="si">{name}</span><span class="s1">&quot; function, which automatically sets the backend.</span>
-<span class="s1">&#39;&#39;&#39;</span>
-        <span class="k">return</span> <span class="n">wrapper</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__call_wrapper</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_cls</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span>
 
-    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Represent this class as a string.</span>
 
 <span class="sd">        :returns: This class as a string.</span>
 <span class="sd">        :rtype: str</span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="k">return</span> <span class="n">f</span><span class="s1">&#39;object_wrapper(</span><span class="si">{self.__cls.__name__}</span><span class="s1">, {tuple(self.__members.keys())})&#39;</span>
-
-
-<span class="k">class</span> <span class="nc">iobject_wrapper</span><span class="p">(</span><span class="n">object_wrapper</span><span class="p">):</span>
-
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">backend</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Object to wrap the members of other objects (including initialization</span>
-<span class="sd">        methods) so the backend is always set to that provided to this class.</span>
-
-<span class="sd">        :param cls: class to wrap.</span>
-<span class="sd">        :type cls: class</span>
-<span class="sd">        :param backend: backend to use when calling the members.</span>
-<span class="sd">        :type backend: Backend</span>
-<span class="sd">        &#39;&#39;&#39;</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">iobject_wrapper</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">backend</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Initialize the wrapped class.</span>
-
-<span class="sd">        :param args: arguments forwarded to the __init__ function.</span>
-<span class="sd">        :type args: tuple</span>
-<span class="sd">        :param kwargs: arguments forwarded to the __init__ function.</span>
-<span class="sd">        :type kwargs: dict</span>
-<span class="sd">        :returns: Wrapped object.</span>
-<span class="sd">        &#39;&#39;&#39;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cls</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__backend</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Represent this class as a string.</span>
-
-<span class="sd">        :returns: This class as a string.</span>
-<span class="sd">        :rtype: str</span>
-<span class="sd">        &#39;&#39;&#39;</span>
-        <span class="k">return</span> <span class="n">f</span><span class="s1">&#39;iobject_wrapper(</span><span class="si">{self.__cls.__name__}</span><span class="s1">, {tuple(self.__members.keys())})&#39;</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;object_wrapper(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">)&#39;</span>
 
 
 <span class="c1"># Determine the default backend</span>

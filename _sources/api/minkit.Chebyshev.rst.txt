@@ -5,3 +5,85 @@ Chebyshev
 
 .. autoclass:: Chebyshev
    :show-inheritance:
+
+   .. rubric:: Attributes Summary
+
+   .. autosummary::
+
+      ~Chebyshev.BIND
+      ~Chebyshev.CACHE_TYPES
+      ~Chebyshev.CONST
+      ~Chebyshev.all_args
+      ~Chebyshev.all_pars
+      ~Chebyshev.all_real_args
+      ~Chebyshev.aop
+      ~Chebyshev.args
+      ~Chebyshev.backend
+      ~Chebyshev.cache
+      ~Chebyshev.cache_type
+      ~Chebyshev.constant
+      ~Chebyshev.data_pars
+      ~Chebyshev.dependent
+      ~Chebyshev.numint_config
+      ~Chebyshev.real_args
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+
+      ~Chebyshev.__call__
+      ~Chebyshev.bind
+      ~Chebyshev.copy
+      ~Chebyshev.evaluate_binned
+      ~Chebyshev.from_json_object
+      ~Chebyshev.function
+      ~Chebyshev.generate
+      ~Chebyshev.get_values
+      ~Chebyshev.integral
+      ~Chebyshev.norm
+      ~Chebyshev.numerical_integral
+      ~Chebyshev.numerical_normalization
+      ~Chebyshev.restoring_state
+      ~Chebyshev.set_values
+      ~Chebyshev.to_backend
+      ~Chebyshev.to_json_object
+      ~Chebyshev.using_cache
+
+   .. rubric:: Attributes Documentation
+
+   .. autoattribute:: BIND
+   .. autoattribute:: CACHE_TYPES
+   .. autoattribute:: CONST
+   .. autoattribute:: all_args
+   .. autoattribute:: all_pars
+   .. autoattribute:: all_real_args
+   .. autoattribute:: aop
+   .. autoattribute:: args
+   .. autoattribute:: backend
+   .. autoattribute:: cache
+   .. autoattribute:: cache_type
+   .. autoattribute:: constant
+   .. autoattribute:: data_pars
+   .. autoattribute:: dependent
+   .. autoattribute:: numint_config
+   .. autoattribute:: real_args
+
+   .. rubric:: Methods Documentation
+
+   .. automethod:: __call__
+   .. automethod:: bind
+   .. automethod:: copy
+   .. automethod:: evaluate_binned
+   .. automethod:: from_json_object
+   .. automethod:: function
+   .. automethod:: generate
+   .. automethod:: get_values
+   .. automethod:: integral
+   .. automethod:: norm
+   .. automethod:: numerical_integral
+   .. automethod:: numerical_normalization
+   .. automethod:: restoring_state
+   .. automethod:: set_values
+   .. automethod:: to_backend
+   .. automethod:: to_json_object
+   .. automethod:: using_cache

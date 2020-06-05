@@ -5,3 +5,85 @@ Argus
 
 .. autoclass:: Argus
    :show-inheritance:
+
+   .. rubric:: Attributes Summary
+
+   .. autosummary::
+
+      ~Argus.BIND
+      ~Argus.CACHE_TYPES
+      ~Argus.CONST
+      ~Argus.all_args
+      ~Argus.all_pars
+      ~Argus.all_real_args
+      ~Argus.aop
+      ~Argus.args
+      ~Argus.backend
+      ~Argus.cache
+      ~Argus.cache_type
+      ~Argus.constant
+      ~Argus.data_pars
+      ~Argus.dependent
+      ~Argus.numint_config
+      ~Argus.real_args
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+
+      ~Argus.__call__
+      ~Argus.bind
+      ~Argus.copy
+      ~Argus.evaluate_binned
+      ~Argus.from_json_object
+      ~Argus.function
+      ~Argus.generate
+      ~Argus.get_values
+      ~Argus.integral
+      ~Argus.norm
+      ~Argus.numerical_integral
+      ~Argus.numerical_normalization
+      ~Argus.restoring_state
+      ~Argus.set_values
+      ~Argus.to_backend
+      ~Argus.to_json_object
+      ~Argus.using_cache
+
+   .. rubric:: Attributes Documentation
+
+   .. autoattribute:: BIND
+   .. autoattribute:: CACHE_TYPES
+   .. autoattribute:: CONST
+   .. autoattribute:: all_args
+   .. autoattribute:: all_pars
+   .. autoattribute:: all_real_args
+   .. autoattribute:: aop
+   .. autoattribute:: args
+   .. autoattribute:: backend
+   .. autoattribute:: cache
+   .. autoattribute:: cache_type
+   .. autoattribute:: constant
+   .. autoattribute:: data_pars
+   .. autoattribute:: dependent
+   .. autoattribute:: numint_config
+   .. autoattribute:: real_args
+
+   .. rubric:: Methods Documentation
+
+   .. automethod:: __call__
+   .. automethod:: bind
+   .. automethod:: copy
+   .. automethod:: evaluate_binned
+   .. automethod:: from_json_object
+   .. automethod:: function
+   .. automethod:: generate
+   .. automethod:: get_values
+   .. automethod:: integral
+   .. automethod:: norm
+   .. automethod:: numerical_integral
+   .. automethod:: numerical_normalization
+   .. automethod:: restoring_state
+   .. automethod:: set_values
+   .. automethod:: to_backend
+   .. automethod:: to_json_object
+   .. automethod:: using_cache

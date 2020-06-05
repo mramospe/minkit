@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>minkit.minimization.core &mdash; minkit 0.0.0.dev0 documentation</title>
+  <title>minkit.minimization.core &mdash; minkit 0.0.0.dev1 documentation</title>
   
 
   
@@ -62,7 +62,7 @@
             
             
               <div class="version">
-                0.0.0.dev0
+                0.0.0.dev1
               </div>
             
           
@@ -156,38 +156,337 @@
            <div itemprop="articleBody">
             
   <h1>Source code for minkit.minimization.core</h1><div class="highlight"><pre>
-<span></span><span class="sd">&#39;&#39;&#39;</span>
+<span></span><span class="c1">########################################</span>
+<span class="c1"># MIT License</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright (c) 2020 Miguel Ramos Pernas</span>
+<span class="c1">########################################</span>
+<span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">Basic functions and classes to do minimizations.</span>
 <span class="sd">&#39;&#39;&#39;</span>
-<span class="kn">from</span> <span class="nn">..base.core</span> <span class="k">import</span> <span class="n">DocMeta</span>
-<span class="kn">from</span> <span class="nn">..base</span> <span class="k">import</span> <span class="n">exceptions</span>
+<span class="kn">from</span> <span class="nn">..base</span> <span class="kn">import</span> <span class="n">data_types</span>
+<span class="kn">from</span> <span class="nn">..base</span> <span class="kn">import</span> <span class="n">exceptions</span>
+<span class="kn">from</span> <span class="nn">..base</span> <span class="kn">import</span> <span class="n">parameters</span>
+<span class="kn">from</span> <span class="nn">..base.core</span> <span class="kn">import</span> <span class="n">DocMeta</span>
+
+<span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">import</span> <span class="nn">contextlib</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+
+<span class="n">DEFAULT_ASYM_ERROR_ATOL</span> <span class="o">=</span> <span class="mf">1e-8</span>  <span class="c1"># same as numpy.allclose</span>
+<span class="n">DEFAULT_ASYM_ERROR_RTOL</span> <span class="o">=</span> <span class="mf">1e-5</span>  <span class="c1"># same as numpy.allclose</span>
+
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Minimizer&#39;</span><span class="p">]</span>
 
 
+<span class="n">MinimizationResult</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">namedtuple</span><span class="p">(</span>
+    <span class="s1">&#39;MinimizationResult&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;valid&#39;</span><span class="p">,</span> <span class="s1">&#39;fcn&#39;</span><span class="p">,</span> <span class="s1">&#39;cov&#39;</span><span class="p">])</span>
+
+
+<span class="k">def</span> <span class="nf">_process_parameters</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">wa</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Process an input set of parameters, converting it to a :class:`Registry`,</span>
+<span class="sd">    if only one parameter is provided.</span>
+
+<span class="sd">    :param args: whole set of parameters.</span>
+<span class="sd">    :type args: Registry</span>
+<span class="sd">    :param wa: input arguments to process.</span>
+<span class="sd">    :type wa: str or list(str)</span>
+<span class="sd">    :param values: values to calculate a profile.</span>
+<span class="sd">    :type values: numpy.ndarray</span>
+<span class="sd">    :returns: registry of parameters and values.</span>
+<span class="sd">    :rtype: Registry, numpy.ndarray</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">wa</span><span class="p">)</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">wa</span> <span class="o">=</span> <span class="p">[</span><span class="n">wa</span><span class="p">]</span>
+        <span class="n">values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">values</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">wa</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+            <span class="s1">&#39;Length of the profile values must coincide with profile parameters&#39;</span><span class="p">)</span>
+
+    <span class="n">pars</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">Registry</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">wa</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">pars</span><span class="p">,</span> <span class="n">values</span>
+
+
 <div class="viewcode-block" id="Minimizer"><a class="viewcode-back" href="../../../api/minkit.Minimizer.html#minkit.Minimizer">[docs]</a><span class="k">class</span> <span class="nc">Minimizer</span><span class="p">(</span><span class="nb">object</span><span class="p">,</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">DocMeta</span><span class="p">):</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">evaluator</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Abstract class to serve as an API between Minkit and the different</span>
 <span class="sd">        minimization methods.</span>
+
+<span class="sd">        :param evaluator: evaluator to be used in the minimization.</span>
+<span class="sd">        :type evaluator: UnbinnedEvaluator, BinnedEvaluator or SimultaneousEvaluator</span>
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
-<div class="viewcode-block" id="Minimizer.result_to_registry"><a class="viewcode-back" href="../../../api/minkit.Minimizer.html#minkit.Minimizer.result_to_registry">[docs]</a>    <span class="k">def</span> <span class="nf">result_to_registry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">result</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__eval</span> <span class="o">=</span> <span class="n">evaluator</span>
+
+    <span class="k">def</span> <span class="nf">_asym_error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">par</span><span class="p">,</span> <span class="n">bound</span><span class="p">,</span> <span class="n">cov</span><span class="p">,</span> <span class="n">var</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="n">DEFAULT_ASYM_ERROR_ATOL</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="n">DEFAULT_ASYM_ERROR_RTOL</span><span class="p">,</span> <span class="n">maxcall</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Transform the parameters from a call to Minuit into a :class:`Registry`.</span>
+<span class="sd">        Calculate the asymmetric error using the variation of the FCN from</span>
+<span class="sd">        *value* to *bound*.</span>
 
-<span class="sd">        :param result: result from a call to the minimizer.</span>
-<span class="sd">        :returns: independent registry of parameters with the results.</span>
-<span class="sd">        :rtype: Registry(Parameter)</span>
+<span class="sd">        :param par: parameter to calculate the asymmetric errors.</span>
+<span class="sd">        :type par: float</span>
+<span class="sd">        :param bound: bound of the parameter.</span>
+<span class="sd">        :type bound: float</span>
+<span class="sd">        :param cov: covariance matrix. If provided, the initial values of the \</span>
+<span class="sd">        parameters will be obtained from them.</span>
+<span class="sd">        :type cov: numpy.ndarray</span>
+<span class="sd">        :param var: squared number of standard deviations.</span>
+<span class="sd">        :type var: float</span>
+<span class="sd">        :param atol: absolute tolerance for the error.</span>
+<span class="sd">        :type atol: float</span>
+<span class="sd">        :param rtol: relative tolerance for the error.</span>
+<span class="sd">        :type rtol: float</span>
+<span class="sd">        :param maxcall: maximum number of calls to calculate each error bound.</span>
+<span class="sd">        :type maxcall: int or None</span>
+<span class="sd">        :returns: Absolute value of the error.</span>
+<span class="sd">        :rtype: float</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">restoring_state</span><span class="p">():</span>
 
-<span class="sd">        .. warning::</span>
-<span class="sd">           The parameters in the returned registry do not belong to the</span>
-<span class="sd">           minimized object(s).</span>
+            <span class="n">initial</span> <span class="o">=</span> <span class="n">par</span><span class="o">.</span><span class="n">value</span>
+
+            <span class="n">l</span><span class="p">,</span> <span class="n">r</span> <span class="o">=</span> <span class="n">par</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">bound</span>  <span class="c1"># consider the minimum on the left</span>
+
+            <span class="n">fcn_l</span> <span class="o">=</span> <span class="n">ref_fcn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_minimize_check_minimum</span><span class="p">(</span><span class="n">par</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_set_parameter_state</span><span class="p">(</span><span class="n">par</span><span class="p">,</span> <span class="n">bound</span><span class="p">,</span> <span class="n">fixed</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">cov</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># set initial values using the covariance matrix</span>
+                <span class="n">s</span> <span class="o">=</span> <span class="n">data_types</span><span class="o">.</span><span class="n">empty_float</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__eval</span><span class="o">.</span><span class="n">args</span><span class="p">))</span>
+                <span class="n">s</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">__eval</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">par</span><span class="o">.</span><span class="n">name</span><span class="p">)]</span> <span class="o">=</span> <span class="n">bound</span>
+                <span class="n">vals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">cov</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">p</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__eval</span><span class="o">.</span><span class="n">args</span><span class="p">,</span> <span class="n">vals</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_set_parameter_state</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+
+            <span class="n">fcn_r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_minimize_check_minimum</span><span class="p">(</span><span class="n">par</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">fcn_r</span> <span class="o">-</span> <span class="n">ref_fcn</span> <span class="o">&lt;</span> <span class="n">var</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                    <span class="s1">&#39;Parameter bounds are smaller than the provided number of standard deviations&#39;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">fcn_r</span> <span class="o">-</span> <span class="n">ref_fcn</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="n">atol</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="n">rtol</span><span class="p">):</span>
+                <span class="k">return</span> <span class="nb">abs</span><span class="p">(</span><span class="n">par</span><span class="o">.</span><span class="n">value</span> <span class="o">-</span> <span class="n">bound</span><span class="p">)</span>
+
+            <span class="n">closest_fcn</span> <span class="o">=</span> <span class="n">fcn_r</span>
+
+            <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">while</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">closest_fcn</span> <span class="o">-</span> <span class="n">ref_fcn</span><span class="p">),</span> <span class="n">var</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="n">atol</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="n">rtol</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="kc">True</span> <span class="k">if</span> <span class="n">maxcall</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">maxcall</span><span class="p">):</span>
+
+                <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>  <span class="c1"># increase the internal counter (for maxcall)</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">_set_parameter_state</span><span class="p">(</span><span class="n">par</span><span class="p">,</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">l</span> <span class="o">+</span> <span class="n">r</span><span class="p">))</span>
+
+                <span class="n">fcn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_minimize_check_minimum</span><span class="p">(</span><span class="n">par</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">fcn</span> <span class="o">-</span> <span class="n">ref_fcn</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">var</span><span class="p">:</span>
+                    <span class="n">l</span><span class="p">,</span> <span class="n">fcn_l</span> <span class="o">=</span> <span class="n">par</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">fcn</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">r</span><span class="p">,</span> <span class="n">fcn_r</span> <span class="o">=</span> <span class="n">par</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">fcn</span>
+
+                <span class="k">if</span> <span class="n">var</span> <span class="o">-</span> <span class="p">(</span><span class="n">fcn_l</span> <span class="o">-</span> <span class="n">ref_fcn</span><span class="p">)</span> <span class="o">&lt;</span> <span class="p">(</span><span class="n">fcn_r</span> <span class="o">-</span> <span class="n">ref_fcn</span><span class="p">)</span> <span class="o">-</span> <span class="n">var</span><span class="p">:</span>
+                    <span class="n">bound</span><span class="p">,</span> <span class="n">closest_fcn</span> <span class="o">=</span> <span class="n">l</span><span class="p">,</span> <span class="n">fcn_l</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">bound</span><span class="p">,</span> <span class="n">closest_fcn</span> <span class="o">=</span> <span class="n">r</span><span class="p">,</span> <span class="n">fcn_r</span>
+
+            <span class="k">if</span> <span class="n">maxcall</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="n">maxcall</span><span class="p">:</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                    <span class="s1">&#39;Reached maximum number of minimization calls&#39;</span><span class="p">,</span> <span class="ne">RuntimeWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="nb">abs</span><span class="p">(</span><span class="n">initial</span> <span class="o">-</span> <span class="n">bound</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_minimize_check_minimum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">pars</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Check the minimum of a minimization and warn if it is not valid.</span>
+
+<span class="sd">        :returns: Value of the FCN.</span>
+<span class="sd">        :rtype: float</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">minimize</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">m</span><span class="o">.</span><span class="n">valid</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;Minimum is not valid during FCN scan&#39;</span><span class="p">,</span>
+                          <span class="ne">RuntimeWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">m</span><span class="o">.</span><span class="n">fcn</span>
+
+    <span class="k">def</span> <span class="nf">_set_parameter_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">par</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fixed</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Set the state of the parameter.</span>
+
+<span class="sd">        :param par: parameter to modify.</span>
+<span class="sd">        :type par: Parameter</span>
+<span class="sd">        :param value: new value of a parameter.</span>
+<span class="sd">        :type value: float or None</span>
+<span class="sd">        :param error: error of the parameter.</span>
+<span class="sd">        :type error: float or None</span>
+<span class="sd">        :param fixed: whether to fix the parameter.</span>
+<span class="sd">        :type fixed: bool or None</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">par</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="k">if</span> <span class="n">error</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">par</span><span class="o">.</span><span class="n">error</span> <span class="o">=</span> <span class="n">error</span>
+        <span class="k">if</span> <span class="n">fixed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">par</span><span class="o">.</span><span class="n">constant</span> <span class="o">=</span> <span class="n">fixed</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">evaluator</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Evaluator of the minimizer.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__eval</span>
+
+<div class="viewcode-block" id="Minimizer.asymmetric_errors"><a class="viewcode-back" href="../../../api/minkit.Minimizer.html#minkit.Minimizer.asymmetric_errors">[docs]</a>    <span class="k">def</span> <span class="nf">asymmetric_errors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">cov</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="n">DEFAULT_ASYM_ERROR_ATOL</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="n">DEFAULT_ASYM_ERROR_RTOL</span><span class="p">,</span> <span class="n">maxcall</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Calculate the asymmetric errors for the given parameter. This is done</span>
+<span class="sd">        by subdividing the bounds of the parameter into two till the variation</span>
+<span class="sd">        of the FCN is one. Unlike MINOS, this method does not treat new</span>
+<span class="sd">        minima.</span>
+
+<span class="sd">        :param name: name of the parameter.</span>
+<span class="sd">        :type name: str</span>
+<span class="sd">        :param cov: covariance matrix. If provided, the initial values of the \</span>
+<span class="sd">        parameters will be obtained from them.</span>
+<span class="sd">        :type cov: numpy.ndarray</span>
+<span class="sd">        :param sigma: number of standard deviations to compute.</span>
+<span class="sd">        :type sigma: float</span>
+<span class="sd">        :param atol: absolute tolerance for the error.</span>
+<span class="sd">        :type atol: float</span>
+<span class="sd">        :param rtol: relative tolerance for the error.</span>
+<span class="sd">        :type rtol: float</span>
+<span class="sd">        :param maxcall: maximum number of calls to calculate each error bound.</span>
+<span class="sd">        :type maxcall: int or None</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">par</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__eval</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
+        <span class="n">lb</span><span class="p">,</span> <span class="n">ub</span> <span class="o">=</span> <span class="n">par</span><span class="o">.</span><span class="n">bounds</span>
+
+        <span class="n">var</span> <span class="o">=</span> <span class="n">sigma</span> <span class="o">*</span> <span class="n">sigma</span>
+
+        <span class="n">lo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_asym_error</span><span class="p">(</span><span class="n">par</span><span class="p">,</span> <span class="n">lb</span><span class="p">,</span> <span class="n">cov</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">atol</span><span class="p">,</span> <span class="n">rtol</span><span class="p">,</span> <span class="n">maxcall</span><span class="p">)</span>
+        <span class="n">hi</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_asym_error</span><span class="p">(</span><span class="n">par</span><span class="p">,</span> <span class="n">ub</span><span class="p">,</span> <span class="n">cov</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">atol</span><span class="p">,</span> <span class="n">rtol</span><span class="p">,</span> <span class="n">maxcall</span><span class="p">)</span>
+
+        <span class="n">par</span><span class="o">.</span><span class="n">asym_errors</span> <span class="o">=</span> <span class="n">lo</span><span class="p">,</span> <span class="n">hi</span></div>
+
+<div class="viewcode-block" id="Minimizer.fcn_profile"><a class="viewcode-back" href="../../../api/minkit.Minimizer.html#minkit.Minimizer.fcn_profile">[docs]</a>    <span class="k">def</span> <span class="nf">fcn_profile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wa</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Evaluate the profile of an FCN for a set of parameters and values.</span>
+
+<span class="sd">        :param wa: single variable or set of variables.</span>
+<span class="sd">        :type wa: str or list(str).</span>
+<span class="sd">        :param values: values for each parameter specified in *wa*.</span>
+<span class="sd">        :type values: numpy.ndarray</span>
+<span class="sd">        :returns: Profile of the FCN for the given values.</span>
+<span class="sd">        :rtype: numpy.ndarray</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">profile_pars</span><span class="p">,</span> <span class="n">values</span> <span class="o">=</span> <span class="n">_process_parameters</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__eval</span><span class="o">.</span><span class="n">args</span><span class="p">,</span> <span class="n">wa</span><span class="p">,</span> <span class="n">values</span><span class="p">)</span>
+
+        <span class="n">fcn_values</span> <span class="o">=</span> <span class="n">data_types</span><span class="o">.</span><span class="n">empty_float</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">restoring_state</span><span class="p">():</span>
+
+            <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__eval</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">profile_pars</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_set_parameter_state</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">fixed</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_set_parameter_state</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">fixed</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+            <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">__eval</span><span class="o">.</span><span class="n">using_caches</span><span class="p">():</span>
+                <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">vals</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">values</span><span class="o">.</span><span class="n">T</span><span class="p">):</span>
+                    <span class="k">for</span> <span class="n">p</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">profile_pars</span><span class="p">,</span> <span class="n">vals</span><span class="p">):</span>
+                        <span class="n">p</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">v</span>
+                    <span class="n">fcn_values</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__eval</span><span class="o">.</span><span class="n">fcn</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">fcn_values</span></div>
+
+<div class="viewcode-block" id="Minimizer.minimize"><a class="viewcode-back" href="../../../api/minkit.Minimizer.html#minkit.Minimizer.minimize">[docs]</a>    <span class="k">def</span> <span class="nf">minimize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Minimize the FCN for the stored PDF and data sample. Arguments depend</span>
+<span class="sd">        on the specific minimizer to use. It returns a tuple with the</span>
+<span class="sd">        information whether the minimization succeded and the covariance matrix.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">MethodNotDefinedError</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span> <span class="s1">&#39;result_to_registry&#39;</span><span class="p">)</span></div></div>
+            <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span> <span class="s1">&#39;minimize&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Minimizer.minimization_profile"><a class="viewcode-back" href="../../../api/minkit.Minimizer.html#minkit.Minimizer.minimization_profile">[docs]</a>    <span class="k">def</span> <span class="nf">minimization_profile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wa</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">minimizer_config</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Minimize a PDF an calculate the FCN for each set of parameters and values.</span>
+
+<span class="sd">        :param wa: single variable or set of variables.</span>
+<span class="sd">        :type wa: str or list(str).</span>
+<span class="sd">        :param values: values for each parameter specified in *wa*.</span>
+<span class="sd">        :type values: numpy.ndarray</span>
+<span class="sd">        :param minimizer_config: arguments passed to :meth:`Minimizer.minimize`.</span>
+<span class="sd">        :type minimizer_config: dict or None</span>
+<span class="sd">        :returns: Profile of the FCN for the given values.</span>
+<span class="sd">        :rtype: numpy.ndarray</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">profile_pars</span><span class="p">,</span> <span class="n">values</span> <span class="o">=</span> <span class="n">_process_parameters</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__eval</span><span class="o">.</span><span class="n">args</span><span class="p">,</span> <span class="n">wa</span><span class="p">,</span> <span class="n">values</span><span class="p">)</span>
+
+        <span class="n">fcn_values</span> <span class="o">=</span> <span class="n">data_types</span><span class="o">.</span><span class="n">empty_float</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+
+        <span class="n">minimizer_config</span> <span class="o">=</span> <span class="n">minimizer_config</span> <span class="ow">or</span> <span class="p">{}</span>
+
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">restoring_state</span><span class="p">():</span>
+
+            <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">profile_pars</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_set_parameter_state</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">fixed</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">vals</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">values</span><span class="o">.</span><span class="n">T</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">p</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">profile_pars</span><span class="p">,</span> <span class="n">vals</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_set_parameter_state</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">v</span><span class="p">)</span>
+
+                <span class="n">res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">minimize</span><span class="p">(</span><span class="o">**</span><span class="n">minimizer_config</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">res</span><span class="o">.</span><span class="n">valid</span><span class="p">:</span>
+                    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                        <span class="s1">&#39;Minimum in FCN scan is not valid&#39;</span><span class="p">,</span> <span class="ne">RuntimeWarning</span><span class="p">)</span>
+
+                <span class="n">fcn_values</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">fcn</span>
+
+        <span class="k">return</span> <span class="n">fcn_values</span></div>
+
+<div class="viewcode-block" id="Minimizer.restoring_state"><a class="viewcode-back" href="../../../api/minkit.Minimizer.html#minkit.Minimizer.restoring_state">[docs]</a>    <span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
+    <span class="k">def</span> <span class="nf">restoring_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Method to ensure that modifications of parameters within a minimizer</span>
+<span class="sd">        context are reset properly. Sadly, the :class:`iminuit.Minuit` class</span>
+<span class="sd">        is not stateless, so each time a parameter is modified it must be</span>
+<span class="sd">        notified of the change.</span>
+
+<span class="sd">        .. warning:: For the :class:`MinuitMinimizer` class, a call to this</span>
+<span class="sd">           method does not preserve the minimization state of MIGRAD.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">__eval</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">restoring_state</span><span class="p">():</span>
+            <span class="k">yield</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="Minimizer.set_parameter_state"><a class="viewcode-back" href="../../../api/minkit.Minimizer.html#minkit.Minimizer.set_parameter_state">[docs]</a>    <span class="k">def</span> <span class="nf">set_parameter_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fixed</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Method to ensure that a modification of a parameter within a minimizer</span>
+<span class="sd">        context is treated properly. Sadly, the :class:`iminuit.Minuit` class</span>
+<span class="sd">        is not stateless, so each time a parameter is modified it must be</span>
+<span class="sd">        notified of the change.</span>
+
+<span class="sd">        :param name: name of the parameter.</span>
+<span class="sd">        :type name: str</span>
+<span class="sd">        :param value: new value of a parameter.</span>
+<span class="sd">        :type value: float or None</span>
+<span class="sd">        :param error: error of the parameter.</span>
+<span class="sd">        :type error: float or None</span>
+<span class="sd">        :param fixed: whether to fix the parameter.</span>
+<span class="sd">        :type fixed: bool or None</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">par</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__eval</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_set_parameter_state</span><span class="p">(</span><span class="n">par</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">error</span><span class="p">,</span> <span class="n">fixed</span><span class="p">)</span></div></div>
 </pre></div>
 
            </div>

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Basic example &mdash; minkit 0.0.0.dev0 documentation</title>
+  <title>Basic example &mdash; minkit 0.0.0.dev1 documentation</title>
   
 
   
@@ -64,7 +64,7 @@
             
             
               <div class="version">
-                0.0.0.dev0
+                0.0.0.dev1
               </div>
             
           
@@ -101,6 +101,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="minimization.html">Minimization with MinKit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="uncertainties.html">Uncertainties</a></li>
 <li class="toctree-l2"><a class="reference internal" href="fit_stability.html">Determining the stability of the fits</a></li>
 <li class="toctree-l2"><a class="reference internal" href="multidimensional.html">Working in more than one dimension</a></li>
 <li class="toctree-l2"><a class="reference internal" href="extension.html">Adding custom PDFs</a></li>
@@ -406,7 +407,6 @@ div.rendered_html tbody tr:hover {
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="o">%</span><span class="k">matplotlib</span> inline
 <span class="kn">import</span> <span class="nn">minkit</span>
-
 </pre></div>
 </div>
 </div>
@@ -499,8 +499,8 @@ Parameter(name=x, value=None, bounds=[-5.  5.], error=0.0, asym_errors=None, con
 <span></span>dtype  = &lt;class &#39;numpy.float64&#39;&gt;
 length = 10000
 ndim   = 1
-array  = [ 1.72411658  0.39013052 -1.08542796 ... -0.34548134  3.46264603
- -0.08042297]
+array  = [ 0.39013052  0.04924674  0.7617482  ...  0.16637999 -1.74747775
+  1.02154995]
 </pre></div>
 </div>
 </div>
@@ -519,8 +519,8 @@ array  = [ 1.72411658  0.39013052 -1.08542796 ... -0.34548134  3.46264603
 </pre></div>
 </div>
 <div class="output_area highlight-none notranslate"><div class="highlight"><pre>
-<span></span>array([ 1.72411658,  0.39013052, -1.08542796, ..., -0.34548134,
-        3.46264603, -0.08042297])
+<span></span>array([ 0.39013052,  0.04924674,  0.7617482 , ...,  0.16637999,
+       -1.74747775,  1.02154995])
 </pre></div>
 </div>
 </div>
@@ -562,36 +562,123 @@ within this context, since it may lead to an undefined behaviour.</p>
 <span></span><span class="n">c</span><span class="o">.</span><span class="n">bounds</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">+</span><span class="mi">1</span><span class="p">)</span>
 <span class="n">s</span><span class="o">.</span><span class="n">bounds</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
 <span class="k">with</span> <span class="n">minkit</span><span class="o">.</span><span class="n">minimizer</span><span class="p">(</span><span class="s1">&#39;uml&#39;</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">minimizer</span><span class="o">=</span><span class="s1">&#39;minuit&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">minimizer</span><span class="p">:</span>
-    <span class="c1"># Now &quot;g&quot; must not be modified</span>
-    <span class="n">r</span> <span class="o">=</span> <span class="n">minimizer</span><span class="o">.</span><span class="n">migrad</span><span class="p">()</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+    <span class="c1"># do not modify the bounds of the parameters in this context</span>
+    <span class="n">minimizer</span><span class="o">.</span><span class="n">migrad</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-------------------------------------------------------------------
-| FCN = 2.85E+04                |      Ncalls=52 (52 total)      |
-| EDM = 0.00159 (Goal: 1E-05)   |            up = 1.0            |
-------------------------------------------------------------------
-|  Valid Min.   | Valid Param.  | Above EDM | Reached call limit |
-------------------------------------------------------------------
-|     True      |     True      |   False   |       False        |
-------------------------------------------------------------------
-| Hesse failed  |   Has cov.    | Accurate  | Pos. def. | Forced |
-------------------------------------------------------------------
-|     False     |     True      |   True    |   True    | False  |
-------------------------------------------------------------------
-------------------------------------------------------------------------------------------
-|   | Name |   Value   | Hesse Err | Minos Err- | Minos Err+ | Limit-  | Limit+  | Fixed |
-------------------------------------------------------------------------------------------
-| 0 | c    |  -0.000   |   0.010   |            |            |   -1    |    1    |       |
-| 1 | s    |   1.006   |   0.007   |            |            |   0.1   |    5    |       |
-------------------------------------------------------------------------------------------
-</pre></div></div>
+<div class="output_area rendered_html docutils container">
+<hr></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area rendered_html docutils container">
+<table>
+    <tr>
+        <td title="Minimum value of function">FCN = 28288.575544127285</td>
+        <td title="Total number of call to FCN so far">TOTAL NCALL = 80</td>
+        <td title="Number of call in last migrad">NCALLS = 80</td>
+    </tr>
+    <tr>
+        <td title="Estimated distance to minimum">EDM = 1.3438488753738374e-05</td>
+        <td title="Maximum EDM definition of convergence">GOAL EDM = 1e-05</td>
+        <td title="Error def. Amount of increase in FCN to be defined as 1 standard deviation">
+        UP = 1.0</td>
+    </tr>
+</table>
+<table>
+    <tr>
+        <td align="center" title="Validity of the migrad call">Valid</td>
+        <td align="center" title="Validity of parameters">Valid Param</td>
+        <td align="center" title="Is Covariance matrix accurate?">Accurate Covar</td>
+        <td align="center" title="Positive definiteness of covariance matrix">PosDef</td>
+        <td align="center" title="Was covariance matrix made posdef by adding diagonal element">Made PosDef</td>
+    </tr>
+    <tr>
+        <td align="center" style="background-color:#92CCA6">True</td>
+        <td align="center" style="background-color:#92CCA6">True</td>
+        <td align="center" style="background-color:#92CCA6">True</td>
+        <td align="center" style="background-color:#92CCA6">True</td>
+        <td align="center" style="background-color:#92CCA6">False</td>
+    </tr>
+    <tr>
+        <td align="center" title="Was last hesse call fail?">Hesse Fail</td>
+        <td align="center" title="Validity of covariance">HasCov</td>
+        <td align="center" title="Is EDM above goal EDM?">Above EDM</td>
+        <td align="center"></td>
+        <td align="center" title="Did last migrad call reach max call limit?">Reach calllim</td>
+    </tr>
+    <tr>
+        <td align="center" style="background-color:#92CCA6">False</td>
+        <td align="center" style="background-color:#92CCA6">True</td>
+        <td align="center" style="background-color:#92CCA6">False</td>
+        <td align="center"></td>
+        <td align="center" style="background-color:#92CCA6">False</td>
+    </tr>
+</table></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area rendered_html docutils container">
+<table>
+    <tr>
+        <td><a href="#" onclick="$('#yYTKliwKaR').toggle()">+</a></td>
+        <td title="Variable name">Name</td>
+        <td title="Value of parameter">Value</td>
+        <td title="Hesse error">Hesse Error</td>
+        <td title="Minos lower error">Minos Error-</td>
+        <td title="Minos upper error">Minos Error+</td>
+        <td title="Lower limit of the parameter">Limit-</td>
+        <td title="Upper limit of the parameter">Limit+</td>
+        <td title="Is the parameter fixed in the fit">Fixed?</td>
+    </tr>
+    <tr>
+        <td>0</td>
+        <td>c</td>
+        <td>-0.0129942</td>
+        <td>0.00995525</td>
+        <td></td>
+        <td></td>
+        <td>-1</td>
+        <td>1</td>
+        <td>No</td>
+    </tr>
+    <tr>
+        <td>1</td>
+        <td>s</td>
+        <td>0.995533</td>
+        <td>0.00704032</td>
+        <td></td>
+        <td></td>
+        <td>0.1</td>
+        <td>5</td>
+        <td>No</td>
+    </tr>
+</table>
+<pre id="yYTKliwKaR" style="display:none;">
+<textarea rows="10" cols="50" onclick="this.select()" readonly>
+\begin{tabular}{|c|r|r|r|r|r|r|r|c|}
+\hline
+ & Name & Value & Hesse Error & Minos Error- & Minos Error+ & Limit- & Limit+ & Fixed?\\
+\hline
+0 & c & -0.0129942 & 0.00995525 &  &  & -1.0 & 1 & No\\
+\hline
+1 & s & 0.995533 & 0.00704032 &  &  & 0.1 & 5 & No\\
+\hline
+\end{tabular}
+</textarea>
+</pre></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area rendered_html docutils container">
+<hr></div>
 </div>
 <p>The first argument to <em>minimizer</em> is the FCN type, which defines the figure of merit to minimize. The second is the PDF and the third is the data set. For this case, the Minuit minimizer is used, so the result of <em>minimizer</em> becomes an interface to the <em>Minuit</em> class from the <em>iminuit</em> package. The minimizer works in such a way that the values of the parameters are automatically set to the result of the minimization process. We can extract the values of the parameters by calling</p>
 <div class="nbinput docutils container">
@@ -599,7 +686,7 @@ within this context, since it may lead to an undefined behaviour.</p>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">reg</span> <span class="o">=</span> <span class="n">minimizer</span><span class="o">.</span><span class="n">result_to_registry</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">params</span><span class="p">)</span>
+<span></span><span class="n">reg</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">all_real_args</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">reg</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -609,7 +696,7 @@ within this context, since it may lead to an undefined behaviour.</p>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-[Parameter(name=c, value=-2.567945855957987e-13, bounds=[-1.  1.], error=0.010062672571108877, asym_errors=None, constant=False), Parameter(name=s, value=1.0062930639292242, bounds=[0.1 5. ], error=0.007116333022511467, asym_errors=None, constant=False)]
+[Parameter(name=c, value=-0.012994159943855443, bounds=[-1.  1.], error=0.009955252058651054, asym_errors=None, constant=False), Parameter(name=s, value=0.9955333727093665, bounds=[0.1 5. ], error=0.007040317897289816, asym_errors=None, constant=False)]
 </pre></div></div>
 </div>
 <p>The resulting registry is a new set of parameters that are not linked to those that were minimized (despite they have the same name).</p>

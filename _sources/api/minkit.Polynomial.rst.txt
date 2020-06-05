@@ -5,3 +5,85 @@ Polynomial
 
 .. autoclass:: Polynomial
    :show-inheritance:
+
+   .. rubric:: Attributes Summary
+
+   .. autosummary::
+
+      ~Polynomial.BIND
+      ~Polynomial.CACHE_TYPES
+      ~Polynomial.CONST
+      ~Polynomial.all_args
+      ~Polynomial.all_pars
+      ~Polynomial.all_real_args
+      ~Polynomial.aop
+      ~Polynomial.args
+      ~Polynomial.backend
+      ~Polynomial.cache
+      ~Polynomial.cache_type
+      ~Polynomial.constant
+      ~Polynomial.data_pars
+      ~Polynomial.dependent
+      ~Polynomial.numint_config
+      ~Polynomial.real_args
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+
+      ~Polynomial.__call__
+      ~Polynomial.bind
+      ~Polynomial.copy
+      ~Polynomial.evaluate_binned
+      ~Polynomial.from_json_object
+      ~Polynomial.function
+      ~Polynomial.generate
+      ~Polynomial.get_values
+      ~Polynomial.integral
+      ~Polynomial.norm
+      ~Polynomial.numerical_integral
+      ~Polynomial.numerical_normalization
+      ~Polynomial.restoring_state
+      ~Polynomial.set_values
+      ~Polynomial.to_backend
+      ~Polynomial.to_json_object
+      ~Polynomial.using_cache
+
+   .. rubric:: Attributes Documentation
+
+   .. autoattribute:: BIND
+   .. autoattribute:: CACHE_TYPES
+   .. autoattribute:: CONST
+   .. autoattribute:: all_args
+   .. autoattribute:: all_pars
+   .. autoattribute:: all_real_args
+   .. autoattribute:: aop
+   .. autoattribute:: args
+   .. autoattribute:: backend
+   .. autoattribute:: cache
+   .. autoattribute:: cache_type
+   .. autoattribute:: constant
+   .. autoattribute:: data_pars
+   .. autoattribute:: dependent
+   .. autoattribute:: numint_config
+   .. autoattribute:: real_args
+
+   .. rubric:: Methods Documentation
+
+   .. automethod:: __call__
+   .. automethod:: bind
+   .. automethod:: copy
+   .. automethod:: evaluate_binned
+   .. automethod:: from_json_object
+   .. automethod:: function
+   .. automethod:: generate
+   .. automethod:: get_values
+   .. automethod:: integral
+   .. automethod:: norm
+   .. automethod:: numerical_integral
+   .. automethod:: numerical_normalization
+   .. automethod:: restoring_state
+   .. automethod:: set_values
+   .. automethod:: to_backend
+   .. automethod:: to_json_object
+   .. automethod:: using_cache

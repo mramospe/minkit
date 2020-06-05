@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ConvPDFs &mdash; minkit 0.0.0.dev0 documentation</title>
+  <title>ConvPDFs &mdash; minkit 0.0.0.dev1 documentation</title>
   
 
   
@@ -64,7 +64,7 @@
             
             
               <div class="version">
-                0.0.0.dev0
+                0.0.0.dev1
               </div>
             
           
@@ -252,8 +252,62 @@
 <col style="width: 90%" />
 </colgroup>
 <tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.ConvPDFs.BIND" title="minkit.ConvPDFs.BIND"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BIND</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#minkit.ConvPDFs.CACHE_TYPES" title="minkit.ConvPDFs.CACHE_TYPES"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CACHE_TYPES</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.ConvPDFs.CONST" title="minkit.ConvPDFs.CONST"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CONST</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#minkit.ConvPDFs.all_args" title="minkit.ConvPDFs.all_args"><code class="xref py py-obj docutils literal notranslate"><span class="pre">all_args</span></code></a></p></td>
+<td><p>All the argument parameters associated to this class.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.ConvPDFs.all_pars" title="minkit.ConvPDFs.all_pars"><code class="xref py py-obj docutils literal notranslate"><span class="pre">all_pars</span></code></a></p></td>
+<td><p>All the parameters associated to this class.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#minkit.ConvPDFs.all_pdfs" title="minkit.ConvPDFs.all_pdfs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">all_pdfs</span></code></a></p></td>
+<td><p>Recursively get all the possible PDFs belonging to this object.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.ConvPDFs.all_real_args" title="minkit.ConvPDFs.all_real_args"><code class="xref py py-obj docutils literal notranslate"><span class="pre">all_real_args</span></code></a></p></td>
+<td><p>All the argument parameters that are not <code class="xref py py-class docutils literal notranslate"><span class="pre">ParameterFormula</span></code> instances.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#minkit.ConvPDFs.aop" title="minkit.ConvPDFs.aop"><code class="xref py py-obj docutils literal notranslate"><span class="pre">aop</span></code></a></p></td>
+<td><p>Object to do operations on arrays.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.ConvPDFs.args" title="minkit.ConvPDFs.args"><code class="xref py py-obj docutils literal notranslate"><span class="pre">args</span></code></a></p></td>
+<td><p>Argument parameters this object directly depends on.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#minkit.ConvPDFs.backend" title="minkit.ConvPDFs.backend"><code class="xref py py-obj docutils literal notranslate"><span class="pre">backend</span></code></a></p></td>
+<td><p>Backend interface.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.ConvPDFs.cache" title="minkit.ConvPDFs.cache"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cache</span></code></a></p></td>
+<td><p>Return the cached values for this PDF.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#minkit.ConvPDFs.cache_type" title="minkit.ConvPDFs.cache_type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cache_type</span></code></a></p></td>
+<td><p>Cache type being used.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.ConvPDFs.constant" title="minkit.ConvPDFs.constant"><code class="xref py py-obj docutils literal notranslate"><span class="pre">constant</span></code></a></p></td>
+<td><p>Whether this is a constant <a class="reference internal" href="minkit.PDF.html#minkit.PDF" title="minkit.PDF"><code class="xref py py-class docutils literal notranslate"><span class="pre">PDF</span></code></a>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#minkit.ConvPDFs.data_pars" title="minkit.ConvPDFs.data_pars"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_pars</span></code></a></p></td>
+<td><p>Data parameters this object directly depends on.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.ConvPDFs.dependencies" title="minkit.ConvPDFs.dependencies"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dependencies</span></code></a></p></td>
+<td><p>Registry of PDFs this instance depends on.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#minkit.ConvPDFs.dependent" title="minkit.ConvPDFs.dependent"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dependent</span></code></a></p></td>
+<td><p></p></td>
+</tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#minkit.ConvPDFs.interpolation_method" title="minkit.ConvPDFs.interpolation_method"><code class="xref py py-obj docutils literal notranslate"><span class="pre">interpolation_method</span></code></a></p></td>
 <td><p>Function used to do the interpolation.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#minkit.ConvPDFs.pdfs" title="minkit.ConvPDFs.pdfs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pdfs</span></code></a></p></td>
+<td><p>Get the registry of PDFs within this class.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.ConvPDFs.real_args" title="minkit.ConvPDFs.real_args"><code class="xref py py-obj docutils literal notranslate"><span class="pre">real_args</span></code></a></p></td>
+<td><p>Arguments that do not depend on other arguments.</p></td>
 </tr>
 </tbody>
 </table>
@@ -267,14 +321,32 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#minkit.ConvPDFs.__call__" title="minkit.ConvPDFs.__call__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__call__</span></code></a>(data[, range, normalized])</p></td>
 <td><p>Call the PDF in the given set of data.</p></td>
 </tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#minkit.ConvPDFs.bind" title="minkit.ConvPDFs.bind"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bind</span></code></a>([range, normalized])</p></td>
+<td><p>Prepare an object that will be called many times with the same set of values.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.ConvPDFs.component" title="minkit.ConvPDFs.component"><code class="xref py py-obj docutils literal notranslate"><span class="pre">component</span></code></a>(name)</p></td>
+<td><p>Get the <a class="reference internal" href="minkit.PDF.html#minkit.PDF" title="minkit.PDF"><code class="xref py py-class docutils literal notranslate"><span class="pre">PDF</span></code></a> object with the given name.</p></td>
+</tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#minkit.ConvPDFs.convolve" title="minkit.ConvPDFs.convolve"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convolve</span></code></a>([normalized])</p></td>
 <td><p>Calculate the convolution.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.ConvPDFs.evaluate_binned" title="minkit.ConvPDFs.evaluate_binned"><code class="xref py py-obj docutils literal notranslate"><span class="pre">evaluate_binned</span></code></a>(data[, normalized])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.ConvPDFs.copy" title="minkit.ConvPDFs.copy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy</span></code></a>([backend])</p></td>
+<td><p>Create a copy of this PDF.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#minkit.ConvPDFs.evaluate_binned" title="minkit.ConvPDFs.evaluate_binned"><code class="xref py py-obj docutils literal notranslate"><span class="pre">evaluate_binned</span></code></a>(data[, normalized])</p></td>
 <td><p>Evaluate the PDF over a binned sample.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#minkit.ConvPDFs.from_json_object" title="minkit.ConvPDFs.from_json_object"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_json_object</span></code></a>(obj, pars, pdfs)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.ConvPDFs.from_json_object" title="minkit.ConvPDFs.from_json_object"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_json_object</span></code></a>(obj, pars, pdfs)</p></td>
 <td><p>Build a PDF from a JSON object.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#minkit.ConvPDFs.generate" title="minkit.ConvPDFs.generate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">generate</span></code></a>([size, mapsize, gensize, …])</p></td>
+<td><p>Generate random data.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.ConvPDFs.get_values" title="minkit.ConvPDFs.get_values"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_values</span></code></a>()</p></td>
+<td><p>Get the values of the parameters within this object.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#minkit.ConvPDFs.integral" title="minkit.ConvPDFs.integral"><code class="xref py py-obj docutils literal notranslate"><span class="pre">integral</span></code></a>([integral_range, range])</p></td>
+<td><p>Calculate the integral of a <a class="reference internal" href="minkit.PDF.html#minkit.PDF" title="minkit.PDF"><code class="xref py py-class docutils literal notranslate"><span class="pre">PDF</span></code></a>.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#minkit.ConvPDFs.norm" title="minkit.ConvPDFs.norm"><code class="xref py py-obj docutils literal notranslate"><span class="pre">norm</span></code></a>([range])</p></td>
 <td><p>Calculate the normalization of the PDF.</p></td>
@@ -285,15 +357,172 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#minkit.ConvPDFs.numerical_normalization" title="minkit.ConvPDFs.numerical_normalization"><code class="xref py py-obj docutils literal notranslate"><span class="pre">numerical_normalization</span></code></a>([range])</p></td>
 <td><p>Calculate a numerical normalization.</p></td>
 </tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#minkit.ConvPDFs.restoring_state" title="minkit.ConvPDFs.restoring_state"><code class="xref py py-obj docutils literal notranslate"><span class="pre">restoring_state</span></code></a>()</p></td>
+<td><p>Enter a context where the attributes of the parameters will be restored on exit.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.ConvPDFs.set_values" title="minkit.ConvPDFs.set_values"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_values</span></code></a>(**kwargs)</p></td>
+<td><p>Set the values of the parameters associated to this PDF.</p></td>
+</tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#minkit.ConvPDFs.to_backend" title="minkit.ConvPDFs.to_backend"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_backend</span></code></a>(backend)</p></td>
 <td><p>Initialize this class in a different backend.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#minkit.ConvPDFs.to_json_object" title="minkit.ConvPDFs.to_json_object"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_json_object</span></code></a>()</p></td>
 <td><p>Dump the PDF information into a JSON object.</p></td>
 </tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#minkit.ConvPDFs.using_cache" title="minkit.ConvPDFs.using_cache"><code class="xref py py-obj docutils literal notranslate"><span class="pre">using_cache</span></code></a>(ctype)</p></td>
+<td><p>Safe method to enable a cache of the PDF.</p></td>
+</tr>
 </tbody>
 </table>
 <p class="rubric">Attributes Documentation</p>
+<dl class="attribute">
+<dt id="minkit.ConvPDFs.BIND">
+<code class="sig-name descname">BIND</code><em class="property"> = 'bind'</em><a class="headerlink" href="#minkit.ConvPDFs.BIND" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="minkit.ConvPDFs.CACHE_TYPES">
+<code class="sig-name descname">CACHE_TYPES</code><em class="property"> = ('bind', 'const')</em><a class="headerlink" href="#minkit.ConvPDFs.CACHE_TYPES" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="minkit.ConvPDFs.CONST">
+<code class="sig-name descname">CONST</code><em class="property"> = 'const'</em><a class="headerlink" href="#minkit.ConvPDFs.CONST" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="minkit.ConvPDFs.all_args">
+<code class="sig-name descname">all_args</code><a class="headerlink" href="#minkit.ConvPDFs.all_args" title="Permalink to this definition">¶</a></dt>
+<dd><p>All the argument parameters associated to this class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="minkit.Registry.html#minkit.Registry" title="minkit.Registry">Registry</a>(<a class="reference internal" href="minkit.Parameter.html#minkit.Parameter" title="minkit.Parameter">Parameter</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="minkit.ConvPDFs.all_pars">
+<code class="sig-name descname">all_pars</code><a class="headerlink" href="#minkit.ConvPDFs.all_pars" title="Permalink to this definition">¶</a></dt>
+<dd><p>All the parameters associated to this class.
+This includes also any <code class="xref py py-class docutils literal notranslate"><span class="pre">ParameterFormula</span></code> and the data parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="minkit.Registry.html#minkit.Registry" title="minkit.Registry">Registry</a>(<a class="reference internal" href="minkit.Parameter.html#minkit.Parameter" title="minkit.Parameter">Parameter</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="minkit.ConvPDFs.all_pdfs">
+<code class="sig-name descname">all_pdfs</code><a class="headerlink" href="#minkit.ConvPDFs.all_pdfs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Recursively get all the possible PDFs belonging to this object.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="minkit.ConvPDFs.all_real_args">
+<code class="sig-name descname">all_real_args</code><a class="headerlink" href="#minkit.ConvPDFs.all_real_args" title="Permalink to this definition">¶</a></dt>
+<dd><p>All the argument parameters that are not <code class="xref py py-class docutils literal notranslate"><span class="pre">ParameterFormula</span></code> instances.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="minkit.Registry.html#minkit.Registry" title="minkit.Registry">Registry</a>(<a class="reference internal" href="minkit.Parameter.html#minkit.Parameter" title="minkit.Parameter">Parameter</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="minkit.ConvPDFs.aop">
+<code class="sig-name descname">aop</code><a class="headerlink" href="#minkit.ConvPDFs.aop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Object to do operations on arrays.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="minkit.ArrayOperations.html#minkit.ArrayOperations" title="minkit.ArrayOperations">ArrayOperations</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="minkit.ConvPDFs.args">
+<code class="sig-name descname">args</code><a class="headerlink" href="#minkit.ConvPDFs.args" title="Permalink to this definition">¶</a></dt>
+<dd><p>Argument parameters this object directly depends on.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="minkit.Registry.html#minkit.Registry" title="minkit.Registry">Registry</a>(<a class="reference internal" href="minkit.Parameter.html#minkit.Parameter" title="minkit.Parameter">Parameter</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="minkit.ConvPDFs.backend">
+<code class="sig-name descname">backend</code><a class="headerlink" href="#minkit.ConvPDFs.backend" title="Permalink to this definition">¶</a></dt>
+<dd><p>Backend interface.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="minkit.Backend.html#minkit.Backend" title="minkit.Backend">Backend</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="minkit.ConvPDFs.cache">
+<code class="sig-name descname">cache</code><a class="headerlink" href="#minkit.ConvPDFs.cache" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the cached values for this PDF.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="minkit.ConvPDFs.cache_type">
+<code class="sig-name descname">cache_type</code><a class="headerlink" href="#minkit.ConvPDFs.cache_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Cache type being used.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a> or <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.8)">None</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="minkit.ConvPDFs.constant">
+<code class="sig-name descname">constant</code><a class="headerlink" href="#minkit.ConvPDFs.constant" title="Permalink to this definition">¶</a></dt>
+<dd><p>Whether this is a constant <a class="reference internal" href="minkit.PDF.html#minkit.PDF" title="minkit.PDF"><code class="xref py py-class docutils literal notranslate"><span class="pre">PDF</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="minkit.ConvPDFs.data_pars">
+<code class="sig-name descname">data_pars</code><a class="headerlink" href="#minkit.ConvPDFs.data_pars" title="Permalink to this definition">¶</a></dt>
+<dd><p>Data parameters this object directly depends on.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="minkit.Registry.html#minkit.Registry" title="minkit.Registry">Registry</a>(<a class="reference internal" href="minkit.Parameter.html#minkit.Parameter" title="minkit.Parameter">Parameter</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="minkit.ConvPDFs.dependencies">
+<code class="sig-name descname">dependencies</code><a class="headerlink" href="#minkit.ConvPDFs.dependencies" title="Permalink to this definition">¶</a></dt>
+<dd><p>Registry of PDFs this instance depends on.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="minkit.Registry.html#minkit.Registry" title="minkit.Registry">Registry</a>(<a class="reference internal" href="minkit.PDF.html#minkit.PDF" title="minkit.PDF">PDF</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="minkit.ConvPDFs.dependent">
+<code class="sig-name descname">dependent</code><em class="property"> = True</em><a class="headerlink" href="#minkit.ConvPDFs.dependent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="attribute">
 <dt id="minkit.ConvPDFs.interpolation_method">
 <code class="sig-name descname">interpolation_method</code><a class="headerlink" href="#minkit.ConvPDFs.interpolation_method" title="Permalink to this definition">¶</a></dt>
@@ -304,6 +533,31 @@
 </dd>
 <dt class="field-even">Setter</dt>
 <dd class="field-even"><p>Set the function to use from a string.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="minkit.ConvPDFs.pdfs">
+<code class="sig-name descname">pdfs</code><a class="headerlink" href="#minkit.ConvPDFs.pdfs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the registry of PDFs within this class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>PDFs owned by this class.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="minkit.Registry.html#minkit.Registry" title="minkit.Registry">Registry</a>(<a class="reference internal" href="minkit.PDF.html#minkit.PDF" title="minkit.PDF">PDF</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="minkit.ConvPDFs.real_args">
+<code class="sig-name descname">real_args</code><a class="headerlink" href="#minkit.ConvPDFs.real_args" title="Permalink to this definition">¶</a></dt>
+<dd><p>Arguments that do not depend on other arguments.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="minkit.Registry.html#minkit.Registry" title="minkit.Registry">Registry</a>(<a class="reference internal" href="minkit.Parameter.html#minkit.Parameter" title="minkit.Parameter">Parameter</a>)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -331,6 +585,40 @@
 </dd></dl>
 
 <dl class="method">
+<dt id="minkit.ConvPDFs.bind">
+<code class="sig-name descname">bind</code><span class="sig-paren">(</span><em class="sig-param">range='full'</em>, <em class="sig-param">normalized=True</em><span class="sig-paren">)</span><a class="headerlink" href="#minkit.ConvPDFs.bind" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prepare an object that will be called many times with the same set of
+values.
+This is usefull for PDFs using a cache, to avoid creating it many times
+in sucessive calls to <a class="reference internal" href="minkit.PDF.html#minkit.PDF.__call__" title="minkit.PDF.__call__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">PDF.__call__()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>range</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – normalization range.</p></li>
+<li><p><strong>normalized</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – whether to return a normalized output.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.ConvPDFs.component">
+<code class="sig-name descname">component</code><span class="sig-paren">(</span><em class="sig-param">name</em><span class="sig-paren">)</span><a class="headerlink" href="#minkit.ConvPDFs.component" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the <a class="reference internal" href="minkit.PDF.html#minkit.PDF" title="minkit.PDF"><code class="xref py py-class docutils literal notranslate"><span class="pre">PDF</span></code></a> object with the given name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – name of the <a class="reference internal" href="minkit.PDF.html#minkit.PDF" title="minkit.PDF"><code class="xref py py-class docutils literal notranslate"><span class="pre">PDF</span></code></a>.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Component with the given name.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="minkit.PDF.html#minkit.PDF" title="minkit.PDF">PDF</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
 <dt id="minkit.ConvPDFs.convolve">
 <code class="sig-name descname">convolve</code><span class="sig-paren">(</span><em class="sig-param">normalized=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/pdfs/pdf_core.html#ConvPDFs.convolve"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.ConvPDFs.convolve" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate the convolution.</p>
@@ -345,7 +633,21 @@
 <dd class="field-even"><p>Data and result of the evaluation.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)">numpy.ndarray</a>, <a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)">numpy.ndarray</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.18)">numpy.ndarray</a>, <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.18)">numpy.ndarray</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.ConvPDFs.copy">
+<code class="sig-name descname">copy</code><span class="sig-paren">(</span><em class="sig-param">backend=None</em><span class="sig-paren">)</span><a class="headerlink" href="#minkit.ConvPDFs.copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a copy of this PDF.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>backend</strong> (<a class="reference internal" href="minkit.Backend.html#minkit.Backend" title="minkit.Backend"><em>Backend</em></a>) – new backend.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A copy of this PDF.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -377,10 +679,73 @@
 This object must represent the internal structure of the PDF.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>obj</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – JSON object.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>obj</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – JSON object.</p></li>
+<li><p><strong>pars</strong> (<a class="reference internal" href="minkit.Registry.html#minkit.Registry" title="minkit.Registry"><em>Registry</em></a>) – parameter to build the PDF.</p></li>
+<li><p><strong>backend</strong> (<a class="reference internal" href="minkit.Backend.html#minkit.Backend" title="minkit.Backend"><em>Backend</em></a>) – backend to build the PDF.</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>This type of PDF constructed together with its parameters.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.ConvPDFs.generate">
+<code class="sig-name descname">generate</code><span class="sig-paren">(</span><em class="sig-param">size=10000</em>, <em class="sig-param">mapsize=1000</em>, <em class="sig-param">gensize=None</em>, <em class="sig-param">safe_factor=1.1</em>, <em class="sig-param">range='full'</em><span class="sig-paren">)</span><a class="headerlink" href="#minkit.ConvPDFs.generate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate random data.
+A call to <a class="reference internal" href="minkit.PDF.html#minkit.PDF.bind" title="minkit.PDF.bind"><code class="xref py py-meth docutils literal notranslate"><span class="pre">PDF.bind()</span></code></a> is implicit, since several calls will be done
+to the PDF with the same sets of values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – size (or minimum size) of the output sample.</p></li>
+<li><p><strong>mapsize</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – number of points to consider per dimension (data parameter)         in order to calculate the maximum value of the PDF.</p></li>
+<li><p><strong>gensize</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – number of entries to generate per iteration.</p></li>
+<li><p><strong>safe_factor</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – additional factor to multiply the numerically calculated         maximum of the function. In general this must be modified if the function is         not well-behaved.</p></li>
+<li><p><strong>range</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – range of the data parameters where to generate data.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Output sample.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="minkit.DataSet.html#minkit.DataSet" title="minkit.DataSet">DataSet</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.ConvPDFs.get_values">
+<code class="sig-name descname">get_values</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#minkit.ConvPDFs.get_values" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the values of the parameters within this object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Dictionary with the values of the parameters.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)">dict</a>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.ConvPDFs.integral">
+<code class="sig-name descname">integral</code><span class="sig-paren">(</span><em class="sig-param">integral_range='full'</em>, <em class="sig-param">range='full'</em><span class="sig-paren">)</span><a class="headerlink" href="#minkit.ConvPDFs.integral" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the integral of a <a class="reference internal" href="minkit.PDF.html#minkit.PDF" title="minkit.PDF"><code class="xref py py-class docutils literal notranslate"><span class="pre">PDF</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>integral_range</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – range of the integral to compute.</p></li>
+<li><p><strong>range</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – normalization range to consider.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Integral of the PDF in the range defined by “integral_range” normalized to “range”.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -440,6 +805,28 @@ This object must represent the internal structure of the PDF.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="minkit.ConvPDFs.restoring_state">
+<code class="sig-name descname">restoring_state</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#minkit.ConvPDFs.restoring_state" title="Permalink to this definition">¶</a></dt>
+<dd><p>Enter a context where the attributes of the parameters will be restored
+on exit.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.ConvPDFs.set_values">
+<code class="sig-name descname">set_values</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#minkit.ConvPDFs.set_values" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the values of the parameters associated to this PDF.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a><em>)</em>) – keyword arguments with “name”/”value”.</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Any PDF sharing parameters with this will also change its behaviour.</p>
+</div>
+</dd></dl>
+
+<dl class="method">
 <dt id="minkit.ConvPDFs.to_backend">
 <code class="sig-name descname">to_backend</code><span class="sig-paren">(</span><em class="sig-param">backend</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/pdfs/pdf_core.html#ConvPDFs.to_backend"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.ConvPDFs.to_backend" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialize this class in a different backend.</p>
@@ -464,6 +851,32 @@ The PDF can be constructed at any time by calling <a class="reference internal" 
 </dd>
 <dt class="field-even">Return type</dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.ConvPDFs.using_cache">
+<code class="sig-name descname">using_cache</code><span class="sig-paren">(</span><em class="sig-param">ctype</em><span class="sig-paren">)</span><a class="headerlink" href="#minkit.ConvPDFs.using_cache" title="Permalink to this definition">¶</a></dt>
+<dd><p>Safe method to enable a cache of the PDF. There are two types of cache:</p>
+<ul class="simple">
+<li><p><em>const</em>: it means that we plan to call the <a class="reference internal" href="minkit.PDF.html#minkit.PDF" title="minkit.PDF"><code class="xref py py-class docutils literal notranslate"><span class="pre">PDF</span></code></a> consecutively
+in the same data set, but the value of the parameters that are not
+constant is allowed to change. This means that any <a class="reference internal" href="minkit.PDF.html#minkit.PDF" title="minkit.PDF"><code class="xref py py-class docutils literal notranslate"><span class="pre">PDF</span></code></a> that
+has all its arguments as constant is assumed to have the same value
+in each evaluation.</p></li>
+<li><p><em>bind</em>: this is reserved for those processes where the normalization
+range will be the same, as well as the values of the parameters of the
+<a class="reference internal" href="minkit.PDF.html#minkit.PDF" title="minkit.PDF"><code class="xref py py-class docutils literal notranslate"><span class="pre">PDF</span></code></a>. However, the function can be called in different data
+sets.</p></li>
+</ul>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>It is responsibility of the user to ensure that the            conditions for the cache to be valid are preserved.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>ctype</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – cache type.</p>
 </dd>
 </dl>
 </dd></dl>

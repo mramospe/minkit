@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>BinnedDataSet &mdash; minkit 0.0.0.dev0 documentation</title>
+  <title>BinnedDataSet &mdash; minkit 0.0.0.dev1 documentation</title>
   
 
   
@@ -64,7 +64,7 @@
             
             
               <div class="version">
-                0.0.0.dev0
+                0.0.0.dev1
               </div>
             
           
@@ -239,7 +239,7 @@
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>edges</strong> (<a class="reference internal" href="minkit.darray.html#minkit.darray" title="minkit.darray"><em>darray</em></a>) – edges of the bins.</p></li>
-<li><p><strong>gaps</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a>) – gaps between edges belonging to different parameters.</p></li>
+<li><p><strong>gaps</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.18)"><em>numpy.ndarray</em></a>) – gaps between edges belonging to different parameters.</p></li>
 <li><p><strong>data_pars</strong> (<a class="reference internal" href="minkit.Registry.html#minkit.Registry" title="minkit.Registry"><em>Registry</em></a><em>(</em><a class="reference internal" href="minkit.Parameter.html#minkit.Parameter" title="minkit.Parameter"><em>Parameter</em></a><em>)</em>) – data parameters.</p></li>
 <li><p><strong>values</strong> (<a class="reference internal" href="minkit.darray.html#minkit.darray" title="minkit.darray"><em>darray</em></a>) – values of the data for each center.</p></li>
 </ul>
@@ -252,17 +252,29 @@
 <col style="width: 90%" />
 </colgroup>
 <tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.BinnedDataSet.aop" title="minkit.BinnedDataSet.aop"><code class="xref py py-obj docutils literal notranslate"><span class="pre">aop</span></code></a></p></td>
+<td><p>Object to do operations on arrays.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#minkit.BinnedDataSet.backend" title="minkit.BinnedDataSet.backend"><code class="xref py py-obj docutils literal notranslate"><span class="pre">backend</span></code></a></p></td>
+<td><p>Backend interface.</p></td>
+</tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#minkit.BinnedDataSet.bounds" title="minkit.BinnedDataSet.bounds"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bounds</span></code></a></p></td>
 <td><p>Bounds of each data parameter.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#minkit.BinnedDataSet.edges" title="minkit.BinnedDataSet.edges"><code class="xref py py-obj docutils literal notranslate"><span class="pre">edges</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#minkit.BinnedDataSet.data_pars" title="minkit.BinnedDataSet.data_pars"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_pars</span></code></a></p></td>
+<td><p>Data parameters associated to this sample.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.BinnedDataSet.edges" title="minkit.BinnedDataSet.edges"><code class="xref py py-obj docutils literal notranslate"><span class="pre">edges</span></code></a></p></td>
 <td><p>Edges of the histogram.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.BinnedDataSet.edges_indices" title="minkit.BinnedDataSet.edges_indices"><code class="xref py py-obj docutils literal notranslate"><span class="pre">edges_indices</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#minkit.BinnedDataSet.edges_indices" title="minkit.BinnedDataSet.edges_indices"><code class="xref py py-obj docutils literal notranslate"><span class="pre">edges_indices</span></code></a></p></td>
 <td><p>Indices to access the edges.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#minkit.BinnedDataSet.gaps" title="minkit.BinnedDataSet.gaps"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gaps</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.BinnedDataSet.gaps" title="minkit.BinnedDataSet.gaps"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gaps</span></code></a></p></td>
 <td><p>Gaps among the different edges.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#minkit.BinnedDataSet.ndim" title="minkit.BinnedDataSet.ndim"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ndim</span></code></a></p></td>
+<td><p>Number of dimensions.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#minkit.BinnedDataSet.sample_type" title="minkit.BinnedDataSet.sample_type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sample_type</span></code></a></p></td>
 <td><p></p></td>
@@ -289,12 +301,45 @@
 </table>
 <p class="rubric">Attributes Documentation</p>
 <dl class="attribute">
+<dt id="minkit.BinnedDataSet.aop">
+<code class="sig-name descname">aop</code><a class="headerlink" href="#minkit.BinnedDataSet.aop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Object to do operations on arrays.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="minkit.ArrayOperations.html#minkit.ArrayOperations" title="minkit.ArrayOperations">ArrayOperations</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="minkit.BinnedDataSet.backend">
+<code class="sig-name descname">backend</code><a class="headerlink" href="#minkit.BinnedDataSet.backend" title="Permalink to this definition">¶</a></dt>
+<dd><p>Backend interface.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="minkit.Backend.html#minkit.Backend" title="minkit.Backend">Backend</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
 <dt id="minkit.BinnedDataSet.bounds">
 <code class="sig-name descname">bounds</code><a class="headerlink" href="#minkit.BinnedDataSet.bounds" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bounds of each data parameter.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)">numpy.ndarray</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.18)">numpy.ndarray</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="minkit.BinnedDataSet.data_pars">
+<code class="sig-name descname">data_pars</code><a class="headerlink" href="#minkit.BinnedDataSet.data_pars" title="Permalink to this definition">¶</a></dt>
+<dd><p>Data parameters associated to this sample.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="minkit.Registry.html#minkit.Registry" title="minkit.Registry">Registry</a>(<a class="reference internal" href="minkit.Parameter.html#minkit.Parameter" title="minkit.Parameter">Parameter</a>)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -316,7 +361,7 @@
 <dd><p>Indices to access the edges.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)">numpy.ndarray</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.18)">numpy.ndarray</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -327,14 +372,25 @@
 <dd><p>Gaps among the different edges.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)">numpy.ndarray</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.18)">numpy.ndarray</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="minkit.BinnedDataSet.ndim">
+<code class="sig-name descname">ndim</code><a class="headerlink" href="#minkit.BinnedDataSet.ndim" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of dimensions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="minkit.BinnedDataSet.sample_type">
-<code class="sig-name descname">sample_type</code><em class="property"> = 0</em><a class="headerlink" href="#minkit.BinnedDataSet.sample_type" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">sample_type</code><em class="property"> = 'binned'</em><a class="headerlink" href="#minkit.BinnedDataSet.sample_type" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -356,9 +412,9 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>edges</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a>) – edges of the bins.</p></li>
+<li><p><strong>edges</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.18)"><em>numpy.ndarray</em></a>) – edges of the bins.</p></li>
 <li><p><strong>data_par</strong> (<a class="reference internal" href="minkit.Parameter.html#minkit.Parameter" title="minkit.Parameter"><em>Parameter</em></a>) – data parameter.</p></li>
-<li><p><strong>values</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a>) – values at each bin.</p></li>
+<li><p><strong>values</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.18)"><em>numpy.ndarray</em></a>) – values at each bin.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>

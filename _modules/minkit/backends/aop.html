@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>minkit.backends.aop &mdash; minkit 0.0.0.dev0 documentation</title>
+  <title>minkit.backends.aop &mdash; minkit 0.0.0.dev1 documentation</title>
   
 
   
@@ -62,7 +62,7 @@
             
             
               <div class="version">
-                0.0.0.dev0
+                0.0.0.dev1
               </div>
             
           
@@ -156,14 +156,19 @@
            <div itemprop="articleBody">
             
   <h1>Source code for minkit.backends.aop</h1><div class="highlight"><pre>
-<span></span><span class="sd">&#39;&#39;&#39;</span>
+<span></span><span class="c1">########################################</span>
+<span class="c1"># MIT License</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright (c) 2020 Miguel Ramos Pernas</span>
+<span class="c1">########################################</span>
+<span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">Application interface to deal with arrays. The different array classes</span>
 <span class="sd">can not define the __getitem__ since numpy objects would use it to do</span>
 <span class="sd">arithmetic operations.</span>
 <span class="sd">&#39;&#39;&#39;</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">arrays</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">core</span>
-<span class="kn">from</span> <span class="nn">..base</span> <span class="k">import</span> <span class="n">data_types</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">arrays</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">core</span>
+<span class="kn">from</span> <span class="nn">..base</span> <span class="kn">import</span> <span class="n">data_types</span>
 
 <span class="kn">import</span> <span class="nn">contextlib</span>
 
@@ -173,7 +178,7 @@
 
 <div class="viewcode-block" id="ArrayOperations"><a class="viewcode-back" href="../../../api/minkit.ArrayOperations.html#minkit.ArrayOperations">[docs]</a><span class="k">class</span> <span class="nc">ArrayOperations</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">backend</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">backend</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Build the object to do operations within a backend. Only the necessary</span>
 <span class="sd">        operators have been defined.</span>
@@ -195,10 +200,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">__backend</span> <span class="o">=</span> <span class="n">backend</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__backend</span><span class="o">.</span><span class="n">btype</span> <span class="o">==</span> <span class="n">core</span><span class="o">.</span><span class="n">CPU</span><span class="p">:</span>
-            <span class="kn">from</span> <span class="nn">.cpu</span> <span class="k">import</span> <span class="n">CPUOperations</span>
+            <span class="kn">from</span> <span class="nn">.cpu</span> <span class="kn">import</span> <span class="n">CPUOperations</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__oper</span> <span class="o">=</span> <span class="n">CPUOperations</span><span class="p">(</span><span class="n">backend</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="kn">from</span> <span class="nn">.gpu</span> <span class="k">import</span> <span class="n">GPUOperations</span>
+            <span class="kn">from</span> <span class="nn">.gpu</span> <span class="kn">import</span> <span class="n">GPUOperations</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__oper</span> <span class="o">=</span> <span class="n">GPUOperations</span><span class="p">(</span><span class="n">backend</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="nd">@property</span>

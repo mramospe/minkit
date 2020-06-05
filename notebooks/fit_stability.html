@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Determining the stability of the fits &mdash; minkit 0.0.0.dev0 documentation</title>
+  <title>Determining the stability of the fits &mdash; minkit 0.0.0.dev1 documentation</title>
   
 
   
@@ -40,7 +40,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Working in more than one dimension" href="multidimensional.html" />
-    <link rel="prev" title="Minimization with MinKit" href="minimization.html" /> 
+    <link rel="prev" title="Uncertainties" href="uncertainties.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -64,7 +64,7 @@
             
             
               <div class="version">
-                0.0.0.dev0
+                0.0.0.dev1
               </div>
             
           
@@ -94,6 +94,7 @@
 <li class="toctree-l2"><a class="reference internal" href="datasets.html">Creating data sets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="basic.html">Basic example</a></li>
 <li class="toctree-l2"><a class="reference internal" href="minimization.html">Minimization with MinKit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="uncertainties.html">Uncertainties</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Determining the stability of the fits</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#Scanning-the-FCN">Scanning the FCN</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#Evaluating-residuals-and-pulls">Evaluating residuals and pulls</a></li>
@@ -417,35 +418,121 @@ Let’s see how to do it on a fit to a Gaussian function.</p>
 
 <span class="k">with</span> <span class="n">minkit</span><span class="o">.</span><span class="n">minimizer</span><span class="p">(</span><span class="s1">&#39;uml&#39;</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span> <span class="k">as</span> <span class="n">minimizer</span><span class="p">:</span>
     <span class="n">result</span> <span class="o">=</span> <span class="n">minimizer</span><span class="o">.</span><span class="n">migrad</span><span class="p">()</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-------------------------------------------------------------------
-| FCN = 2.821E+04               |      Ncalls=91 (91 total)      |
-| EDM = 3.41E-07 (Goal: 1E-05)  |            up = 1.0            |
-------------------------------------------------------------------
-|  Valid Min.   | Valid Param.  | Above EDM | Reached call limit |
-------------------------------------------------------------------
-|     True      |     True      |   False   |       False        |
-------------------------------------------------------------------
-| Hesse failed  |   Has cov.    | Accurate  | Pos. def. | Forced |
-------------------------------------------------------------------
-|     False     |     True      |   True    |   True    | False  |
-------------------------------------------------------------------
-------------------------------------------------------------------------------------------
-|   | Name |   Value   | Hesse Err | Minos Err- | Minos Err+ | Limit-  | Limit+  | Fixed |
-------------------------------------------------------------------------------------------
-| 0 | c    |   0.007   |   0.010   |            |            |   -1    |    1    |       |
-| 1 | s    |   0.992   |   0.007   |            |            |   0.7   |   1.3   |       |
-------------------------------------------------------------------------------------------
-</pre></div></div>
+<div class="output_area rendered_html docutils container">
+<hr></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area rendered_html docutils container">
+<table>
+    <tr>
+        <td title="Minimum value of function">FCN = 28257.803801867896</td>
+        <td title="Total number of call to FCN so far">TOTAL NCALL = 92</td>
+        <td title="Number of call in last migrad">NCALLS = 92</td>
+    </tr>
+    <tr>
+        <td title="Estimated distance to minimum">EDM = 5.589309293901719e-06</td>
+        <td title="Maximum EDM definition of convergence">GOAL EDM = 1e-05</td>
+        <td title="Error def. Amount of increase in FCN to be defined as 1 standard deviation">
+        UP = 1.0</td>
+    </tr>
+</table>
+<table>
+    <tr>
+        <td align="center" title="Validity of the migrad call">Valid</td>
+        <td align="center" title="Validity of parameters">Valid Param</td>
+        <td align="center" title="Is Covariance matrix accurate?">Accurate Covar</td>
+        <td align="center" title="Positive definiteness of covariance matrix">PosDef</td>
+        <td align="center" title="Was covariance matrix made posdef by adding diagonal element">Made PosDef</td>
+    </tr>
+    <tr>
+        <td align="center" style="background-color:#92CCA6">True</td>
+        <td align="center" style="background-color:#92CCA6">True</td>
+        <td align="center" style="background-color:#92CCA6">True</td>
+        <td align="center" style="background-color:#92CCA6">True</td>
+        <td align="center" style="background-color:#92CCA6">False</td>
+    </tr>
+    <tr>
+        <td align="center" title="Was last hesse call fail?">Hesse Fail</td>
+        <td align="center" title="Validity of covariance">HasCov</td>
+        <td align="center" title="Is EDM above goal EDM?">Above EDM</td>
+        <td align="center"></td>
+        <td align="center" title="Did last migrad call reach max call limit?">Reach calllim</td>
+    </tr>
+    <tr>
+        <td align="center" style="background-color:#92CCA6">False</td>
+        <td align="center" style="background-color:#92CCA6">True</td>
+        <td align="center" style="background-color:#92CCA6">False</td>
+        <td align="center"></td>
+        <td align="center" style="background-color:#92CCA6">False</td>
+    </tr>
+</table></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area rendered_html docutils container">
+<table>
+    <tr>
+        <td><a href="#" onclick="$('#jpdLPRpLTU').toggle()">+</a></td>
+        <td title="Variable name">Name</td>
+        <td title="Value of parameter">Value</td>
+        <td title="Hesse error">Hesse Error</td>
+        <td title="Minos lower error">Minos Error-</td>
+        <td title="Minos upper error">Minos Error+</td>
+        <td title="Lower limit of the parameter">Limit-</td>
+        <td title="Upper limit of the parameter">Limit+</td>
+        <td title="Is the parameter fixed in the fit">Fixed?</td>
+    </tr>
+    <tr>
+        <td>0</td>
+        <td>c</td>
+        <td>-0.00837095</td>
+        <td>0.00995019</td>
+        <td></td>
+        <td></td>
+        <td>-1</td>
+        <td>1</td>
+        <td>No</td>
+    </tr>
+    <tr>
+        <td>1</td>
+        <td>s</td>
+        <td>0.99453</td>
+        <td>0.00706184</td>
+        <td></td>
+        <td></td>
+        <td>0.7</td>
+        <td>1.3</td>
+        <td>No</td>
+    </tr>
+</table>
+<pre id="jpdLPRpLTU" style="display:none;">
+<textarea rows="10" cols="50" onclick="this.select()" readonly>
+\begin{tabular}{|c|r|r|r|r|r|r|r|c|}
+\hline
+ & Name & Value & Hesse Error & Minos Error- & Minos Error+ & Limit- & Limit+ & Fixed?\\
+\hline
+0 & c & -0.00837095 & 0.00995019 &  &  & -1.0 & 1 & No\\
+\hline
+1 & s & 0.99453 & 0.00706184 &  &  & 0.7 & 1.3 & No\\
+\hline
+\end{tabular}
+</textarea>
+</pre></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area rendered_html docutils container">
+<hr></div>
 </div>
 <p>In order to scan the variables, we must define the points to be evaluated as a numpy array.</p>
 <div class="nbinput docutils container">
@@ -458,8 +545,9 @@ Let’s see how to do it on a fit to a Gaussian function.</p>
 <span class="n">c_scan</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">*</span><span class="n">c</span><span class="o">.</span><span class="n">bounds</span><span class="p">,</span> <span class="mi">40</span><span class="p">)</span>
 <span class="n">s_scan</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">*</span><span class="n">s</span><span class="o">.</span><span class="n">bounds</span><span class="p">,</span> <span class="mi">40</span><span class="p">)</span>
 
-<span class="n">c_fcn</span> <span class="o">=</span> <span class="n">minkit</span><span class="o">.</span><span class="n">fcn_profile</span><span class="p">(</span><span class="s1">&#39;uml&#39;</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="n">c_scan</span><span class="p">)</span>
-<span class="n">s_fcn</span> <span class="o">=</span> <span class="n">minkit</span><span class="o">.</span><span class="n">fcn_profile</span><span class="p">(</span><span class="s1">&#39;uml&#39;</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="s1">&#39;s&#39;</span><span class="p">,</span> <span class="n">s_scan</span><span class="p">)</span>
+<span class="k">with</span> <span class="n">minkit</span><span class="o">.</span><span class="n">minimizer</span><span class="p">(</span><span class="s1">&#39;uml&#39;</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span> <span class="k">as</span> <span class="n">minimizer</span><span class="p">:</span>
+    <span class="n">c_fcn</span> <span class="o">=</span> <span class="n">minimizer</span><span class="o">.</span><span class="n">fcn_profile</span><span class="p">(</span><span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="n">c_scan</span><span class="p">)</span>
+    <span class="n">s_fcn</span> <span class="o">=</span> <span class="n">minimizer</span><span class="o">.</span><span class="n">fcn_profile</span><span class="p">(</span><span class="s1">&#39;s&#39;</span><span class="p">,</span> <span class="n">s_scan</span><span class="p">)</span>
 
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 
@@ -491,7 +579,8 @@ Let’s see how to do it on a fit to a Gaussian function.</p>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="n">grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">a</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">c_scan</span><span class="p">,</span> <span class="n">s_scan</span><span class="p">)])</span>
 
-<span class="n">fcn</span> <span class="o">=</span> <span class="n">minkit</span><span class="o">.</span><span class="n">fcn_profile</span><span class="p">(</span><span class="s1">&#39;uml&#39;</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="s1">&#39;s&#39;</span><span class="p">),</span> <span class="n">grid</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="c1"># need to reverse for &quot;imshow&quot;</span>
+<span class="k">with</span> <span class="n">minkit</span><span class="o">.</span><span class="n">minimizer</span><span class="p">(</span><span class="s1">&#39;uml&#39;</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span> <span class="k">as</span> <span class="n">minimizer</span><span class="p">:</span>
+    <span class="n">fcn</span> <span class="o">=</span> <span class="n">minimizer</span><span class="o">.</span><span class="n">fcn_profile</span><span class="p">((</span><span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="s1">&#39;s&#39;</span><span class="p">),</span> <span class="n">grid</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="c1"># need to reverse for &quot;imshow&quot;</span>
 
 <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
 
@@ -556,15 +645,6 @@ Let’s see how to do it on a fit to a Gaussian function.</p>
 <img alt="../_images/notebooks_fit_stability_8_0.png" src="../_images/notebooks_fit_stability_8_0.png" />
 </div>
 </div>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>
-</pre></div>
-</div>
-</div>
 </div>
 </div>
 
@@ -579,7 +659,7 @@ Let’s see how to do it on a fit to a Gaussian function.</p>
         <a href="multidimensional.html" class="btn btn-neutral float-right" title="Working in more than one dimension" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="minimization.html" class="btn btn-neutral float-left" title="Minimization with MinKit" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="uncertainties.html" class="btn btn-neutral float-left" title="Uncertainties" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

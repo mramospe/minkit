@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Minimization with MinKit &mdash; minkit 0.0.0.dev0 documentation</title>
+  <title>Minimization with MinKit &mdash; minkit 0.0.0.dev1 documentation</title>
   
 
   
@@ -39,7 +39,7 @@
   <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Determining the stability of the fits" href="fit_stability.html" />
+    <link rel="next" title="Uncertainties" href="uncertainties.html" />
     <link rel="prev" title="Basic example" href="basic.html" /> 
 </head>
 
@@ -64,7 +64,7 @@
             
             
               <div class="version">
-                0.0.0.dev0
+                0.0.0.dev1
               </div>
             
           
@@ -94,6 +94,7 @@
 <li class="toctree-l2"><a class="reference internal" href="datasets.html">Creating data sets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="basic.html">Basic example</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Minimization with MinKit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="uncertainties.html">Uncertainties</a></li>
 <li class="toctree-l2"><a class="reference internal" href="fit_stability.html">Determining the stability of the fits</a></li>
 <li class="toctree-l2"><a class="reference internal" href="multidimensional.html">Working in more than one dimension</a></li>
 <li class="toctree-l2"><a class="reference internal" href="extension.html">Adding custom PDFs</a></li>
@@ -416,11 +417,7 @@ is needed or not. To give an idea of how the minimization is done with MinKit, l
 <span class="n">data</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="mi">10000</span><span class="p">)</span>
 
 <span class="k">with</span> <span class="n">minkit</span><span class="o">.</span><span class="n">minimizer</span><span class="p">(</span><span class="s1">&#39;uml&#39;</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span> <span class="k">as</span> <span class="n">minimizer</span><span class="p">:</span>
-    <span class="n">result</span> <span class="o">=</span> <span class="n">minimizer</span><span class="o">.</span><span class="n">migrad</span><span class="p">()</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
-
-<span class="n">g</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="o">**</span><span class="n">minimizer</span><span class="o">.</span><span class="n">result_to_registry</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">params</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+    <span class="n">minimizer</span><span class="o">.</span><span class="n">migrad</span><span class="p">()</span>
 
 <span class="c1"># Plot the results</span>
 <span class="n">values</span><span class="p">,</span> <span class="n">edges</span> <span class="o">=</span> <span class="n">minkit</span><span class="o">.</span><span class="n">data_plotting_arrays</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
@@ -441,33 +438,121 @@ is needed or not. To give an idea of how the minimization is done with MinKit, l
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-------------------------------------------------------------------
-| FCN = 2.85E+04                |      Ncalls=67 (67 total)      |
-| EDM = 2.62E-08 (Goal: 1E-05)  |            up = 1.0            |
-------------------------------------------------------------------
-|  Valid Min.   | Valid Param.  | Above EDM | Reached call limit |
-------------------------------------------------------------------
-|     True      |     True      |   False   |       False        |
-------------------------------------------------------------------
-| Hesse failed  |   Has cov.    | Accurate  | Pos. def. | Forced |
-------------------------------------------------------------------
-|     False     |     True      |   True    |   True    | False  |
-------------------------------------------------------------------
-------------------------------------------------------------------------------------------
-|   | Name |   Value   | Hesse Err | Minos Err- | Minos Err+ | Limit-  | Limit+  | Fixed |
-------------------------------------------------------------------------------------------
-| 0 | c    |  15.000   |   0.007   |            |            |   10    |   20    |       |
-| 1 | s    |   1.006   |   0.007   |            |            |   0.1   |    2    |       |
-------------------------------------------------------------------------------------------
-</pre></div></div>
+<div class="output_area rendered_html docutils container">
+<hr></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area rendered_html docutils container">
+<table>
+    <tr>
+        <td title="Minimum value of function">FCN = 28288.575555243537</td>
+        <td title="Total number of call to FCN so far">TOTAL NCALL = 74</td>
+        <td title="Number of call in last migrad">NCALLS = 74</td>
+    </tr>
+    <tr>
+        <td title="Estimated distance to minimum">EDM = 2.456083689719908e-05</td>
+        <td title="Maximum EDM definition of convergence">GOAL EDM = 1e-05</td>
+        <td title="Error def. Amount of increase in FCN to be defined as 1 standard deviation">
+        UP = 1.0</td>
+    </tr>
+</table>
+<table>
+    <tr>
+        <td align="center" title="Validity of the migrad call">Valid</td>
+        <td align="center" title="Validity of parameters">Valid Param</td>
+        <td align="center" title="Is Covariance matrix accurate?">Accurate Covar</td>
+        <td align="center" title="Positive definiteness of covariance matrix">PosDef</td>
+        <td align="center" title="Was covariance matrix made posdef by adding diagonal element">Made PosDef</td>
+    </tr>
+    <tr>
+        <td align="center" style="background-color:#92CCA6">True</td>
+        <td align="center" style="background-color:#92CCA6">True</td>
+        <td align="center" style="background-color:#92CCA6">True</td>
+        <td align="center" style="background-color:#92CCA6">True</td>
+        <td align="center" style="background-color:#92CCA6">False</td>
+    </tr>
+    <tr>
+        <td align="center" title="Was last hesse call fail?">Hesse Fail</td>
+        <td align="center" title="Validity of covariance">HasCov</td>
+        <td align="center" title="Is EDM above goal EDM?">Above EDM</td>
+        <td align="center"></td>
+        <td align="center" title="Did last migrad call reach max call limit?">Reach calllim</td>
+    </tr>
+    <tr>
+        <td align="center" style="background-color:#92CCA6">False</td>
+        <td align="center" style="background-color:#92CCA6">True</td>
+        <td align="center" style="background-color:#92CCA6">False</td>
+        <td align="center"></td>
+        <td align="center" style="background-color:#92CCA6">False</td>
+    </tr>
+</table></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area rendered_html docutils container">
+<table>
+    <tr>
+        <td><a href="#" onclick="$('#tvepQTuCNZ').toggle()">+</a></td>
+        <td title="Variable name">Name</td>
+        <td title="Value of parameter">Value</td>
+        <td title="Hesse error">Hesse Error</td>
+        <td title="Minos lower error">Minos Error-</td>
+        <td title="Minos upper error">Minos Error+</td>
+        <td title="Lower limit of the parameter">Limit-</td>
+        <td title="Upper limit of the parameter">Limit+</td>
+        <td title="Is the parameter fixed in the fit">Fixed?</td>
+    </tr>
+    <tr>
+        <td>0</td>
+        <td>c</td>
+        <td>14.987</td>
+        <td>0.00995622</td>
+        <td></td>
+        <td></td>
+        <td>10</td>
+        <td>20</td>
+        <td>No</td>
+    </tr>
+    <tr>
+        <td>1</td>
+        <td>s</td>
+        <td>0.995523</td>
+        <td>0.00704013</td>
+        <td></td>
+        <td></td>
+        <td>0.1</td>
+        <td>2</td>
+        <td>No</td>
+    </tr>
+</table>
+<pre id="tvepQTuCNZ" style="display:none;">
+<textarea rows="10" cols="50" onclick="this.select()" readonly>
+\begin{tabular}{|c|r|r|r|r|r|r|r|c|}
+\hline
+ & Name & Value & Hesse Error & Minos Error- & Minos Error+ & Limit- & Limit+ & Fixed?\\
+\hline
+0 & c & 14.987 & 0.00995622 &  &  & 10.0 & 20 & No\\
+\hline
+1 & s & 0.995523 & 0.00704013 &  &  & 0.1 & 2 & No\\
+\hline
+\end{tabular}
+</textarea>
+</pre></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area rendered_html docutils container">
+<hr></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/notebooks_minimization_1_1.png" src="../_images/notebooks_minimization_1_1.png" />
+<img alt="../_images/notebooks_minimization_1_4.png" src="../_images/notebooks_minimization_1_4.png" />
 </div>
 </div>
 <p>Note that we have called <em>minkit.minimizer</em> in order to create a context and do the minimization. The first argument is the FCN to use, an unbinned maximum likelihood in this case. It is very important that we do not change the properties of the PDF inside the <em>with</em> statement. This is because the PDF has enabled a cache. This means that, if the parameters have been set to constant, the evaluation of the PDF over the data values might have been kept in the cache, to reduce the execution time.</p>
@@ -494,11 +579,7 @@ is needed or not. To give an idea of how the minimization is done with MinKit, l
 
 <span class="c1"># Minimize the PDF</span>
 <span class="k">with</span> <span class="n">minkit</span><span class="o">.</span><span class="n">minimizer</span><span class="p">(</span><span class="s1">&#39;uml&#39;</span><span class="p">,</span> <span class="n">pdf</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span> <span class="k">as</span> <span class="n">minimizer</span><span class="p">:</span>
-    <span class="n">result</span> <span class="o">=</span> <span class="n">minimizer</span><span class="o">.</span><span class="n">migrad</span><span class="p">()</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
-
-<span class="n">pdf</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="o">**</span><span class="n">minimizer</span><span class="o">.</span><span class="n">result_to_registry</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">params</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+    <span class="n">minimizer</span><span class="o">.</span><span class="n">migrad</span><span class="p">()</span>
 
 <span class="n">values</span><span class="p">,</span> <span class="n">edges</span> <span class="o">=</span> <span class="n">minkit</span><span class="o">.</span><span class="n">data_plotting_arrays</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
 
@@ -506,8 +587,14 @@ is needed or not. To give an idea of how the minimization is done with MinKit, l
 
 <span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">centers</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="n">edges</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">values</span><span class="p">,</span> <span class="n">histtype</span><span class="o">=</span><span class="s1">&#39;step&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;data&#39;</span><span class="p">);</span>
 
-<span class="n">gx</span><span class="p">,</span> <span class="n">pdf_values</span> <span class="o">=</span> <span class="n">minkit</span><span class="o">.</span><span class="n">pdf_plotting_arrays</span><span class="p">(</span><span class="n">pdf</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">edges</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">gx</span><span class="p">,</span> <span class="n">pdf_values</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;blue&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;PDF&#39;</span><span class="p">)</span>
+<span class="n">pdf_centers</span><span class="p">,</span> <span class="n">pdf_values</span> <span class="o">=</span> <span class="n">minkit</span><span class="o">.</span><span class="n">pdf_plotting_arrays</span><span class="p">(</span><span class="n">pdf</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">edges</span><span class="p">)</span>
+<span class="n">_</span><span class="p">,</span> <span class="n">g_values</span> <span class="o">=</span> <span class="n">minkit</span><span class="o">.</span><span class="n">pdf_plotting_arrays</span><span class="p">(</span><span class="n">pdf</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">edges</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="s1">&#39;g&#39;</span><span class="p">)</span>
+<span class="n">_</span><span class="p">,</span> <span class="n">e_values</span> <span class="o">=</span> <span class="n">minkit</span><span class="o">.</span><span class="n">pdf_plotting_arrays</span><span class="p">(</span><span class="n">pdf</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">edges</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="s1">&#39;e&#39;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">pdf_centers</span><span class="p">,</span> <span class="n">e_values</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;orange&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;:&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Exponential&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">pdf_centers</span><span class="p">,</span> <span class="n">g_values</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;green&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Gaussian&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">pdf_centers</span><span class="p">,</span> <span class="n">pdf_values</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;blue&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;PDF&#39;</span><span class="p">)</span>
+
 <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">();</span>
 
 <span class="c1"># Reset values</span>
@@ -518,35 +605,147 @@ is needed or not. To give an idea of how the minimization is done with MinKit, l
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-------------------------------------------------------------------
-| FCN = 4.192E+04               |      Ncalls=96 (96 total)      |
-| EDM = 2.8E-07 (Goal: 1E-05)   |            up = 1.0            |
-------------------------------------------------------------------
-|  Valid Min.   | Valid Param.  | Above EDM | Reached call limit |
-------------------------------------------------------------------
-|     True      |     True      |   False   |       False        |
-------------------------------------------------------------------
-| Hesse failed  |   Has cov.    | Accurate  | Pos. def. | Forced |
-------------------------------------------------------------------
-|     False     |     True      |   True    |   True    | False  |
-------------------------------------------------------------------
-------------------------------------------------------------------------------------------
-|   | Name |   Value   | Hesse Err | Minos Err- | Minos Err+ | Limit-  | Limit+  | Fixed |
-------------------------------------------------------------------------------------------
-| 0 | y    |   0.491   |   0.009   |            |            |    0    |    1    |       |
-| 1 | c    |  14.981   |   0.021   |            |            |   10    |   20    |       |
-| 2 | s    |   0.982   |   0.020   |            |            |   0.1   |    2    |       |
-| 3 | k    |  -0.092   |   0.005   |            |            |   -1    |    0    |       |
-------------------------------------------------------------------------------------------
-</pre></div></div>
+<div class="output_area rendered_html docutils container">
+<hr></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area rendered_html docutils container">
+<table>
+    <tr>
+        <td title="Minimum value of function">FCN = 41568.87190680871</td>
+        <td title="Total number of call to FCN so far">TOTAL NCALL = 99</td>
+        <td title="Number of call in last migrad">NCALLS = 99</td>
+    </tr>
+    <tr>
+        <td title="Estimated distance to minimum">EDM = 5.483245260122549e-06</td>
+        <td title="Maximum EDM definition of convergence">GOAL EDM = 1e-05</td>
+        <td title="Error def. Amount of increase in FCN to be defined as 1 standard deviation">
+        UP = 1.0</td>
+    </tr>
+</table>
+<table>
+    <tr>
+        <td align="center" title="Validity of the migrad call">Valid</td>
+        <td align="center" title="Validity of parameters">Valid Param</td>
+        <td align="center" title="Is Covariance matrix accurate?">Accurate Covar</td>
+        <td align="center" title="Positive definiteness of covariance matrix">PosDef</td>
+        <td align="center" title="Was covariance matrix made posdef by adding diagonal element">Made PosDef</td>
+    </tr>
+    <tr>
+        <td align="center" style="background-color:#92CCA6">True</td>
+        <td align="center" style="background-color:#92CCA6">True</td>
+        <td align="center" style="background-color:#92CCA6">True</td>
+        <td align="center" style="background-color:#92CCA6">True</td>
+        <td align="center" style="background-color:#92CCA6">False</td>
+    </tr>
+    <tr>
+        <td align="center" title="Was last hesse call fail?">Hesse Fail</td>
+        <td align="center" title="Validity of covariance">HasCov</td>
+        <td align="center" title="Is EDM above goal EDM?">Above EDM</td>
+        <td align="center"></td>
+        <td align="center" title="Did last migrad call reach max call limit?">Reach calllim</td>
+    </tr>
+    <tr>
+        <td align="center" style="background-color:#92CCA6">False</td>
+        <td align="center" style="background-color:#92CCA6">True</td>
+        <td align="center" style="background-color:#92CCA6">False</td>
+        <td align="center"></td>
+        <td align="center" style="background-color:#92CCA6">False</td>
+    </tr>
+</table></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area rendered_html docutils container">
+<table>
+    <tr>
+        <td><a href="#" onclick="$('#gbkiDciKnL').toggle()">+</a></td>
+        <td title="Variable name">Name</td>
+        <td title="Value of parameter">Value</td>
+        <td title="Hesse error">Hesse Error</td>
+        <td title="Minos lower error">Minos Error-</td>
+        <td title="Minos upper error">Minos Error+</td>
+        <td title="Lower limit of the parameter">Limit-</td>
+        <td title="Upper limit of the parameter">Limit+</td>
+        <td title="Is the parameter fixed in the fit">Fixed?</td>
+    </tr>
+    <tr>
+        <td>0</td>
+        <td>y</td>
+        <td>0.526921</td>
+        <td>0.00950927</td>
+        <td></td>
+        <td></td>
+        <td>0</td>
+        <td>1</td>
+        <td>No</td>
+    </tr>
+    <tr>
+        <td>1</td>
+        <td>c</td>
+        <td>14.9758</td>
+        <td>0.0202446</td>
+        <td></td>
+        <td></td>
+        <td>10</td>
+        <td>20</td>
+        <td>No</td>
+    </tr>
+    <tr>
+        <td>2</td>
+        <td>s</td>
+        <td>1.02638</td>
+        <td>0.020045</td>
+        <td></td>
+        <td></td>
+        <td>0.1</td>
+        <td>2</td>
+        <td>No</td>
+    </tr>
+    <tr>
+        <td>3</td>
+        <td>k</td>
+        <td>-0.10163</td>
+        <td>0.0057237</td>
+        <td></td>
+        <td></td>
+        <td>-1</td>
+        <td>0</td>
+        <td>No</td>
+    </tr>
+</table>
+<pre id="gbkiDciKnL" style="display:none;">
+<textarea rows="14" cols="50" onclick="this.select()" readonly>
+\begin{tabular}{|c|r|r|r|r|r|r|r|c|}
+\hline
+ & Name & Value & Hesse Error & Minos Error- & Minos Error+ & Limit- & Limit+ & Fixed?\\
+\hline
+0 & y & 0.526921 & 0.00950927 &  &  & 0.0 & 1 & No\\
+\hline
+1 & c & 14.9758 & 0.0202446 &  &  & 10.0 & 20 & No\\
+\hline
+2 & s & 1.02638 & 0.020045 &  &  & 0.1 & 2 & No\\
+\hline
+3 & k & -0.10163 & 0.0057237 &  &  & -1.0 & 0 & No\\
+\hline
+\end{tabular}
+</textarea>
+</pre></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area rendered_html docutils container">
+<hr></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/notebooks_minimization_3_1.png" src="../_images/notebooks_minimization_3_1.png" />
+<img alt="../_images/notebooks_minimization_3_4.png" src="../_images/notebooks_minimization_3_4.png" />
 </div>
 </div>
 <p>Let’s now assume we want to know the two yields of the PDFs. To do this we need to modify the model, and do and use an extended likelihood during the minimization.</p>
@@ -566,13 +765,11 @@ is needed or not. To give an idea of how the minimization is done with MinKit, l
 <span class="c1"># Generate and fit</span>
 <span class="n">data</span> <span class="o">=</span> <span class="n">pdf</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">ng</span><span class="o">.</span><span class="n">value</span> <span class="o">+</span> <span class="n">ne</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
 
+<span class="n">ng</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="mi">6000</span> <span class="c1"># vary the yields to flee from the minimum</span>
+<span class="n">ne</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">ng</span><span class="o">.</span><span class="n">value</span>
+
 <span class="k">with</span> <span class="n">minkit</span><span class="o">.</span><span class="n">minimizer</span><span class="p">(</span><span class="s1">&#39;ueml&#39;</span><span class="p">,</span> <span class="n">pdf</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span> <span class="k">as</span> <span class="n">minimizer</span><span class="p">:</span>
-    <span class="n">result</span> <span class="o">=</span> <span class="n">minimizer</span><span class="o">.</span><span class="n">migrad</span><span class="p">()</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
-
-<span class="c1"># Plot the results</span>
-<span class="n">pdf</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="o">**</span><span class="n">minimizer</span><span class="o">.</span><span class="n">result_to_registry</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">params</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+    <span class="n">minimizer</span><span class="o">.</span><span class="n">migrad</span><span class="p">()</span>
 
 <span class="n">values</span><span class="p">,</span> <span class="n">edges</span> <span class="o">=</span> <span class="n">minkit</span><span class="o">.</span><span class="n">data_plotting_arrays</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
 
@@ -580,8 +777,14 @@ is needed or not. To give an idea of how the minimization is done with MinKit, l
 
 <span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">centers</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="n">edges</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">values</span><span class="p">,</span> <span class="n">histtype</span><span class="o">=</span><span class="s1">&#39;step&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;data&#39;</span><span class="p">);</span>
 
-<span class="n">gx</span><span class="p">,</span> <span class="n">pdf_values</span> <span class="o">=</span> <span class="n">minkit</span><span class="o">.</span><span class="n">pdf_plotting_arrays</span><span class="p">(</span><span class="n">pdf</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">edges</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">gx</span><span class="p">,</span> <span class="n">pdf_values</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;blue&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;PDF&#39;</span><span class="p">)</span>
+<span class="n">pdf_centers</span><span class="p">,</span> <span class="n">pdf_values</span> <span class="o">=</span> <span class="n">minkit</span><span class="o">.</span><span class="n">pdf_plotting_arrays</span><span class="p">(</span><span class="n">pdf</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">edges</span><span class="p">)</span>
+<span class="n">_</span><span class="p">,</span> <span class="n">g_values</span> <span class="o">=</span> <span class="n">minkit</span><span class="o">.</span><span class="n">pdf_plotting_arrays</span><span class="p">(</span><span class="n">pdf</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">edges</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="s1">&#39;g&#39;</span><span class="p">)</span>
+<span class="n">_</span><span class="p">,</span> <span class="n">e_values</span> <span class="o">=</span> <span class="n">minkit</span><span class="o">.</span><span class="n">pdf_plotting_arrays</span><span class="p">(</span><span class="n">pdf</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">edges</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="s1">&#39;e&#39;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">pdf_centers</span><span class="p">,</span> <span class="n">e_values</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;orange&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;:&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Exponential&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">pdf_centers</span><span class="p">,</span> <span class="n">g_values</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;green&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Gaussian&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">pdf_centers</span><span class="p">,</span> <span class="n">pdf_values</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;blue&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;PDF&#39;</span><span class="p">)</span>
+
 <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">();</span>
 
 <span class="c1"># Reset the values</span>
@@ -592,36 +795,160 @@ is needed or not. To give an idea of how the minimization is done with MinKit, l
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-------------------------------------------------------------------
-| FCN = -1.225E+05              |     Ncalls=127 (127 total)     |
-| EDM = 1.43E-05 (Goal: 1E-05)  |            up = 1.0            |
-------------------------------------------------------------------
-|  Valid Min.   | Valid Param.  | Above EDM | Reached call limit |
-------------------------------------------------------------------
-|     True      |     True      |   False   |       False        |
-------------------------------------------------------------------
-| Hesse failed  |   Has cov.    | Accurate  | Pos. def. | Forced |
-------------------------------------------------------------------
-|     False     |     True      |   True    |   True    | False  |
-------------------------------------------------------------------
-------------------------------------------------------------------------------------------
-|   | Name |   Value   | Hesse Err | Minos Err- | Minos Err+ | Limit-  | Limit+  | Fixed |
-------------------------------------------------------------------------------------------
-| 0 | ng   |  0.505E4  |  0.010E4  |            |            |    0    |  10000  |       |
-| 1 | ne   |  0.495E4  |  0.010E4  |            |            |    0    |  10000  |       |
-| 2 | c    |  15.016   |   0.020   |            |            |   10    |   20    |       |
-| 3 | s    |   0.986   |   0.019   |            |            |   0.1   |    2    |       |
-| 4 | k    |  -0.099   |   0.006   |            |            |   -1    |    0    |       |
-------------------------------------------------------------------------------------------
-</pre></div></div>
+<div class="output_area rendered_html docutils container">
+<hr></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area rendered_html docutils container">
+<table>
+    <tr>
+        <td title="Minimum value of function">FCN = -122354.9230188445</td>
+        <td title="Total number of call to FCN so far">TOTAL NCALL = 124</td>
+        <td title="Number of call in last migrad">NCALLS = 124</td>
+    </tr>
+    <tr>
+        <td title="Estimated distance to minimum">EDM = 2.1664581983657007e-05</td>
+        <td title="Maximum EDM definition of convergence">GOAL EDM = 1e-05</td>
+        <td title="Error def. Amount of increase in FCN to be defined as 1 standard deviation">
+        UP = 1.0</td>
+    </tr>
+</table>
+<table>
+    <tr>
+        <td align="center" title="Validity of the migrad call">Valid</td>
+        <td align="center" title="Validity of parameters">Valid Param</td>
+        <td align="center" title="Is Covariance matrix accurate?">Accurate Covar</td>
+        <td align="center" title="Positive definiteness of covariance matrix">PosDef</td>
+        <td align="center" title="Was covariance matrix made posdef by adding diagonal element">Made PosDef</td>
+    </tr>
+    <tr>
+        <td align="center" style="background-color:#92CCA6">True</td>
+        <td align="center" style="background-color:#92CCA6">True</td>
+        <td align="center" style="background-color:#92CCA6">True</td>
+        <td align="center" style="background-color:#92CCA6">True</td>
+        <td align="center" style="background-color:#92CCA6">False</td>
+    </tr>
+    <tr>
+        <td align="center" title="Was last hesse call fail?">Hesse Fail</td>
+        <td align="center" title="Validity of covariance">HasCov</td>
+        <td align="center" title="Is EDM above goal EDM?">Above EDM</td>
+        <td align="center"></td>
+        <td align="center" title="Did last migrad call reach max call limit?">Reach calllim</td>
+    </tr>
+    <tr>
+        <td align="center" style="background-color:#92CCA6">False</td>
+        <td align="center" style="background-color:#92CCA6">True</td>
+        <td align="center" style="background-color:#92CCA6">False</td>
+        <td align="center"></td>
+        <td align="center" style="background-color:#92CCA6">False</td>
+    </tr>
+</table></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area rendered_html docutils container">
+<table>
+    <tr>
+        <td><a href="#" onclick="$('#WINHArABmO').toggle()">+</a></td>
+        <td title="Variable name">Name</td>
+        <td title="Value of parameter">Value</td>
+        <td title="Hesse error">Hesse Error</td>
+        <td title="Minos lower error">Minos Error-</td>
+        <td title="Minos upper error">Minos Error+</td>
+        <td title="Lower limit of the parameter">Limit-</td>
+        <td title="Upper limit of the parameter">Limit+</td>
+        <td title="Is the parameter fixed in the fit">Fixed?</td>
+    </tr>
+    <tr>
+        <td>0</td>
+        <td>ng</td>
+        <td>5052.31</td>
+        <td>107.283</td>
+        <td></td>
+        <td></td>
+        <td>0</td>
+        <td>10000</td>
+        <td>No</td>
+    </tr>
+    <tr>
+        <td>1</td>
+        <td>ne</td>
+        <td>4947.74</td>
+        <td>106.773</td>
+        <td></td>
+        <td></td>
+        <td>0</td>
+        <td>10000</td>
+        <td>No</td>
+    </tr>
+    <tr>
+        <td>2</td>
+        <td>c</td>
+        <td>15.0023</td>
+        <td>0.0206492</td>
+        <td></td>
+        <td></td>
+        <td>10</td>
+        <td>20</td>
+        <td>No</td>
+    </tr>
+    <tr>
+        <td>3</td>
+        <td>s</td>
+        <td>1.01169</td>
+        <td>0.0203878</td>
+        <td></td>
+        <td></td>
+        <td>0.1</td>
+        <td>2</td>
+        <td>No</td>
+    </tr>
+    <tr>
+        <td>4</td>
+        <td>k</td>
+        <td>-0.0963174</td>
+        <td>0.00560069</td>
+        <td></td>
+        <td></td>
+        <td>-1</td>
+        <td>0</td>
+        <td>No</td>
+    </tr>
+</table>
+<pre id="WINHArABmO" style="display:none;">
+<textarea rows="16" cols="50" onclick="this.select()" readonly>
+\begin{tabular}{|c|r|r|r|r|r|r|r|c|}
+\hline
+ & Name & Value & Hesse Error & Minos Error- & Minos Error+ & Limit- & Limit+ & Fixed?\\
+\hline
+0 & ng & 5052.31 & 107.283 &  &  & 0.0 & 10000 & No\\
+\hline
+1 & ne & 4947.74 & 106.773 &  &  & 0.0 & 10000 & No\\
+\hline
+2 & c & 15.0023 & 0.0206492 &  &  & 10.0 & 20 & No\\
+\hline
+3 & s & 1.01169 & 0.0203878 &  &  & 0.1 & 2 & No\\
+\hline
+4 & k & -0.0963174 & 0.00560069 &  &  & -1.0 & 0 & No\\
+\hline
+\end{tabular}
+</textarea>
+</pre></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area rendered_html docutils container">
+<hr></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/notebooks_minimization_5_1.png" src="../_images/notebooks_minimization_5_1.png" />
+<img alt="../_images/notebooks_minimization_5_4.png" src="../_images/notebooks_minimization_5_4.png" />
 </div>
 </div>
 <p>Note that we have specified the <em>ueml</em> (unbinned extended maximum likelihood) FCN. If we set it to <em>uml</em>, we would get wrong values. Let’s now see what happens with binned data sets. In this case, we will use the <em>bml</em> FCN.</p>
@@ -637,11 +964,7 @@ is needed or not. To give an idea of how the minimization is done with MinKit, l
 <span class="n">binned_data</span> <span class="o">=</span> <span class="n">minkit</span><span class="o">.</span><span class="n">BinnedDataSet</span><span class="o">.</span><span class="n">from_ndarray</span><span class="p">(</span><span class="n">edges</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">values</span><span class="p">)</span>
 
 <span class="k">with</span> <span class="n">minkit</span><span class="o">.</span><span class="n">minimizer</span><span class="p">(</span><span class="s1">&#39;bml&#39;</span><span class="p">,</span> <span class="n">pdf</span><span class="p">,</span> <span class="n">binned_data</span><span class="p">)</span> <span class="k">as</span> <span class="n">minimizer</span><span class="p">:</span>
-    <span class="n">result</span> <span class="o">=</span> <span class="n">minimizer</span><span class="o">.</span><span class="n">migrad</span><span class="p">()</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
-
-<span class="n">pdf</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="o">**</span><span class="n">minimizer</span><span class="o">.</span><span class="n">result_to_registry</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">params</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+    <span class="n">minimizer</span><span class="o">.</span><span class="n">migrad</span><span class="p">()</span>
 
 <span class="n">values</span><span class="p">,</span> <span class="n">edges</span> <span class="o">=</span> <span class="n">minkit</span><span class="o">.</span><span class="n">data_plotting_arrays</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
 
@@ -649,8 +972,14 @@ is needed or not. To give an idea of how the minimization is done with MinKit, l
 
 <span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">centers</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="n">edges</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">values</span><span class="p">,</span> <span class="n">histtype</span><span class="o">=</span><span class="s1">&#39;step&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;data&#39;</span><span class="p">);</span>
 
-<span class="n">gx</span><span class="p">,</span> <span class="n">pdf_values</span> <span class="o">=</span> <span class="n">minkit</span><span class="o">.</span><span class="n">pdf_plotting_arrays</span><span class="p">(</span><span class="n">pdf</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">edges</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">gx</span><span class="p">,</span> <span class="n">pdf_values</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;blue&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;PDF&#39;</span><span class="p">);</span>
+<span class="n">pdf_centers</span><span class="p">,</span> <span class="n">pdf_values</span> <span class="o">=</span> <span class="n">minkit</span><span class="o">.</span><span class="n">pdf_plotting_arrays</span><span class="p">(</span><span class="n">pdf</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">edges</span><span class="p">)</span>
+<span class="n">_</span><span class="p">,</span> <span class="n">g_values</span> <span class="o">=</span> <span class="n">minkit</span><span class="o">.</span><span class="n">pdf_plotting_arrays</span><span class="p">(</span><span class="n">pdf</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">edges</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="s1">&#39;g&#39;</span><span class="p">)</span>
+<span class="n">_</span><span class="p">,</span> <span class="n">e_values</span> <span class="o">=</span> <span class="n">minkit</span><span class="o">.</span><span class="n">pdf_plotting_arrays</span><span class="p">(</span><span class="n">pdf</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">edges</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="s1">&#39;e&#39;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">pdf_centers</span><span class="p">,</span> <span class="n">e_values</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;orange&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;:&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Exponential&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">pdf_centers</span><span class="p">,</span> <span class="n">g_values</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;green&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Gaussian&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">pdf_centers</span><span class="p">,</span> <span class="n">pdf_values</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;blue&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;PDF&#39;</span><span class="p">)</span>
+
 <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">();</span>
 
 <span class="c1"># Reset the values</span>
@@ -661,36 +990,160 @@ is needed or not. To give an idea of how the minimization is done with MinKit, l
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-------------------------------------------------------------------
-| FCN = 112.4                   |      Ncalls=97 (97 total)      |
-| EDM = 4.1E-06 (Goal: 1E-05)   |            up = 1.0            |
-------------------------------------------------------------------
-|  Valid Min.   | Valid Param.  | Above EDM | Reached call limit |
-------------------------------------------------------------------
-|     True      |     True      |   False   |       False        |
-------------------------------------------------------------------
-| Hesse failed  |   Has cov.    | Accurate  | Pos. def. | Forced |
-------------------------------------------------------------------
-|     False     |     True      |   True    |   True    | False  |
-------------------------------------------------------------------
-------------------------------------------------------------------------------------------
-|   | Name |   Value   | Hesse Err | Minos Err- | Minos Err+ | Limit-  | Limit+  | Fixed |
-------------------------------------------------------------------------------------------
-| 0 | ng   |   0.5E4   |   0.7E4   |            |            |    0    |  10000  |       |
-| 1 | ne   |   0.5E4   |   0.7E4   |            |            |    0    |  10000  |       |
-| 2 | c    |  15.016   |   0.020   |            |            |   10    |   20    |       |
-| 3 | s    |   0.987   |   0.019   |            |            |   0.1   |    2    |       |
-| 4 | k    |  -0.099   |   0.006   |            |            |   -1    |    0    |       |
-------------------------------------------------------------------------------------------
-</pre></div></div>
+<div class="output_area rendered_html docutils container">
+<hr></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area rendered_html docutils container">
+<table>
+    <tr>
+        <td title="Minimum value of function">FCN = 85.809988390516</td>
+        <td title="Total number of call to FCN so far">TOTAL NCALL = 100</td>
+        <td title="Number of call in last migrad">NCALLS = 100</td>
+    </tr>
+    <tr>
+        <td title="Estimated distance to minimum">EDM = 2.6451594374739883e-07</td>
+        <td title="Maximum EDM definition of convergence">GOAL EDM = 1e-05</td>
+        <td title="Error def. Amount of increase in FCN to be defined as 1 standard deviation">
+        UP = 1.0</td>
+    </tr>
+</table>
+<table>
+    <tr>
+        <td align="center" title="Validity of the migrad call">Valid</td>
+        <td align="center" title="Validity of parameters">Valid Param</td>
+        <td align="center" title="Is Covariance matrix accurate?">Accurate Covar</td>
+        <td align="center" title="Positive definiteness of covariance matrix">PosDef</td>
+        <td align="center" title="Was covariance matrix made posdef by adding diagonal element">Made PosDef</td>
+    </tr>
+    <tr>
+        <td align="center" style="background-color:#92CCA6">True</td>
+        <td align="center" style="background-color:#92CCA6">True</td>
+        <td align="center" style="background-color:#92CCA6">True</td>
+        <td align="center" style="background-color:#92CCA6">True</td>
+        <td align="center" style="background-color:#92CCA6">False</td>
+    </tr>
+    <tr>
+        <td align="center" title="Was last hesse call fail?">Hesse Fail</td>
+        <td align="center" title="Validity of covariance">HasCov</td>
+        <td align="center" title="Is EDM above goal EDM?">Above EDM</td>
+        <td align="center"></td>
+        <td align="center" title="Did last migrad call reach max call limit?">Reach calllim</td>
+    </tr>
+    <tr>
+        <td align="center" style="background-color:#92CCA6">False</td>
+        <td align="center" style="background-color:#92CCA6">True</td>
+        <td align="center" style="background-color:#92CCA6">False</td>
+        <td align="center"></td>
+        <td align="center" style="background-color:#92CCA6">False</td>
+    </tr>
+</table></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area rendered_html docutils container">
+<table>
+    <tr>
+        <td><a href="#" onclick="$('#NsqBqFzpum').toggle()">+</a></td>
+        <td title="Variable name">Name</td>
+        <td title="Value of parameter">Value</td>
+        <td title="Hesse error">Hesse Error</td>
+        <td title="Minos lower error">Minos Error-</td>
+        <td title="Minos upper error">Minos Error+</td>
+        <td title="Lower limit of the parameter">Limit-</td>
+        <td title="Upper limit of the parameter">Limit+</td>
+        <td title="Is the parameter fixed in the fit">Fixed?</td>
+    </tr>
+    <tr>
+        <td>0</td>
+        <td>ng</td>
+        <td>5053.04</td>
+        <td>7422.08</td>
+        <td></td>
+        <td></td>
+        <td>0</td>
+        <td>10000</td>
+        <td>No</td>
+    </tr>
+    <tr>
+        <td>1</td>
+        <td>ne</td>
+        <td>4945.67</td>
+        <td>7381.12</td>
+        <td></td>
+        <td></td>
+        <td>0</td>
+        <td>10000</td>
+        <td>No</td>
+    </tr>
+    <tr>
+        <td>2</td>
+        <td>c</td>
+        <td>15.0018</td>
+        <td>0.0206669</td>
+        <td></td>
+        <td></td>
+        <td>10</td>
+        <td>20</td>
+        <td>No</td>
+    </tr>
+    <tr>
+        <td>3</td>
+        <td>s</td>
+        <td>1.01206</td>
+        <td>0.0204419</td>
+        <td></td>
+        <td></td>
+        <td>0.1</td>
+        <td>2</td>
+        <td>No</td>
+    </tr>
+    <tr>
+        <td>4</td>
+        <td>k</td>
+        <td>-0.096293</td>
+        <td>0.00560712</td>
+        <td></td>
+        <td></td>
+        <td>-1</td>
+        <td>0</td>
+        <td>No</td>
+    </tr>
+</table>
+<pre id="NsqBqFzpum" style="display:none;">
+<textarea rows="16" cols="50" onclick="this.select()" readonly>
+\begin{tabular}{|c|r|r|r|r|r|r|r|c|}
+\hline
+ & Name & Value & Hesse Error & Minos Error- & Minos Error+ & Limit- & Limit+ & Fixed?\\
+\hline
+0 & ng & 5053.04 & 7422.08 &  &  & 0.0 & 10000 & No\\
+\hline
+1 & ne & 4945.67 & 7381.12 &  &  & 0.0 & 10000 & No\\
+\hline
+2 & c & 15.0018 & 0.0206669 &  &  & 10.0 & 20 & No\\
+\hline
+3 & s & 1.01206 & 0.0204419 &  &  & 0.1 & 2 & No\\
+\hline
+4 & k & -0.096293 & 0.00560712 &  &  & -1.0 & 0 & No\\
+\hline
+\end{tabular}
+</textarea>
+</pre></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area rendered_html docutils container">
+<hr></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/notebooks_minimization_7_1.png" src="../_images/notebooks_minimization_7_1.png" />
+<img alt="../_images/notebooks_minimization_7_4.png" src="../_images/notebooks_minimization_7_4.png" />
 </div>
 </div>
 <p>Similarly, with the FCN <em>chi2</em> we would be doing a fit to the chi-square, that is, we would be assuming that the input values, instead of following a Poisson distribution, they follow a Gaussian.</p>
@@ -704,7 +1157,7 @@ is needed or not. To give an idea of how the minimization is done with MinKit, l
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="fit_stability.html" class="btn btn-neutral float-right" title="Determining the stability of the fits" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="uncertainties.html" class="btn btn-neutral float-right" title="Uncertainties" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="basic.html" class="btn btn-neutral float-left" title="Basic example" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

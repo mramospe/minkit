@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>simultaneous_minimizer &mdash; minkit 0.0.0.dev0 documentation</title>
+  <title>simultaneous_minimizer &mdash; minkit 0.0.0.dev1 documentation</title>
   
 
   
@@ -40,7 +40,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="sweights" href="minkit.sweights.html" />
-    <link rel="prev" title="simultaneous_fcn_profile" href="minkit.simultaneous_fcn_profile.html" /> 
+    <link rel="prev" title="register_pdf" href="minkit.register_pdf.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -64,7 +64,7 @@
             
             
               <div class="version">
-                0.0.0.dev0
+                0.0.0.dev1
               </div>
             
           
@@ -99,13 +99,11 @@
 <li class="toctree-l3"><a class="reference internal" href="minkit.binned_extended_maximum_likelihood.html">binned_extended_maximum_likelihood</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.binned_maximum_likelihood.html">binned_maximum_likelihood</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.data_plotting_arrays.html">data_plotting_arrays</a></li>
-<li class="toctree-l3"><a class="reference internal" href="minkit.fcn_profile.html">fcn_profile</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.minimizer.html">minimizer</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.pdf_from_json.html">pdf_from_json</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.pdf_plotting_arrays.html">pdf_plotting_arrays</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.pdf_to_json.html">pdf_to_json</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.register_pdf.html">register_pdf</a></li>
-<li class="toctree-l3"><a class="reference internal" href="minkit.simultaneous_fcn_profile.html">simultaneous_fcn_profile</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">simultaneous_minimizer</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.sweights.html">sweights</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minkit.sweights_u.html">sweights_u</a></li>
@@ -215,7 +213,9 @@
 <dt id="minkit.simultaneous_minimizer">
 <code class="sig-prename descclassname">minkit.</code><code class="sig-name descname">simultaneous_minimizer</code><span class="sig-paren">(</span><em class="sig-param">categories</em>, <em class="sig-param">minimizer='minuit'</em>, <em class="sig-param">minimizer_config=None</em>, <em class="sig-param">constraints=None</em>, <em class="sig-param">range='full'</em>, <em class="sig-param">weights_treatment='rescale'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/minimization/minimizers.html#simultaneous_minimizer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.simultaneous_minimizer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a new object to minimizer a <a class="reference internal" href="minkit.PDF.html#minkit.PDF" title="minkit.PDF"><code class="xref py py-class docutils literal notranslate"><span class="pre">PDF</span></code></a>.
-The bounds of the data parameters must not change in the process.</p>
+The bounds of the data parameters must not change in the process.
+Changes to the values, errors or the <em>constant</em> state of the parameters
+must be done through the <a class="reference internal" href="minkit.Minimizer.html#minkit.Minimizer.set_parameter_state" title="minkit.Minimizer.set_parameter_state"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Minimizer.set_parameter_state()</span></code></a> method.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -228,7 +228,10 @@ The bounds of the data parameters must not change in the process.</p>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>minimizer to call.</p>
+<dd class="field-even"><p>Minimizer to call.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="minkit.Minimizer.html#minkit.Minimizer" title="minkit.Minimizer">Minimizer</a></p>
 </dd>
 </dl>
 <p>The treatment of weights when calculating FCNs can lead to unreliable errors
@@ -249,6 +252,9 @@ sample weight, although the uncertainties will still be incorrect.</p></li>
 sets a new sample is internally created with values falling in <em>range</em>.
 The weights of the sample are also changed according to the <em>weights_treatment</em>
 argument.</p>
+<p>It is also very important that any change to the state of a parameter
+within a minimization context is done using the
+<a class="reference internal" href="minkit.Minimizer.html#minkit.Minimizer.set_parameter_state" title="minkit.Minimizer.set_parameter_state"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Minimizer.set_parameter_state()</span></code></a> method.</p>
 </div>
 </dd></dl>
 
@@ -265,7 +271,7 @@ argument.</p>
         <a href="minkit.sweights.html" class="btn btn-neutral float-right" title="sweights" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="minkit.simultaneous_fcn_profile.html" class="btn btn-neutral float-left" title="simultaneous_fcn_profile" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="minkit.register_pdf.html" class="btn btn-neutral float-left" title="register_pdf" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

@@ -17,7 +17,9 @@ ParameterBase
 
    .. autosummary::
 
+      ~ParameterBase.copy
       ~ParameterBase.from_json_object
+      ~ParameterBase.restoring_state
       ~ParameterBase.to_json_object
 
    .. rubric:: Attributes Documentation
@@ -27,5 +29,7 @@ ParameterBase
 
    .. rubric:: Methods Documentation
 
+   .. automethod:: copy
    .. automethod:: from_json_object
+   .. automethod:: restoring_state
    .. automethod:: to_json_object

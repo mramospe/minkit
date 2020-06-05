@@ -24,6 +24,7 @@ PDF
       ~PDF.constant
       ~PDF.data_pars
       ~PDF.dependent
+      ~PDF.real_args
 
    .. rubric:: Methods Summary
 
@@ -31,6 +32,7 @@ PDF
 
       ~PDF.__call__
       ~PDF.bind
+      ~PDF.copy
       ~PDF.evaluate_binned
       ~PDF.from_json_object
       ~PDF.generate
@@ -39,6 +41,7 @@ PDF
       ~PDF.norm
       ~PDF.numerical_integral
       ~PDF.numerical_normalization
+      ~PDF.restoring_state
       ~PDF.set_values
       ~PDF.to_backend
       ~PDF.to_json_object
@@ -60,11 +63,13 @@ PDF
    .. autoattribute:: constant
    .. autoattribute:: data_pars
    .. autoattribute:: dependent
+   .. autoattribute:: real_args
 
    .. rubric:: Methods Documentation
 
    .. automethod:: __call__
    .. automethod:: bind
+   .. automethod:: copy
    .. automethod:: evaluate_binned
    .. automethod:: from_json_object
    .. automethod:: generate
@@ -73,6 +78,7 @@ PDF
    .. automethod:: norm
    .. automethod:: numerical_integral
    .. automethod:: numerical_normalization
+   .. automethod:: restoring_state
    .. automethod:: set_values
    .. automethod:: to_backend
    .. automethod:: to_json_object

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>MinKit reference &mdash; minkit 0.0.0.dev0 documentation</title>
+  <title>MinKit reference &mdash; minkit 0.0.0.dev1 documentation</title>
   
 
   
@@ -64,7 +64,7 @@
             
             
               <div class="version">
-                0.0.0.dev0
+                0.0.0.dev1
               </div>
             
           
@@ -99,13 +99,11 @@
 <li class="toctree-l3"><a class="reference internal" href="api/minkit.binned_extended_maximum_likelihood.html">binned_extended_maximum_likelihood</a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/minkit.binned_maximum_likelihood.html">binned_maximum_likelihood</a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/minkit.data_plotting_arrays.html">data_plotting_arrays</a></li>
-<li class="toctree-l3"><a class="reference internal" href="api/minkit.fcn_profile.html">fcn_profile</a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/minkit.minimizer.html">minimizer</a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/minkit.pdf_from_json.html">pdf_from_json</a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/minkit.pdf_plotting_arrays.html">pdf_plotting_arrays</a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/minkit.pdf_to_json.html">pdf_to_json</a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/minkit.register_pdf.html">register_pdf</a></li>
-<li class="toctree-l3"><a class="reference internal" href="api/minkit.simultaneous_fcn_profile.html">simultaneous_fcn_profile</a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/minkit.simultaneous_minimizer.html">simultaneous_minimizer</a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/minkit.sweights.html">sweights</a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/minkit.sweights_u.html">sweights_u</a></li>
@@ -277,26 +275,20 @@ of the Minkit package.</p>
 <tr class="row-even"><td><p><a class="reference internal" href="api/minkit.data_plotting_arrays.html#minkit.data_plotting_arrays" title="minkit.data_plotting_arrays"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_plotting_arrays</span></code></a>(data, **kwargs)</p></td>
 <td><p>Get the values from a data sample for plotting.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="api/minkit.fcn_profile.html#minkit.fcn_profile" title="minkit.fcn_profile"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fcn_profile</span></code></a>(fcn, pdf, data, wa, values[, …])</p></td>
-<td><p>Evaluate the profile of an FCN for a set of parameters and values.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="api/minkit.minimizer.html#minkit.minimizer" title="minkit.minimizer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">minimizer</span></code></a>(fcn, pdf, data[, minimizer, …])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/minkit.minimizer.html#minkit.minimizer" title="minkit.minimizer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">minimizer</span></code></a>(fcn, pdf, data[, minimizer, …])</p></td>
 <td><p>Create a new minimizer to be used within a context.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="api/minkit.pdf_from_json.html#minkit.pdf_from_json" title="minkit.pdf_from_json"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pdf_from_json</span></code></a>(obj)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="api/minkit.pdf_from_json.html#minkit.pdf_from_json" title="minkit.pdf_from_json"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pdf_from_json</span></code></a>(obj[, backend])</p></td>
 <td><p>Load a PDF from a JSON object.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="api/minkit.pdf_plotting_arrays.html#minkit.pdf_plotting_arrays" title="minkit.pdf_plotting_arrays"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pdf_plotting_arrays</span></code></a>(pdf, data_values, edges)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/minkit.pdf_plotting_arrays.html#minkit.pdf_plotting_arrays" title="minkit.pdf_plotting_arrays"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pdf_plotting_arrays</span></code></a>(pdf, data_values, edges)</p></td>
 <td><p>Scale the PDF values given the data values that have already been plotted using a defined set of edges.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="api/minkit.pdf_to_json.html#minkit.pdf_to_json" title="minkit.pdf_to_json"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pdf_to_json</span></code></a>(pdf)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="api/minkit.pdf_to_json.html#minkit.pdf_to_json" title="minkit.pdf_to_json"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pdf_to_json</span></code></a>(pdf)</p></td>
 <td><p>Dump a PDF to a JSON-like object.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="api/minkit.register_pdf.html#minkit.register_pdf" title="minkit.register_pdf"><code class="xref py py-obj docutils literal notranslate"><span class="pre">register_pdf</span></code></a>(cl)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/minkit.register_pdf.html#minkit.register_pdf" title="minkit.register_pdf"><code class="xref py py-obj docutils literal notranslate"><span class="pre">register_pdf</span></code></a>(cl)</p></td>
 <td><p>Decorator to register PDF classes in the PDF_REGISTRY registry.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="api/minkit.simultaneous_fcn_profile.html#minkit.simultaneous_fcn_profile" title="minkit.simultaneous_fcn_profile"><code class="xref py py-obj docutils literal notranslate"><span class="pre">simultaneous_fcn_profile</span></code></a>(categories, wa, values)</p></td>
-<td><p>Evaluate the profile of a simultaneous FCN for a set of parameters and values.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="api/minkit.simultaneous_minimizer.html#minkit.simultaneous_minimizer" title="minkit.simultaneous_minimizer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">simultaneous_minimizer</span></code></a>(categories[, …])</p></td>
 <td><p>Create a new object to minimizer a <a class="reference internal" href="api/minkit.PDF.html#minkit.PDF" title="minkit.PDF"><code class="xref py py-class docutils literal notranslate"><span class="pre">PDF</span></code></a>.</p></td>
@@ -381,7 +373,7 @@ of the Minkit package.</p>
 <tr class="row-even"><td><p><a class="reference internal" href="api/minkit.Landau.html#minkit.Landau" title="minkit.Landau"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Landau</span></code></a>(name, x, center, sigma[, backend])</p></td>
 <td><p>Create a Landau PDF with the parameters related to the data, center and scale parameter.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="api/minkit.Minimizer.html#minkit.Minimizer" title="minkit.Minimizer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Minimizer</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/minkit.Minimizer.html#minkit.Minimizer" title="minkit.Minimizer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Minimizer</span></code></a>(evaluator)</p></td>
 <td><p>Abstract class to serve as an API between Minkit and the different minimization methods.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="api/minkit.MinuitMinimizer.html#minkit.MinuitMinimizer" title="minkit.MinuitMinimizer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MinuitMinimizer</span></code></a>(evaluator, **minimizer_config)</p></td>

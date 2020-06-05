@@ -17,13 +17,21 @@ Registry
    .. autosummary::
 
       ~Registry.append
+      ~Registry.clear
+      ~Registry.copy
+      ~Registry.count
+      ~Registry.extend
       ~Registry.from_json_object
       ~Registry.get
       ~Registry.index
       ~Registry.insert
+      ~Registry.pop
       ~Registry.reduce
+      ~Registry.remove
+      ~Registry.restoring_state
+      ~Registry.reverse
+      ~Registry.sort
       ~Registry.to_json_object
-      ~Registry.values
 
    .. rubric:: Attributes Documentation
 
@@ -32,10 +40,18 @@ Registry
    .. rubric:: Methods Documentation
 
    .. automethod:: append
+   .. automethod:: clear
+   .. automethod:: copy
+   .. automethod:: count
+   .. automethod:: extend
    .. automethod:: from_json_object
    .. automethod:: get
    .. automethod:: index
    .. automethod:: insert
+   .. automethod:: pop
    .. automethod:: reduce
+   .. automethod:: remove
+   .. automethod:: restoring_state
+   .. automethod:: reverse
+   .. automethod:: sort
    .. automethod:: to_json_object
-   .. automethod:: values

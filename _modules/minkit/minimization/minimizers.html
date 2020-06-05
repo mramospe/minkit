@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>minkit.minimization.minimizers &mdash; minkit 0.0.0.dev0 documentation</title>
+  <title>minkit.minimization.minimizers &mdash; minkit 0.0.0.dev1 documentation</title>
   
 
   
@@ -62,7 +62,7 @@
             
             
               <div class="version">
-                0.0.0.dev0
+                0.0.0.dev1
               </div>
             
           
@@ -156,15 +156,20 @@
            <div itemprop="articleBody">
             
   <h1>Source code for minkit.minimization.minimizers</h1><div class="highlight"><pre>
-<span></span><span class="sd">&#39;&#39;&#39;</span>
+<span></span><span class="c1">########################################</span>
+<span class="c1"># MIT License</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright (c) 2020 Miguel Ramos Pernas</span>
+<span class="c1">########################################</span>
+<span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">API for minimizers.</span>
 <span class="sd">&#39;&#39;&#39;</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">evaluators</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">fcns</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">minuit_api</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">scipy_api</span>
-<span class="kn">from</span> <span class="nn">..base</span> <span class="k">import</span> <span class="n">parameters</span>
-<span class="kn">from</span> <span class="nn">..pdfs</span> <span class="k">import</span> <span class="n">dataset</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">evaluators</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">fcns</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">minuit_api</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">scipy_api</span>
+<span class="kn">from</span> <span class="nn">..base</span> <span class="kn">import</span> <span class="n">parameters</span>
+<span class="kn">from</span> <span class="nn">..pdfs</span> <span class="kn">import</span> <span class="n">dataset</span>
 
 <span class="kn">import</span> <span class="nn">contextlib</span>
 <span class="kn">import</span> <span class="nn">logging</span>
@@ -183,6 +188,8 @@
     <span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Create a new minimizer to be used within a context.</span>
 <span class="sd">    The bounds of the data parameters must not change in the process.</span>
+<span class="sd">    Changes to the values, errors or the *constant* state of the parameters</span>
+<span class="sd">    must be done through the :meth:`Minimizer.set_parameter_state` method.</span>
 
 <span class="sd">    :param fcn: type of FCN to use for the minimization.</span>
 <span class="sd">    :type fcn: str</span>
@@ -200,7 +207,8 @@
 <span class="sd">    :type range: str</span>
 <span class="sd">    :param weights_treatment: what to do with weighted samples (see below for more information).</span>
 <span class="sd">    :type weights_treatment: str</span>
-<span class="sd">    :returns: minimizer to call.</span>
+<span class="sd">    :returns: Minimizer to call.</span>
+<span class="sd">    :rtype: Minimizer</span>
 
 <span class="sd">    The treatment of weights when calculating FCNs can lead to unreliable errors</span>
 <span class="sd">    for the parameters. In general there is no correct way of processing</span>
@@ -217,8 +225,12 @@
 <span class="sd">    .. warning::</span>
 <span class="sd">       Do not change the bounds of the data parameters, since for unbinned data</span>
 <span class="sd">       sets a new sample is internally created with values falling in *range*.</span>
-<span class="sd">       The weights of the sample are also changed according to the *weights_treatment*</span>
-<span class="sd">       argument.</span>
+<span class="sd">       The weights of the sample are also changed according to the</span>
+<span class="sd">       *weights_treatment* argument.</span>
+
+<span class="sd">       It is also very important that any change to the state of a parameter</span>
+<span class="sd">       within a minimization context is done using the</span>
+<span class="sd">       :meth:`Minimizer.set_parameter_state` method.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="n">mf</span> <span class="o">=</span> <span class="n">fcns</span><span class="o">.</span><span class="n">fcn_from_name</span><span class="p">(</span><span class="n">fcn</span><span class="p">)</span>
 
@@ -235,7 +247,7 @@
     <span class="k">elif</span> <span class="n">minimizer</span> <span class="o">==</span> <span class="n">SCIPY</span><span class="p">:</span>
         <span class="k">yield</span> <span class="n">scipy_api</span><span class="o">.</span><span class="n">SciPyMinimizer</span><span class="p">(</span><span class="n">evaluator</span><span class="p">,</span> <span class="o">**</span><span class="n">minimizer_config</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;Unknown minimizer &quot;</span><span class="si">{minimizer}</span><span class="s1">&quot;&#39;</span><span class="p">)</span></div>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Unknown minimizer &quot;</span><span class="si">{</span><span class="n">minimizer</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="simultaneous_minimizer"><a class="viewcode-back" href="../../../api/minkit.simultaneous_minimizer.html#minkit.simultaneous_minimizer">[docs]</a><span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
@@ -243,6 +255,8 @@
     <span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Create a new object to minimizer a :class:`PDF`.</span>
 <span class="sd">    The bounds of the data parameters must not change in the process.</span>
+<span class="sd">    Changes to the values, errors or the *constant* state of the parameters</span>
+<span class="sd">    must be done through the :meth:`Minimizer.set_parameter_state` method.</span>
 
 <span class="sd">    :param categories: categories to process.</span>
 <span class="sd">    :type categories: list(Category)</span>
@@ -256,7 +270,8 @@
 <span class="sd">    :type range: str</span>
 <span class="sd">    :param weights_treatment: what to do with weighted samples (see below for more information).</span>
 <span class="sd">    :type weights_treatment: str</span>
-<span class="sd">    :returns: minimizer to call.</span>
+<span class="sd">    :returns: Minimizer to call.</span>
+<span class="sd">    :rtype: Minimizer</span>
 
 <span class="sd">    The treatment of weights when calculating FCNs can lead to unreliable errors</span>
 <span class="sd">    for the parameters. In general there is no correct way of processing</span>
@@ -275,6 +290,10 @@
 <span class="sd">       sets a new sample is internally created with values falling in *range*.</span>
 <span class="sd">       The weights of the sample are also changed according to the *weights_treatment*</span>
 <span class="sd">       argument.</span>
+
+<span class="sd">       It is also very important that any change to the state of a parameter</span>
+<span class="sd">       within a minimization context is done using the</span>
+<span class="sd">       :meth:`Minimizer.set_parameter_state` method.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="c1"># Build the simultaneous evaluator</span>
     <span class="n">evals</span> <span class="o">=</span> <span class="p">[]</span>
@@ -301,7 +320,7 @@
     <span class="k">elif</span> <span class="n">minimizer</span> <span class="o">==</span> <span class="n">SCIPY</span><span class="p">:</span>
         <span class="k">yield</span> <span class="n">scipy_api</span><span class="o">.</span><span class="n">SciPyMinimizer</span><span class="p">(</span><span class="n">evaluator</span><span class="p">,</span> <span class="o">**</span><span class="n">minimizer_config</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;Unknown minimizer &quot;</span><span class="si">{minimizer}</span><span class="s1">&quot;&#39;</span><span class="p">)</span></div>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Unknown minimizer &quot;</span><span class="si">{</span><span class="n">minimizer</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="p">)</span></div>
 </pre></div>
 
            </div>

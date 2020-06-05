@@ -6,12 +6,46 @@ carray
 .. autoclass:: carray
    :show-inheritance:
 
+   .. rubric:: Attributes Summary
+
+   .. autosummary::
+
+      ~carray.aop
+      ~carray.backend
+      ~carray.dtype
+      ~carray.length
+      ~carray.ndim
+      ~carray.shape
+      ~carray.size
+      ~carray.ua
+
    .. rubric:: Methods Summary
 
    .. autosummary::
 
+      ~carray.as_ndarray
+      ~carray.astype
+      ~carray.copy
       ~carray.from_ndarray
+      ~carray.get
+      ~carray.to_backend
+
+   .. rubric:: Attributes Documentation
+
+   .. autoattribute:: aop
+   .. autoattribute:: backend
+   .. autoattribute:: dtype
+   .. autoattribute:: length
+   .. autoattribute:: ndim
+   .. autoattribute:: shape
+   .. autoattribute:: size
+   .. autoattribute:: ua
 
    .. rubric:: Methods Documentation
 
+   .. automethod:: as_ndarray
+   .. automethod:: astype
+   .. automethod:: copy
    .. automethod:: from_ndarray
+   .. automethod:: get
+   .. automethod:: to_backend

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>minkit.base.core &mdash; minkit 0.0.0.dev0 documentation</title>
+  <title>minkit.base.core &mdash; minkit 0.0.0.dev1 documentation</title>
   
 
   
@@ -62,7 +62,7 @@
             
             
               <div class="version">
-                0.0.0.dev0
+                0.0.0.dev1
               </div>
             
           
@@ -156,7 +156,12 @@
            <div itemprop="articleBody">
             
   <h1>Source code for minkit.base.core</h1><div class="highlight"><pre>
-<span></span><span class="sd">&#39;&#39;&#39;</span>
+<span></span><span class="c1">########################################</span>
+<span class="c1"># MIT License</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright (c) 2020 Miguel Ramos Pernas</span>
+<span class="c1">########################################</span>
+<span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">Definition of the backend where to store the data and run the jobs.</span>
 <span class="sd">&#39;&#39;&#39;</span>
 <span class="kn">import</span> <span class="nn">contextlib</span>
@@ -176,7 +181,7 @@
 
 <span class="k">class</span> <span class="nc">DocMeta</span><span class="p">(</span><span class="nb">type</span><span class="p">):</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">namespace</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">namespace</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Metaclass that allows to inherit the docstring from the first base</span>
 <span class="sd">        with an available docstring for that method.</span>
@@ -243,14 +248,14 @@
 <span class="sd">    :type expression: str</span>
 <span class="sd">    :returns: evaluation of the expression.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
-    <span class="n">code</span> <span class="o">=</span> <span class="nb">compile</span><span class="p">(</span><span class="n">expression</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s2">&quot;eval&quot;</span><span class="p">)</span>
+    <span class="n">code</span> <span class="o">=</span> <span class="nb">compile</span><span class="p">(</span><span class="n">expression</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;eval&#39;</span><span class="p">)</span>
 
     <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">code</span><span class="o">.</span><span class="n">co_names</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">MATH_OBJECTS</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">NameError</span><span class="p">(</span>
-                <span class="n">f</span><span class="s2">&quot;Use of </span><span class="si">{name}</span><span class="s2"> not allowed in a mathematical expression; functions and constants allowed: {sorted(MATH_OBJECTS.keys())}&quot;</span><span class="p">)</span>
+                <span class="sa">f</span><span class="s1">&#39;Use of </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1"> not allowed in a mathematical expression; functions and constants allowed: </span><span class="si">{</span><span class="nb">sorted</span><span class="p">(</span><span class="n">MATH_OBJECTS</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="nb">eval</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;__builtins__&quot;</span><span class="p">:</span> <span class="p">{}},</span> <span class="n">MATH_OBJECTS</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">eval</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;__builtins__&#39;</span><span class="p">:</span> <span class="p">{}},</span> <span class="n">MATH_OBJECTS</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="timer"><a class="viewcode-back" href="../../../api/minkit.timer.html#minkit.timer">[docs]</a><span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
@@ -265,7 +270,7 @@
     <span class="n">hours</span><span class="p">,</span> <span class="n">rem</span> <span class="o">=</span> <span class="nb">divmod</span><span class="p">(</span><span class="n">end</span> <span class="o">-</span> <span class="n">start</span><span class="p">,</span> <span class="mi">3600</span><span class="p">)</span>
     <span class="n">minutes</span><span class="p">,</span> <span class="n">seconds</span> <span class="o">=</span> <span class="nb">divmod</span><span class="p">(</span><span class="n">rem</span><span class="p">,</span> <span class="mi">60</span><span class="p">)</span>
 
-    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;Time elapsed: </span><span class="si">{hours}</span><span class="s1">h </span><span class="si">{minutes}</span><span class="s1">m </span><span class="si">{seconds}</span><span class="s1">s&#39;</span><span class="p">)</span></div>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Time elapsed: </span><span class="si">{</span><span class="n">hours</span><span class="si">}</span><span class="s1">h </span><span class="si">{</span><span class="n">minutes</span><span class="si">}</span><span class="s1">m </span><span class="si">{</span><span class="n">seconds</span><span class="si">}</span><span class="s1">s&#39;</span><span class="p">)</span></div>
 </pre></div>
 
            </div>

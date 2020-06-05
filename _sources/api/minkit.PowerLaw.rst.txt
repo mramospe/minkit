@@ -5,3 +5,85 @@ PowerLaw
 
 .. autoclass:: PowerLaw
    :show-inheritance:
+
+   .. rubric:: Attributes Summary
+
+   .. autosummary::
+
+      ~PowerLaw.BIND
+      ~PowerLaw.CACHE_TYPES
+      ~PowerLaw.CONST
+      ~PowerLaw.all_args
+      ~PowerLaw.all_pars
+      ~PowerLaw.all_real_args
+      ~PowerLaw.aop
+      ~PowerLaw.args
+      ~PowerLaw.backend
+      ~PowerLaw.cache
+      ~PowerLaw.cache_type
+      ~PowerLaw.constant
+      ~PowerLaw.data_pars
+      ~PowerLaw.dependent
+      ~PowerLaw.numint_config
+      ~PowerLaw.real_args
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+
+      ~PowerLaw.__call__
+      ~PowerLaw.bind
+      ~PowerLaw.copy
+      ~PowerLaw.evaluate_binned
+      ~PowerLaw.from_json_object
+      ~PowerLaw.function
+      ~PowerLaw.generate
+      ~PowerLaw.get_values
+      ~PowerLaw.integral
+      ~PowerLaw.norm
+      ~PowerLaw.numerical_integral
+      ~PowerLaw.numerical_normalization
+      ~PowerLaw.restoring_state
+      ~PowerLaw.set_values
+      ~PowerLaw.to_backend
+      ~PowerLaw.to_json_object
+      ~PowerLaw.using_cache
+
+   .. rubric:: Attributes Documentation
+
+   .. autoattribute:: BIND
+   .. autoattribute:: CACHE_TYPES
+   .. autoattribute:: CONST
+   .. autoattribute:: all_args
+   .. autoattribute:: all_pars
+   .. autoattribute:: all_real_args
+   .. autoattribute:: aop
+   .. autoattribute:: args
+   .. autoattribute:: backend
+   .. autoattribute:: cache
+   .. autoattribute:: cache_type
+   .. autoattribute:: constant
+   .. autoattribute:: data_pars
+   .. autoattribute:: dependent
+   .. autoattribute:: numint_config
+   .. autoattribute:: real_args
+
+   .. rubric:: Methods Documentation
+
+   .. automethod:: __call__
+   .. automethod:: bind
+   .. automethod:: copy
+   .. automethod:: evaluate_binned
+   .. automethod:: from_json_object
+   .. automethod:: function
+   .. automethod:: generate
+   .. automethod:: get_values
+   .. automethod:: integral
+   .. automethod:: norm
+   .. automethod:: numerical_integral
+   .. automethod:: numerical_normalization
+   .. automethod:: restoring_state
+   .. automethod:: set_values
+   .. automethod:: to_backend
+   .. automethod:: to_json_object
+   .. automethod:: using_cache

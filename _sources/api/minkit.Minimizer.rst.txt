@@ -6,12 +6,32 @@ Minimizer
 .. autoclass:: Minimizer
    :show-inheritance:
 
+   .. rubric:: Attributes Summary
+
+   .. autosummary::
+
+      ~Minimizer.evaluator
+
    .. rubric:: Methods Summary
 
    .. autosummary::
 
-      ~Minimizer.result_to_registry
+      ~Minimizer.asymmetric_errors
+      ~Minimizer.fcn_profile
+      ~Minimizer.minimization_profile
+      ~Minimizer.minimize
+      ~Minimizer.restoring_state
+      ~Minimizer.set_parameter_state
+
+   .. rubric:: Attributes Documentation
+
+   .. autoattribute:: evaluator
 
    .. rubric:: Methods Documentation
 
-   .. automethod:: result_to_registry
+   .. automethod:: asymmetric_errors
+   .. automethod:: fcn_profile
+   .. automethod:: minimization_profile
+   .. automethod:: minimize
+   .. automethod:: restoring_state
+   .. automethod:: set_parameter_state

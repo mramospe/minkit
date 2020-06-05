@@ -17,6 +17,7 @@ BinnedEvaluator
    .. autosummary::
 
       ~BinnedEvaluator.__call__
+      ~BinnedEvaluator.fcn
       ~BinnedEvaluator.using_caches
 
    .. rubric:: Attributes Documentation
@@ -26,4 +27,5 @@ BinnedEvaluator
    .. rubric:: Methods Documentation
 
    .. automethod:: __call__
+   .. automethod:: fcn
    .. automethod:: using_caches

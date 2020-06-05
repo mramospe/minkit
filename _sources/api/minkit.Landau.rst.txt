@@ -5,3 +5,85 @@ Landau
 
 .. autoclass:: Landau
    :show-inheritance:
+
+   .. rubric:: Attributes Summary
+
+   .. autosummary::
+
+      ~Landau.BIND
+      ~Landau.CACHE_TYPES
+      ~Landau.CONST
+      ~Landau.all_args
+      ~Landau.all_pars
+      ~Landau.all_real_args
+      ~Landau.aop
+      ~Landau.args
+      ~Landau.backend
+      ~Landau.cache
+      ~Landau.cache_type
+      ~Landau.constant
+      ~Landau.data_pars
+      ~Landau.dependent
+      ~Landau.numint_config
+      ~Landau.real_args
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+
+      ~Landau.__call__
+      ~Landau.bind
+      ~Landau.copy
+      ~Landau.evaluate_binned
+      ~Landau.from_json_object
+      ~Landau.function
+      ~Landau.generate
+      ~Landau.get_values
+      ~Landau.integral
+      ~Landau.norm
+      ~Landau.numerical_integral
+      ~Landau.numerical_normalization
+      ~Landau.restoring_state
+      ~Landau.set_values
+      ~Landau.to_backend
+      ~Landau.to_json_object
+      ~Landau.using_cache
+
+   .. rubric:: Attributes Documentation
+
+   .. autoattribute:: BIND
+   .. autoattribute:: CACHE_TYPES
+   .. autoattribute:: CONST
+   .. autoattribute:: all_args
+   .. autoattribute:: all_pars
+   .. autoattribute:: all_real_args
+   .. autoattribute:: aop
+   .. autoattribute:: args
+   .. autoattribute:: backend
+   .. autoattribute:: cache
+   .. autoattribute:: cache_type
+   .. autoattribute:: constant
+   .. autoattribute:: data_pars
+   .. autoattribute:: dependent
+   .. autoattribute:: numint_config
+   .. autoattribute:: real_args
+
+   .. rubric:: Methods Documentation
+
+   .. automethod:: __call__
+   .. automethod:: bind
+   .. automethod:: copy
+   .. automethod:: evaluate_binned
+   .. automethod:: from_json_object
+   .. automethod:: function
+   .. automethod:: generate
+   .. automethod:: get_values
+   .. automethod:: integral
+   .. automethod:: norm
+   .. automethod:: numerical_integral
+   .. automethod:: numerical_normalization
+   .. automethod:: restoring_state
+   .. automethod:: set_values
+   .. automethod:: to_backend
+   .. automethod:: to_json_object
+   .. automethod:: using_cache

@@ -10,30 +10,84 @@ MultiPDF
 
    .. autosummary::
 
+      ~MultiPDF.BIND
+      ~MultiPDF.CACHE_TYPES
+      ~MultiPDF.CONST
       ~MultiPDF.all_args
       ~MultiPDF.all_pars
       ~MultiPDF.all_pdfs
+      ~MultiPDF.all_real_args
+      ~MultiPDF.aop
+      ~MultiPDF.args
+      ~MultiPDF.backend
+      ~MultiPDF.cache
+      ~MultiPDF.cache_type
+      ~MultiPDF.constant
+      ~MultiPDF.data_pars
+      ~MultiPDF.dependencies
       ~MultiPDF.dependent
       ~MultiPDF.pdfs
+      ~MultiPDF.real_args
 
    .. rubric:: Methods Summary
 
    .. autosummary::
 
+      ~MultiPDF.__call__
       ~MultiPDF.bind
       ~MultiPDF.component
+      ~MultiPDF.copy
+      ~MultiPDF.evaluate_binned
       ~MultiPDF.from_json_object
+      ~MultiPDF.generate
+      ~MultiPDF.get_values
+      ~MultiPDF.integral
+      ~MultiPDF.norm
+      ~MultiPDF.numerical_integral
+      ~MultiPDF.numerical_normalization
+      ~MultiPDF.restoring_state
+      ~MultiPDF.set_values
+      ~MultiPDF.to_backend
+      ~MultiPDF.to_json_object
+      ~MultiPDF.using_cache
 
    .. rubric:: Attributes Documentation
 
+   .. autoattribute:: BIND
+   .. autoattribute:: CACHE_TYPES
+   .. autoattribute:: CONST
    .. autoattribute:: all_args
    .. autoattribute:: all_pars
    .. autoattribute:: all_pdfs
+   .. autoattribute:: all_real_args
+   .. autoattribute:: aop
+   .. autoattribute:: args
+   .. autoattribute:: backend
+   .. autoattribute:: cache
+   .. autoattribute:: cache_type
+   .. autoattribute:: constant
+   .. autoattribute:: data_pars
+   .. autoattribute:: dependencies
    .. autoattribute:: dependent
    .. autoattribute:: pdfs
+   .. autoattribute:: real_args
 
    .. rubric:: Methods Documentation
 
+   .. automethod:: __call__
    .. automethod:: bind
    .. automethod:: component
+   .. automethod:: copy
+   .. automethod:: evaluate_binned
    .. automethod:: from_json_object
+   .. automethod:: generate
+   .. automethod:: get_values
+   .. automethod:: integral
+   .. automethod:: norm
+   .. automethod:: numerical_integral
+   .. automethod:: numerical_normalization
+   .. automethod:: restoring_state
+   .. automethod:: set_values
+   .. automethod:: to_backend
+   .. automethod:: to_json_object
+   .. automethod:: using_cache

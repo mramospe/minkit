@@ -6,28 +6,88 @@ ProdPDFs
 .. autoclass:: ProdPDFs
    :show-inheritance:
 
+   .. rubric:: Attributes Summary
+
+   .. autosummary::
+
+      ~ProdPDFs.BIND
+      ~ProdPDFs.CACHE_TYPES
+      ~ProdPDFs.CONST
+      ~ProdPDFs.all_args
+      ~ProdPDFs.all_pars
+      ~ProdPDFs.all_pdfs
+      ~ProdPDFs.all_real_args
+      ~ProdPDFs.aop
+      ~ProdPDFs.args
+      ~ProdPDFs.backend
+      ~ProdPDFs.cache
+      ~ProdPDFs.cache_type
+      ~ProdPDFs.constant
+      ~ProdPDFs.data_pars
+      ~ProdPDFs.dependencies
+      ~ProdPDFs.dependent
+      ~ProdPDFs.pdfs
+      ~ProdPDFs.real_args
+
    .. rubric:: Methods Summary
 
    .. autosummary::
 
       ~ProdPDFs.__call__
+      ~ProdPDFs.bind
+      ~ProdPDFs.component
+      ~ProdPDFs.copy
       ~ProdPDFs.evaluate_binned
       ~ProdPDFs.from_json_object
+      ~ProdPDFs.generate
+      ~ProdPDFs.get_values
       ~ProdPDFs.integral
       ~ProdPDFs.norm
       ~ProdPDFs.numerical_integral
       ~ProdPDFs.numerical_normalization
+      ~ProdPDFs.restoring_state
+      ~ProdPDFs.set_values
       ~ProdPDFs.to_backend
       ~ProdPDFs.to_json_object
+      ~ProdPDFs.using_cache
+
+   .. rubric:: Attributes Documentation
+
+   .. autoattribute:: BIND
+   .. autoattribute:: CACHE_TYPES
+   .. autoattribute:: CONST
+   .. autoattribute:: all_args
+   .. autoattribute:: all_pars
+   .. autoattribute:: all_pdfs
+   .. autoattribute:: all_real_args
+   .. autoattribute:: aop
+   .. autoattribute:: args
+   .. autoattribute:: backend
+   .. autoattribute:: cache
+   .. autoattribute:: cache_type
+   .. autoattribute:: constant
+   .. autoattribute:: data_pars
+   .. autoattribute:: dependencies
+   .. autoattribute:: dependent
+   .. autoattribute:: pdfs
+   .. autoattribute:: real_args
 
    .. rubric:: Methods Documentation
 
    .. automethod:: __call__
+   .. automethod:: bind
+   .. automethod:: component
+   .. automethod:: copy
    .. automethod:: evaluate_binned
    .. automethod:: from_json_object
+   .. automethod:: generate
+   .. automethod:: get_values
    .. automethod:: integral
    .. automethod:: norm
    .. automethod:: numerical_integral
    .. automethod:: numerical_normalization
+   .. automethod:: restoring_state
+   .. automethod:: set_values
    .. automethod:: to_backend
    .. automethod:: to_json_object
+   .. automethod:: using_cache

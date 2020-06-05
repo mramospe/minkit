@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Minimizer &mdash; minkit 0.0.0.dev0 documentation</title>
+  <title>Minimizer &mdash; minkit 0.0.0.dev1 documentation</title>
   
 
   
@@ -64,7 +64,7 @@
             
             
               <div class="version">
-                0.0.0.dev0
+                0.0.0.dev1
               </div>
             
           
@@ -232,10 +232,27 @@
 <h1>Minimizer<a class="headerlink" href="#minimizer" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="minkit.Minimizer">
-<em class="property">class </em><code class="sig-prename descclassname">minkit.</code><code class="sig-name descname">Minimizer</code><a class="reference internal" href="../_modules/minkit/minimization/core.html#Minimizer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.Minimizer" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">minkit.</code><code class="sig-name descname">Minimizer</code><span class="sig-paren">(</span><em class="sig-param">evaluator</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/minimization/core.html#Minimizer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.Minimizer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Abstract class to serve as an API between Minkit and the different
 minimization methods.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>evaluator</strong> (<a class="reference internal" href="minkit.UnbinnedEvaluator.html#minkit.UnbinnedEvaluator" title="minkit.UnbinnedEvaluator"><em>UnbinnedEvaluator</em></a><em>, </em><a class="reference internal" href="minkit.BinnedEvaluator.html#minkit.BinnedEvaluator" title="minkit.BinnedEvaluator"><em>BinnedEvaluator</em></a><em> or </em><a class="reference internal" href="minkit.SimultaneousEvaluator.html#minkit.SimultaneousEvaluator" title="minkit.SimultaneousEvaluator"><em>SimultaneousEvaluator</em></a>) – evaluator to be used in the minimization.</p>
+</dd>
+</dl>
+<p class="rubric">Attributes Summary</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.Minimizer.evaluator" title="minkit.Minimizer.evaluator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">evaluator</span></code></a></p></td>
+<td><p>Evaluator of the minimizer.</p></td>
+</tr>
+</tbody>
+</table>
 <p class="rubric">Methods Summary</p>
 <table class="longtable docutils align-default">
 <colgroup>
@@ -243,32 +260,135 @@ minimization methods.</p>
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.Minimizer.result_to_registry" title="minkit.Minimizer.result_to_registry"><code class="xref py py-obj docutils literal notranslate"><span class="pre">result_to_registry</span></code></a>(result)</p></td>
-<td><p>Transform the parameters from a call to Minuit into a <a class="reference internal" href="minkit.Registry.html#minkit.Registry" title="minkit.Registry"><code class="xref py py-class docutils literal notranslate"><span class="pre">Registry</span></code></a>.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.Minimizer.asymmetric_errors" title="minkit.Minimizer.asymmetric_errors"><code class="xref py py-obj docutils literal notranslate"><span class="pre">asymmetric_errors</span></code></a>(name[, cov, sigma, atol, …])</p></td>
+<td><p>Calculate the asymmetric errors for the given parameter.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#minkit.Minimizer.fcn_profile" title="minkit.Minimizer.fcn_profile"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fcn_profile</span></code></a>(wa, values)</p></td>
+<td><p>Evaluate the profile of an FCN for a set of parameters and values.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.Minimizer.minimization_profile" title="minkit.Minimizer.minimization_profile"><code class="xref py py-obj docutils literal notranslate"><span class="pre">minimization_profile</span></code></a>(wa, values[, …])</p></td>
+<td><p>Minimize a PDF an calculate the FCN for each set of parameters and values.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#minkit.Minimizer.minimize" title="minkit.Minimizer.minimize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">minimize</span></code></a>(*args, **kwargs)</p></td>
+<td><p>Minimize the FCN for the stored PDF and data sample.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.Minimizer.restoring_state" title="minkit.Minimizer.restoring_state"><code class="xref py py-obj docutils literal notranslate"><span class="pre">restoring_state</span></code></a>()</p></td>
+<td><p>Method to ensure that modifications of parameters within a minimizer context are reset properly.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#minkit.Minimizer.set_parameter_state" title="minkit.Minimizer.set_parameter_state"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_parameter_state</span></code></a>(name[, value, error, fixed])</p></td>
+<td><p>Method to ensure that a modification of a parameter within a minimizer context is treated properly.</p></td>
 </tr>
 </tbody>
 </table>
+<p class="rubric">Attributes Documentation</p>
+<dl class="attribute">
+<dt id="minkit.Minimizer.evaluator">
+<code class="sig-name descname">evaluator</code><a class="headerlink" href="#minkit.Minimizer.evaluator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluator of the minimizer.</p>
+</dd></dl>
+
 <p class="rubric">Methods Documentation</p>
 <dl class="method">
-<dt id="minkit.Minimizer.result_to_registry">
-<code class="sig-name descname">result_to_registry</code><span class="sig-paren">(</span><em class="sig-param">result</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/minimization/core.html#Minimizer.result_to_registry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.Minimizer.result_to_registry" title="Permalink to this definition">¶</a></dt>
-<dd><p>Transform the parameters from a call to Minuit into a <a class="reference internal" href="minkit.Registry.html#minkit.Registry" title="minkit.Registry"><code class="xref py py-class docutils literal notranslate"><span class="pre">Registry</span></code></a>.</p>
+<dt id="minkit.Minimizer.asymmetric_errors">
+<code class="sig-name descname">asymmetric_errors</code><span class="sig-paren">(</span><em class="sig-param">name</em>, <em class="sig-param">cov=None</em>, <em class="sig-param">sigma=1</em>, <em class="sig-param">atol=1e-08</em>, <em class="sig-param">rtol=1e-05</em>, <em class="sig-param">maxcall=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/minimization/core.html#Minimizer.asymmetric_errors"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.Minimizer.asymmetric_errors" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the asymmetric errors for the given parameter. This is done
+by subdividing the bounds of the parameter into two till the variation
+of the FCN is one. Unlike MINOS, this method does not treat new
+minima.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>result</strong> – result from a call to the minimizer.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>independent registry of parameters with the results.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="minkit.Registry.html#minkit.Registry" title="minkit.Registry">Registry</a>(<a class="reference internal" href="minkit.Parameter.html#minkit.Parameter" title="minkit.Parameter">Parameter</a>)</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – name of the parameter.</p></li>
+<li><p><strong>cov</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.18)"><em>numpy.ndarray</em></a>) – covariance matrix. If provided, the initial values of the         parameters will be obtained from them.</p></li>
+<li><p><strong>sigma</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – number of standard deviations to compute.</p></li>
+<li><p><strong>atol</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – absolute tolerance for the error.</p></li>
+<li><p><strong>rtol</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – relative tolerance for the error.</p></li>
+<li><p><strong>maxcall</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.8)"><em>None</em></a>) – maximum number of calls to calculate each error bound.</p></li>
+</ul>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.Minimizer.fcn_profile">
+<code class="sig-name descname">fcn_profile</code><span class="sig-paren">(</span><em class="sig-param">wa</em>, <em class="sig-param">values</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/minimization/core.html#Minimizer.fcn_profile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.Minimizer.fcn_profile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluate the profile of an FCN for a set of parameters and values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>wa</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>)</em><em></em>) – single variable or set of variables.</p></li>
+<li><p><strong>values</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.18)"><em>numpy.ndarray</em></a>) – values for each parameter specified in <em>wa</em>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Profile of the FCN for the given values.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.18)">numpy.ndarray</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.Minimizer.minimization_profile">
+<code class="sig-name descname">minimization_profile</code><span class="sig-paren">(</span><em class="sig-param">wa</em>, <em class="sig-param">values</em>, <em class="sig-param">minimizer_config=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/minimization/core.html#Minimizer.minimization_profile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.Minimizer.minimization_profile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Minimize a PDF an calculate the FCN for each set of parameters and values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>wa</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>)</em><em></em>) – single variable or set of variables.</p></li>
+<li><p><strong>values</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.18)"><em>numpy.ndarray</em></a>) – values for each parameter specified in <em>wa</em>.</p></li>
+<li><p><strong>minimizer_config</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.8)"><em>None</em></a>) – arguments passed to <a class="reference internal" href="#minkit.Minimizer.minimize" title="minkit.Minimizer.minimize"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Minimizer.minimize()</span></code></a>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Profile of the FCN for the given values.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.18)">numpy.ndarray</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.Minimizer.minimize">
+<code class="sig-name descname">minimize</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/minimization/core.html#Minimizer.minimize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.Minimizer.minimize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Minimize the FCN for the stored PDF and data sample. Arguments depend
+on the specific minimizer to use. It returns a tuple with the
+information whether the minimization succeded and the covariance matrix.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.Minimizer.restoring_state">
+<code class="sig-name descname">restoring_state</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/minimization/core.html#Minimizer.restoring_state"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.Minimizer.restoring_state" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to ensure that modifications of parameters within a minimizer
+context are reset properly. Sadly, the <a class="reference external" href="https://iminuit.readthedocs.io/en/latest/reference.html#iminuit.Minuit" title="(in iminuit v1.3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">iminuit.Minuit</span></code></a> class
+is not stateless, so each time a parameter is modified it must be
+notified of the change.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>The parameters in the returned registry do not belong to the
-minimized object(s).</p>
+<p>For the <a class="reference internal" href="minkit.MinuitMinimizer.html#minkit.MinuitMinimizer" title="minkit.MinuitMinimizer"><code class="xref py py-class docutils literal notranslate"><span class="pre">MinuitMinimizer</span></code></a> class, a call to this
+method does not preserve the minimization state of MIGRAD.</p>
 </div>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.Minimizer.set_parameter_state">
+<code class="sig-name descname">set_parameter_state</code><span class="sig-paren">(</span><em class="sig-param">name</em>, <em class="sig-param">value=None</em>, <em class="sig-param">error=None</em>, <em class="sig-param">fixed=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/minimization/core.html#Minimizer.set_parameter_state"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.Minimizer.set_parameter_state" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to ensure that a modification of a parameter within a minimizer
+context is treated properly. Sadly, the <a class="reference external" href="https://iminuit.readthedocs.io/en/latest/reference.html#iminuit.Minuit" title="(in iminuit v1.3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">iminuit.Minuit</span></code></a> class
+is not stateless, so each time a parameter is modified it must be
+notified of the change.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – name of the parameter.</p></li>
+<li><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.8)"><em>None</em></a>) – new value of a parameter.</p></li>
+<li><p><strong>error</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.8)"><em>None</em></a>) – error of the parameter.</p></li>
+<li><p><strong>fixed</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.8)"><em>None</em></a>) – whether to fix the parameter.</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>

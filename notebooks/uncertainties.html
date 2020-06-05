@@ -1,0 +1,683 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Uncertainties &mdash; minkit 0.0.0.dev1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Determining the stability of the fits" href="fit_stability.html" />
+    <link rel="prev" title="Minimization with MinKit" href="minimization.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> minkit
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.0.0.dev1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../user.html">User guide</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="datasets.html">Creating data sets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="basic.html">Basic example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="minimization.html">Minimization with MinKit</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Uncertainties</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fit_stability.html">Determining the stability of the fits</a></li>
+<li class="toctree-l2"><a class="reference internal" href="multidimensional.html">Working in more than one dimension</a></li>
+<li class="toctree-l2"><a class="reference internal" href="extension.html">Adding custom PDFs</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../reference.html">MinKit reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../performance.html">Performance</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">minkit</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../user.html">User guide</a> &raquo;</li>
+        
+      <li>Uncertainties</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/notebooks/uncertainties.ipynb.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS for nbsphinx extension */
+
+/* remove conflicting styling from Sphinx themes */
+div.nbinput,
+div.nbinput div.prompt,
+div.nbinput div.input_area,
+div.nbinput div[class*=highlight],
+div.nbinput div[class*=highlight] pre,
+div.nboutput,
+div.nbinput div.prompt,
+div.nbinput div.output_area,
+div.nboutput div[class*=highlight],
+div.nboutput div[class*=highlight] pre {
+    background: none;
+    border: none;
+    padding: 0 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+/* avoid gaps between output lines */
+div.nboutput div[class*=highlight] pre {
+    line-height: normal;
+}
+
+/* input/output containers */
+div.nbinput,
+div.nboutput {
+    display: -webkit-flex;
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+    width: 100%;
+}
+@media (max-width: 540px) {
+    div.nbinput,
+    div.nboutput {
+        flex-direction: column;
+    }
+}
+
+/* input container */
+div.nbinput {
+    padding-top: 5px;
+}
+
+/* last container */
+div.nblast {
+    padding-bottom: 5px;
+}
+
+/* input prompt */
+div.nbinput div.prompt pre {
+    color: #307FC1;
+}
+
+/* output prompt */
+div.nboutput div.prompt pre {
+    color: #BF5B3D;
+}
+
+/* all prompts */
+div.nbinput div.prompt,
+div.nboutput div.prompt {
+    min-width: 5ex;
+    padding-top: 0.4em;
+    padding-right: 0.4em;
+    text-align: right;
+    flex: 0;
+}
+@media (max-width: 540px) {
+    div.nbinput div.prompt,
+    div.nboutput div.prompt {
+        text-align: left;
+        padding: 0.4em;
+    }
+    div.nboutput div.prompt.empty {
+        padding: 0;
+    }
+}
+
+/* disable scrollbars on prompts */
+div.nbinput div.prompt pre,
+div.nboutput div.prompt pre {
+    overflow: hidden;
+}
+
+/* input/output area */
+div.nbinput div.input_area,
+div.nboutput div.output_area {
+    padding: 0.4em;
+    -webkit-flex: 1;
+    flex: 1;
+    overflow: auto;
+}
+@media (max-width: 540px) {
+    div.nbinput div.input_area,
+    div.nboutput div.output_area {
+        width: 100%;
+    }
+}
+
+/* input area */
+div.nbinput div.input_area {
+    border: 1px solid #e0e0e0;
+    border-radius: 2px;
+    background: #f5f5f5;
+}
+
+/* override MathJax center alignment in output cells */
+div.nboutput div[class*=MathJax] {
+    text-align: left !important;
+}
+
+/* override sphinx.ext.imgmath center alignment in output cells */
+div.nboutput div.math p {
+    text-align: left;
+}
+
+/* standard error */
+div.nboutput div.output_area.stderr {
+    background: #fdd;
+}
+
+/* ANSI colors */
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-default-inverse-fg { color: #FFFFFF; }
+.ansi-default-inverse-bg { background-color: #000000; }
+
+.ansi-bold { font-weight: bold; }
+.ansi-underline { text-decoration: underline; }
+
+/* Some additional styling taken form the Jupyter notebook CSS */
+div.rendered_html table {
+  border: none;
+  border-collapse: collapse;
+  border-spacing: 0;
+  color: black;
+  font-size: 12px;
+  table-layout: fixed;
+}
+div.rendered_html thead {
+  border-bottom: 1px solid black;
+  vertical-align: bottom;
+}
+div.rendered_html tr,
+div.rendered_html th,
+div.rendered_html td {
+  text-align: right;
+  vertical-align: middle;
+  padding: 0.5em 0.5em;
+  line-height: normal;
+  white-space: normal;
+  max-width: none;
+  border: none;
+}
+div.rendered_html th {
+  font-weight: bold;
+}
+div.rendered_html tbody tr:nth-child(odd) {
+  background: #f5f5f5;
+}
+div.rendered_html tbody tr:hover {
+  background: rgba(66, 165, 245, 0.2);
+}
+
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="Uncertainties">
+<h1>Uncertainties<a class="headerlink" href="#Uncertainties" title="Permalink to this headline">¶</a></h1>
+<p>Uncertainties in the Minkit package are computed using the Hessian matrix. A more accurate uncertainty can be obtained by minimizing a PDF for several fixed values of a parameter(s). In Minuit, this is done using MINOS. However, Minkit provides a dedicated function to evaluate asymmetric uncertainties. The result is identical to that of MINOS, as can be see in the following example:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="o">%</span><span class="k">matplotlib</span> inline
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">minkit</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">make_interp_spline</span>
+
+<span class="n">m</span> <span class="o">=</span> <span class="n">minkit</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="s1">&#39;m&#39;</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">30</span><span class="p">))</span>
+<span class="n">c</span> <span class="o">=</span> <span class="n">minkit</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">25</span><span class="p">))</span>
+<span class="n">s</span> <span class="o">=</span> <span class="n">minkit</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="s1">&#39;s&#39;</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+<span class="n">g</span> <span class="o">=</span> <span class="n">minkit</span><span class="o">.</span><span class="n">Gaussian</span><span class="p">(</span><span class="s1">&#39;g&#39;</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span>
+
+<span class="n">data</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="mi">200</span><span class="p">)</span>
+
+<span class="c1"># Calculate the profile and the distance to the minimum</span>
+<span class="n">values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">*</span><span class="n">s</span><span class="o">.</span><span class="n">bounds</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)</span>
+
+<span class="k">with</span> <span class="n">minkit</span><span class="o">.</span><span class="n">minimizer</span><span class="p">(</span><span class="s1">&#39;uml&#39;</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span> <span class="k">as</span> <span class="n">minimizer</span><span class="p">:</span>
+
+    <span class="n">r</span> <span class="o">=</span> <span class="n">minimizer</span><span class="o">.</span><span class="n">minimize</span><span class="p">()</span>
+
+    <span class="n">minimizer</span><span class="o">.</span><span class="n">minos</span><span class="p">(</span><span class="s1">&#39;s&#39;</span><span class="p">)</span> <span class="c1"># minos must run before so the internal state of the minimum is set</span>
+
+    <span class="n">smn</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+    <span class="n">minimizer</span><span class="o">.</span><span class="n">minuit</span><span class="o">.</span><span class="n">print_level</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1"># reduce the verbosity of Minuit</span>
+    <span class="n">profile</span> <span class="o">=</span> <span class="n">minimizer</span><span class="o">.</span><span class="n">minimization_profile</span><span class="p">(</span><span class="s1">&#39;s&#39;</span><span class="p">,</span> <span class="n">values</span><span class="p">)</span>
+    <span class="n">minimizer</span><span class="o">.</span><span class="n">asymmetric_errors</span><span class="p">(</span><span class="s1">&#39;s&#39;</span><span class="p">)</span>
+
+    <span class="n">skt</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+<span class="c1"># Split in left and right parts</span>
+<span class="n">distances</span> <span class="o">=</span> <span class="n">profile</span> <span class="o">-</span> <span class="n">r</span><span class="o">.</span><span class="n">fcn</span>
+
+<span class="n">cond</span> <span class="o">=</span> <span class="p">(</span><span class="n">values</span> <span class="o">&lt;</span> <span class="n">s</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+
+<span class="n">left_values</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="n">cond</span><span class="p">]</span>
+<span class="n">left_distances</span> <span class="o">=</span> <span class="n">distances</span><span class="p">[</span><span class="n">cond</span><span class="p">]</span>
+<span class="n">right_values</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="o">~</span><span class="n">cond</span><span class="p">]</span>
+<span class="n">right_distances</span> <span class="o">=</span> <span class="n">distances</span><span class="p">[</span><span class="o">~</span><span class="n">cond</span><span class="p">]</span>
+
+<span class="c1"># Calculate the position where the FCN varies one unit</span>
+<span class="n">left_int</span> <span class="o">=</span> <span class="n">make_interp_spline</span><span class="p">(</span><span class="n">left_distances</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">left_values</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">right_int</span> <span class="o">=</span> <span class="n">make_interp_spline</span><span class="p">(</span><span class="n">right_distances</span><span class="p">,</span> <span class="n">right_values</span><span class="p">)</span>
+
+<span class="n">lv</span><span class="p">,</span> <span class="n">rv</span> <span class="o">=</span> <span class="n">left_int</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">right_int</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># Plot the results</span>
+<span class="n">fmin</span><span class="p">,</span> <span class="n">fmax</span> <span class="o">=</span> <span class="mf">0.99</span> <span class="o">*</span> <span class="n">profile</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">profile</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">profile</span><span class="p">);</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">s</span><span class="o">.</span><span class="n">value</span><span class="p">],</span> <span class="p">[</span><span class="n">r</span><span class="o">.</span><span class="n">fcn</span><span class="p">],</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">);</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">((</span><span class="n">lv</span><span class="p">,</span> <span class="n">lv</span><span class="p">),</span> <span class="p">(</span><span class="n">fmin</span><span class="p">,</span> <span class="n">fmax</span><span class="p">),</span> <span class="s1">&#39;r-&#39;</span><span class="p">,</span> <span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">((</span><span class="n">rv</span><span class="p">,</span> <span class="n">rv</span><span class="p">),</span> <span class="p">(</span><span class="n">fmin</span><span class="p">,</span> <span class="n">fmax</span><span class="p">),</span> <span class="s1">&#39;r-&#39;</span><span class="p">,</span> <span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;s&#39;</span><span class="p">);</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;FCN&#39;</span><span class="p">);</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="o">*</span><span class="n">s</span><span class="o">.</span><span class="n">bounds</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">fmin</span><span class="p">,</span> <span class="n">fmax</span><span class="p">);</span>
+
+<span class="c1"># Show the result from the different methods</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Value (profile): </span><span class="si">{</span><span class="n">s</span><span class="o">.</span><span class="n">value</span><span class="si">:</span><span class="s1">.4f</span><span class="si">}</span><span class="s1"> + </span><span class="si">{</span><span class="n">rv</span> <span class="o">-</span> <span class="n">s</span><span class="o">.</span><span class="n">value</span><span class="si">:</span><span class="s1">.4f</span><span class="si">}</span><span class="s1"> - </span><span class="si">{</span><span class="n">s</span><span class="o">.</span><span class="n">value</span> <span class="o">-</span> <span class="n">lv</span><span class="si">:</span><span class="s1">.4f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Value (minkit):  </span><span class="si">{</span><span class="n">skt</span><span class="o">.</span><span class="n">value</span><span class="si">:</span><span class="s1">.4f</span><span class="si">}</span><span class="s1"> + </span><span class="si">{</span><span class="n">skt</span><span class="o">.</span><span class="n">asym_errors</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s1">.4f</span><span class="si">}</span><span class="s1"> - </span><span class="si">{</span><span class="n">skt</span><span class="o">.</span><span class="n">asym_errors</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s1">.4f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Value (minos):   </span><span class="si">{</span><span class="n">smn</span><span class="o">.</span><span class="n">value</span><span class="si">:</span><span class="s1">.4f</span><span class="si">}</span><span class="s1"> + </span><span class="si">{</span><span class="n">smn</span><span class="o">.</span><span class="n">asym_errors</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s1">.4f</span><span class="si">}</span><span class="s1"> - </span><span class="si">{</span><span class="n">smn</span><span class="o">.</span><span class="n">asym_errors</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s1">.4f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area rendered_html docutils container">
+<hr></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area rendered_html docutils container">
+<table>
+    <tr>
+        <td title="Minimum value of function">FCN = 1173.9229253724423</td>
+        <td title="Total number of call to FCN so far">TOTAL NCALL = 73</td>
+        <td title="Number of call in last migrad">NCALLS = 73</td>
+    </tr>
+    <tr>
+        <td title="Estimated distance to minimum">EDM = 2.1564957293602136e-06</td>
+        <td title="Maximum EDM definition of convergence">GOAL EDM = 1e-05</td>
+        <td title="Error def. Amount of increase in FCN to be defined as 1 standard deviation">
+        UP = 1.0</td>
+    </tr>
+</table>
+<table>
+    <tr>
+        <td align="center" title="Validity of the migrad call">Valid</td>
+        <td align="center" title="Validity of parameters">Valid Param</td>
+        <td align="center" title="Is Covariance matrix accurate?">Accurate Covar</td>
+        <td align="center" title="Positive definiteness of covariance matrix">PosDef</td>
+        <td align="center" title="Was covariance matrix made posdef by adding diagonal element">Made PosDef</td>
+    </tr>
+    <tr>
+        <td align="center" style="background-color:#92CCA6">True</td>
+        <td align="center" style="background-color:#92CCA6">True</td>
+        <td align="center" style="background-color:#92CCA6">True</td>
+        <td align="center" style="background-color:#92CCA6">True</td>
+        <td align="center" style="background-color:#92CCA6">False</td>
+    </tr>
+    <tr>
+        <td align="center" title="Was last hesse call fail?">Hesse Fail</td>
+        <td align="center" title="Validity of covariance">HasCov</td>
+        <td align="center" title="Is EDM above goal EDM?">Above EDM</td>
+        <td align="center"></td>
+        <td align="center" title="Did last migrad call reach max call limit?">Reach calllim</td>
+    </tr>
+    <tr>
+        <td align="center" style="background-color:#92CCA6">False</td>
+        <td align="center" style="background-color:#92CCA6">True</td>
+        <td align="center" style="background-color:#92CCA6">False</td>
+        <td align="center"></td>
+        <td align="center" style="background-color:#92CCA6">False</td>
+    </tr>
+</table></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area rendered_html docutils container">
+<table>
+    <tr>
+        <td><a href="#" onclick="$('#QZdYsXHRyP').toggle()">+</a></td>
+        <td title="Variable name">Name</td>
+        <td title="Value of parameter">Value</td>
+        <td title="Hesse error">Hesse Error</td>
+        <td title="Minos lower error">Minos Error-</td>
+        <td title="Minos upper error">Minos Error+</td>
+        <td title="Lower limit of the parameter">Limit-</td>
+        <td title="Upper limit of the parameter">Limit+</td>
+        <td title="Is the parameter fixed in the fit">Fixed?</td>
+    </tr>
+    <tr>
+        <td>0</td>
+        <td>c</td>
+        <td>19.9489</td>
+        <td>0.357295</td>
+        <td></td>
+        <td></td>
+        <td>15</td>
+        <td>25</td>
+        <td>No</td>
+    </tr>
+    <tr>
+        <td>1</td>
+        <td>s</td>
+        <td>6.21105</td>
+        <td>0.665073</td>
+        <td></td>
+        <td></td>
+        <td>3</td>
+        <td>10</td>
+        <td>No</td>
+    </tr>
+</table>
+<pre id="QZdYsXHRyP" style="display:none;">
+<textarea rows="10" cols="50" onclick="this.select()" readonly>
+\begin{tabular}{|c|r|r|r|r|r|r|r|c|}
+\hline
+ & Name & Value & Hesse Error & Minos Error- & Minos Error+ & Limit- & Limit+ & Fixed?\\
+\hline
+0 & c & 19.9489 & 0.357295 &  &  & 15.0 & 25 & No\\
+\hline
+1 & s & 6.21105 & 0.665073 &  &  & 3.0 & 10 & No\\
+\hline
+\end{tabular}
+</textarea>
+</pre></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area rendered_html docutils container">
+<hr></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area rendered_html docutils container">
+<span>Minos status for s: <span style="background-color:#92CCA6">VALID</span></span>
+<table>
+    <tr>
+        <td title="lower and upper minos error of the parameter">Error</td>
+        <td>-0.583995385037981</td>
+        <td>0.7897048274133996</td>
+    </tr>
+    <tr>
+        <td title="Validity of minos error">Valid</td>
+        <td style="background-color:#92CCA6">True</td>
+        <td style="background-color:#92CCA6">True</td>
+    </tr>
+    <tr>
+        <td title="Did minos error search hit limit of any parameter?">At Limit</td>
+        <td style="background-color:#92CCA6">False</td>
+        <td style="background-color:#92CCA6">False</td>
+    </tr>
+    <tr>
+        <td title="I don't really know what this one means... Post it in issue if you know">Max FCN</td>
+        <td style="background-color:#92CCA6">False</td>
+        <td style="background-color:#92CCA6">False</td>
+    </tr>
+    <tr>
+        <td title="New minimum found when doing minos scan.">New Min</td>
+        <td style="background-color:#92CCA6">False</td>
+        <td style="background-color:#92CCA6">False</td>
+    </tr>
+</table></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Value (profile): 6.2110 + 0.7897 - 0.5840
+Value (minkit):  6.2110 + 0.7897 - 0.5840
+Value (minos):   6.2110 + 0.7897 - 0.5840
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_uncertainties_1_6.png" src="../_images/notebooks_uncertainties_1_6.png" />
+</div>
+</div>
+<p>Note that we have run MINOS right after the minimization process. This must be done because MINOS needs the minimization state of MIGRAD before running. If we use the Minkit functions, new minimization processes will run, and the minimization state will not be reset. If using the Minuit API, it is therefore recommended to call its functions instead, and not to mix the two APIs.</p>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="fit_stability.html" class="btn btn-neutral float-right" title="Determining the stability of the fits" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="minimization.html" class="btn btn-neutral float-left" title="Minimization with MinKit" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2020, Miguel Ramos Pernas
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

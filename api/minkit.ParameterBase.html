@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ParameterBase &mdash; minkit 0.0.0.dev0 documentation</title>
+  <title>ParameterBase &mdash; minkit 0.0.0.dev1 documentation</title>
   
 
   
@@ -64,7 +64,7 @@
             
             
               <div class="version">
-                0.0.0.dev0
+                0.0.0.dev1
               </div>
             
           
@@ -257,8 +257,14 @@
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.ParameterBase.from_json_object" title="minkit.ParameterBase.from_json_object"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_json_object</span></code></a>(obj)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.ParameterBase.copy" title="minkit.ParameterBase.copy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy</span></code></a>()</p></td>
+<td><p>Create a copy of this instance.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#minkit.ParameterBase.from_json_object" title="minkit.ParameterBase.from_json_object"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_json_object</span></code></a>(obj)</p></td>
 <td><p>Build the parameter from a JSON object (a dictionary).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#minkit.ParameterBase.restoring_state" title="minkit.ParameterBase.restoring_state"><code class="xref py py-obj docutils literal notranslate"><span class="pre">restoring_state</span></code></a>()</p></td>
+<td><p>Enter a context where the attributes of the parameter will be restored on exit.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#minkit.ParameterBase.to_json_object" title="minkit.ParameterBase.to_json_object"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_json_object</span></code></a>()</p></td>
 <td><p>Represent this class as a JSON-like object.</p></td>
@@ -284,6 +290,18 @@
 
 <p class="rubric">Methods Documentation</p>
 <dl class="method">
+<dt id="minkit.ParameterBase.copy">
+<code class="sig-name descname">copy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/base/parameters.html#ParameterBase.copy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.ParameterBase.copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a copy of this instance.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Avoid calling this method directly for sets of parameters and use the
+<a class="reference internal" href="minkit.Registry.html#minkit.Registry.copy" title="minkit.Registry.copy"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Registry.copy()</span></code></a> method instead, so the possible dependencies
+among parameters are correctly solved.</p>
+</div>
+</dd></dl>
+
+<dl class="method">
 <dt id="minkit.ParameterBase.from_json_object">
 <em class="property">classmethod </em><code class="sig-name descname">from_json_object</code><span class="sig-paren">(</span><em class="sig-param">obj</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/base/parameters.html#ParameterBase.from_json_object"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.ParameterBase.from_json_object" title="Permalink to this definition">¶</a></dt>
 <dd><p>Build the parameter from a JSON object (a dictionary).
@@ -299,6 +317,13 @@ This is meant to be used together with the <a class="reference external" href="h
 <dd class="field-odd"><p><a class="reference internal" href="minkit.Parameter.html#minkit.Parameter" title="minkit.Parameter">Parameter</a></p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="minkit.ParameterBase.restoring_state">
+<code class="sig-name descname">restoring_state</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/minkit/base/parameters.html#ParameterBase.restoring_state"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#minkit.ParameterBase.restoring_state" title="Permalink to this definition">¶</a></dt>
+<dd><p>Enter a context where the attributes of the parameter will be restored
+on exit.</p>
 </dd></dl>
 
 <dl class="method">

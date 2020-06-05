@@ -17,6 +17,7 @@ Evaluator
    .. autosummary::
 
       ~Evaluator.__call__
+      ~Evaluator.fcn
       ~Evaluator.using_caches
 
    .. rubric:: Attributes Documentation
@@ -26,4 +27,5 @@ Evaluator
    .. rubric:: Methods Documentation
 
    .. automethod:: __call__
+   .. automethod:: fcn
    .. automethod:: using_caches

@@ -6,24 +6,58 @@ darray
 .. autoclass:: darray
    :show-inheritance:
 
+   .. rubric:: Attributes Summary
+
+   .. autosummary::
+
+      ~darray.aop
+      ~darray.backend
+      ~darray.dtype
+      ~darray.length
+      ~darray.ndim
+      ~darray.shape
+      ~darray.size
+      ~darray.ua
+
    .. rubric:: Methods Summary
 
    .. autosummary::
 
+      ~darray.as_ndarray
+      ~darray.astype
+      ~darray.copy
       ~darray.from_ndarray
+      ~darray.get
       ~darray.max
       ~darray.min
       ~darray.slice
       ~darray.sum
       ~darray.take_column
       ~darray.take_slice
+      ~darray.to_backend
+
+   .. rubric:: Attributes Documentation
+
+   .. autoattribute:: aop
+   .. autoattribute:: backend
+   .. autoattribute:: dtype
+   .. autoattribute:: length
+   .. autoattribute:: ndim
+   .. autoattribute:: shape
+   .. autoattribute:: size
+   .. autoattribute:: ua
 
    .. rubric:: Methods Documentation
 
+   .. automethod:: as_ndarray
+   .. automethod:: astype
+   .. automethod:: copy
    .. automethod:: from_ndarray
+   .. automethod:: get
    .. automethod:: max
    .. automethod:: min
    .. automethod:: slice
    .. automethod:: sum
    .. automethod:: take_column
    .. automethod:: take_slice
+   .. automethod:: to_backend

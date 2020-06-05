@@ -10,9 +10,14 @@ farray
 
    .. autosummary::
 
+      ~farray.aop
+      ~farray.backend
+      ~farray.dtype
+      ~farray.length
       ~farray.ndim
       ~farray.shape
       ~farray.size
+      ~farray.ua
 
    .. rubric:: Methods Summary
 
@@ -22,13 +27,19 @@ farray
       ~farray.astype
       ~farray.copy
       ~farray.from_ndarray
+      ~farray.get
       ~farray.to_backend
 
    .. rubric:: Attributes Documentation
 
+   .. autoattribute:: aop
+   .. autoattribute:: backend
+   .. autoattribute:: dtype
+   .. autoattribute:: length
    .. autoattribute:: ndim
    .. autoattribute:: shape
    .. autoattribute:: size
+   .. autoattribute:: ua
 
    .. rubric:: Methods Documentation
 
@@ -36,4 +47,5 @@ farray
    .. automethod:: astype
    .. automethod:: copy
    .. automethod:: from_ndarray
+   .. automethod:: get
    .. automethod:: to_backend

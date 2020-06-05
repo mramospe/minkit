@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>minkit.minimization.minuit_api &mdash; minkit 0.0.0.dev0 documentation</title>
+  <title>minkit.minimization.minuit_api &mdash; minkit 0.0.0.dev1 documentation</title>
   
 
   
@@ -62,7 +62,7 @@
             
             
               <div class="version">
-                0.0.0.dev0
+                0.0.0.dev1
               </div>
             
           
@@ -156,12 +156,19 @@
            <div itemprop="articleBody">
             
   <h1>Source code for minkit.minimization.minuit_api</h1><div class="highlight"><pre>
-<span></span><span class="sd">&#39;&#39;&#39;</span>
+<span></span><span class="c1">########################################</span>
+<span class="c1"># MIT License</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright (c) 2020 Miguel Ramos Pernas</span>
+<span class="c1">########################################</span>
+<span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">Definition of the interface functions and classes with :mod:`iminuit`.</span>
 <span class="sd">&#39;&#39;&#39;</span>
-<span class="kn">from</span> <span class="nn">..base</span> <span class="k">import</span> <span class="n">parameters</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">core</span>
+<span class="kn">from</span> <span class="nn">..base</span> <span class="kn">import</span> <span class="n">data_types</span>
+<span class="kn">from</span> <span class="nn">..base</span> <span class="kn">import</span> <span class="n">parameters</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">core</span>
 
+<span class="kn">import</span> <span class="nn">contextlib</span>
 <span class="kn">import</span> <span class="nn">functools</span>
 <span class="kn">import</span> <span class="nn">iminuit</span>
 
@@ -194,15 +201,15 @@
 <span class="sd">    :rtype: dict</span>
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="n">values</span> <span class="o">=</span> <span class="p">{</span><span class="n">v</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">v</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">registry</span><span class="p">}</span>
-    <span class="n">errors</span> <span class="o">=</span> <span class="p">{</span><span class="n">f</span><span class="s1">&#39;error_</span><span class="si">{v.name}</span><span class="s1">&#39;</span><span class="p">:</span> <span class="n">v</span><span class="o">.</span><span class="n">error</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">registry</span><span class="p">}</span>
-    <span class="n">limits</span> <span class="o">=</span> <span class="p">{</span><span class="n">f</span><span class="s1">&#39;limit_</span><span class="si">{v.name}</span><span class="s1">&#39;</span><span class="p">:</span> <span class="n">v</span><span class="o">.</span><span class="n">bounds</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">registry</span><span class="p">}</span>
-    <span class="n">const</span> <span class="o">=</span> <span class="p">{</span><span class="n">f</span><span class="s1">&#39;fix_</span><span class="si">{v.name}</span><span class="s1">&#39;</span><span class="p">:</span> <span class="n">v</span><span class="o">.</span><span class="n">constant</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">registry</span><span class="p">}</span>
+    <span class="n">errors</span> <span class="o">=</span> <span class="p">{</span><span class="sa">f</span><span class="s1">&#39;error_</span><span class="si">{</span><span class="n">v</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">:</span> <span class="n">v</span><span class="o">.</span><span class="n">error</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">registry</span><span class="p">}</span>
+    <span class="n">limits</span> <span class="o">=</span> <span class="p">{</span><span class="sa">f</span><span class="s1">&#39;limit_</span><span class="si">{</span><span class="n">v</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">:</span> <span class="n">v</span><span class="o">.</span><span class="n">bounds</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">registry</span><span class="p">}</span>
+    <span class="n">const</span> <span class="o">=</span> <span class="p">{</span><span class="sa">f</span><span class="s1">&#39;fix_</span><span class="si">{</span><span class="n">v</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">:</span> <span class="n">v</span><span class="o">.</span><span class="n">constant</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">registry</span><span class="p">}</span>
     <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">errordef</span><span class="o">=</span><span class="n">ERRORDEF</span><span class="p">,</span> <span class="o">**</span><span class="n">values</span><span class="p">,</span> <span class="o">**</span><span class="n">errors</span><span class="p">,</span> <span class="o">**</span><span class="n">limits</span><span class="p">,</span> <span class="o">**</span><span class="n">const</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="MinuitMinimizer"><a class="viewcode-back" href="../../../api/minkit.MinuitMinimizer.html#minkit.MinuitMinimizer">[docs]</a><span class="k">class</span> <span class="nc">MinuitMinimizer</span><span class="p">(</span><span class="n">core</span><span class="o">.</span><span class="n">Minimizer</span><span class="p">):</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">evaluator</span><span class="p">,</span> <span class="o">**</span><span class="n">minimizer_config</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">evaluator</span><span class="p">,</span> <span class="o">**</span><span class="n">minimizer_config</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Interface with the :class:`iminuit.Minuit` class. In the calls to the</span>
 <span class="sd">        different methods of this class it is ensured that the parameters of</span>
@@ -212,9 +219,8 @@
 <span class="sd">        :param evaluator: evaluator to be used in the minimization.</span>
 <span class="sd">        :type evaluator: UnbinnedEvaluator, BinnedEvaluator or SimultaneousEvaluator</span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">evaluator</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">__eval</span> <span class="o">=</span> <span class="n">evaluator</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__args</span> <span class="o">=</span> <span class="n">evaluator</span><span class="o">.</span><span class="n">args</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__minuit</span> <span class="o">=</span> <span class="n">iminuit</span><span class="o">.</span><span class="n">Minuit</span><span class="p">(</span><span class="n">evaluator</span><span class="p">,</span>
                                        <span class="n">forced_parameters</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__args</span><span class="o">.</span><span class="n">names</span><span class="p">,</span>
@@ -222,9 +228,22 @@
                                        <span class="o">**</span><span class="n">minimizer_config</span><span class="p">,</span>
                                        <span class="o">**</span><span class="n">registry_to_minuit_input</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__args</span><span class="p">))</span>
 
+    <span class="k">def</span> <span class="nf">_set_parameter_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">par</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fixed</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_set_parameter_state</span><span class="p">(</span><span class="n">par</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">error</span><span class="p">,</span> <span class="n">fixed</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__minuit</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">par</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+        <span class="k">if</span> <span class="n">error</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__minuit</span><span class="o">.</span><span class="n">errors</span><span class="p">[</span><span class="n">par</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">error</span>
+
+        <span class="k">if</span> <span class="n">fixed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__minuit</span><span class="o">.</span><span class="n">fixed</span><span class="p">[</span><span class="n">par</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">fixed</span>
+
     <span class="k">def</span> <span class="nf">_update_args</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Update the parameters using the information from the given parameters.</span>
+<span class="sd">        Update the parameters using the information from the Minuit result.</span>
 
 <span class="sd">        :param params: list of parameters.</span>
 <span class="sd">        :type params: iminuit.util.Params</span>
@@ -237,13 +256,6 @@
                 <span class="n">a</span><span class="o">.</span><span class="n">bounds</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">lower_limit</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">upper_limit</span>
             <span class="n">a</span><span class="o">.</span><span class="n">error</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">error</span>
             <span class="n">a</span><span class="o">.</span><span class="n">constant</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">is_fixed</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">evaluator</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Evaluator of the minimizer.</span>
-<span class="sd">        &#39;&#39;&#39;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__eval</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">minuit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -259,13 +271,14 @@
 <span class="sd">        and the values of the parameters are set to those from the minimization</span>
 <span class="sd">        result.</span>
 
-<span class="sd">        :returns: output from :py:meth:`iminuit.Minuit.hesse`.</span>
+<span class="sd">        :returns: Output from :py:meth:`iminuit.Minuit.hesse`.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__minuit</span><span class="o">.</span><span class="n">hesse</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">*</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">__args</span><span class="o">.</span><span class="n">restoring_state</span><span class="p">():</span>
+            <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__minuit</span><span class="o">.</span><span class="n">hesse</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">*</span><span class="n">kwargs</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_update_args</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_update_args</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">result</span></div>
+        <span class="k">return</span> <span class="n">params</span></div>
 
 <div class="viewcode-block" id="MinuitMinimizer.migrad"><a class="viewcode-back" href="../../../api/minkit.MinuitMinimizer.html#minkit.MinuitMinimizer.migrad">[docs]</a>    <span class="nd">@use_const_cache</span>
     <span class="k">def</span> <span class="nf">migrad</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -276,49 +289,77 @@
 
 <span class="sd">        :returns: output from :py:meth:`iminuit.Minuit.migrad`.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__minuit</span><span class="o">.</span><span class="n">migrad</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">*</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">result</span><span class="p">,</span> <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__minuit</span><span class="o">.</span><span class="n">migrad</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">*</span><span class="n">kwargs</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_update_args</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">params</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_update_args</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">result</span></div>
+        <span class="k">return</span> <span class="n">result</span><span class="p">,</span> <span class="n">params</span></div>
+
+<div class="viewcode-block" id="MinuitMinimizer.minimize"><a class="viewcode-back" href="../../../api/minkit.MinuitMinimizer.html#minkit.MinuitMinimizer.minimize">[docs]</a>    <span class="nd">@use_const_cache</span>
+    <span class="k">def</span> <span class="nf">minimize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Same as :meth:`MinuitMinimizer.migrad`, but offering a common interface</span>
+<span class="sd">        for all the :class:`Minimizer` objects. It returns a tuple with the</span>
+<span class="sd">        information whether the minimization succeded and the covariance matrix.</span>
+
+<span class="sd">        .. seealso:: MinuitMinimizer.migrad</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">res</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">migrad</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">res</span><span class="o">.</span><span class="n">is_valid</span><span class="p">:</span>
+
+            <span class="n">cov</span> <span class="o">=</span> <span class="n">data_types</span><span class="o">.</span><span class="n">empty_float</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__args</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__args</span><span class="p">)))</span>
+
+            <span class="n">non_fixed</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">Registry</span><span class="p">(</span>
+                <span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="ow">not</span> <span class="n">p</span><span class="o">.</span><span class="n">constant</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__args</span><span class="p">))</span>
+
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">p1</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">non_fixed</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">p2</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">non_fixed</span><span class="p">[</span><span class="n">i</span><span class="p">:]):</span>
+                    <span class="n">cov</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">cov</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__minuit</span><span class="o">.</span><span class="n">covariance</span><span class="p">[(</span>
+                        <span class="n">p1</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">p2</span><span class="o">.</span><span class="n">name</span><span class="p">)]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">cov</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">return</span> <span class="n">core</span><span class="o">.</span><span class="n">MinimizationResult</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">is_valid</span><span class="p">,</span> <span class="n">res</span><span class="o">.</span><span class="n">fval</span><span class="p">,</span> <span class="n">cov</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="MinuitMinimizer.minos"><a class="viewcode-back" href="../../../api/minkit.MinuitMinimizer.html#minkit.MinuitMinimizer.minos">[docs]</a>    <span class="nd">@use_const_cache</span>
     <span class="k">def</span> <span class="nf">minos</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Arguments are forwarded to the :py:meth:`iminuit.Minuit.minos` function,</span>
-<span class="sd">        and the values of the parameters are set to those from the minimization</span>
-<span class="sd">        result.</span>
+<span class="sd">        and the values of the parameters are set to those of the MINOS result.</span>
+<span class="sd">        If a new minimum is found, the value of the parameter is set accordingly.</span>
 
 <span class="sd">        :returns: output from :py:meth:`iminuit.Minuit.minos`.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__minuit</span><span class="o">.</span><span class="n">minos</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">*</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">__args</span><span class="o">.</span><span class="n">restoring_state</span><span class="p">():</span>  <span class="c1"># to preserve the information of the minimum</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__minuit</span><span class="o">.</span><span class="n">minos</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">*</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="n">a</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
-            <span class="n">a</span><span class="o">.</span><span class="n">asym_errors</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">lower</span><span class="p">,</span> <span class="n">v</span><span class="o">.</span><span class="n">upper</span>
+            <span class="n">a</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">min</span>
+            <span class="c1"># lower is negative by default</span>
+            <span class="n">a</span><span class="o">.</span><span class="n">asym_errors</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">lower</span><span class="p">),</span> <span class="n">v</span><span class="o">.</span><span class="n">upper</span>
 
         <span class="k">return</span> <span class="n">result</span></div>
 
-<div class="viewcode-block" id="MinuitMinimizer.result_to_registry"><a class="viewcode-back" href="../../../api/minkit.MinuitMinimizer.html#minkit.MinuitMinimizer.result_to_registry">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">result_to_registry</span><span class="p">(</span><span class="n">result</span><span class="p">):</span>
+<div class="viewcode-block" id="MinuitMinimizer.restoring_state"><a class="viewcode-back" href="../../../api/minkit.MinuitMinimizer.html#minkit.MinuitMinimizer.restoring_state">[docs]</a>    <span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
+    <span class="k">def</span> <span class="nf">restoring_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Transform the parameters from a call to Minuit into a :class:`Registry`.</span>
+<span class="sd">        Method to ensure that modifications of parameters within a minimizer</span>
+<span class="sd">        context are reset properly. Sadly, the :class:`iminuit.Minuit` class</span>
+<span class="sd">        is not stateless, so each time a parameter is modified it must be</span>
+<span class="sd">        notified of the change.</span>
 
-<span class="sd">        :param result: result from a migrad call.</span>
-<span class="sd">        :type result: iminuit.util.Params</span>
-<span class="sd">        :returns: registry of parameters with the result from Migrad.</span>
-<span class="sd">        :rtype: Registry(Parameter)</span>
-
-<span class="sd">        .. warning::</span>
-<span class="sd">           The parameters in the returned registry do not belong to the</span>
-<span class="sd">           minimized object(s).</span>
+<span class="sd">        .. warning:: This does not preserve the minimization state of MIGRAD.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="n">reg</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">Registry</span><span class="p">()</span>
-        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
-            <span class="n">limits</span> <span class="o">=</span> <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">lower_limit</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">upper_limit</span><span class="p">)</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">has_limits</span> <span class="k">else</span> <span class="kc">None</span>
-            <span class="n">reg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">parameters</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span>
-                <span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="n">limits</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">error</span><span class="p">,</span> <span class="n">constant</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">is_fixed</span><span class="p">))</span>
-        <span class="k">return</span> <span class="n">reg</span></div></div>
+        <span class="k">with</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">restoring_state</span><span class="p">():</span>  <span class="c1"># restores the parameters</span>
+            <span class="n">values</span><span class="p">,</span> <span class="n">errors</span><span class="p">,</span> <span class="n">fixed</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span>
+                <span class="o">*</span><span class="p">[(</span><span class="n">p</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">error</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">constant</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">evaluator</span><span class="o">.</span><span class="n">args</span><span class="p">])</span>
+            <span class="k">yield</span> <span class="bp">self</span>
+            <span class="k">for</span> <span class="n">p</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">f</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">evaluator</span><span class="o">.</span><span class="n">args</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">errors</span><span class="p">,</span> <span class="n">fixed</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__minuit</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__minuit</span><span class="o">.</span><span class="n">errors</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">e</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__minuit</span><span class="o">.</span><span class="n">fixed</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span></div></div>
 </pre></div>
 
            </div>

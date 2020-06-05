@@ -12,6 +12,7 @@ Formula
 
       ~Formula.all_args
       ~Formula.args
+      ~Formula.dependencies
       ~Formula.dependent
       ~Formula.value
 
@@ -19,17 +20,22 @@ Formula
 
    .. autosummary::
 
+      ~Formula.copy
       ~Formula.from_json_object
+      ~Formula.restoring_state
       ~Formula.to_json_object
 
    .. rubric:: Attributes Documentation
 
    .. autoattribute:: all_args
    .. autoattribute:: args
+   .. autoattribute:: dependencies
    .. autoattribute:: dependent
    .. autoattribute:: value
 
    .. rubric:: Methods Documentation
 
+   .. automethod:: copy
    .. automethod:: from_json_object
+   .. automethod:: restoring_state
    .. automethod:: to_json_object

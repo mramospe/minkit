@@ -5,3 +5,85 @@ Exponential
 
 .. autoclass:: Exponential
    :show-inheritance:
+
+   .. rubric:: Attributes Summary
+
+   .. autosummary::
+
+      ~Exponential.BIND
+      ~Exponential.CACHE_TYPES
+      ~Exponential.CONST
+      ~Exponential.all_args
+      ~Exponential.all_pars
+      ~Exponential.all_real_args
+      ~Exponential.aop
+      ~Exponential.args
+      ~Exponential.backend
+      ~Exponential.cache
+      ~Exponential.cache_type
+      ~Exponential.constant
+      ~Exponential.data_pars
+      ~Exponential.dependent
+      ~Exponential.numint_config
+      ~Exponential.real_args
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+
+      ~Exponential.__call__
+      ~Exponential.bind
+      ~Exponential.copy
+      ~Exponential.evaluate_binned
+      ~Exponential.from_json_object
+      ~Exponential.function
+      ~Exponential.generate
+      ~Exponential.get_values
+      ~Exponential.integral
+      ~Exponential.norm
+      ~Exponential.numerical_integral
+      ~Exponential.numerical_normalization
+      ~Exponential.restoring_state
+      ~Exponential.set_values
+      ~Exponential.to_backend
+      ~Exponential.to_json_object
+      ~Exponential.using_cache
+
+   .. rubric:: Attributes Documentation
+
+   .. autoattribute:: BIND
+   .. autoattribute:: CACHE_TYPES
+   .. autoattribute:: CONST
+   .. autoattribute:: all_args
+   .. autoattribute:: all_pars
+   .. autoattribute:: all_real_args
+   .. autoattribute:: aop
+   .. autoattribute:: args
+   .. autoattribute:: backend
+   .. autoattribute:: cache
+   .. autoattribute:: cache_type
+   .. autoattribute:: constant
+   .. autoattribute:: data_pars
+   .. autoattribute:: dependent
+   .. autoattribute:: numint_config
+   .. autoattribute:: real_args
+
+   .. rubric:: Methods Documentation
+
+   .. automethod:: __call__
+   .. automethod:: bind
+   .. automethod:: copy
+   .. automethod:: evaluate_binned
+   .. automethod:: from_json_object
+   .. automethod:: function
+   .. automethod:: generate
+   .. automethod:: get_values
+   .. automethod:: integral
+   .. automethod:: norm
+   .. automethod:: numerical_integral
+   .. automethod:: numerical_normalization
+   .. automethod:: restoring_state
+   .. automethod:: set_values
+   .. automethod:: to_backend
+   .. automethod:: to_json_object
+   .. automethod:: using_cache

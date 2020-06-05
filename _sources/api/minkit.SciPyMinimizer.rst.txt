@@ -16,8 +16,13 @@ SciPyMinimizer
 
    .. autosummary::
 
+      ~SciPyMinimizer.asymmetric_errors
+      ~SciPyMinimizer.fcn_profile
+      ~SciPyMinimizer.minimization_profile
       ~SciPyMinimizer.minimize
-      ~SciPyMinimizer.result_to_registry
+      ~SciPyMinimizer.restoring_state
+      ~SciPyMinimizer.scipy_minimize
+      ~SciPyMinimizer.set_parameter_state
 
    .. rubric:: Attributes Documentation
 
@@ -25,5 +30,10 @@ SciPyMinimizer
 
    .. rubric:: Methods Documentation
 
+   .. automethod:: asymmetric_errors
+   .. automethod:: fcn_profile
+   .. automethod:: minimization_profile
    .. automethod:: minimize
-   .. automethod:: result_to_registry
+   .. automethod:: restoring_state
+   .. automethod:: scipy_minimize
+   .. automethod:: set_parameter_state

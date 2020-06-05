@@ -5,3 +5,85 @@ CrystalBall
 
 .. autoclass:: CrystalBall
    :show-inheritance:
+
+   .. rubric:: Attributes Summary
+
+   .. autosummary::
+
+      ~CrystalBall.BIND
+      ~CrystalBall.CACHE_TYPES
+      ~CrystalBall.CONST
+      ~CrystalBall.all_args
+      ~CrystalBall.all_pars
+      ~CrystalBall.all_real_args
+      ~CrystalBall.aop
+      ~CrystalBall.args
+      ~CrystalBall.backend
+      ~CrystalBall.cache
+      ~CrystalBall.cache_type
+      ~CrystalBall.constant
+      ~CrystalBall.data_pars
+      ~CrystalBall.dependent
+      ~CrystalBall.numint_config
+      ~CrystalBall.real_args
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+
+      ~CrystalBall.__call__
+      ~CrystalBall.bind
+      ~CrystalBall.copy
+      ~CrystalBall.evaluate_binned
+      ~CrystalBall.from_json_object
+      ~CrystalBall.function
+      ~CrystalBall.generate
+      ~CrystalBall.get_values
+      ~CrystalBall.integral
+      ~CrystalBall.norm
+      ~CrystalBall.numerical_integral
+      ~CrystalBall.numerical_normalization
+      ~CrystalBall.restoring_state
+      ~CrystalBall.set_values
+      ~CrystalBall.to_backend
+      ~CrystalBall.to_json_object
+      ~CrystalBall.using_cache
+
+   .. rubric:: Attributes Documentation
+
+   .. autoattribute:: BIND
+   .. autoattribute:: CACHE_TYPES
+   .. autoattribute:: CONST
+   .. autoattribute:: all_args
+   .. autoattribute:: all_pars
+   .. autoattribute:: all_real_args
+   .. autoattribute:: aop
+   .. autoattribute:: args
+   .. autoattribute:: backend
+   .. autoattribute:: cache
+   .. autoattribute:: cache_type
+   .. autoattribute:: constant
+   .. autoattribute:: data_pars
+   .. autoattribute:: dependent
+   .. autoattribute:: numint_config
+   .. autoattribute:: real_args
+
+   .. rubric:: Methods Documentation
+
+   .. automethod:: __call__
+   .. automethod:: bind
+   .. automethod:: copy
+   .. automethod:: evaluate_binned
+   .. automethod:: from_json_object
+   .. automethod:: function
+   .. automethod:: generate
+   .. automethod:: get_values
+   .. automethod:: integral
+   .. automethod:: norm
+   .. automethod:: numerical_integral
+   .. automethod:: numerical_normalization
+   .. automethod:: restoring_state
+   .. automethod:: set_values
+   .. automethod:: to_backend
+   .. automethod:: to_json_object
+   .. automethod:: using_cache

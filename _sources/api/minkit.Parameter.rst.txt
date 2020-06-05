@@ -12,14 +12,18 @@ Parameter
 
       ~Parameter.bounds
       ~Parameter.constant
+      ~Parameter.dependent
+      ~Parameter.ranges
       ~Parameter.value
 
    .. rubric:: Methods Summary
 
    .. autosummary::
 
+      ~Parameter.copy
       ~Parameter.from_json_object
       ~Parameter.get_range
+      ~Parameter.restoring_state
       ~Parameter.set_range
       ~Parameter.to_json_object
 
@@ -27,11 +31,15 @@ Parameter
 
    .. autoattribute:: bounds
    .. autoattribute:: constant
+   .. autoattribute:: dependent
+   .. autoattribute:: ranges
    .. autoattribute:: value
 
    .. rubric:: Methods Documentation
 
+   .. automethod:: copy
    .. automethod:: from_json_object
    .. automethod:: get_range
+   .. automethod:: restoring_state
    .. automethod:: set_range
    .. automethod:: to_json_object
