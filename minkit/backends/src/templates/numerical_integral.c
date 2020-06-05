@@ -1,3 +1,9 @@
+/****************************************
+ * MIT License
+ *
+ * Copyright (c) 2020 Miguel Ramos Pernas
+ ****************************************/
+
 #ifdef USE_CPU
 #include "Python.h"
 #include "math.h"
@@ -7,6 +13,7 @@
 #include <gsl/gsl_monte_plain.h>
 #include <gsl/gsl_monte_vegas.h>
 #include <stdio.h>
+
 /// Function proxy to integrate
 double function_proxy(double *data, size_t dim, void *vparams) {
 

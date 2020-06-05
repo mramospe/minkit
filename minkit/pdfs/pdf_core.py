@@ -1,3 +1,8 @@
+########################################
+# MIT License
+#
+# Copyright (c) 2020 Miguel Ramos Pernas
+########################################
 '''
 Base classes to define PDF data_types.
 '''
@@ -8,6 +13,7 @@ from ..backends.core import common_backend, parse_backend
 from ..base import core
 from ..base import bindings
 from ..base import data_types
+from ..base import dependencies
 from ..base import exceptions
 from ..base import parameters
 
@@ -28,7 +34,7 @@ DEFAULT_EVB_SIZE = 100
 DEFAULT_CONV_SIZE = 10000
 
 # Default number of events to generate in a single step
-DEFAULT_GEN_SIZE = 1000
+DEFAULT_GEN_SIZE = 10000
 
 # Registry of PDF classes so they can be built by name
 PDF_REGISTRY = {}
@@ -230,6 +236,16 @@ class PDF(object, metaclass=core.DocMeta):
         self.__cache = None
         self.__cache_type = None
 
+    def copy(self, backend=None):
+        '''
+        Create a copy of this PDF.
+
+        :param backend: new backend.
+        :type backend: Backend
+        :returns: A copy of this PDF.
+        '''
+        return pdf_from_json(pdf_to_json(self), backend)
+
     @allows_const_cache
     def evaluate_binned(self, data, normalized=True):
         '''
@@ -246,13 +262,17 @@ class PDF(object, metaclass=core.DocMeta):
             self.__class__, 'evaluate_binned')
 
     @classmethod
-    def from_json_object(cls, obj, pars):
+    def from_json_object(cls, obj, pars, backend):
         '''
         Build a PDF from a JSON object.
         This object must represent the internal structure of the PDF.
 
         :param obj: JSON object.
         :type obj: dict
+        :param pars: parameter to build the PDF.
+        :type pars: Registry
+        :param backend: backend to build the PDF.
+        :type backend: Backend
         :returns: This type of PDF constructed together with its parameters.
         '''
         class_name = obj['class']
@@ -262,7 +282,8 @@ class PDF(object, metaclass=core.DocMeta):
         if cl is None:
             raise RuntimeError(
                 f'Class "{class_name}" does not appear in the registry')
-        return cl.from_json_object(obj, pars)  # Use the correct constructor
+        # Use the correct constructor
+        return cl.from_json_object(obj, pars, backend)
 
     def _generate_single_bounds(self, size, mapsize, gensize, safe_factor, bounds):
         '''
@@ -316,7 +337,10 @@ class PDF(object, metaclass=core.DocMeta):
 
         :type: Registry(Parameter)
         '''
-        return self.args
+        args = parameters.Registry(self.args)
+        for p in filter(lambda p: p.dependent, self.args):
+            args += p.all_args
+        return args
 
     @property
     def all_pars(self):
@@ -326,7 +350,7 @@ class PDF(object, metaclass=core.DocMeta):
 
         :type: Registry(Parameter)
         '''
-        return self.data_pars + self.__arg_pars
+        return self.data_pars + self.all_args
 
     @property
     def all_real_args(self):
@@ -345,6 +369,15 @@ class PDF(object, metaclass=core.DocMeta):
         :type: Registry(Parameter)
         '''
         return self.__arg_pars
+
+    @property
+    def real_args(self):
+        '''
+        Arguments that do not depend on other arguments.
+
+        :type: Registry(Parameter)
+        '''
+        return parameters.Registry(filter(lambda p: not p.dependent, self.__arg_pars))
 
     @property
     def cache(self):
@@ -578,6 +611,17 @@ class PDF(object, metaclass=core.DocMeta):
             yield self
         self._free_cache()
 
+    @contextlib.contextmanager
+    def restoring_state(self):
+        '''
+        Enter a context where the attributes of the parameters will be restored
+        on exit.
+        '''
+        with contextlib.ExitStack() as stack:
+            for p in self.all_pars:
+                stack.enter_context(p.restoring_state())
+            yield self
+
 
 class SourcePDF(PDF):
 
@@ -777,7 +821,7 @@ class SourcePDF(PDF):
             return out
 
     @classmethod
-    def from_json_object(cls, obj, pars):
+    def from_json_object(cls, obj, pars, backend=None):
 
         if cls.__name__ == 'SourcePDF':
             raise exceptions.MethodNotDefinedError(cls, 'from_json_object')
@@ -785,7 +829,7 @@ class SourcePDF(PDF):
         data_pars = list(map(pars.get, obj['data_pars']))
         arg_pars = list(map(pars.get, obj['arg_pars']))
 
-        return cls(obj['name'], *data_pars, *arg_pars)
+        return cls(obj['name'], *data_pars, *arg_pars, backend=backend)
 
     def function(self, range=parameters.FULL, normalized=True):
         '''
@@ -929,6 +973,15 @@ class MultiPDF(PDF):
         for pdf in filter(lambda p: p.dependent, self.__pdfs):
             pdfs += pdf.all_pdfs
         return pdfs
+
+    @property
+    def dependencies(self):
+        '''
+        Registry of PDFs this instance depends on.
+
+        :type: Registry(PDF)
+        '''
+        return self.__pdfs
 
     @property
     def pdfs(self):
@@ -1413,12 +1466,14 @@ class ProdPDFs(MultiPDF):
                 'pdfs': self.pdfs.names}
 
 
-def pdf_from_json(obj):
+def pdf_from_json(obj, backend=None):
     '''
     Load a PDF from a JSON object.
 
     :param obj: JSON-like object.
     :type obj: dict
+    :param backend: backend to build the PDF.
+    :type backend: Backend
     :returns: A PDF with the configuration from the object.
     :rtype: PDF
     '''
@@ -1431,39 +1486,13 @@ def pdf_from_json(obj):
 
     # Parse PDFs
     pdfs = parameters.Registry(
-        [PDF.from_json_object(o, pars) for o in obj['ipdfs']])
+        [PDF.from_json_object(o, pars, backend) for o in obj['ipdfs']])
 
     for o in obj['dpdfs']:
         pdfs.append(MultiPDF.from_json_object(o, pars, pdfs))
 
     # Last PDF to be constructed is the main PDF
     return pdfs[-1]
-
-
-def _solve_dependencies(objects):
-    '''
-    Get the resolution order for the given set of dependencies.
-
-    :param objects: names of the objects with their dependencies.
-    :type objects: list(tuple(str, list(str)))
-    :returns: Resolution order.
-    :rtype: list(str)
-    '''
-    ntot = len(objects)
-
-    result = []
-
-    objects = list(objects)
-    while len(result) != ntot:
-        new_objects = []
-        for name, lst in objects:
-            l = set(lst).difference(result)
-            if len(l) == 0:
-                result.append(name)
-            else:
-                new_objects.append((name, l))
-        objects = new_objects
-    return result
 
 
 def pdf_to_json(pdf):
@@ -1475,40 +1504,17 @@ def pdf_to_json(pdf):
     :returns: JSON-like object.
     :rtype: dict
     '''
-    # Declare some lambda functions to make code more readable
-    def is_dependent(p): return p.dependent
-    def not_dependent(p): return not p.dependent
-
-    # Solve dependencies for ParameterFormula objects
-    pars = pdf.all_pars
-    ipars = parameters.Registry(filter(not_dependent, pars))
-    dpars = parameters.Registry(filter(is_dependent, pars))
-    for p in filter(is_dependent, pars):
-
-        pars = p.all_args
-        ipars += parameters.Registry(filter(not_dependent, pars))
-        dpars += parameters.Registry(filter(is_dependent, pars))
-
-    ro = _solve_dependencies(
-        [(d.name, set(d.all_args.names).difference(ipars.names)) for d in dpars])
-
-    dpars = parameters.Registry([dpars.get(n) for n in ro])
+    # Solve dependencies for parameters
+    ipars, dpars = dependencies.split_dependent_objects_with_resolution_order(
+        pdf.all_pars)
 
     # Solve dependencies for PDF objects
     if pdf.dependent:
-        pdfs = pdf.all_pdfs
-        ipdfs = parameters.Registry(filter(not_dependent, pdfs))
-        dpdfs = parameters.Registry(filter(is_dependent, pdfs))
-
-        dpdfs.append(pdf)  # Do not forget to add itself
-
-        ro = _solve_dependencies(
-            [(d.name, set(d.all_pdfs.names).difference(ipdfs.names)) for d in dpdfs])
-
-        dpdfs = parameters.Registry([dpdfs.get(n) for n in ro])
+        ipdfs, dpdfs = dependencies.split_dependent_objects_with_resolution_order(
+            pdf.pdfs)
+        dpdfs.insert(0, pdf)  # must include this PDF
     else:
-        ipdfs = parameters.Registry([pdf])
-        dpdfs = parameters.Registry()
+        ipdfs, dpdfs = [pdf], []
 
     return {'dpdfs': [pdf.to_json_object() for pdf in dpdfs],
             'ipdfs': [pdf.to_json_object() for pdf in ipdfs],

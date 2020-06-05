@@ -1,3 +1,8 @@
+########################################
+# MIT License
+#
+# Copyright (c) 2020 Miguel Ramos Pernas
+########################################
 '''
 Test the "minimizers" module.
 '''
@@ -5,8 +10,6 @@ import helpers
 import numpy as np
 import minkit
 import pytest
-
-from minkit.minimization.minuit_api import MinuitMinimizer
 
 helpers.configure_logging()
 
@@ -24,7 +27,7 @@ def test_minimizer():
     '''
     Test the "minimizer" function
     '''
-    m = minkit.Parameter('m', bounds=(20, 80))
+    m = minkit.Parameter('m', bounds=(30, 70))
     c = minkit.Parameter('c', 50, bounds=(30, 70))
     s = minkit.Parameter('s', 5, bounds=(1, 10))
     g = minkit.Gaussian('gaussian', m, c, s)
@@ -37,7 +40,7 @@ def test_minimizer():
 
     with helpers.fit_test(g) as test:
         with minkit.minimizer('uml', g, data, minimizer='minuit') as minuit:
-            test.result = pytest.shared_result = minuit.migrad()
+            test.result, _ = pytest.shared_result = minuit.migrad()
 
     pytest.shared_names = [p.name for p in g.all_args]
 
@@ -45,27 +48,27 @@ def test_minimizer():
     arr = helpers.rndm_gen.uniform(*m.bounds, 100000)
     data = minkit.DataSet.from_ndarray(arr, m)
 
-    with minkit.minimizer('uml', g, data, minimizer='minuit') as minuit:
-        r = minuit.migrad()
-        print(r)
+    with g.restoring_state(), helpers.fit_test(g, fails=True) as test:
+        with minkit.minimizer('uml', g, data, minimizer='minuit') as minuit:
+            test.result, _ = minuit.migrad()
 
-    reg = MinuitMinimizer.result_to_registry(r.params)
+        reg = g.args.copy()
 
-    assert not np.allclose(reg.get(s.name).value, initials[s.name])
+        assert not np.allclose(reg.get(s.name).value, initials[s.name])
 
     # With weights fits correctly
     data = minkit.DataSet(data.values, data.data_pars, weights=g(data))
 
     with helpers.fit_test(g) as test:
         with minkit.minimizer('uml', g, data, minimizer='minuit') as minuit:
-            test.result = minuit.migrad()
+            test.result, _ = minuit.migrad()
 
     # Test the binned case
     data = data.make_binned(bins=100)
 
     with helpers.fit_test(g) as test:
-        with minkit.minimizer('bml', g, data, minimizer='minuit') as minuit:
-            test.result = minuit.migrad()
+        with minkit.minimizer('chi2', g, data, minimizer='minuit') as minuit:
+            test.result, _ = minuit.migrad()
 
 
 @pytest.mark.minimization
@@ -96,7 +99,7 @@ def test_simultaneous_minimizer():
 
     with helpers.fit_test(categories, simultaneous=True) as test:
         with minkit.simultaneous_minimizer(categories, minimizer='minuit') as minuit:
-            test.result = minuit.migrad()
+            test.result, _ = minuit.migrad()
 
 
 @pytest.mark.minimization
@@ -118,13 +121,13 @@ def test_scipyminimizer():
     with minkit.minimizer('uml', g, data, minimizer='scipy') as minimizer:
         for m in minkit.minimization.scipy_api.SCIPY_CHOICES:
             g.set_values(**initials)
-            values.append(minimizer.result_to_registry(
-                minimizer.minimize(method=m)))
+            minimizer.minimize(method=m)
+            values.append(g.args.copy())
 
     with minkit.minimizer('uml', g, data, minimizer='minuit') as minimizer:
         g.set_values(**initials)
-        reference = MinuitMinimizer.result_to_registry(
-            minimizer.migrad().params)
+        minimizer.migrad()
+        reference = g.args.copy()
 
     for reg in values:
         for p, r in zip(reg, reference):
@@ -137,14 +140,39 @@ def test_scipyminimizer():
     with minkit.minimizer('bml', g, data, minimizer='scipy') as minimizer:
         for m in minkit.minimization.scipy_api.SCIPY_CHOICES:
             g.set_values(**initials)
-            values.append(minimizer.result_to_registry(
-                minimizer.minimize(method=m)))
+            minimizer.minimize(method=m)
+            values.append(g.args.copy())
 
     with minkit.minimizer('bml', g, data, minimizer='minuit') as minimizer:
         g.set_values(**initials)
-        reference = MinuitMinimizer.result_to_registry(
-            minimizer.migrad().params)
+        minimizer.migrad()
+        reference = g.args.copy()
 
     for reg in values:
         for p, r in zip(reg, reference):
             helpers.check_parameters(p, r, rtol=0.05)
+
+
+@pytest.mark.minimization
+def test_asymmetric_errors():
+    '''
+    Test the calculation of asymmetric errors.
+    '''
+    g = helpers.default_gaussian(sigma='s')
+
+    s = g.args.get('s')
+
+    data = g.generate(1000)
+
+    with minkit.minimizer('uml', g, data) as minimizer:
+        minimizer.minimize()
+        minimizer.minuit.print_level = 0
+        minimizer.asymmetric_errors('s')
+        minimizer.minuit.print_level = 1
+        minimizer.minimize()
+        errors = s.asym_errors
+        minimizer.minos('s')
+
+    assert s.asym_errors != ()
+
+    assert np.allclose(s.asym_errors, errors, rtol=1e-4)  # compare with MINOS

@@ -1,26 +1,32 @@
 #!/usr/bin/env python
+########################################
+# MIT License
+#
+# Copyright (c) 2020 Miguel Ramos Pernas
+########################################
 '''
 Generate a sample using the RooFit package.
 '''
 import time
 import argparse
 import roofit_models
+import multiprocessing
 import numpy as np
 import ROOT as rt
 rt.PyConfig.IgnoreCommandLineOptions = True
 
 
-def fit(pdf, nevts, repetitions, m, pars):
+def fit(pdf, nevts, repetitions, m, pars, ncpu):
     '''
     Generate data following the given model and fit it.
     '''
     times = np.empty(repetitions, dtype=np.float64)
-    initials = {p.GetName(): np.random.uniform(p.getMin(), p.GetMax())
+    initials = {p.GetName(): np.random.uniform(p.getMin(), p.getMax())
                 for p in pars}
     for i in range(len(times)):
-        data = pdf.generate(rt.RooArgSet(m), nevts)
+        data = pdf.generate(rt.RooArgSet(m), nevts, rt.RooFit.NumCPU(ncpu))
         start = time.time()
-        r = pdf.fitTo(data, rt.RooFit.Save())
+        pdf.fitTo(data, rt.RooFit.Save(), rt.RooFit.NumCPU(ncpu))
         end = time.time()
         times[i] = end - start
         for p in pars:
@@ -28,29 +34,29 @@ def fit(pdf, nevts, repetitions, m, pars):
     return times
 
 
-def generate(pdf, nevts, repetitions, m):
+def generate(pdf, nevts, repetitions, m, ncpu):
     '''
     Generate data following the given model.
     '''
     times = np.empty(repetitions, dtype=np.float64)
     for i in range(len(times)):
         start = time.time()
-        data = pdf.generate(rt.RooArgSet(m), nevts)
+        pdf.generate(rt.RooArgSet(m), nevts, rt.RooFit.NumCPU(ncpu))
         end = time.time()
         times[i] = end - start
     return times
 
 
-def main(jobtype, model, nevts, repetitions, outputfile, backend):
+def main(jobtype, model, nevts, repetitions, outputfile, ncpu):
 
     pdf, pars, extra = getattr(roofit_models, model)()
 
     m = pars[0]
 
     if jobtype == 'generate':
-        times = generate(pdf, nevts, repetitions, m)
+        times = generate(pdf, nevts, repetitions, m, ncpu)
     elif jobtype == 'fit':
-        times = fit(pdf, nevts, repetitions, m, pars[1:])
+        times = fit(pdf, nevts, repetitions, m, pars[1:], ncpu)
     else:
         raise ValueError(f'Unknown job type {jobtype}')
 
@@ -73,8 +79,7 @@ if __name__ == '__main__':
                         help='Number of repetitions')
     parser.add_argument('outputfile', type=str,
                         help='Where to save the result')
-    parser.add_argument('--backend', type=str, default='cpu',
-                        choices=('cpu', 'cuda', 'opencl'),
-                        help='Backend to use')
+    parser.add_argument('--ncpu', type=int, default=1, choices=tuple(range(multiprocessing.cpu_count())),
+                        help='Number of threads to run')
     args = parser.parse_args()
     main(**vars(args))

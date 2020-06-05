@@ -1,3 +1,8 @@
+########################################
+# MIT License
+#
+# Copyright (c) 2020 Miguel Ramos Pernas
+########################################
 '''
 Definition of functions for GPUs.
 

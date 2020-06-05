@@ -1,3 +1,8 @@
+########################################
+# MIT License
+#
+# Copyright (c) 2020 Miguel Ramos Pernas
+########################################
 '''
 Define array types to be used within the package.
 '''

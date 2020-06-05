@@ -1,3 +1,8 @@
+<!--
+ MIT License
+
+ Copyright (c) 2020 Miguel Ramos Pernas
+-->
 <!--Amoroso PDF-->
 <PDF>
   <parameters a="a" theta="theta" alpha="alpha" beta="beta"/>

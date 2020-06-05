@@ -54,6 +54,7 @@ Thumbs.db
 ##########################
 .eggs/
 build/
+dist/
 minkit.egg-info/
 
 # Other files #

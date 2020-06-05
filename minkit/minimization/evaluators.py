@@ -1,3 +1,8 @@
+########################################
+# MIT License
+#
+# Copyright (c) 2020 Miguel Ramos Pernas
+########################################
 '''
 Definition of classes to evaluate FCNs using PDFs and data sets.
 '''
@@ -56,6 +61,16 @@ class Evaluator(object, metaclass=core.DocMeta):
         '''
         raise exceptions.PropertyNotDefinedError(self.__class__, 'args')
 
+    def fcn(self):
+        '''
+        Calculate the value of the FCN with the current set of values.
+
+        :returns: Value of the FCN.
+        :rtype: float
+        '''
+        raise exceptions.MethodNotDefinedError(
+            self.__class__, 'fcn')
+
     @contextlib.contextmanager
     def using_caches(self):
         '''
@@ -89,22 +104,20 @@ class BinnedEvaluator(Evaluator):
         super(BinnedEvaluator, self).__init__()
 
     def __call__(self, *values):
-
         for i, p in enumerate(self.args):
             p.value = values[i]
-
-        fcn = self.__fcn(self.__pdf, self.__data)
-
-        return fcn + fcns.evaluate_constraints(self.__constraints)
+        return self.fcn()
 
     @property
     def args(self):
-
         return self.__pdf.all_real_args
+
+    def fcn(self):
+        fcn = self.__fcn(self.__pdf, self.__data)
+        return fcn + fcns.evaluate_constraints(self.__constraints)
 
     @contextlib.contextmanager
     def using_caches(self):
-
         with self.__pdf.using_cache(pdf_core.PDF.CONST):
             yield self
 
@@ -156,22 +169,20 @@ class UnbinnedEvaluator(Evaluator):
         super(UnbinnedEvaluator, self).__init__()
 
     def __call__(self, *values):
-
         for i, p in enumerate(self.args):
             p.value = values[i]
-
-        fcn = self.__fcn(self.__pdf, self.__data, self.__range)
-
-        return fcn + fcns.evaluate_constraints(self.__constraints)
+        return self.fcn()
 
     @property
     def args(self):
-
         return self.__pdf.all_real_args
+
+    def fcn(self):
+        fcn = self.__fcn(self.__pdf, self.__data, self.__range)
+        return fcn + fcns.evaluate_constraints(self.__constraints)
 
     @contextlib.contextmanager
     def using_caches(self):
-
         with self.__pdf.using_cache(pdf_core.PDF.CONST):
             yield self
 
@@ -210,6 +221,14 @@ class SimultaneousEvaluator(Evaluator):
             args += e.args
 
         return args
+
+    def fcn(self):
+
+        sfcn = 0.
+        for e in self.__evaluators:
+            sfcn += e.fcn()
+
+        return sfcn + fcns.evaluate_constraints(self.__constraints)
 
     @contextlib.contextmanager
     def using_caches(self):

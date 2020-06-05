@@ -1,3 +1,9 @@
+/****************************************
+ * MIT License
+ *
+ * Copyright (c) 2020 Miguel Ramos Pernas
+ ****************************************/
+
 /******************************************************************************
  * Template to define the file to be compiled. A backend greater than 0 means
  * that it will be comiled on CPU.

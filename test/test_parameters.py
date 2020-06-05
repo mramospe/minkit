@@ -1,3 +1,8 @@
+########################################
+# MIT License
+#
+# Copyright (c) 2020 Miguel Ramos Pernas
+########################################
 '''
 Test the "parameters" module.
 '''
@@ -28,6 +33,12 @@ def test_parameter(tmpdir):
 
     check_parameters(f, s)
 
+    c = s.copy()
+
+    assert not c is s
+
+    check_parameters(c, s)
+
 
 @pytest.mark.core
 def test_eval_math_expression():
@@ -57,14 +68,14 @@ def test_formula(tmpdir):
     '''
     a = minkit.Parameter('a', 1)
     b = minkit.Parameter('b', 2)
-    c = minkit.Formula('c', 'a * b', [a, b])
+    c = minkit.Formula('c', '{a} * {b}', [a, b])
 
     assert np.allclose(c.value, a.value * b.value)
 
     # Test its use on a PDF
     m = minkit.Parameter('m', bounds=(10, 20))
     c = minkit.Parameter('c', 15, bounds=(10, 20))
-    s = minkit.Formula('s', '0.1 + c / 10', [c])
+    s = minkit.Formula('s', '0.1 + {c} / 10', [c])
     g = minkit.Gaussian('gaussian', m, c, s)
 
     data = g.generate(10000)
@@ -75,7 +86,7 @@ def test_formula(tmpdir):
 
     with helpers.fit_test(g) as test:
         with minkit.minimizer('uml', g, data, minimizer='minuit') as minuit:
-            test.result = minuit.migrad()
+            test.result, _ = minuit.migrad()
 
     # Test the JSON (only for formula)
     with open(os.path.join(tmpdir, 'r.json'), 'wt') as fi:
@@ -89,7 +100,46 @@ def test_formula(tmpdir):
         json.dump(minkit.pdf_to_json(g), fi)
 
     with open(os.path.join(tmpdir, 'pdf.json'), 'rt') as fi:
-        s = minkit.pdf_from_json(json.load(fi))
+        minkit.pdf_from_json(json.load(fi))
+
+    # Test the copy of a formula
+    new_args = s.args.copy()
+
+    assert all(not o is p for o, p in zip(s.args, s.copy(new_args).args))
+
+    # Test for a formula depending on another formula
+    m = minkit.Parameter('m', bounds=(10, 20))
+    c = minkit.Parameter('c', 15, bounds=(10, 20))
+    d = minkit.Formula('d', '0.1 + {c} / 10', [c])
+    s = minkit.Formula('s', '2 * {d}', [d])
+    g = minkit.Gaussian('gaussian', m, c, s)
+
+    assert s.value == 3.2
+
+    data = g.generate(10000)
+
+    with helpers.fit_test(g) as test:
+        with minkit.minimizer('uml', g, data, minimizer='minuit') as minuit:
+            test.result, _ = minuit.migrad()
+
+    # Test the JSON (only for formula)
+    with open(os.path.join(tmpdir, 'r.json'), 'wt') as fi:
+        json.dump(s.to_json_object(), fi)
+
+    with open(os.path.join(tmpdir, 'r.json'), 'rt') as fi:
+        s = minkit.Formula.from_json_object(json.load(fi), g.all_args)
+
+    # Test the copy of a formula depending on another formula
+    new_args = s.args.copy()
+
+    assert all(not o is p for o, p in zip(s.args, s.copy(new_args).args))
+
+    # Test the JSON (whole PDF)
+    with open(os.path.join(tmpdir, 'pdf.json'), 'wt') as fi:
+        json.dump(minkit.pdf_to_json(g), fi)
+
+    with open(os.path.join(tmpdir, 'pdf.json'), 'rt') as fi:
+        minkit.pdf_from_json(json.load(fi))
 
 
 @pytest.mark.core
@@ -111,14 +161,14 @@ def test_range():
 
     with helpers.fit_test(e) as test:
         with minkit.minimizer('uml', e, data, minimizer='minuit', range='sides') as minuit:
-            test.result = minuit.migrad()
+            test.result, _ = minuit.migrad()
 
     # Test generation of data only in the range
     data = e.generate(10000, range='sides')
 
     with helpers.fit_test(e) as test:
         with minkit.minimizer('uml', e, data, minimizer='minuit', range='sides') as minuit:
-            test.result = minuit.migrad()
+            test.result, _ = minuit.migrad()
 
 
 @pytest.mark.core
@@ -141,6 +191,8 @@ def test_registry(tmpdir):
 
     for fv, sv in zip(f, s):
         check_parameters(fv, sv)
+
+    assert all(not o is p for o, p in zip(s, s.copy()))
 
     # Must raise errors if different objects with the same names are added to the registry
     a2 = minkit.Parameter('a', 1., (-5, +5), None, 0.1, False)

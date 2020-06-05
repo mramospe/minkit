@@ -6,3 +6,4 @@ of the Minkit package.
 
 .. automodapi:: minkit
    :no-heading:
+   :inherited-members:

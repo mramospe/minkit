@@ -1,11 +1,18 @@
+########################################
+# MIT License
+#
+# Copyright (c) 2020 Miguel Ramos Pernas
+########################################
 '''
 Define classes and functions to work with parameters.
 '''
 from . import core
 from . import data_types
+from . import dependencies
 from . import exceptions
 
 import collections
+import contextlib
 import logging
 import numpy as np
 
@@ -30,6 +37,18 @@ class ParameterBase(object, metaclass=core.DocMeta):
         '''
         super().__init__()
 
+    def copy(self):
+        '''
+        Create a copy of this instance.
+
+        .. warning::
+
+           Avoid calling this method directly for sets of parameters and use the
+           :meth:`Registry.copy` method instead, so the possible dependencies
+           among parameters are correctly solved.
+        '''
+        raise exceptions.MethodNotDefinedError(self.__class__, 'copy')
+
     @property
     def value(self):
         '''
@@ -51,6 +70,14 @@ class ParameterBase(object, metaclass=core.DocMeta):
         :rtype: Parameter
         '''
         raise exceptions.MethodNotDefinedError(cls, 'from_json_object')
+
+    @contextlib.contextmanager
+    def restoring_state(self):
+        '''
+        Enter a context where the attributes of the parameter will be restored
+        on exit.
+        '''
+        yield self
 
     def to_json_object(self):
         '''
@@ -95,7 +122,8 @@ class Parameter(ParameterBase):
         self.value = value
         self.bounds = bounds  # This sets the FULL range
         self.error = error
-        self.asym_errors = asym_errors
+        self.asym_errors = asym_errors if asym_errors is None else tuple(
+            asym_errors)
 
         if ranges is not None:
             for n, r in ranges.items():
@@ -147,6 +175,18 @@ class Parameter(ParameterBase):
     def constant(self, v):
         self.__constant = v
 
+    def copy(self):
+        # a copy is created during __init__ for bounds, ranges, and asym_errors
+        ranges = {r: n for r, n in self.__ranges.items() if r != FULL}
+        return self.__class__(self.name, self.value, self.__bounds, ranges, self.error, self.__constant, self.asym_errors)
+
+    @property
+    def ranges(self):
+        '''
+        Names of the parameter ranges.
+        '''
+        return list(self.__ranges.keys())
+
     @classmethod
     def from_json_object(cls, obj):
         '''
@@ -187,6 +227,14 @@ class Parameter(ParameterBase):
             raise ValueError(
                 f'Range name "{name}" is protected; can not be used')
         self.__ranges[name] = data_types.array_float(values)
+
+    @contextlib.contextmanager
+    def restoring_state(self):
+        ranges = {n: r for n, r in self.__ranges.items() if n != FULL}
+        vals = (self.name, self.value, self.bounds, ranges,
+                self.error, self.constant, self.asym_errors)
+        yield self
+        self.__init__(*vals)
 
     def to_json_object(self):
         '''
@@ -231,6 +279,13 @@ class Formula(ParameterBase):
     def __init__(self, name, formula, pars):
         '''
         Parameter representing an operation of many parameters.
+        The formula can be expressed as a function of parameter names, as a function
+        of indices or a mixture of the two, like:
+
+        * *Parameter names*: "a * b" will multiply *a* and *b*.
+        * *Indices*: "{0} * {1}" will multiply the first and second elements in *pars*.
+        * *Mixed*: "{a} * {b} + {1}" will multiply *a* and *b* and sum the second element \
+        in *pars*.
 
         :param name: name of the parameter.
         :type name: str
@@ -242,19 +297,8 @@ class Formula(ParameterBase):
         super().__init__()
 
         self.name = name
-        self.__pars = Registry(pars)
-
-        # Replace the names of the parameters with brackets
-        names = list(
-            reversed(sorted(zip(map(len, self.__pars.names), self.__pars.names))))
-        for i, (_, n) in enumerate(names):
-            formula = formula.replace(n, '{' + str(i) + '}')
-
-        # Avoid partially replacing similar names
-        for i, (_, n) in enumerate(names):
-            formula = formula.replace('{' + str(i) + '}', '{' + n + '}')
-
         self.__formula = formula
+        self.__pars = Registry(pars)
 
     def __repr__(self):
         '''
@@ -267,25 +311,34 @@ class Formula(ParameterBase):
             self.__class__.__name__, self.name, self.__formula, self.__pars.names)
 
     @property
-    def all_args(self):
+    def args(self):
         '''
-        All argument parameters this object depends on.
+        Argument parameters this object directly depends on.
 
         :type: Registry(Parameter)
         '''
-        pars = Registry(self.__pars)
-        for p in filter(lambda p: p.dependent, pars):
-            pars += p.all_args
-        return pars
+        return self.__pars
 
     @property
-    def args(self):
+    def dependencies(self):
+        '''
+        Registry of parameters this instance depends on.
+
+        :type: Registry(Parameter)
+        '''
+        return self.__pars
+
+    @property
+    def all_args(self):
         '''
         Argument parameters this object depends on.
 
         :type: Registry(Parameter)
         '''
-        return self.__pars
+        args = Registry(self.__pars)
+        for p in filter(lambda p: p.dependent, args):
+            args += p.all_args
+        return args
 
     @property
     def value(self):
@@ -297,6 +350,23 @@ class Formula(ParameterBase):
         values = {p.name: p.value for p in self.args}
         return core.eval_math_expression(self.__formula.format(**values))
 
+    def copy(self, pars):
+        '''
+        Create a copy of this instance.
+
+        :param pars: parameter to build the class.
+        :type pars: Registry
+        :returns: A copy of this instance.
+        :rtype: Formula
+
+        .. warning::
+
+           Avoid calling this method directly for sets of parameters and use the
+           :meth:`Registry.copy` method instead, so the possible dependencies
+           among parameters are correctly solved.
+        '''
+        return self.__class__(self.name, self.__formula, pars)
+
     @classmethod
     def from_json_object(cls, obj, pars):
         '''
@@ -305,6 +375,8 @@ class Formula(ParameterBase):
 
         :param obj: object to use to construct the class.
         :type obj: dict
+        :param pars: registry with the parameters this object depends on.
+        :type pars: Registry
         :returns: parameter created from the JSON object.
         :rtype: Parameter
         '''
@@ -346,7 +418,7 @@ class Registry(list):
         If they are not, then an error is raised.
         Constructor is directly forwarded to :class:`list`.
         '''
-        super(Registry, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def __add__(self, other):
         '''
@@ -373,16 +445,7 @@ class Registry(list):
         '''
         for el in filter(lambda p: p.name in self.names, other):
             self._raise_if_not_same(el)
-        return super(Registry, self).__iadd__(filter(lambda p: p.name not in self.names, other))
-
-    def __len__(self):
-        '''
-        Get the length of the registry.
-
-        :returns: length of the registry.
-        :rtype: int
-        '''
-        return data_types.cpu_int(super(Registry, self).__len__())
+        return super().__iadd__(filter(lambda p: p.name not in self.names, other))
 
     def _raise_if_not_same(self, el):
         '''
@@ -425,9 +488,30 @@ class Registry(list):
         :type el: object
         '''
         if el.name not in self.names:
-            super(Registry, self).append(el)
+            super().append(el)
         else:
             self._raise_if_not_same(el)
+
+    def copy(self, contained_type='parameter'):
+        '''
+        Create a copy of this instance.
+
+        :returns: Copy of this instance.
+        :rtype: Registry
+        '''
+        iobjs, dobjs = dependencies.split_dependent_objects_with_resolution_order(
+            self)
+
+        objs = Registry([o.copy() for o in iobjs])
+
+        for o in dobjs:
+            objs.append(o.copy(objs))
+
+        result = Registry(len(self) * [None])
+        for i, p in enumerate(self):
+            result[i] = objs.get(p.name)
+
+        return result
 
     def get(self, name):
         '''
@@ -471,7 +555,7 @@ class Registry(list):
             self._raise_if_not_same(p)
             return self
         else:
-            return super(Registry, self).insert(i, p)
+            return super().insert(i, p)
 
     def reduce(self, names):
         '''
@@ -484,6 +568,17 @@ class Registry(list):
         '''
         return self.__class__(filter(lambda p: p.name in names, self))
 
+    @contextlib.contextmanager
+    def restoring_state(self):
+        '''
+        Enter a context where the attributes of the parameter will be restored
+        on exit.
+        '''
+        with contextlib.ExitStack() as stack:
+            for p in self:
+                stack.enter_context(p.restoring_state())
+            yield self
+
     def to_json_object(self):
         '''
         Represent this class as a JSON-like object.
@@ -492,15 +587,6 @@ class Registry(list):
         :rtype: dict
         '''
         return [p.to_json_object() for p in self]
-
-    def values(self):
-        '''
-        Get a dictionary with the values of the different parameters.
-
-        :returns: dictionary with the values.
-        :rtype: dict(str, float)
-        '''
-        return {p.name: p.value for p in self}
 
 
 def bounds_for_range(data_pars, range):

@@ -28,12 +28,9 @@ jobs:
         - pip install pyflakes
       before_script: " "
       script:
-        - python setup.py check_format --directory docs
-        - python setup.py check_format --directory minkit
-        - python setup.py check_format --directory test
-        - python setup.py check_pyflakes --directory docs
-        - python setup.py check_pyflakes --directory minkit
-        - python setup.py check_pyflakes --directory test
+        - python setup.py check_copyright --regex "(minkit|test|docs|performance)$"
+        - python setup.py check_format --regex "(minkit|test|docs|performance)$"
+        - python setup.py check_pyflakes --regex "(minkit|test|docs|performance)$"
       after_success: " "
     - stage: documentation
       python: 3.7

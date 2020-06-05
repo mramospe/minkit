@@ -1,6 +1,6 @@
 # Dependency on packages
-iminuit
-numdifftools
-numpy
-scipy
-uncertainties
+iminuit>=1.3
+numdifftools>=0.9.39
+numpy>=1.17
+scipy>=1.3.2
+uncertainties>=3.1.2

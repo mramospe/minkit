@@ -1,3 +1,8 @@
+########################################
+# MIT License
+#
+# Copyright (c) 2020 Miguel Ramos Pernas
+########################################
 '''
 Tests for the "backends" module.
 '''
@@ -27,6 +32,17 @@ def test_backend():
     dataset = bk.DataSet.from_ndarray(data, x)
 
     new_bk = minkit.Backend(minkit.backends.core.CPU)
+
+    m = bk.Parameter('m')
+    c = bk.Parameter('c')
+    s = bk.Parameter('s')
+    k = bk.Parameter('k')
+    y = bk.Parameter('y')
+
+    g = bk.Gaussian('gauss', m, c, s)
+    e = bk.Exponential('exponential', m, k)
+
+    bk.AddPDFs.two_components('pdf', g, e, y)
 
     # Test the adaption of objects to new backends
     dataset.to_backend(new_bk)

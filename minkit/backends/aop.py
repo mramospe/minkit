@@ -1,3 +1,8 @@
+########################################
+# MIT License
+#
+# Copyright (c) 2020 Miguel Ramos Pernas
+########################################
 '''
 Application interface to deal with arrays. The different array classes
 can not define the __getitem__ since numpy objects would use it to do

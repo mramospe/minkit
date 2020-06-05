@@ -1,3 +1,8 @@
+########################################
+# MIT License
+#
+# Copyright (c) 2020 Miguel Ramos Pernas
+########################################
 '''
 Operations with numpy objects. All the functions in this module expect objects
 of type :class:`numpy.ndarray`.

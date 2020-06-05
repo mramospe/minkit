@@ -1,3 +1,8 @@
+########################################
+# MIT License
+#
+# Copyright (c) 2020 Miguel Ramos Pernas
+########################################
 '''
 Helper functions to test the minkit package.
 '''
@@ -5,8 +10,6 @@ import functools
 import logging
 import minkit
 import numpy as np
-
-from minkit.minimization.minuit_api import MinuitMinimizer
 
 # Default seed for the generators
 DEFAULT_SEED = 4987
@@ -26,12 +29,15 @@ def check_parameters(f, s, **kwargs):
     Check that two parameters have the same values for the attributes.
     '''
     assert f.name == s.name
-    for attr in ('bounds', 'value', 'error', 'constant'):
+    for attr in ('bounds', 'value', 'error', 'constant', 'asym_errors'):
         fa, sa = getattr(f, attr), getattr(s, attr)
         if fa is not None:
             assert np.allclose(fa, sa, **kwargs)
         else:
             assert sa is None
+
+    for n in f.ranges:
+        assert np.allclose(f.get_range(n), s.get_range(n))
 
 
 def check_pdfs(f, s):
@@ -109,15 +115,15 @@ def default_add_pdfs(center='c', sigma='s', k='k', extended=False, yields=None):
         return minkit.AddPDFs.two_components('pdf', g, e, y)
 
 
-def default_gaussian(center='c', sigma='s', data_par=None):
+def default_gaussian(pdf_name='g', data_par='x', center='c', sigma='s'):
     '''
     Create a Gaussian function.
     '''
-    x = data_par if data_par is not None else minkit.Parameter(
-        'x', bounds=(-4, +4))
+    x = minkit.Parameter(
+        data_par, bounds=(-4, +4))
     c = minkit.Parameter(center, 0, bounds=(-4, +4))
     s = minkit.Parameter(sigma, 1, bounds=(0.1, 2.))
-    return minkit.Gaussian('gaussian', x, c, s)
+    return minkit.Gaussian(pdf_name, x, c, s)
 
 
 def setting_seed(function=None, seed=DEFAULT_SEED):
@@ -141,11 +147,13 @@ def setting_seed(function=None, seed=DEFAULT_SEED):
 
 class fit_test(object):
 
-    def __init__(self, proxy, nsigma=5, simultaneous=False):
+    def __init__(self, proxy, nsigma=5, simultaneous=False, fails=False):
         '''
         Save the initial values and do a check afterwards to determine whether
         the fit was successful or not.
         '''
+        self.fails = fails
+
         # Must be set after the minimization ends
         self.result = None
 
@@ -185,24 +193,33 @@ class fit_test(object):
 
         if self.result is not None:
 
-            # Print the result
-            print(self.result)
+            if not self.fails:
 
-            # Check that the fit run fine
-            assert not self.result.fmin.hesse_failed
+                # Print the result
+                print(self.result)
 
-            # Check the values of the parameters
-            results = MinuitMinimizer.result_to_registry(self.result.params)
-            for n, v in self.initials.items():
-                rv = results.get(n)
-                assert np.allclose(v, rv.value, atol=self.nsigma * rv.error)
+                # Check that the fit run fine
+                assert not self.result.hesse_failed
 
-            # Reset the values of the PDF(s)
-            if self.simultaneous:
-                for c in self.proxy:
-                    c.pdf.set_values(**self.initials)
-            else:
-                self.proxy.set_values(**self.initials)
+                # Check the values of the parameters
+                if self.simultaneous:
+                    results = minkit.Registry()
+                    for c in self.proxy:
+                        results += c.pdf.all_real_args
+                else:
+                    results = self.proxy.all_real_args
+
+                for n, v in self.initials.items():
+                    rv = results.get(n)
+                    assert np.allclose(
+                        v, rv.value, atol=self.nsigma * rv.error)
+
+                # Reset the values of the PDF(s)
+                if self.simultaneous:
+                    for c in self.proxy:
+                        c.pdf.set_values(**self.initials)
+                else:
+                    self.proxy.set_values(**self.initials)
         else:
             raise RuntimeError(
                 'Must set the attribute "result" to the result from the minimization')

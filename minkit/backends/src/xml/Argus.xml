@@ -1,3 +1,8 @@
+<!--
+ MIT License
+
+ Copyright (c) 2020 Miguel Ramos Pernas
+-->
 <!--Argus PDF-->
 <PDF>
   <parameters mu="mu" c="c" p="p"/>

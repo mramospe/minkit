@@ -1,3 +1,8 @@
+<!--
+ MIT License
+
+ Copyright (c) 2020 Miguel Ramos Pernas
+-->
 <!--Chebyshev polynomial PDF-->
 <PDF>
   <variable_parameters n="n" p="p"/>

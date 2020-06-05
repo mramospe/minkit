@@ -1,3 +1,8 @@
+########################################
+# MIT License
+#
+# Copyright (c) 2020 Miguel Ramos Pernas
+########################################
 '''
 In this module the exposed objects are defined manually to avoid loading
 GPU-specific modules.

@@ -1,3 +1,8 @@
+########################################
+# MIT License
+#
+# Copyright (c) 2020 Miguel Ramos Pernas
+########################################
 from .base.core import get_exposed_package_objects
 from .backends import core as backends_core
 from .backends import aop
@@ -20,14 +25,8 @@ __all__.sort()
 
 class Backend(object):
 
-    _objects_backend_dependent_with_init = ('Amoroso', 'Chebyshev',
-                                            'CrystalBall', 'Exponential', 'Gaussian', 'Polynomial', 'PowerLaw', 'PDF',
-                                            'SourcePDF')
-
-    _objects_backend_no_init = ('BinnedDataSet', 'DataSet')
-
-    _objects_backend_dependent = _objects_backend_dependent_with_init + \
-        _objects_backend_no_init
+    _exposed_objects = tuple(n for n, c in minkit_api.items(
+    ) if inspect.isclass(c))  # loading all the classes
 
     def __init__(self, btype=backends_core.CPU, **kwargs):
         '''
@@ -51,11 +50,8 @@ class Backend(object):
 
         self.__aop = aop.ArrayOperations(self, **kwargs)
 
-        for n in Backend._objects_backend_no_init:
+        for n in Backend._exposed_objects:
             setattr(self, n, object_wrapper(minkit_api[n], self))
-
-        for n in Backend._objects_backend_dependent_with_init:
-            setattr(self, n, iobject_wrapper(minkit_api[n], self))
 
     @property
     def aop(self):
@@ -78,9 +74,6 @@ class Backend(object):
 
 class object_wrapper(object):
 
-    members_backend_dependent = {o: {n: v for n, v in inspect.getmembers(
-        minkit_api[o], inspect.ismethod)} for o in Backend._objects_backend_dependent}
-
     def __init__(self, cls, backend):
         '''
         Object to wrap the members of other objects so the backend is always
@@ -92,9 +85,24 @@ class object_wrapper(object):
         :type backend: Backend
         '''
         super(object_wrapper, self).__init__()
-        self.__cls = cls
-        self.__backend = backend
-        self.__members = object_wrapper.members_backend_dependent[cls.__name__]
+        self._cls = cls
+        self._backend = backend
+
+    def __call_wrapper(self, func):
+        '''
+        '''
+        if 'backend' in inspect.getfullargspec(func).args:
+            def wrapper(*args, **kwargs):
+                return func(*args, backend=self._backend, **kwargs)
+        else:
+            def wrapper(*args, **kwargs):
+                return func(*args, **kwargs)
+
+        wrapper.__name__ = func.__name__
+        wrapper.__doc__ = f'''
+Wrapper around the "{func.__name__}" function, which automatically sets the backend.
+'''
+        return wrapper
 
     def __call__(self, *args, **kwargs):
         '''
@@ -106,7 +114,7 @@ class object_wrapper(object):
         :type kwargs: dict
         :returns: Wrapped object.
         '''
-        return self.__cls(*args, **kwargs)
+        return self.__call_wrapper(self._cls)(*args, **kwargs)
 
     def __getattr__(self, name):
         '''
@@ -117,13 +125,7 @@ class object_wrapper(object):
         :returns: Wrapped function.
         :rtype: function
         '''
-        def wrapper(*args, **kwargs):
-            return self.__members[name](*args, backend=self.__backend, **kwargs)
-        wrapper.__name__ = name
-        wrapper.__doc__ = f'''
-Wrapper around the "{name}" function, which automatically sets the backend.
-'''
-        return wrapper
+        return self.__call_wrapper(getattr(self._cls, name))
 
     def __repr__(self):
         '''
@@ -132,43 +134,7 @@ Wrapper around the "{name}" function, which automatically sets the backend.
         :returns: This class as a string.
         :rtype: str
         '''
-        return f'object_wrapper({self.__cls.__name__}, {tuple(self.__members.keys())})'
-
-
-class iobject_wrapper(object_wrapper):
-
-    def __init__(self, cls, backend):
-        '''
-        Object to wrap the members of other objects (including initialization
-        methods) so the backend is always set to that provided to this class.
-
-        :param cls: class to wrap.
-        :type cls: class
-        :param backend: backend to use when calling the members.
-        :type backend: Backend
-        '''
-        super(iobject_wrapper, self).__init__(cls, backend)
-
-    def __call__(self, *args, **kwargs):
-        '''
-        Initialize the wrapped class.
-
-        :param args: arguments forwarded to the __init__ function.
-        :type args: tuple
-        :param kwargs: arguments forwarded to the __init__ function.
-        :type kwargs: dict
-        :returns: Wrapped object.
-        '''
-        return self.__cls(*args, backend=self.__backend, **kwargs)
-
-    def __repr__(self):
-        '''
-        Represent this class as a string.
-
-        :returns: This class as a string.
-        :rtype: str
-        '''
-        return f'iobject_wrapper({self.__cls.__name__}, {tuple(self.__members.keys())})'
+        return f'object_wrapper({self._cls.__name__})'
 
 
 # Determine the default backend

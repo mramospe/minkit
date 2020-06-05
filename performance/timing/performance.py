@@ -1,16 +1,21 @@
 #!/usr/bin/env python
+########################################
+# MIT License
+#
+# Copyright (c) 2020 Miguel Ramos Pernas
+########################################
 '''
 Generate the plots about the performance.
 '''
 import argparse
 import cycler
+import json
 import logging
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import os
 import subprocess
-import tempfile
 
 number_of_events = [1000, 10000, 100000, 1000000, 10000000]
 
@@ -31,7 +36,7 @@ for t in ('xtick', 'ytick'):
     matplotlib.rcParams[f'{t}.minor.size'] = 5
 
 
-def run(jobtype, model, repetitions, directory, backends):
+def run(jobtype, model, repetitions, directory, backends, extra_args):
     '''
     Main function to execute.
     '''
@@ -59,54 +64,70 @@ def run(jobtype, model, repetitions, directory, backends):
     # Run with RooFit
     for bk in {'roofit'}.intersection(backends):
 
-        ofile = os.path.join(directory, f'{bk}.txt')
-        with open(ofile, 'wt'):
-            pass
+        cfg = extra_args.get('roofit', {})
 
         logger.info(f'Processing for backend "{bk}" and model "{model}"')
 
-        for nevts in number_of_events:
+        for ncpu in cfg.get('ncpu', [1]):
 
-            logger.info(f'- {nevts}')
+            logger.info(f'Running on {ncpu} cores')
 
-            p = subprocess.Popen(f'python roofit_script.py {jobtype} {model} {nevts} {repetitions} {ofile}',
-                                 stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-            stdout, stderr = p.communicate()
-            if p.poll() != 0:
-                raise RuntimeError(f'Job failed with errors:\n{stderr}')
+            ofile = os.path.join(directory, f'{bk}_ncpu_{ncpu}.txt')
+            with open(ofile, 'wt'):
+                pass
+
+            for nevts in number_of_events:
+
+                logger.info(f'- {nevts}')
+
+                p = subprocess.Popen(f'python roofit_script.py {jobtype} {model} {nevts} {repetitions} {ofile}',
+                                     stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+                stdout, stderr = p.communicate()
+                if p.poll() != 0:
+                    raise RuntimeError(f'Job failed with errors:\n{stderr}')
 
 
-def plot(directory, output, show, backends):
+def plot(files, output, show):
     '''
     Generate output plots.
     '''
     # Get the data and plot the results
     fig, (ax, lax) = plt.subplots(1, 2, figsize=(12, 6))
 
-    values = np.empty(len(number_of_events), dtype=[
-                      (b, np.float64) for b in backends])
-    errors = np.empty(len(number_of_events), dtype=[
-                      (b, np.float64) for b in backends])
+    values = np.empty((len(files), len(number_of_events)), dtype=np.float64)
+    errors = np.empty((len(files), len(number_of_events)), dtype=np.float64)
 
-    for m in backends:
-        values[m], errors[m] = np.loadtxt(
-            os.path.join(directory, f'{m}.txt')).T
+    for i, f in enumerate(files):
+        values[i], errors[i] = np.loadtxt(f).T
+
+    def _process_backend(f):
+        name = os.path.basename(f).replace('.txt', '')
+        if 'roofit' in name:
+            ncpu = name.split('_')[-1]
+            return f'roofit (ncpu={ncpu})'
+        else:
+            return name
 
     # Normalize to maximum
-    tmax = values.view((np.float64, len(values.dtype.names))).max()
+    tmax = values.max()
 
-    cyc = cycler.cycler(label=backends,
-                        ls=('-', '--', ':', '-.'),
-                        marker=('*', '^', 's', 'x'))
+    backends = list(map(_process_backend, files))
 
-    for c in cyc:
+    raw_cyc = cycler.cycler(ls=('-', '--', ':', '-.',
+                                (0, (5, 10)),  # loosely dashed
+                                (0, (3, 10, 1, 10)),  # loosely dashdotted
+                                (0, (3, 5, 1, 5, 1, 5)),  # dashdotdotted
+                                (0, (3, 1, 1, 1, 1, 1))),  # densely dashdotdotted
+                            marker=('*', '^', 's', 'x', 'v', 'P', 'D', 'o'))
 
-        m = c['label']
+    cyc = (len(backends) // len(raw_cyc) + 1) * raw_cyc
 
-        v = values[m] / tmax
-        e = errors[m] / tmax
+    for i, (b, c) in enumerate(zip(backends, cyc)):
+
+        v = values[i] / tmax
+        e = errors[i] / tmax
         for a in ax, lax:
-            a.errorbar(number_of_events, v, yerr=e, **c)
+            a.errorbar(number_of_events, v, yerr=e, label=b, **c)
 
     lax.set_yscale('log', nonposy='clip')
     for a in ax, lax:
@@ -147,17 +168,19 @@ if __name__ == '__main__':
                             help='Where to put the output files')
     parser_run.add_argument('--backends', nargs='*', default=all_backends,
                             help='Backends to process')
+    parser_run.add_argument('--extra-args', type=json.loads,
+                            help='Arguments to be forwarded to the backend runner. '
+                            'It must be provided as a JSON dictionary. '
+                            'Only the "roofit" backend accepts configuration with the "ncpu" key. '
+                            'You can set it via --extra-args \'{"roofit": {"ncpu": [1, 4]}}\'')
 
     parser_plot = subparsers.add_parser('plot', help=plot.__doc__)
     parser_plot.set_defaults(function=plot)
-    parser_plot.add_argument('directory', type=str, default='./',
-                             help='Where to get the files')
+    parser_plot.add_argument('files', nargs='*', help='Files to process')
     parser_plot.add_argument('--output', type=str, default='result.pdf',
                              help='Name of the output file')
     parser_plot.add_argument('--show', action='store_true',
                              help='Whether to show the results')
-    parser_plot.add_argument('--backends', nargs='*', default=all_backends,
-                             help='Backends to process')
 
     args = parser.parse_args()
 

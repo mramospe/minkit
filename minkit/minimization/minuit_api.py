@@ -1,9 +1,16 @@
+########################################
+# MIT License
+#
+# Copyright (c) 2020 Miguel Ramos Pernas
+########################################
 '''
 Definition of the interface functions and classes with :mod:`iminuit`.
 '''
+from ..base import data_types
 from ..base import parameters
 from . import core
 
+import contextlib
 import functools
 import iminuit
 
@@ -54,9 +61,8 @@ class MinuitMinimizer(core.Minimizer):
         :param evaluator: evaluator to be used in the minimization.
         :type evaluator: UnbinnedEvaluator, BinnedEvaluator or SimultaneousEvaluator
         '''
-        super().__init__()
+        super().__init__(evaluator)
 
-        self.__eval = evaluator
         self.__args = evaluator.args
         self.__minuit = iminuit.Minuit(evaluator,
                                        forced_parameters=self.__args.names,
@@ -64,9 +70,22 @@ class MinuitMinimizer(core.Minimizer):
                                        **minimizer_config,
                                        **registry_to_minuit_input(self.__args))
 
+    def _set_parameter_state(self, par, value=None, error=None, fixed=None):
+
+        super()._set_parameter_state(par, value, error, fixed)
+
+        if value is not None:
+            self.__minuit.values[par.name] = value
+
+        if error is not None:
+            self.__minuit.errors[par.name] = error
+
+        if fixed is not None:
+            self.__minuit.fixed[par.name] = fixed
+
     def _update_args(self, params):
         '''
-        Update the parameters using the information from the given parameters.
+        Update the parameters using the information from the Minuit result.
 
         :param params: list of parameters.
         :type params: iminuit.util.Params
@@ -79,13 +98,6 @@ class MinuitMinimizer(core.Minimizer):
                 a.bounds = p.lower_limit, p.upper_limit
             a.error = p.error
             a.constant = p.is_fixed
-
-    @property
-    def evaluator(self):
-        '''
-        Evaluator of the minimizer.
-        '''
-        return self.__eval
 
     @property
     def minuit(self):
@@ -101,13 +113,14 @@ class MinuitMinimizer(core.Minimizer):
         and the values of the parameters are set to those from the minimization
         result.
 
-        :returns: output from :py:meth:`iminuit.Minuit.hesse`.
+        :returns: Output from :py:meth:`iminuit.Minuit.hesse`.
         '''
-        result = self.__minuit.hesse(*args, *kwargs)
+        with self.__args.restoring_state():
+            params = self.__minuit.hesse(*args, *kwargs)
 
-        self._update_args(result)
+        self._update_args(params)
 
-        return result
+        return params
 
     @use_const_cache
     def migrad(self, *args, **kwargs):
@@ -118,46 +131,74 @@ class MinuitMinimizer(core.Minimizer):
 
         :returns: output from :py:meth:`iminuit.Minuit.migrad`.
         '''
-        result = self.__minuit.migrad(*args, *kwargs)
+        result, params = self.__minuit.migrad(*args, *kwargs)
 
-        self._update_args(result.params)
+        self._update_args(params)
 
-        return result
+        return result, params
+
+    @use_const_cache
+    def minimize(self, *args, **kwargs):
+        '''
+        Same as :meth:`MinuitMinimizer.migrad`, but offering a common interface
+        for all the :class:`Minimizer` objects. It returns a tuple with the
+        information whether the minimization succeded and the covariance matrix.
+
+        .. seealso:: MinuitMinimizer.migrad
+        '''
+        res, _ = self.migrad(*args, **kwargs)
+
+        if res.is_valid:
+
+            cov = data_types.empty_float((len(self.__args), len(self.__args)))
+
+            non_fixed = parameters.Registry(
+                filter(lambda p: not p.constant, self.__args))
+
+            for i, p1 in enumerate(non_fixed):
+                for j, p2 in enumerate(non_fixed[i:]):
+                    cov[i][j] = cov[j][i] = self.__minuit.covariance[(
+                        p1.name, p2.name)]
+        else:
+            cov = None
+
+        return core.MinimizationResult(res.is_valid, res.fval, cov)
 
     @use_const_cache
     def minos(self, *args, **kwargs):
         '''
         Arguments are forwarded to the :py:meth:`iminuit.Minuit.minos` function,
-        and the values of the parameters are set to those from the minimization
-        result.
+        and the values of the parameters are set to those of the MINOS result.
+        If a new minimum is found, the value of the parameter is set accordingly.
 
         :returns: output from :py:meth:`iminuit.Minuit.minos`.
         '''
-        result = self.__minuit.minos(*args, *kwargs)
+        with self.__args.restoring_state():  # to preserve the information of the minimum
+            result = self.__minuit.minos(*args, *kwargs)
 
         for k, v in result.items():
             a = self.__args.get(k)
-            a.asym_errors = v.lower, v.upper
+            a.value = v.min
+            # lower is negative by default
+            a.asym_errors = abs(v.lower), v.upper
 
         return result
 
-    @staticmethod
-    def result_to_registry(result):
+    @contextlib.contextmanager
+    def restoring_state(self):
         '''
-        Transform the parameters from a call to Minuit into a :class:`Registry`.
+        Method to ensure that modifications of parameters within a minimizer
+        context are reset properly. Sadly, the :class:`iminuit.Minuit` class
+        is not stateless, so each time a parameter is modified it must be
+        notified of the change.
 
-        :param result: result from a migrad call.
-        :type result: iminuit.util.Params
-        :returns: registry of parameters with the result from Migrad.
-        :rtype: Registry(Parameter)
-
-        .. warning::
-           The parameters in the returned registry do not belong to the
-           minimized object(s).
+        .. warning:: This does not preserve the minimization state of MIGRAD.
         '''
-        reg = parameters.Registry()
-        for p in result:
-            limits = (p.lower_limit, p.upper_limit) if p.has_limits else None
-            reg.append(parameters.Parameter(
-                p.name, p.value, bounds=limits, error=p.error, constant=p.is_fixed))
-        return reg
+        with super().restoring_state():  # restores the parameters
+            values, errors, fixed = zip(
+                *[(p.value, p.error, p.constant) for p in self.evaluator.args])
+            yield self
+            for p, v, e, f in zip(self.evaluator.args, values, errors, fixed):
+                self.__minuit.values[p.name] = v
+                self.__minuit.errors[p.name] = e
+                self.__minuit.fixed[p.name] = f

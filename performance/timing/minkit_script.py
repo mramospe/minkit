@@ -1,4 +1,9 @@
 #!/usr/bin/env python
+########################################
+# MIT License
+#
+# Copyright (c) 2020 Miguel Ramos Pernas
+########################################
 '''
 Generate a sample using the minkit package.
 '''
@@ -22,8 +27,8 @@ def fit(pdf, nevts, repetitions):
     for i in range(len(times)):
         data = pdf.generate(nevts)
         start = time.time()
-        with minkit.unbinned_minimizer('uml', pdf, data) as minimizer:
-            r = minimizer.migrad()
+        with minkit.minimizer('uml', pdf, data) as minimizer:
+            minimizer.migrad()
         end = time.time()
         times[i] = end - start
         pdf.set_values(**initials)
@@ -37,7 +42,7 @@ def generate(pdf, nevts, repetitions):
     times = np.empty(repetitions, dtype=np.float64)
     for i in range(len(times)):
         start = time.time()
-        data = pdf.generate(nevts)
+        pdf.generate(nevts)
         end = time.time()
         times[i] = end - start
     return times
@@ -45,9 +50,9 @@ def generate(pdf, nevts, repetitions):
 
 def main(jobtype, model, nevts, repetitions, outputfile, backend):
 
-    minkit.initialize(backend)
+    bk = minkit.Backend(backend)
 
-    pdf = getattr(minkit_models, model)()
+    pdf = getattr(minkit_models, model)(bk)
 
     if jobtype == 'generate':
         times = generate(pdf, nevts, repetitions)

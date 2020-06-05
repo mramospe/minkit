@@ -1,3 +1,8 @@
+########################################
+# MIT License
+#
+# Copyright (c) 2020 Miguel Ramos Pernas
+########################################
 '''
 Functions and classes related to the s-plot technique.
 More information at: https://arxiv.org/abs/physics/0402083
@@ -25,7 +30,7 @@ def sweights(pdfs, yields, data, range=parameters.FULL, return_covariance=False)
     :param return_covariance: if set to True, it also returns the covariance matrix.
     :type return_covariance: bool
     :returns: Values of the s-weights for each specie and possible covariance matrix.
-    :rtype: list(numpy.ndarray), (numpy.ndarray)
+    :rtype: list(darray), (numpy.ndarray)
     '''
     l = len(yields)
 
@@ -72,9 +77,20 @@ def sweights_u(a, sweights, bins=10, range=None):
     r'''
     Get the uncertainty associated to the s-weights related to sample *a*.
     Arguments are similar to those of :func:`numpy.histogram`.
-    By definition, the uncertainty on the s-weights (for plotting), is defined as the
-    sum of the squares of the weights in that bin, like
+    By definition, the uncertainty on the s-weights (for plotting), is defined
+    as the sum of the squares of the weights in that bin, like
 
     .. math:: \sigma = \sqrt{\sum_{b \in \delta x} \omega^2}
+
+    :param a: array of data.
+    :type a: numpy.ndarray
+    :param sweights: array of weights.
+    :type sweights: numpy.ndarray
+    :param bins: bins for the histogram.
+    :type bins: int or numpy.ndarray
+    :param range: range of the histogram.
+    :type range: tuple(float, float) or None
+    :returns: Uncertainties for each bin of the histogram.
+    :rtype: numpy.ndarray
     '''
-    return np.sqrt(np.histogram(a, bins=bins, weights=sweights*sweights))
+    return np.sqrt(np.histogram(a, bins=bins, weights=sweights*sweights)[0])

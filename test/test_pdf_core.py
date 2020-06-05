@@ -1,3 +1,8 @@
+########################################
+# MIT License
+#
+# Copyright (c) 2020 Miguel Ramos Pernas
+########################################
 '''
 Test the "pdf_core" module.
 '''
@@ -89,6 +94,9 @@ def test_addpdfs(tmpdir):
 
     check_multi_pdfs(s, pdf)
 
+    # Check copying the PDF
+    pdf.copy()
+
 
 @pytest.mark.core
 def test_category():
@@ -106,20 +114,7 @@ def test_constpdf(tmpdir):
     '''
     Test a fit with a constant PDF.
     '''
-    m = minkit.Parameter('m', bounds=(0, 10))
-
-    # Create an Exponential PDF
-    k = minkit.Parameter('k', -0.05)
-    e = minkit.Exponential('exponential', m, k)
-
-    # Create a Gaussian PDF
-    c = minkit.Parameter('c', 5., bounds=(0, 10))
-    s = minkit.Parameter('s', 1., bounds=(0.5, 3))
-    g = minkit.Gaussian('gaussian', m, c, s)
-
-    # Add them together
-    g2e = minkit.Parameter('g2e', 0.5, bounds=(0, 1))
-    pdf = minkit.AddPDFs.two_components('model', g, e, g2e)
+    pdf = helpers.default_add_pdfs(extended=False)
 
     # Check for "get_values" and "set_values"
     p = pdf.norm()
@@ -131,7 +126,7 @@ def test_constpdf(tmpdir):
 
     with fit_test(pdf) as test:
         with minkit.minimizer('uml', pdf, data, minimizer='minuit') as minuit:
-            test.result = minuit.migrad()
+            test.result, _ = minuit.migrad()
 
     # Test the JSON conversion
     with open(os.path.join(tmpdir, 'pdf.json'), 'wt') as fi:
@@ -187,7 +182,7 @@ def test_convpdfs(tmpdir):
 
     with fit_test(pdf) as test:
         with minkit.minimizer('uml', pdf, data, minimizer='minuit') as minuit:
-            test.result = minuit.migrad()
+            test.result, _ = minuit.migrad()
 
     # Test the JSON conversion
     with open(os.path.join(tmpdir, 'pdf.json'), 'wt') as fi:
@@ -197,6 +192,9 @@ def test_convpdfs(tmpdir):
         s = minkit.pdf_from_json(json.load(fi))
 
     check_multi_pdfs(s, pdf)
+
+    # Check copying the PDF
+    pdf.copy()
 
 
 @pytest.mark.pdfs
@@ -239,6 +237,9 @@ def test_prodpdfs(tmpdir):
 
     check_multi_pdfs(s, pdf)
 
+    # Check copying the PDF
+    pdf.copy()
+
     # Do a simple fit
     for p in pdf.all_real_args:
         p.constant = False
@@ -247,7 +248,7 @@ def test_prodpdfs(tmpdir):
 
     with fit_test(pdf) as test:
         with minkit.minimizer('uml', pdf, data) as minimizer:
-            test.result = minimizer.migrad()
+            test.result, _ = minimizer.migrad()
 
 
 @pytest.mark.pdfs
@@ -279,6 +280,9 @@ def test_sourcepdf(tmpdir):
         s = minkit.pdf_from_json(json.load(fi))
 
     check_pdfs(s, pol0)
+
+    # Check copying the PDF
+    pol0.copy()
 
 
 @pytest.mark.pdfs
@@ -343,3 +347,30 @@ def test_display_pdfs():
     # Print ConvPDFs
     pdf = minkit.ConvPDFs('pdf', gx, gy)
     print(pdf)
+
+
+@pytest.mark.pdfs
+@pytest.mark.source_pdf
+def test_restoring_state():
+    '''
+    Test that the state of the PDFs is treated correctly.
+    '''
+    m = minkit.Parameter('m', bounds=(10, 20))
+    c = minkit.Parameter('c', 15, bounds=(10, 20))
+    s = minkit.Formula('s', '0.1 * {c}', [c])
+    g = minkit.Gaussian('g', m, c, s)
+
+    data = g.generate(10000)
+
+    with minkit.minimizer('uml', g, data) as minuit:
+        minuit.migrad()
+        result = g.args.copy()
+
+    data = g.generate(10000)  # new data set
+
+    with g.restoring_state(), minkit.minimizer('uml', g, data) as minuit:
+        minuit.migrad()
+
+    # The values of the PDF must be those of the first minimization
+    for f, s in zip(result, g.real_args):
+        helpers.check_parameters(f, s)

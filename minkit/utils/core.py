@@ -1,3 +1,8 @@
+########################################
+# MIT License
+#
+# Copyright (c) 2020 Miguel Ramos Pernas
+########################################
 '''
 Some utilities to plot data and PDFs using matplotlib.
 '''
@@ -65,8 +70,8 @@ def scaled_pdf_values(pdf, grid, data_values, edges, range=parameters.FULL, comp
                     np.sum(data_types.fromiter_float(
                         (a.value for a in pdf.args)))
             else:
-                y = pdf.args[i]
-            return y * scaled_pdf_values(c(grid, range=range), data_values, edges)
+                y = pdf.args[i].value
+            return y * scaled_pdf_values(c, grid, data_values, edges, range)
 
 
 def calculate_projection(grid, pdf_values, edges, projection, size):

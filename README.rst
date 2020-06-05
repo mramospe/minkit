@@ -2,14 +2,14 @@
 MinKit
 ======
 
-.. image:: https://img.shields.io/travis/mramospe/minkit.svg
-   :target: https://travis-ci.org/mramospe/minkit.svg?branch=master
+.. image:: https://travis-ci.org/mramospe/minkit.svg?branch=master
+   :target: https://travis-ci.org/mramospe/minkit
 
 .. image:: https://img.shields.io/badge/documentation-link-blue.svg
    :target: https://mramospe.github.io/minkit/
 
 .. image:: https://codecov.io/gh/mramospe/minkit/branch/master/graph/badge.svg
-   :target: https://codecov.io/gh/mramospe/minkit?branch=master
+   :target: https://codecov.io/gh/mramospe/minkit
 
 .. inclusion-marker-do-not-remove
 

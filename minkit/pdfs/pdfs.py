@@ -1,3 +1,8 @@
+########################################
+# MIT License
+#
+# Copyright (c) 2020 Miguel Ramos Pernas
+########################################
 '''
 Definition of PDFs based in C, OpenCL or CUDA.
 '''
@@ -45,7 +50,7 @@ class Amoroso(pdf_core.SourcePDF):
                 'Parameter "alpha" for the {self.__class__.__name__} PDF must be greater than zero; check its bounds')
 
         super().__init__(
-            name, [x], [a, theta, alpha, beta], backend)
+            name, [x], [a, theta, alpha, beta], backend=backend)
 
 
 @pdf_core.register_pdf
@@ -69,7 +74,7 @@ class Argus(pdf_core.SourcePDF):
         :param p: power ruling the peaking strength of the distribution.
         :type p: Parameter
         '''
-        super().__init__(name, [x], [mu, c, p], backend)
+        super().__init__(name, [x], [mu, c, p], backend=backend)
 
 
 @pdf_core.register_pdf
@@ -136,7 +141,7 @@ class CrystalBall(pdf_core.SourcePDF):
         :param n: power of the power-law.
         :type n: Parameter
         '''
-        super().__init__(name, [x], [c, s, a, n], backend)
+        super().__init__(name, [x], [c, s, a, n], backend=backend)
 
 
 @pdf_core.register_pdf
@@ -156,7 +161,7 @@ class Exponential(pdf_core.SourcePDF):
         :param k: parameter of the exponential.
         :type k: Parameter
         '''
-        super().__init__(name, [x], [k], backend)
+        super().__init__(name, [x], [k], backend=backend)
 
 
 @pdf_core.register_pdf
@@ -204,7 +209,7 @@ class Gaussian(pdf_core.SourcePDF):
         :param sigma: standard deviation.
         :type sigma: Parameter
         '''
-        super().__init__(name, [x], [center, sigma], backend)
+        super().__init__(name, [x], [center, sigma], backend=backend)
 
 
 @pdf_core.register_pdf
@@ -224,12 +229,12 @@ class Landau(pdf_core.SourcePDF):
         :type name: str
         :param x: Parameter
         :type x: data parameter.
-        :param center: center of the Gaussian.
+        :param center: center of the Landau distribution.
         :type center: Parameter
         :param sigma: scale parameter.
         :type sigma: Parameter
         '''
-        super().__init__(name, [x], [center, sigma], backend)
+        super().__init__(name, [x], [center, sigma], backend=backend)
 
 
 @pdf_core.register_pdf
@@ -283,4 +288,4 @@ class PowerLaw(pdf_core.SourcePDF):
                 logger.warning(
                     'Defining power law with an asymptote that might lie in the middle of the range of interest')
 
-        super().__init__(name, [x], [c, n], backend)
+        super().__init__(name, [x], [c, n], backend=backend)

@@ -1,3 +1,8 @@
+########################################
+# MIT License
+#
+# Copyright (c) 2020 Miguel Ramos Pernas
+########################################
 '''
 Operations with GPU objects. All the functions in this module expect objects
 of type :class:`reikna.cluda.api.Array` or :class:`numpy.ndarray`.
@@ -11,11 +16,7 @@ from . import gpu_core
 from .gpu_functions import make_functions
 from ..base import data_types
 
-from reikna.cbrng.tools import KeyGenerator
-from reikna.cbrng.bijections import philox
-from reikna.cbrng.samplers import uniform_float
 from scipy.interpolate import splrep
-from string import Template
 
 import contextlib
 import functools
@@ -752,13 +753,7 @@ class GPUOperations(object):
 
 class RandomUniformGenerator(object):
 
-    with open(os.path.join(gpu_core.GPU_SRC, 'templates_rndm.c')) as f:
-        template = Template(f.read()).substitute(
-            bijection_module='${bijection.module}',
-            sampler_module='${sampler.module}',
-            keygen_module='${keygen.module}')
-
-    def __init__(self, aop, seed=DEFAULT_SEED, counter=0):
+    def __init__(self, aop, seed=DEFAULT_SEED):
         '''
         Object to manage the generation of random numbers in GPU.
 
@@ -766,10 +761,26 @@ class RandomUniformGenerator(object):
         :type aop: ArrayOperations
         '''
         super().__init__()
-        self.__aop = aop
-        self.__counter = counter
 
-        self.seed(seed)
+        with open(os.path.join(gpu_core.GPU_SRC, 'philox.c')) as f:
+            self.__module = aop.context.compile(f.read())
+
+        self.__aop = aop
+
+        self.seed(seed)  # set the seed and the counter
+
+        self.rounds = 10  # default in Range123
+
+    @property
+    def rounds(self):
+        '''
+        Number of rounds to do in the generation.
+        '''
+        return self.__rounds
+
+    @rounds.setter
+    def rounds(self, r):
+        self.__rounds = data_types.cpu_int(r)
 
     def seed(self, seed):
         '''
@@ -779,14 +790,8 @@ class RandomUniformGenerator(object):
         :param seed: new seed.
         :type seed: int
         '''
-        bij = philox(64, 4)  # 64 for double, 32 for float
-
-        sampler = uniform_float(bij, data_types.cpu_float, 0, 1)
-
-        keygen = KeyGenerator.create(bij, seed=seed)
-
-        self.__module = self.__aop.context.compile(RandomUniformGenerator.template, render_kwds=dict(
-            bijection=bij, keygen=keygen, sampler=sampler))
+        self.__counter = data_types.cpu_int(0)
+        self.__seed = data_types.cpu_int(seed)
 
     def generate(self, lgth, ndim=1):
         '''
@@ -801,10 +806,13 @@ class RandomUniformGenerator(object):
         '''
         dest = self.__aop.fzeros(lgth, ndim)
 
-        gs, ls = self.__aop.context.get_sizes(dest.length)
+        l = (dest.size // 4) + (dest.size %
+                                4 != 0)  # each thread sets 4 numbers
 
-        self.__module.generate(dest.size, dest.ua, data_types.cpu_int(self.__counter),
-                               global_size=gs, local_size=ls)
+        gs, ls = self.__aop.context.get_sizes(l)
+
+        self.__module.philox(dest.size, dest.ua, self.__seed, self.__counter, self.__rounds,
+                             global_size=gs, local_size=ls)
 
         self.__counter += dest.size  # update the counter to generate independent samples
 

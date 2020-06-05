@@ -1,3 +1,8 @@
+########################################
+# MIT License
+#
+# Copyright (c) 2020 Miguel Ramos Pernas
+########################################
 # -*- coding: utf-8 -*-
 #
 # minkit documentation build configuration file, created by

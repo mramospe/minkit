@@ -1,3 +1,8 @@
+########################################
+# MIT License
+#
+# Copyright (c) 2020 Miguel Ramos Pernas
+########################################
 '''
 API for minimizers.
 '''
@@ -25,6 +30,8 @@ def minimizer(fcn, pdf, data, minimizer=MINUIT, minimizer_config=None, constrain
     r'''
     Create a new minimizer to be used within a context.
     The bounds of the data parameters must not change in the process.
+    Changes to the values, errors or the *constant* state of the parameters
+    must be done through the :meth:`Minimizer.set_parameter_state` method.
 
     :param fcn: type of FCN to use for the minimization.
     :type fcn: str
@@ -42,7 +49,8 @@ def minimizer(fcn, pdf, data, minimizer=MINUIT, minimizer_config=None, constrain
     :type range: str
     :param weights_treatment: what to do with weighted samples (see below for more information).
     :type weights_treatment: str
-    :returns: minimizer to call.
+    :returns: Minimizer to call.
+    :rtype: Minimizer
 
     The treatment of weights when calculating FCNs can lead to unreliable errors
     for the parameters. In general there is no correct way of processing
@@ -59,8 +67,12 @@ def minimizer(fcn, pdf, data, minimizer=MINUIT, minimizer_config=None, constrain
     .. warning::
        Do not change the bounds of the data parameters, since for unbinned data
        sets a new sample is internally created with values falling in *range*.
-       The weights of the sample are also changed according to the *weights_treatment*
-       argument.
+       The weights of the sample are also changed according to the
+       *weights_treatment* argument.
+
+       It is also very important that any change to the state of a parameter
+       within a minimization context is done using the
+       :meth:`Minimizer.set_parameter_state` method.
     '''
     mf = fcns.fcn_from_name(fcn)
 
@@ -85,6 +97,8 @@ def simultaneous_minimizer(categories, minimizer=MINUIT, minimizer_config=None, 
     r'''
     Create a new object to minimizer a :class:`PDF`.
     The bounds of the data parameters must not change in the process.
+    Changes to the values, errors or the *constant* state of the parameters
+    must be done through the :meth:`Minimizer.set_parameter_state` method.
 
     :param categories: categories to process.
     :type categories: list(Category)
@@ -98,7 +112,8 @@ def simultaneous_minimizer(categories, minimizer=MINUIT, minimizer_config=None, 
     :type range: str
     :param weights_treatment: what to do with weighted samples (see below for more information).
     :type weights_treatment: str
-    :returns: minimizer to call.
+    :returns: Minimizer to call.
+    :rtype: Minimizer
 
     The treatment of weights when calculating FCNs can lead to unreliable errors
     for the parameters. In general there is no correct way of processing
@@ -117,6 +132,10 @@ def simultaneous_minimizer(categories, minimizer=MINUIT, minimizer_config=None, 
        sets a new sample is internally created with values falling in *range*.
        The weights of the sample are also changed according to the *weights_treatment*
        argument.
+
+       It is also very important that any change to the state of a parameter
+       within a minimization context is done using the
+       :meth:`Minimizer.set_parameter_state` method.
     '''
     # Build the simultaneous evaluator
     evals = []

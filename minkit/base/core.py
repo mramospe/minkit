@@ -1,3 +1,8 @@
+########################################
+# MIT License
+#
+# Copyright (c) 2020 Miguel Ramos Pernas
+########################################
 '''
 Definition of the backend where to store the data and run the jobs.
 '''
@@ -85,14 +90,14 @@ def eval_math_expression(expression):
     :type expression: str
     :returns: evaluation of the expression.
     '''
-    code = compile(expression, '', "eval")
+    code = compile(expression, '', 'eval')
 
     for name in code.co_names:
         if name not in MATH_OBJECTS:
             raise NameError(
-                f"Use of {name} not allowed in a mathematical expression; functions and constants allowed: {sorted(MATH_OBJECTS.keys())}")
+                f'Use of {name} not allowed in a mathematical expression; functions and constants allowed: {sorted(MATH_OBJECTS.keys())}')
 
-    return eval(code, {"__builtins__": {}}, MATH_OBJECTS)
+    return eval(code, {'__builtins__': {}}, MATH_OBJECTS)
 
 
 @contextlib.contextmanager

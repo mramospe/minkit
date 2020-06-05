@@ -1,3 +1,8 @@
+########################################
+# MIT License
+#
+# Copyright (c) 2020 Miguel Ramos Pernas
+########################################
 '''
 Functions and classes to handle sets of data.
 '''
@@ -14,8 +19,8 @@ import numpy as np
 __all__ = ['DataSet', 'BinnedDataSet']
 
 # Names of different data types
-BINNED = 0
-UNBINNED = 1
+BINNED = 'binned'
+UNBINNED = 'unbinned'
 
 logger = logging.getLogger(__name__)
 

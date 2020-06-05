@@ -1,3 +1,9 @@
+/****************************************
+ * MIT License
+ *
+ * Copyright (c) 2020 Miguel Ramos Pernas
+ ****************************************/
+
 /******************************************************************************
  * Implementation of the main functions to evaluate PDFs.
  *

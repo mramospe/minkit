@@ -1,3 +1,9 @@
+/****************************************
+ * MIT License
+ *
+ * Copyright (c) 2020 Miguel Ramos Pernas
+ ****************************************/
+
 /** Define functions that depend on the number of threads per block.
  *
  */
