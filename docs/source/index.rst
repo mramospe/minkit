@@ -39,9 +39,6 @@ The sample can be easily fitted calling:
 
 After this process, the parameters of the PDF take values corresponding to the minimization point.
 
-If you are looking for more specific information, then jump to any of the
-following sections:
-
 .. toctree::
    :maxdepth: 2
 
