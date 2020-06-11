@@ -1,5 +1,5 @@
-MinKit reference
-================
+Reference
+=========
 
 Here you can find the documentation on the functions and classes
 of the MinKit package.

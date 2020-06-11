@@ -301,7 +301,7 @@ def device_lookup(devices, device=None, interactive=False):
 
     if not interactive:
         # Use the default value
-        logger.info('Using the first encountered device')
+        logger.warning('Using the first encountered device')
         return default
     else:
         # Ask the user to select a device
