@@ -15,9 +15,6 @@ PDFs are implemented in C++, OpenCL and CUDA, allowing a fast evaluation of the 
 The package is built on top of the `numpy <https://numpy.org>`__ and `iminuit <https://iminuit.readthedocs.io/en/latest>`__ packages.
 The interface with CUDA and OpenCL is handled using `reikna <http://reikna.publicfields.net>`__, which is itself an API for `PyCUDA <https://documen.tician.de/pycuda>`__ and `PyOpenCL <https://documen.tician.de/pyopencl>`__.
 
-Basic example
-=============
-
 Classes meant for the user are imported directly from the main module
 
 .. code-block:: python
@@ -41,9 +38,6 @@ The sample can be easily fitted calling:
       minimizer.minimize()
 
 After this process, the parameters of the PDF take values corresponding to the minimization point.
-
-Documentation and advanced examples
-===================================
 
 If you are looking for more specific information, then jump to any of the
 following sections:
