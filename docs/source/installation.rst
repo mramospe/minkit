@@ -1,7 +1,7 @@
 Installation
 ============
 
-The Minkit package allows to minimize probability density functions (PDFs) using
+The MinKit package allows to minimize probability density functions (PDFs) using
 a python API, offering the opportunity to use iminuit or scipy minimizers.
 The PDFs are compiled at runtime, allowing any user do define custom PDFs.
 This package is available on `PyPi <https://pypi.org/>`__, so to install it simply type
@@ -37,7 +37,7 @@ variables set before running any script. In Ubuntu, this can be done executing:
 
 This package is capable to work in CPU and GPU backends, and has been designed
 to work in both CUDA and OpenCL. The GPU operations are done using the
-`reikna <http://reikna.publicfields.net>`__ package. In order to make Minkit
+`reikna <http://reikna.publicfields.net>`__ package. In order to make MinKit
 run in GPUs, it becomes necessary to have installed
 `reikna <http://reikna.publicfields.net>`__,
 and `pycuda <https://documen.tician.de/pycuda/>`__ or

@@ -117,7 +117,7 @@ class Minimizer(object, metaclass=DocMeta):
 
     def __init__(self, evaluator):
         '''
-        Abstract class to serve as an API between Minkit and the different
+        Abstract class to serve as an API between MinKit and the different
         minimization methods.
 
         :param evaluator: evaluator to be used in the minimization.

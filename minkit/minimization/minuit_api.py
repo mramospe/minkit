@@ -45,7 +45,7 @@ def registry_to_minuit_input(registry):
     :rtype: dict
     '''
     values = {v.name: v.value for v in registry}
-    # 0 for Minuit, None for Minkit
+    # 0 for Minuit, None for MinKit
     errors = {f'error_{v.name}': v.error or 0. for v in registry}
     limits = {f'limit_{v.name}': v.bounds for v in registry}
     const = {f'fix_{v.name}': v.constant for v in registry}
@@ -231,6 +231,6 @@ class MinuitMinimizer(core.Minimizer):
             yield self
             for p, v, e, f in zip(self.evaluator.args, values, errors, fixed):
                 self.__minuit.values[p.name] = v
-                # 0 for Minuit, None for Minkit
+                # 0 for Minuit, None for MinKit
                 self.__minuit.errors[p.name] = e or 0.
                 self.__minuit.fixed[p.name] = f
