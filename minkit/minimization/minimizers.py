@@ -9,6 +9,7 @@ API for minimizers.
 from . import evaluators
 from . import fcns
 from . import minuit_api
+from . import nlopt_api
 from . import scipy_api
 from ..base import parameters
 from ..pdfs import dataset
@@ -20,13 +21,9 @@ __all__ = ['minimizer', 'simultaneous_minimizer']
 
 logger = logging.getLogger(__name__)
 
-# Names for the minimizers
-MINUIT = 'minuit'
-SCIPY = 'scipy'
-
 
 @contextlib.contextmanager
-def minimizer(fcn, pdf, data, minimizer=MINUIT, minimizer_config=None, constraints=None, range=parameters.FULL, weights_treatment=evaluators.WGTS_RESCALE):
+def minimizer(fcn, pdf, data, minimizer=minuit_api.MINUIT, minimizer_config=None, constraints=None, range=parameters.FULL, weights_treatment=evaluators.WGTS_RESCALE):
     r'''
     Create a new minimizer to be used within a context.
     The bounds of the data parameters must not change in the process.
@@ -42,15 +39,25 @@ def minimizer(fcn, pdf, data, minimizer=MINUIT, minimizer_config=None, constrain
     :param minimizer: minimizer to use (*minuit* or *scipy*).
     :type minimizer: str
     :param minimizer_config: any extra configuration to be passed to the minimizer. For *minuit*, the argument *forced_parameters* is unavailable.
-    :type minimizer_config: dict
+    :type minimizer_config: dict or None
     :param constraints: set of constraints to consider in the minimization.
-    :type constraints: list(PDF)
+    :type constraints: list(PDF) or None
     :param range: range of data to minimize (unbinned case only).
     :type range: str
     :param weights_treatment: what to do with weighted samples (see below for more information).
     :type weights_treatment: str
     :returns: Minimizer to call.
-    :rtype: Minimizer
+    :rtype: MinuitMinimizer or SciPyMinimizer
+
+    The available minimizers are:
+
+    * *minuit*: use MIGRAD from the Minuit package for minimization.
+
+    * From the SciPy package, the methods *L-BFGS-B*, *TNC*, *SLSQP* and
+      *trust-constr* are available.
+
+    * From the NLopt package, the methods *COBYLA*, *BOBYQA*, *NEWUOA*,
+      *PRAXIS*, *NELDERMEAD*, *SBPLX* are available.
 
     The treatment of weights when calculating FCNs can lead to unreliable errors
     for the parameters. In general there is no correct way of processing
@@ -73,6 +80,8 @@ def minimizer(fcn, pdf, data, minimizer=MINUIT, minimizer_config=None, constrain
        It is also very important that any change to the state of a parameter
        within a minimization context is done using the
        :meth:`Minimizer.set_parameter_state` method.
+
+    .. seealso:: :func:`simultaneous_minimizer`
     '''
     mf = fcns.fcn_from_name(fcn)
 
@@ -84,16 +93,18 @@ def minimizer(fcn, pdf, data, minimizer=MINUIT, minimizer_config=None, constrain
 
     minimizer_config = minimizer_config or {}
 
-    if minimizer == MINUIT:
+    if minimizer == minuit_api.MINUIT:
         yield minuit_api.MinuitMinimizer(evaluator, **minimizer_config)
-    elif minimizer == SCIPY:
-        yield scipy_api.SciPyMinimizer(evaluator, **minimizer_config)
+    elif minimizer in scipy_api.SCIPY_CHOICES:
+        yield scipy_api.SciPyMinimizer(minimizer, evaluator, **minimizer_config)
+    elif minimizer in nlopt_api.NLOPT_CHOICES:
+        yield nlopt_api.NLoptMinimizer(minimizer, evaluator, **minimizer_config)
     else:
         raise ValueError(f'Unknown minimizer "{minimizer}"')
 
 
 @contextlib.contextmanager
-def simultaneous_minimizer(categories, minimizer=MINUIT, minimizer_config=None, constraints=None, range=parameters.FULL, weights_treatment=evaluators.WGTS_RESCALE):
+def simultaneous_minimizer(categories, minimizer=minuit_api.MINUIT, minimizer_config=None, constraints=None, range=parameters.FULL, weights_treatment=evaluators.WGTS_RESCALE):
     r'''
     Create a new object to minimizer a :class:`PDF`.
     The bounds of the data parameters must not change in the process.
@@ -105,15 +116,26 @@ def simultaneous_minimizer(categories, minimizer=MINUIT, minimizer_config=None, 
     :param minimizer: minimizer to use (*minuit* or *scipy*).
     :type minimizer: str
     :param minimizer_config: any extra configuration to be passed to the minimizer. For *minuit*, the argument *forced_parameters* is unavailable.
-    :type minimizer_config: dict
+    :type minimizer_config: dict or None
     :param constraints: set of constraints to consider in the minimization.
-    :type constraints: list(PDF)
+    :type constraints: list(PDF) or None
     :param range: range of data to minimize.
     :type range: str
     :param weights_treatment: what to do with weighted samples (see below for more information).
     :type weights_treatment: str
     :returns: Minimizer to call.
-    :rtype: Minimizer
+    :rtype: MinuitMinimizer or SciPyMinimizer
+    :raises ValueError: If the minimizer is unknown.
+
+    The available minimizers are:
+
+    * *minuit*: use MIGRAD from the Minuit package for minimization.
+
+    * From the SciPy package, the methods *L-BFGS-B*, *TNC*, *SLSQP* and
+      *trust-constr* are available.
+
+    * From the NLopt package, the methods *COBYLA*, *BOBYQA*, *NEWUOA*,
+      *PRAXIS*, *NELDERMEAD*, *SBPLX* are available.
 
     The treatment of weights when calculating FCNs can lead to unreliable errors
     for the parameters. In general there is no correct way of processing
@@ -136,6 +158,8 @@ def simultaneous_minimizer(categories, minimizer=MINUIT, minimizer_config=None, 
        It is also very important that any change to the state of a parameter
        within a minimization context is done using the
        :meth:`Minimizer.set_parameter_state` method.
+
+    .. seealso:: :func:`minimizer`
     '''
     # Build the simultaneous evaluator
     evals = []
@@ -157,9 +181,11 @@ def simultaneous_minimizer(categories, minimizer=MINUIT, minimizer_config=None, 
     minimizer_config = minimizer_config or {}
 
     # Return the minimizer
-    if minimizer == MINUIT:
+    if minimizer == minuit_api.MINUIT:
         yield minuit_api.MinuitMinimizer(evaluator, **minimizer_config)
-    elif minimizer == SCIPY:
-        yield scipy_api.SciPyMinimizer(evaluator, **minimizer_config)
+    elif minimizer in scipy_api.SCIPY_CHOICES:
+        yield scipy_api.SciPyMinimizer(minimizer, evaluator, **minimizer_config)
+    elif minimizer in nlopt_api.NLOPT_CHOICES:
+        yield nlopt_api.NLoptMinimizer(minimizer, evaluator, **minimizer_config)
     else:
         raise ValueError(f'Unknown minimizer "{minimizer}"')

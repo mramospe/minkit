@@ -12,8 +12,8 @@ from ..base import exceptions
 from ..base import parameters
 from ..pdfs import pdf_core
 
-import collections
 import contextlib
+import functools
 import logging
 
 __all__ = ['Category', 'Evaluator', 'BinnedEvaluator',
@@ -21,11 +21,68 @@ __all__ = ['Category', 'Evaluator', 'BinnedEvaluator',
 
 logger = logging.getLogger(__name__)
 
-# Object to help users to create simultaneous minimizers.
-Category = collections.namedtuple('Category', ['fcn', 'pdf', 'data'])
-Category.__doc__ = '''\
-Object serving as a proxy for an FCN to be evaluated using a PDF on a data set.
-The type of data (binned/unbinned) is assumed from the FCN.'''
+
+def unblind_parameters(method):
+    '''
+    Wrapper around a method to unblind the parameters. The class owing the
+    method must define the property *args*.
+    '''
+    @functools.wraps(method)
+    def wrapper(self, *args, **kwargs):
+        with contextlib.ExitStack() as stack:
+            for p in filter(lambda p: p.blind_config is not None, self.args):
+                stack.enter_context(p.blind(status=False))
+            return method(self, *args, **kwargs)
+    return wrapper
+
+
+class Category(object):
+
+    def __init__(self, fcn, pdf, data):
+        '''
+        Object serving as a proxy for an FCN to be evaluated using a PDF on a data set.
+        The type of data (binned/unbinned) is assumed from the FCN.
+
+        :param fcn: name of the FCN.
+        :type fcn: str
+        :param pdf: probability density function associated to this category.
+        :type pdf: PDF
+        :param data: data set associated to this category.
+        :type data: DataSet or BinnedDataSet
+        '''
+        super().__init__()
+
+        self.__data = data
+        self.__fcn = fcn
+        self.__pdf = pdf
+
+    @property
+    def data(self):
+        '''
+        Data sample.
+
+        :type: DataSet or BinnedDataSet
+        '''
+        return self.__data
+
+    @property
+    def fcn(self):
+        '''
+        FCN used in the category.
+
+        :type: str
+        '''
+        return self.__fcn
+
+    @property
+    def pdf(self):
+        '''
+        Probability density function.
+
+        :type: PDF
+        '''
+        return self.__pdf
+
 
 # Methods to treat samples with weights
 WGTS_RESCALE = 'rescale'
@@ -47,8 +104,10 @@ class Evaluator(object, metaclass=core.DocMeta):
 
         :param values: set of values to evaluate the FCN.
         :type values: tuple(float)
-        :returns: value of the FCN.
+        :returns: Value of the FCN.
         :rtype: float
+
+        .. seealso:: :meth:`Evaluator.fcn`
         '''
         raise exceptions.MethodNotDefinedError(self.__class__, '__call__')
 
@@ -94,7 +153,7 @@ class BinnedEvaluator(Evaluator):
         :param data: data sample to process.
         :type data: BinnedDataSet
         :param constraints: set of constraints to consider in the minimization.
-        :type constraints: list(PDF)
+        :type constraints: list(PDF) or None
         '''
         self.__data = data
         self.__fcn = fcn
@@ -112,13 +171,14 @@ class BinnedEvaluator(Evaluator):
     def args(self):
         return self.__pdf.all_real_args
 
+    @unblind_parameters
     def fcn(self):
         fcn = self.__fcn(self.__pdf, self.__data)
         return fcn + fcns.evaluate_constraints(self.__constraints)
 
     @contextlib.contextmanager
     def using_caches(self):
-        with self.__pdf.using_cache(pdf_core.PDF.CONST):
+        with self.__pdf.using_cache(pdf_core.CONST):
             yield self
 
 
@@ -137,9 +197,10 @@ class UnbinnedEvaluator(Evaluator):
         :param range: range of data to minimize.
         :type range: str
         :param constraints: set of constraints to consider in the minimization.
-        :type constraints: list(PDF)
+        :type constraints: list(PDF) or None
         :param weights_treatment: what to do with weighted samples (see below for more information).
         :type weights_treatment: str
+        :raises ValueError: If the the way to treat the weights is unknown.
 
         The treatment of weights when calculating FCNs can lead to unreliable errors
         for the parameters. In general there is no correct way of processing
@@ -177,13 +238,32 @@ class UnbinnedEvaluator(Evaluator):
     def args(self):
         return self.__pdf.all_real_args
 
+    @property
+    def data(self):
+        '''
+        Data sample.
+
+        :type: DataSet or BinnedDataSet
+        '''
+        return self.__data
+
+    @property
+    def pdf(self):
+        '''
+        Probability density function.
+
+        :type: PDF
+        '''
+        return self.__pdf
+
+    @unblind_parameters
     def fcn(self):
         fcn = self.__fcn(self.__pdf, self.__data, self.__range)
         return fcn + fcns.evaluate_constraints(self.__constraints)
 
     @contextlib.contextmanager
     def using_caches(self):
-        with self.__pdf.using_cache(pdf_core.PDF.CONST):
+        with self.__pdf.using_cache(pdf_core.CONST):
             yield self
 
 
@@ -197,7 +277,7 @@ class SimultaneousEvaluator(Evaluator):
         :param evaluators: list of evaluators to use.
         :type evaluators: list(UnbinnedEvaluator or BinnedEvaluator)
         :param constraints: set of constraints to consider in the minimization.
-        :type constraints: list(PDF)
+        :type constraints: list(PDF) or None
         '''
         self.__evaluators = evaluators
         self.__constraints = constraints
@@ -222,11 +302,29 @@ class SimultaneousEvaluator(Evaluator):
 
         return args
 
+    @property
+    def data(self):
+        '''
+        Data sample.
+
+        :type: DataSet or BinnedDataSet
+        '''
+        return self.__data
+
+    @property
+    def pdf(self):
+        '''
+        Probability density function.
+
+        :type: PDF
+        '''
+        return self.__pdf
+
     def fcn(self):
 
         sfcn = 0.
         for e in self.__evaluators:
-            sfcn += e.fcn()
+            sfcn += e.fcn()  # blinded parameters are processed in each call
 
         return sfcn + fcns.evaluate_constraints(self.__constraints)
 

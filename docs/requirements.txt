@@ -1,0 +1,7 @@
+jupyter
+matplotlib
+pydot
+sphinx
+sphinx-automodapi
+sphinx-rtd-theme
+nbsphinx

@@ -216,3 +216,144 @@ def test_registry(tmpdir):
     f += [a, a]
     _ = f + [a, b]
     assert len(f) == pl
+
+
+@pytest.mark.core
+@pytest.mark.minimization
+@helpers.setting_seed
+def test_blinding(tmpdir):
+    '''
+    Test fits with blinded parameters.
+    '''
+    iv, ib = 1., (0, 2)
+
+    p = minkit.Parameter('p', value=iv, bounds=ib)
+
+    p.blind_config = 10, 2
+
+    assert not np.allclose(p.value, iv)  # value is hidden
+    assert not np.allclose(p.bounds, ib)  # bounds are hidden
+
+    with p.blind(status=False):
+        assert np.allclose(p.value, iv)
+        assert np.allclose(p.bounds, ib)
+
+    # Test the blinding state in JSON files
+    with open(os.path.join(tmpdir, 'p.json'), 'wt') as fi:
+        json.dump(p.to_json_object(), fi)
+
+    with open(os.path.join(tmpdir, 'p.json'), 'rt') as fi:
+        minkit.Parameter.from_json_object(json.load(fi))
+
+    assert not np.allclose(p.value, iv)  # value is still hidden
+    assert not np.allclose(p.bounds, ib)  # bounds are still hidden
+
+    with p.blind(status=False):
+        assert np.allclose(p.value, iv)
+        assert np.allclose(p.bounds, ib)
+
+    # Gaussian model with a blinded center
+    pdf = helpers.default_gaussian(center='c')
+
+    data = pdf.generate(10000)
+
+    c = pdf.args.get('c')
+
+    iv = c.value  # initial value
+    ib = c.bounds  # initial bounds
+
+    initial = pdf.get_values()
+
+    c.blind_config = 10, 2
+
+    for m in 'minuit', 'L-BFGS-B', 'COBYLA':  # test all the minimizers
+
+        with c.blind(status=False):
+            pdf.set_values(**initial)
+
+        helpers.randomize(pdf)
+        with minkit.minimizer('uml', pdf, data) as minimizer:
+            minimizer.minimize()
+
+        assert not np.allclose(c.value, iv)
+
+        with c.blind(status=False):
+            assert np.allclose(c.value, iv, atol=2. * c.error)
+            assert np.allclose(c.bounds, ib)
+
+    # Model composed by a background and a signal component with unknown yield
+    pdf = helpers.default_add_pdfs(extended=True, yields=('nsig', 'nbkg'))
+
+    nsig = pdf.args.get('nsig')
+    nbkg = pdf.args.get('nbkg')
+
+    nsig.value = 1000
+    nbkg.value = 10000
+
+    data = pdf.generate(int(nsig.value + nbkg.value))
+
+    nsig.bounds = 0.8 * nsig.value, len(data)
+    nbkg.bounds = 0.8 * nbkg.value, len(data)
+
+    iv = nsig.value
+
+    nsig.blind_config = 10000, 100
+
+    helpers.randomize(pdf)
+    with minkit.minimizer('ueml', pdf, data) as minimizer:
+        minimizer.minimize()
+
+    assert not np.allclose(nsig.value, iv)
+
+    with nsig.blind(status=False):
+        assert np.allclose(nsig.value, iv, atol=2. * nsig.error)
+
+    # Blinding using a formula
+    f = minkit.Formula('f', '10 * {nsig}', [nsig])
+
+    pdf.args[pdf.args.index('nsig')] = f
+
+    with nsig.blind(status=False):
+        iv = nsig.value
+        data = pdf.generate(int(f.value + nbkg.value))
+
+    helpers.randomize(pdf)
+    with minkit.minimizer('ueml', pdf, data) as minimizer:
+        minimizer.minimize()
+
+    assert not np.allclose(nsig.value, iv)
+
+    with nsig.blind(status=False):
+        assert np.allclose(nsig.value, iv, atol=2. * nsig.error)
+
+    # Test the determination of asymmetric errors and profiles
+    with minkit.minimizer('ueml', pdf, data) as minimizer:
+
+        minimizer.minuit.print_level = 0
+
+        minimizer.minimize()
+
+        # FCN profile (a linear transformation makes the shapes of the profile
+        # be the same)
+        v = np.linspace(*nsig.bounds, 20)
+        fp = minimizer.fcn_profile('nsig', v)
+        mp = minimizer.minimization_profile('nsig', v)
+        with nsig.blind(status=False):
+            v = np.linspace(*nsig.bounds, 20)
+            ufp = minimizer.fcn_profile('nsig', v)
+            ump = minimizer.minimization_profile('nsig', v)
+
+        assert np.allclose(fp, ufp)
+        assert np.allclose(mp, ump)
+
+        # asymmetric errors
+        minimizer.asymmetric_errors('nsig')
+        errors = nsig.asym_errors
+        with nsig.blind(status=False):
+            assert not np.allclose(errors, nsig.asym_errors)
+
+        # minos errors
+        minimizer.minos('nsig')
+        errors = nsig.asym_errors
+        with nsig.blind(status=False):
+            assert not np.allclose(errors, nsig.asym_errors)

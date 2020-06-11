@@ -31,6 +31,8 @@ def sweights(pdfs, yields, data, range=parameters.FULL, return_covariance=False)
     :type return_covariance: bool
     :returns: Values of the s-weights for each specie and possible covariance matrix.
     :rtype: list(darray), (numpy.ndarray)
+    :raises ValueError: If the number of provided yields is smaller than the \
+    number of PDFs minus one.
     '''
     l = len(yields)
 

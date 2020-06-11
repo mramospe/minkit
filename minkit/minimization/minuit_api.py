@@ -21,6 +21,8 @@ __all__ = ['MinuitMinimizer']
 # that the output of the FCNs is a chi-square-like function.
 ERRORDEF = 1.
 
+MINUIT = 'minuit'
+
 
 def use_const_cache(method):
     '''
@@ -43,7 +45,8 @@ def registry_to_minuit_input(registry):
     :rtype: dict
     '''
     values = {v.name: v.value for v in registry}
-    errors = {f'error_{v.name}': v.error for v in registry}
+    # 0 for Minuit, None for Minkit
+    errors = {f'error_{v.name}': v.error or 0. for v in registry}
     limits = {f'limit_{v.name}': v.bounds for v in registry}
     const = {f'fix_{v.name}': v.constant for v in registry}
     return dict(errordef=ERRORDEF, **values, **errors, **limits, **const)
@@ -70,6 +73,26 @@ class MinuitMinimizer(core.Minimizer):
                                        **minimizer_config,
                                        **registry_to_minuit_input(self.__args))
 
+    def _asym_error(self, par, bound, cov, var=1, atol=core.DEFAULT_ASYM_ERROR_ATOL, rtol=core.DEFAULT_ASYM_ERROR_RTOL, maxcall=None):
+        with self._restore_minuit():
+            return super()._asym_error(par, bound, cov, var, atol, rtol, maxcall)
+
+    @contextlib.contextmanager
+    def _restore_minuit(self):
+        '''
+        Create a new context where the class holds a new Minuit instance,
+        with the same parameters as the previous but with no information
+        about the minimization state.
+        '''
+        previous = self.__minuit
+        self.__minuit = iminuit.Minuit(self.evaluator,
+                                       forced_parameters=self.__args.names,
+                                       pedantic=False,
+                                       print_level=previous.print_level,
+                                       **self.__minuit.fitarg)
+        yield self
+        self.__minuit = previous
+
     def _set_parameter_state(self, par, value=None, error=None, fixed=None):
 
         super()._set_parameter_state(par, value, error, fixed)
@@ -92,12 +115,7 @@ class MinuitMinimizer(core.Minimizer):
         '''
         for p in params:
             a = self.__args.get(p.name)
-            # Update the fields
-            a.value = p.value
-            if p.has_limits:
-                a.bounds = p.lower_limit, p.upper_limit
-            a.error = p.error
-            a.constant = p.is_fixed
+            a.value, a.error = p.value, p.error
 
     @property
     def minuit(self):
@@ -130,12 +148,18 @@ class MinuitMinimizer(core.Minimizer):
         result.
 
         :returns: output from :py:meth:`iminuit.Minuit.migrad`.
+
+        .. seealso:: :meth:`MinuitMinimizer.minimize`
         '''
         result, params = self.__minuit.migrad(*args, *kwargs)
 
         self._update_args(params)
 
         return result, params
+
+    def minimization_profile(self, wa, values, minimization_results=False, minimizer_config=None):
+        with self._restore_minuit():
+            return super().minimization_profile(wa, values, minimization_results, minimizer_config)
 
     @use_const_cache
     def minimize(self, *args, **kwargs):
@@ -144,7 +168,7 @@ class MinuitMinimizer(core.Minimizer):
         for all the :class:`Minimizer` objects. It returns a tuple with the
         information whether the minimization succeded and the covariance matrix.
 
-        .. seealso:: MinuitMinimizer.migrad
+        .. seealso:: :meth:`MinuitMinimizer.migrad`
         '''
         res, _ = self.migrad(*args, **kwargs)
 
@@ -172,6 +196,8 @@ class MinuitMinimizer(core.Minimizer):
         If a new minimum is found, the value of the parameter is set accordingly.
 
         :returns: output from :py:meth:`iminuit.Minuit.minos`.
+
+        .. seealso:: :meth:`MinuitMinimizer.asymmetric_errors`
         '''
         with self.__args.restoring_state():  # to preserve the information of the minimum
             result = self.__minuit.minos(*args, *kwargs)
@@ -179,10 +205,15 @@ class MinuitMinimizer(core.Minimizer):
         for k, v in result.items():
             a = self.__args.get(k)
             a.value = v.min
-            # lower is negative by default
-            a.asym_errors = abs(v.lower), v.upper
+            a.asym_errors = abs(v.lower), v.upper  # lower error is negative
 
         return result
+
+    def minos_profile(self, *args, **kwargs):
+        '''
+        Arguments are forwarded to the :py:meth:`iminuit.Minuit.mnprofile` function.
+        '''
+        return self.__minuit.mnprofile(*args, **kwargs)
 
     @contextlib.contextmanager
     def restoring_state(self):
@@ -200,5 +231,6 @@ class MinuitMinimizer(core.Minimizer):
             yield self
             for p, v, e, f in zip(self.evaluator.args, values, errors, fixed):
                 self.__minuit.values[p.name] = v
-                self.__minuit.errors[p.name] = e
+                # 0 for Minuit, None for Minkit
+                self.__minuit.errors[p.name] = e or 0.
                 self.__minuit.fixed[p.name] = f

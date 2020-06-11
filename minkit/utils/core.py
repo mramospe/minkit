@@ -53,7 +53,7 @@ def scaled_pdf_values(pdf, grid, data_values, edges, range=parameters.FULL, comp
     :type range: str
     :param component: if provided, then *pdf* is assumed to be a :class:`AddPDFs` \
     class, and the values associated to the given component will be calculated.
-    :type component: str
+    :type component: str or None
     :returns: Normalized values of the PDF
     :rtype: numpy.ndarray
     '''
@@ -137,6 +137,8 @@ def data_plotting_arrays(data, **kwargs):
     to True. In the binned case, the values and the list of edges. If the has only one \
     dimension, the edges are returned as a single array.
     :rtype: numpy.ndarray, (numpy.ndarray or list(numpy.ndarray)), (numpy.ndarray)
+    :raises ValueError: If the rebinning argument is not a proper divisor of \
+    the number of bins, or if its dimension does not match that of the data.
     '''
     projection = kwargs.get('projection', None)
 
@@ -146,7 +148,7 @@ def data_plotting_arrays(data, **kwargs):
         sa = tuple(i for i, p in enumerate(
             data.data_pars) if p.name != projection)
 
-    if data.sample_type == dataset.UNBINNED:
+    if data._sample_type == dataset.UNBINNED:
 
         # Exclusive options for unbinned samples
         bins = kwargs.get('bins', None)
@@ -258,9 +260,9 @@ def pdf_plotting_arrays(pdf, data_values, edges, range=parameters.FULL, componen
     :type range: str
     :param component: if provided, then *pdf* is assumed to be a :class:`AddPDFs` \
     class, and the values associated to the given component will be calculated.
-    :type component: str
+    :type component: str or None
     :param projection: calculate the projection on a given variable.
-    :type projection: str
+    :type projection: str or None
     :param size: number of points to evaluate. If the range is disjoint, then this \
     size corresponds to the number of points per subrange.
     :type size: int

@@ -2,18 +2,16 @@
 #
 
 # You can set these variables from the command line.
-SPHINXOPTS            =
-SPHINXBUILD           = python -msphinx
-SPHINXPROJ            = minkit
-SOURCEDIR             = source
-BUILDDIR             := $(if $(BUILDDIR),$(BUILDDIR),../../minkit-docs)
-INPUT_NOTEBOOKS_DIR   = notebooks
-OUTPUT_NOTEBOOKS_DIR  = source/$(INPUT_NOTEBOOKS_DIR)
-GITCOMMANDS           = cd $(BUILDDIR)/html; git add . ; git commit -m 'Rebuilt docs' ; git push origin gh-pages
-PROJECT_SOURCES       = $(shell find ../minkit -type f)
+SPHINXOPTS       =
+SPHINXBUILD      = python -msphinx
+SPHINXPROJ       = minkit
+SOURCEDIR        = source
+BUILDDIR        := $(if $(BUILDDIR),$(BUILDDIR),../../minkit-docs)
+NOTEBOOKS_DIR    = source/notebooks
+GITCOMMANDS      = cd $(BUILDDIR)/html; git add . ; git commit -m 'Rebuilt docs' ; git push origin gh-pages
+PROJECT_SOURCES  = $(shell find ../minkit -type f)
 
-ALLNOTEBOOKS      = $(wildcard $(INPUT_NOTEBOOKS_DIR)/*.ipynb)
-ALLNOTEBOOKS_OUT = $(patsubst $(INPUT_NOTEBOOKS_DIR)/%.ipynb, $(OUTPUT_NOTEBOOKS_DIR)/%.ipynb, $(ALLNOTEBOOKS))
+ALLNOTEBOOKS = $(wildcard $(NOTEBOOKS_DIR)/*.ipynb)
 
 # Put it first so that "make" without argument is like "make help".
 help:
@@ -28,17 +26,27 @@ help:
 gh-pages: html
 	$(GITCOMMANDS)
 
-# Create the directory to contain the notebooks
-$(OUTPUT_NOTEBOOKS_DIR):
-	mkdir -p $@
+# Target to update the notebooks. Notebooks are rebuilt in-place, so to avoid
+# circular dependencies the target runs every time we call it.
+%.ipynb: FORCE
+	jupyter nbconvert --execute --to notebook --output $(subst $(NOTEBOOKS_DIR)/,,$@) --output-dir $(NOTEBOOKS_DIR) $@
 
-# Target to update the notebooks
-$(OUTPUT_NOTEBOOKS_DIR)/%.ipynb: $(INPUT_NOTEBOOKS_DIR)/%.ipynb $(OUTPUT_NOTEBOOKS_DIR) $(PROJECT_SOURCES)
-	jupyter nbconvert --execute --to notebook --output $(subst $(OUTPUT_NOTEBOOKS_DIR)/,,$@) --output-dir $(OUTPUT_NOTEBOOKS_DIR) $<
+# Target for Jupyter notebooks
+notebooks: $(ALLNOTEBOOKS);
+
+# Forces running certain rules
+FORCE: ;
 
 # Catch-all target: route all unknown targets to Sphinx using the new
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
-html: Makefile $(ALLNOTEBOOKS_OUT) $(PROJECT_SOURCES)
+html: Makefile $(PROJECT_SOURCES) notebooks
 	@if [ -d $(BUILDDIR)/doctrees ]; then rm -r $(BUILDDIR)/doctrees; fi
 	@if [ -d source/api ]; then rm -r source/api; fi
 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
+
+# Only to be used when the notebooks have already been created and only
+# parts of the code not related to the API are modified.
+html-no-notebooks: Makefile $(PROJECT_SOURCES)
+	@if [ -d $(BUILDDIR)/doctrees ]; then rm -r $(BUILDDIR)/doctrees; fi
+	@if [ -d source/api ]; then rm -r source/api; fi
+	@$(SPHINXBUILD) -M html "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)

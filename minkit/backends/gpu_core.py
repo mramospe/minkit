@@ -174,8 +174,10 @@ class Context(object):
         Return the standard sizes for a given array. In case a size in
         "y" is provided, it is considered to be smaller than the size in "x".
 
-        :param sizes: size of the arrays to work.
-        :type: int
+        :param size_x: size of the array in the *x* dimension.
+        :type size_x: int
+        :param size_x: size of the array in the *y* dimension.
+        :type size_y: int or None
         :returns: global and local sizes, that depend on the number of dimensions.
         :rtype: int, int or tuple(int, ...), tuple(int, ...)
         '''
@@ -264,7 +266,7 @@ def device_lookup(devices, device=None, interactive=False):
     :param devices: list of available devices
     :type devices: list(Device)
     :param device: index of the possible device to use.
-    :type device: int
+    :type device: int or None
     :param interactive: whether to ask the user for input.
     :type interactive: bool
     :returns: the selected device.

@@ -25,8 +25,8 @@ class ArrayOperations(object):
         Build the object to do operations within a backend. Only the necessary
         operators have been defined.
 
-        :param btype: backend type ('cpu', 'cuda', 'opencl').
-        :type btype: str
+        :param backend: backend where the operations will be done.
+        :type backend: Backend
         :param kwargs: arguments forwarded to the backend constructor \
         (cuda and opencl backends only).
         :type kwargs: dict
@@ -64,9 +64,10 @@ class ArrayOperations(object):
         :param ndata_pars: number of data parameters.
         :type ndata_pars: int
         :param nvar_arg_pars: number of variable arguments.
-        :type nvar_arg_pars: int
+        :type nvar_arg_pars: int or None
         :returns: proxy for the different evaluation functions.
         :rtype: FunctionsProxy
+        :raises FileNotFoundError: If the XML file associated to the PDF can not be found.
         '''
         return self.__oper.access_pdf(name, ndata_pars, nvar_arg_pars)
 
@@ -116,7 +117,7 @@ class ArrayOperations(object):
         :param arrays: collection of arrays.
         :type arrays: tuple(farray)
         :param maximum: possible maximum length of the output array.
-        :type maximum: int
+        :type maximum: int or None
         :returns: concatenated array.
         :rtype: farray
         '''
@@ -150,6 +151,8 @@ class ArrayOperations(object):
 
         :param size: length of the output array.
         :type size: int
+        :param ndim: number of dimensions of the output array.
+        :type ndim: int
         :returns: empty array.
         :rtype: darray
         '''
@@ -391,7 +394,7 @@ class ArrayOperations(object):
         :param b: second array.
         :type b: farray
         :param out: possible output array to write the data.
-        :type out: barray
+        :type out: barray or None
         :returns: array of decisions.
         :rtype: barray
         '''
@@ -410,7 +413,7 @@ class ArrayOperations(object):
         :param b: second array.
         :type b: farray
         :param out: possible output array to write the data.
-        :type out: barray
+        :type out: barray or None
         :returns: array of decisions.
         :rtype: barray
         '''
@@ -497,6 +500,8 @@ class ArrayOperations(object):
 
         :param size: length of the output array.
         :type size: int
+        :param ndim: number of dimensions of the output array.
+        :type ndim: int
         :returns: array of zeros.
         :rtype: farray
         '''
@@ -631,10 +636,12 @@ class ArrayOperations(object):
         '''
         Take elements of the array using a period.
 
+        :param a: input array.
+        :type a: farray
         :param i: column to take the elements.
         :type i: int
         :returns: reduced array.
-        :rtype: marray
+        :rtype: farray
         '''
         return self.__oper.take_column(a, i)
 
@@ -642,12 +649,14 @@ class ArrayOperations(object):
         '''
         Take a slice of entries from the array.
 
+        :param a: input array.
+        :type a: farray
         :param start: where to start taking entries.
         :type start: int
         :param end: where to end taking entries.
-        :type end: int
+        :type end: int or None
         :returns: slice of the array.
-        :rtype: marray
+        :rtype: farray
         '''
         end = end if end is not None else len(a)
         return self.__oper.take_slice(a, start, end)

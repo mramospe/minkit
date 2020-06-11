@@ -50,7 +50,7 @@ def evaluate_constraints(constraints=None):
     Calculate the values of the constraints, if any.
 
     :param constraints: functions defining constraints to different parameters.
-    :type contraints: list(PDF)
+    :type contraints: list(PDF) or None
     :returns: evaluation of the product of constraints.
     :rtype: float
     '''
@@ -262,6 +262,7 @@ def fcn_from_name(name):
     :type name: str
     :returns: associated function.
     :rtype: function
+    :raises ValueError: If the FCN is unknown.
     '''
     if name == BINNED_CHISQUARE:
         return binned_chisquare

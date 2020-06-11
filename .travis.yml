@@ -22,15 +22,15 @@ jobs:
       python: 3.7
     - stage: format
       python: 3.7
-      install:
+      before_script:
         - sudo apt-get install clang-format
         - pip install autopep8
         - pip install pyflakes
-      before_script: " "
       script:
         - python setup.py check_copyright --regex "(minkit|test|docs|performance)$"
         - python setup.py check_format --regex "(minkit|test|docs|performance)$"
         - python setup.py check_pyflakes --regex "(minkit|test|docs|performance)$"
+        - python setup.py check_documentation
       after_success: " "
     - stage: documentation
       python: 3.7
@@ -38,7 +38,7 @@ jobs:
         - sudo apt-get install pandoc graphviz
         - pip install -r requirements.txt
         - pip install .
-        - pip install jupyter matplotlib pydot sphinx sphinx-automodapi sphinx-rtd-theme nbsphinx
+        - pip install -r docs/requirements.txt
       script:
         - mkdir html-docs
         - cd docs

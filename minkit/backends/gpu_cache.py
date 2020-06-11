@@ -187,6 +187,7 @@ class ArrayCacheManager(object):
 
         :param dtype: data type of the output arrays.
         :type dtype: numpy.dtype
+        :raises ValueError: If the data type is not supported.
         '''
         super().__init__()
 

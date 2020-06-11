@@ -13,6 +13,7 @@ from . import exceptions
 
 import collections
 import contextlib
+import functools
 import logging
 import numpy as np
 
@@ -24,12 +25,141 @@ FULL = 'full'
 logger = logging.getLogger(__name__)
 
 
+def check_return_none(method):
+    '''
+    Decorator for methods with a single argument that will return None if
+    the input argument is None.
+    '''
+    @functools.wraps(method)
+    def wrapper(self, arg):
+        if arg is None:
+            return arg
+        else:
+            return method(self, arg)
+    return wrapper
+
+
+class Blinding(object):
+
+    def __init__(self, center, scale):
+        r'''
+        Object to blind the value of a parameter.
+
+        :param center: center of the transformation.
+        :type center: float
+        :param scale: scale of the transformation.
+        :type scale: float
+        '''
+        super().__init__()
+
+        self.__center = center
+        self.__scale = scale
+
+    @property
+    def state(self):
+        '''
+        Center and scale of the blinding transformation.
+
+        :type: tuple(float, float)
+        '''
+        return self.__center, self.__scale
+
+    @classmethod
+    def build(cls, center, scale):
+        '''
+        Build the instance using a center and a scale. The actual value of
+        these attributes will be obtained from two pseudorandom numbers.
+
+        :param center: prototype for the center.
+        :type center: float
+        :param scale: prototype for the scale.
+        :type scale:
+        '''
+        c = center * core.GLOBAL_RND_GEN.uniform(-1, +1)
+        s = core.GLOBAL_RND_GEN.uniform(1, scale)
+        return cls(c, s)
+
+    @check_return_none
+    def blind(self, value):
+        '''
+        Get the blinded value associated to that given.
+
+        :param value: value to blind.
+        :type value: float
+        :returns: Blinded value.
+        :rtype: float
+        '''
+        return self.__scale * (value + self.__center)
+
+    @check_return_none
+    def blind_error(self, error):
+        '''
+        Get the blinded value of the given error.
+
+        :param error: error to blind.
+        :type error: float
+        :returns: Blinded error.
+        :rtype: float
+        '''
+        return abs(self.__scale) * error
+
+    def blind_value_error(self, value, error):
+        '''
+        Blind the provided value and error.
+
+        :param value: value to blind.
+        :type value: float
+        :param error: error to blind.
+        :type error: float
+        :returns: Blinded value and error.
+        :rtype: float, float
+        '''
+        return self.blind(value), self.blind_error(error)
+
+    @check_return_none
+    def unblind(self, value):
+        '''
+        Get the unblinded value associated to that given.
+
+        :param value: value to unblind.
+        :type value: float
+        :returns: Unblinded value.
+        :rtype: float
+        '''
+        return value / self.__scale - self.__center
+
+    @check_return_none
+    def unblind_error(self, error):
+        '''
+        Get the unblinded value for the given error.
+
+        :param error: error to unblind.
+        :type error: float
+        :returns: Unblinded error.
+        :rtype: float
+        '''
+        return error / abs(self.__scale)
+
+    def unblind_value_error(self, value, error):
+        '''
+        Unblind the provided value and error.
+
+        :param value: value to unblind.
+        :type value: float
+        :param error: error to unblind.
+        :type error: float
+        :returns: Unblinded value and error.
+        :rtype: float, float
+        '''
+        return self.unblind(value), self.unblind_error(error)
+
+
 class ParameterBase(object, metaclass=core.DocMeta):
 
     # Flag to determine if this parameter class depends on other parameters
     # or not. Any object with dependent = True must have the property "args"
     # defined.
-    dependent = False
+    _dependent = False
 
     def __init__(self):
         '''
@@ -42,7 +172,6 @@ class ParameterBase(object, metaclass=core.DocMeta):
         Create a copy of this instance.
 
         .. warning::
-
            Avoid calling this method directly for sets of parameters and use the
            :meth:`Registry.copy` method instead, so the possible dependencies
            among parameters are correctly solved.
@@ -66,7 +195,7 @@ class ParameterBase(object, metaclass=core.DocMeta):
 
         :param obj: object to use to construct the class.
         :type obj: dict
-        :returns: parameter created from the JSON object.
+        :returns: Parameter created from the JSON object.
         :rtype: Parameter
         '''
         raise exceptions.MethodNotDefinedError(cls, 'from_json_object')
@@ -83,7 +212,7 @@ class ParameterBase(object, metaclass=core.DocMeta):
         '''
         Represent this class as a JSON-like object.
 
-        :returns: this class as a JSON-like object.
+        :returns: This class as a JSON-like object.
         :rtype: dict
         '''
         raise exceptions.MethodNotDefinedError(
@@ -92,38 +221,51 @@ class ParameterBase(object, metaclass=core.DocMeta):
 
 class Parameter(ParameterBase):
 
-    def __init__(self, name, value=None, bounds=None, ranges=None, error=0., constant=False, asym_errors=None):
+    def __init__(self, name, value=None, bounds=None, ranges=None, error=None, constant=False, asym_errors=None, blind_config=None):
         '''
         Object to represent a parameter for a PDF.
 
         :param name: name of the parameter.
         :type name: str
         :param value: initial value.
-        :type value: float
+        :type value: float or None
         :param bounds: bounds for the parameter. This defines the *full* range.
-        :type bounds: tuple or tuple(tuple, ...)
+        :type bounds: tuple, tuple(tuple, ...) or None
         :param ranges: possible ranges
         :type ranges: dict(str, tuple) or dict(str, tuple(tuple, ...))
         :param error: error of the parameter.
-        :type error: float
+        :type error: float or None
         :param constant: whether to initialize this parameter as constant.
         :type constant: bool
         :param asym_errors: asymmetric errors.
-        :type asym_errors: tuple(float, float)
+        :type asym_errors: tuple(float, float) or None
+        :param blind_config: if provided, set the blinding configuration.
+        :type blind_config: tuple(float, float)
         :ivar name: name of the parameter.
-        :ivar error: error of the parameter.
+
+        .. note::
+           If the parameter is in *blind* status, then the attributes *value*
+           *error* and *asym_errors* are blinded, in such a way that the
+           returned values do not correspond to the true values, and setting
+           the attributes forces the class to unblind the result (the input
+           value is assumed to be *blinded*). On the other hand, if the object
+           is saved into a JSON file, the blinding state is also preserved.
         '''
         super().__init__()
 
         self.__constant = constant
         self.__ranges = {}
 
-        self.name = name
-        self.value = value
-        self.bounds = bounds  # This sets the FULL range
+        self.blind_config = blind_config  # must set it before any value or error
+
+        self.name = name  # the only attribute that can be freely modified
+
+        self.bounds = bounds  # this sets the FULL range
         self.error = error
         self.asym_errors = asym_errors if asym_errors is None else tuple(
             asym_errors)
+
+        self.value = value  # transforms it into a float
 
         if ranges is not None:
             for n, r in ranges.items():
@@ -133,11 +275,34 @@ class Parameter(ParameterBase):
         '''
         Rerpresent this class as a string, showing its attributes.
 
-        :returns: this class as a string.
+        :returns: This class as a string.
         :rtype: str
         '''
         return '{}(name={}, value={}, bounds={}, error={}, asym_errors={}, constant={})'.format(
             self.__class__.__name__, self.name, self.value, self.bounds, self.error, self.asym_errors, self.constant)
+
+    @property
+    def asym_errors(self):
+        '''
+        Asymmetric errors.
+
+        :type: tuple(float, float)
+        '''
+        if self.__asym_errors is None:
+            return self.__asym_errors
+
+        if self.__blind is None:
+            return self.__asym_errors
+        else:
+            lo, hi = self.__asym_errors
+            return self.__blind.blind_error(lo), self.__blind.blind_error(hi)
+
+    @asym_errors.setter
+    def asym_errors(self, errors):
+        if self.__blind is None:
+            self.__asym_errors = errors
+        else:
+            self.__asym_errors = tuple(map(self.__blind.unblind_error, errors))
 
     @property
     def bounds(self):
@@ -146,7 +311,17 @@ class Parameter(ParameterBase):
 
         :type: numpy.ndarray
         '''
-        return self.__bounds
+        if self.__blind is None:
+            return self.__bounds
+        else:
+            vmin, vmax = self.__bounds
+
+            l, r = self.__blind.blind(vmin), self.__blind.blind(vmax)
+
+            if l < r:
+                return data_types.array_float((l, r))
+            else:
+                return data_types.array_float((r, l))
 
     @bounds.setter
     def bounds(self, values):
@@ -154,13 +329,42 @@ class Parameter(ParameterBase):
         Set the bounds of the parameter, which also modifies the *full* range.
 
         :param values: bounds to set.
-        :type values: tuple or tuple(tuple, ...)
+        :type values: tuple(float, float)
         '''
         if values is None:
             self.__bounds = values
         else:
             self.__bounds = data_types.array_float(values)
         self.__ranges[FULL] = self.__bounds
+
+    @property
+    def blind_config(self):
+        '''
+        Blinding state of the parameter. The blinding state is specified as
+        follows:
+
+        .. code-block:: python
+
+           p = minkit.Parameter('p', 0.5, bounds=(0, 1))
+           p.blind_config = None # the parameter is not blinded (default)
+           p.blind_config = 10, 2 # set the offset and scale for blinding
+
+        The last line gives the arguments to calculate the blinding
+        coefficients. The actual value of the coefficients is obtained from
+        pseudorandom numbers using the specified values.
+
+        :getter: Return the object used to blind and unblind the parameter.
+        :setter: Set the blinding state of the parameter.
+        '''
+        return self.__blind
+
+    @blind_config.setter
+    def blind_config(self, cs):
+
+        if cs is None:
+            self.__blind = None
+        else:
+            self.__blind = Blinding.build(*cs)
 
     @property
     def constant(self):
@@ -174,6 +378,69 @@ class Parameter(ParameterBase):
     @constant.setter
     def constant(self, v):
         self.__constant = v
+
+    @property
+    def error(self):
+        '''
+        Error of the parameter.
+
+        :type: float
+        '''
+        if self.__blind is None:
+            return self.__error
+        else:
+            return self.__blind.blind_error(self.__error)
+
+    @error.setter
+    def error(self, error):
+        if self.__blind is None:
+            self.__error = error
+        else:
+            self.__error = self.__blind.unblind_error(error)
+
+    @property
+    def value(self):
+        '''
+        Value of the parameter.
+
+        :type: float
+        '''
+        if self.__blind is None:
+            return self.__value
+        else:
+            return self.__blind.blind(self.__value)
+
+    @value.setter
+    def value(self, value):
+        if value is not None:
+            if self.__blind is None:
+                self.__value = data_types.cpu_float(value)
+            else:
+                self.__value = data_types.cpu_float(
+                    self.__blind.unblind(value))
+        else:
+            self.__value = value
+
+    @contextlib.contextmanager
+    def blind(self, status=True):
+        '''
+        Enter a context where the blinding status is modified to that given.
+
+        :param status: blinding status.
+        :type status: bool
+        :raises RuntimeError: If the parameter is requested to be blinded and \
+        no blinding configuration is present.
+        '''
+        if self.__blind is None and status == True:
+            raise RuntimeError(
+                'Attempt to blind a parameter with no blinding configuration')
+        elif self.__blind is not None and not status:
+            previous = self.__blind
+            self.__blind = None
+            yield self
+            self.__blind = previous
+        else:
+            yield self
 
     def copy(self):
         # a copy is created during __init__ for bounds, ranges, and asym_errors
@@ -195,12 +462,21 @@ class Parameter(ParameterBase):
 
         :param obj: object to use to construct the class.
         :type obj: dict
-        :returns: parameter created from the JSON object.
+        :returns: Parameter created from the JSON object.
         :rtype: Parameter
         '''
         obj = dict(obj)
+
         obj['ranges'] = {n: o for n, o in obj['ranges'].items()}
-        return cls(**obj)
+
+        bc = obj.pop('blind')
+
+        instance = cls(**obj)
+
+        if bc is not None:
+            instance.__blind = Blinding(*bc)
+
+        return instance
 
     def get_range(self, name):
         '''
@@ -208,7 +484,7 @@ class Parameter(ParameterBase):
 
         :param name: name of the range.
         :type name: str
-        :returns: attached range.
+        :returns: Attached range.
         :rtype: numpy.ndarray
         '''
         return self.__ranges[name]
@@ -222,6 +498,11 @@ class Parameter(ParameterBase):
         :type name: str
         :param values: bounds of the range.
         :type values: tuple or tuple(tuple, ...)
+        :raises ValueError: If the value of the *full* range is changed.
+
+        .. note::
+           If you want to change the *full* range, modify the *bounds*
+           of the parameter.
         '''
         if name == FULL:
             raise ValueError(
@@ -231,16 +512,18 @@ class Parameter(ParameterBase):
     @contextlib.contextmanager
     def restoring_state(self):
         ranges = {n: r for n, r in self.__ranges.items() if n != FULL}
-        vals = (self.name, self.value, self.bounds, ranges,
-                self.error, self.constant, self.asym_errors)
+        vals = (self.name, self.__value, self.__bounds, ranges,
+                self.__error, self.__constant, self.__asym_errors)
+        b = self.__blind  # use exactly the same blinding configuration as before
         yield self
         self.__init__(*vals)
+        self.__blind = b
 
     def to_json_object(self):
         '''
         Represent this class as a JSON-like object.
 
-        :returns: this class as a JSON-like object.
+        :returns: This class as a JSON-like object.
         :rtype: dict
         '''
         if self.bounds is None:
@@ -253,28 +536,13 @@ class Parameter(ParameterBase):
                 'bounds': bounds,
                 'ranges': {n: r.tolist() for n, r in self.__ranges.items() if n != FULL},
                 'error': self.error,
+                'blind': self.__blind if self.__blind is None else self.__blind.state,
                 'constant': self.constant}
-
-    @property
-    def value(self):
-        '''
-        Value of the parameter.
-
-        :type: float
-        '''
-        return self.__value
-
-    @value.setter
-    def value(self, value):
-        if value is not None:
-            self.__value = data_types.cpu_float(value)
-        else:
-            self.__value = value
 
 
 class Formula(ParameterBase):
 
-    dependent = True
+    _dependent = True
 
     def __init__(self, name, formula, pars):
         '''
@@ -304,7 +572,7 @@ class Formula(ParameterBase):
         '''
         Rerpresent this class as a string, showing its attributes.
 
-        :returns: this class as a string.
+        :returns: This class as a string.
         :rtype: str
         '''
         return '{}(name={}, formula=\'{}\', parameters={})'.format(
@@ -336,7 +604,7 @@ class Formula(ParameterBase):
         :type: Registry(Parameter)
         '''
         args = Registry(self.__pars)
-        for p in filter(lambda p: p.dependent, args):
+        for p in filter(lambda p: p._dependent, args):
             args += p.all_args
         return args
 
@@ -360,7 +628,6 @@ class Formula(ParameterBase):
         :rtype: Formula
 
         .. warning::
-
            Avoid calling this method directly for sets of parameters and use the
            :meth:`Registry.copy` method instead, so the possible dependencies
            among parameters are correctly solved.
@@ -377,7 +644,7 @@ class Formula(ParameterBase):
         :type obj: dict
         :param pars: registry with the parameters this object depends on.
         :type pars: Registry
-        :returns: parameter created from the JSON object.
+        :returns: Parameter created from the JSON object.
         :rtype: Parameter
         '''
         pars = Registry(pars.get(n) for n in obj['pars'])
@@ -387,30 +654,17 @@ class Formula(ParameterBase):
         '''
         Represent this class as a JSON-like object.
 
-        :returns: this class as a JSON-like object.
+        :returns: This class as a JSON-like object.
         :rtype: dict
         '''
         return {'name': self.name, 'formula': self.__formula, 'pars': self.args.names}
-
-
-def range_is_disjoint(r):
-    '''
-    Return whether this range is composed by more than one subrange (with no
-    common borders.
-
-    :param r: range to process.
-    :type r: numpy.ndarray
-    :returns: whether the range is disjoint or not.
-    :rtype: bool
-    '''
-    return len(r.shape) > 1
 
 
 class Registry(list):
 
     def __init__(self, *args, **kwargs):
         '''
-        Extension of list to hold information used in :py:mod:`minkit`.
+        Extension of a list to hold information used in :py:mod:`minkit`.
         It represents a collection of objects with the attribute *name*, providing a unique
         identifier (each object is assumed to be identified by its name).
         Any attempt to add a new element to the registry with the same name as one already
@@ -427,7 +681,7 @@ class Registry(list):
 
         :param other: registry to take elements from.
         :type other: Registry
-        :returns: a registry with the new elements added.
+        :returns: A registry with the new elements added.
         :rtype: Registry
         '''
         res = self.__class__(self)
@@ -440,8 +694,10 @@ class Registry(list):
 
         :param other: registry to take elements from.
         :type other: Registry
-        :returns: this object with the new elements added.
+        :returns: This object with the new elements added.
         :rtype: Registry
+        :raises ValueError: If an element is found with the same name as \
+        another in the new registry, but they are different instances.
         '''
         for el in filter(lambda p: p.name in self.names, other):
             self._raise_if_not_same(el)
@@ -452,6 +708,10 @@ class Registry(list):
         Raise an error saying that an object that is trying to be added with given name
         is not the same as that in the registry.
         The name of the element is assumed to be already in the registry.
+
+        :param el: object to check.
+        :raises ValueError: If an element is found with the same name as \
+        another in the new registry, but they are different instances.
         '''
         curr = self.get(el.name)
         if curr is not el:
@@ -475,7 +735,7 @@ class Registry(list):
 
         :param obj: object to use to construct the class.
         :type obj: dict
-        :returns: parameter created from the JSON object.
+        :returns: Parameter created from the JSON object.
         :rtype: Registry
         '''
         return cls(map(Parameter.from_json_object, obj))
@@ -486,13 +746,21 @@ class Registry(list):
 
         :param el: new element to add.
         :type el: object
+        :raises ValueError: If an element is found with the same name as \
+        that provided, but they are different instances.
         '''
         if el.name not in self.names:
             super().append(el)
         else:
             self._raise_if_not_same(el)
 
-    def copy(self, contained_type='parameter'):
+    def clear(self):
+        '''
+        Remove all the elements from the registry.
+        '''
+        super().clear()
+
+    def copy(self):
         '''
         Create a copy of this instance.
 
@@ -513,13 +781,29 @@ class Registry(list):
 
         return result
 
+    def count(self, predicate):
+        '''
+        Count the number of elements that satisfy the given predicate.
+
+        :param predicate: function to check the contained objects.
+        '''
+        return data_types.fromiter_int((predicate(p) for p in self)).sum()
+
+    def extend(self, iterable):
+        '''
+        Extend list by appending elements from the iterable.
+
+        :param iterable: iterable to get the new elements.
+        '''
+        self.__iadd__(self.__class__(iterable))
+
     def get(self, name):
         '''
         Return the object with name *name* in this registry.
 
         :param name: name of the object.
         :type name: str
-        :returns: object with the specified name.
+        :returns: Object with the specified name.
         :raises LookupError: If no object is found with the given name.
         '''
         for e in self:
@@ -529,11 +813,11 @@ class Registry(list):
 
     def index(self, name):
         '''
-        Get the position in the registry of the parameter with the given name.
+        Get the position in the registry of the object with the given name.
 
-        :param name: name of the parameter.
+        :param name: name of the object.
         :type name: str
-        :returns: position.
+        :returns: Position of the object with the given name.
         :rtype: int
         :raises LookupError: If no object is found with the given name.
         '''
@@ -550,6 +834,8 @@ class Registry(list):
         :type i: int
         :param p: object to insert.
         :type p: object
+        :raises ValueError: If an element is found with the same name as \
+        that provided, but they are different instances.
         '''
         if p.name in self.names:
             self._raise_if_not_same(p)
@@ -557,16 +843,34 @@ class Registry(list):
         else:
             return super().insert(i, p)
 
+    def pop(self, name):
+        '''
+        Remove and return the item with the given name.
+
+        :param name: name of the object.
+        :type name: str
+        '''
+        return super().pop(self.index(name))
+
     def reduce(self, names):
         '''
         Create a new :class:`Registry` object keeping only the given names.
 
         :param names: names
         :type names: tuple(str)
-        :returns: new registry keeping only the provided names.
+        :returns: New registry keeping only the provided names.
         :rype: Registry
         '''
         return self.__class__(filter(lambda p: p.name in names, self))
+
+    def remove(self, name):
+        '''
+        Remove the object with the given name.
+
+        :param name: name of the object.
+        :type name: str
+        '''
+        super().pop(self.index(name))
 
     @contextlib.contextmanager
     def restoring_state(self):
@@ -579,11 +883,23 @@ class Registry(list):
                 stack.enter_context(p.restoring_state())
             yield self
 
+    def reverse(self):
+        '''
+        Reverse the registry in-place.
+        '''
+        self.__init__(self.get(n) for n in reversed(self.names))
+
+    def sort(self):
+        '''
+        Sort by name in-place.
+        '''
+        self.__init__(self.get(n) for n in sorted(self.names))
+
     def to_json_object(self):
         '''
         Represent this class as a JSON-like object.
 
-        :returns: this class as a JSON-like object.
+        :returns: This class as a JSON-like object.
         :rtype: dict
         '''
         return [p.to_json_object() for p in self]
@@ -597,14 +913,14 @@ def bounds_for_range(data_pars, range):
     :type data_pars: Registry(Parameter)
     :param range: range to evaluate.
     :type range: str
-    :returns: bounds for the given range.
+    :returns: Bounds for the given range.
     :rtype: numpy.ndarray
     '''
     single_bounds = collections.OrderedDict()
     multi_bounds = collections.OrderedDict()
     for p in data_pars:
         r = p.get_range(range)
-        if range_is_disjoint(r):
+        if len(r.shape) > 1:
             multi_bounds[p.name] = r
         else:
             single_bounds[p.name] = r

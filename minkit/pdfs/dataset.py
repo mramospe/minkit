@@ -16,7 +16,7 @@ from ..backends.core import parse_backend
 import logging
 import numpy as np
 
-__all__ = ['DataSet', 'BinnedDataSet']
+__all__ = ['DataObject', 'DataSet', 'BinnedDataSet']
 
 # Names of different data types
 BINNED = 'binned'
@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 
 class DataObject(object, metaclass=core.DocMeta):
 
-    sample_type = None  # must be defined for each class
+    _sample_type = None  # : Sample type (*binned*/*unbinned*)
 
     def __init__(self, pars, backend):
         '''
@@ -92,7 +92,7 @@ class DataObject(object, metaclass=core.DocMeta):
 
 class DataSet(DataObject):
 
-    sample_type = UNBINNED
+    _sample_type = UNBINNED  # : *unbinned*
 
     def __init__(self, data, pars, weights=None):
         '''
@@ -103,7 +103,7 @@ class DataSet(DataObject):
         :param pars: data parameters.
         :type pars: Registry(Parameter)
         :param weights: possible set of weights.
-        :type weights: darray
+        :type weights: darray or None
         '''
         super().__init__(pars, data.aop.backend)
 
@@ -114,6 +114,8 @@ class DataSet(DataObject):
         '''
         Get the array of data for the given parameter.
 
+        :param var: name of the data parameter.
+        :type var: str
         :returns: Data array.
         :rtype: numpy.ndarray
         '''
@@ -150,16 +152,19 @@ class DataSet(DataObject):
         return self.__weights
 
     @classmethod
-    def from_ndarray(cls, arr, data_par, weights=None, backend=None):
+    def from_ndarray(cls, arr, arg, weights=None, backend=None):
         '''
         Build the class from a single array.
 
         :param arr: array of data.
         :type arr: numpy.ndarray
-        :param data_pars: data parameters.
-        :type data_pars: Registry(Parameter)
+        :param arg: if *arr* only contains one set of values, it must be \
+        a single data parameter. Otherwise a collection of parameters.
+        :type arg: Registry(Parameter)
         :param weights: possible weights to use.
-        :type weights: numpy.ndarray
+        :type weights: numpy.ndarray or None
+        :param backend: backend where the data set is built.
+        :type backend: Backend or None
         '''
         aop = parse_backend(backend)
 
@@ -169,9 +174,9 @@ class DataSet(DataObject):
             weights = darray.from_ndarray(weights, aop.backend)
 
         if data.ndim > 1:
-            return cls(data, parameters.Registry(data_par), weights)
+            return cls(data, parameters.Registry(arg), weights)
         else:
-            return cls(data, parameters.Registry([data_par]), weights)
+            return cls(data, parameters.Registry([arg]), weights)
 
     @classmethod
     def from_records(cls, arr, data_pars, weights=None, backend=None):
@@ -183,7 +188,10 @@ class DataSet(DataObject):
         :param data_pars: data parameters.
         :type data_pars: Registry(Parameter)
         :param weights: possible weights to use.
-        :type weights: numpy.ndarray
+        :type weights: numpy.ndarray or None
+        :param backend: backend where the data set is built.
+        :type backend: Backend or None
+        :raises RuntimeError: If a parameter is not found in the input array.
         '''
         aop = parse_backend(backend)
         arrs = np.empty((len(arr), len(data_pars)))
@@ -234,9 +242,11 @@ class DataSet(DataObject):
         :param samples: samples to merge.
         :type samples: tuple(DataSet)
         :param maximum: maximum number of entries for the final sample.
-        :type maximum: int
+        :type maximum: int or None
         :returns: Merged sample.
         :rtype: DataSet
+        :raise RuntimeError: If the samples have different parameters or if \
+        only some of them have weights.
 
         ... warning:: If *maximum* is specified, the last elements corresponding to the
             last samples might be dropped.
@@ -258,7 +268,7 @@ class DataSet(DataObject):
         mw = (samples[0].weights is None)
         if any(map(lambda s: (s.weights is None) != mw, samples[1:])):
             raise RuntimeError(
-                'Attempt to merge samples with and without weihts')
+                'Attempt to merge samples with and without weights')
 
         data = aop.concatenate(
             tuple(s.values for s in filter(lambda s: s.values is not None, samples)))
@@ -358,7 +368,7 @@ class DataSet(DataObject):
 
 class BinnedDataSet(DataObject):
 
-    sample_type = BINNED
+    _sample_type = BINNED  # : *binned*
 
     def __init__(self, edges, gaps, pars, values):
         '''
@@ -368,8 +378,8 @@ class BinnedDataSet(DataObject):
         :type edges: darray
         :param gaps: gaps between edges belonging to different parameters.
         :type gaps: numpy.ndarray
-        :param data_pars: data parameters.
-        :type data_pars: Registry(Parameter)
+        :param pars: data parameters.
+        :type pars: Registry(Parameter)
         :param values: values of the data for each center.
         :type values: darray
         '''
@@ -392,6 +402,8 @@ class BinnedDataSet(DataObject):
         '''
         Get the centers of the bins for the given parameter.
 
+        :param var: name of the data parameter.
+        :type var: str
         :returns: Centers of the bins.
         :rtype: darray
         '''
@@ -464,6 +476,8 @@ class BinnedDataSet(DataObject):
         :type data_par: Parameter
         :param values: values at each bin.
         :type values: numpy.ndarray
+        :param backend: backend where the data set is built.
+        :type backend: Backend or None
         :returns: Binned data set.
         :rtype: BinnedDataSet
         '''

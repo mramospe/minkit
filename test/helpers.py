@@ -145,6 +145,29 @@ def setting_seed(function=None, seed=DEFAULT_SEED):
         return __wrapper
 
 
+def randomize(pdf):
+    '''
+    Variate the values of a PDF following a normal distribution centered
+    in the central value of the parameter, and with standard deviation equal
+    to the distance from the bounds divided by the square root of 12.
+    If it falls out of bounds, the middle distance between the closest bound
+    and the current value is used.
+    '''
+    for p in filter(lambda a: not a.constant, pdf.all_real_args):
+
+        l, r = p.bounds
+
+        c = 0.5 * (r + l)
+
+        def gen(): return rndm_gen.normal(c, 0.2886751345948129 * (r - l))
+
+        v = gen()
+        while v > r or v < l:
+            v = gen()
+
+        p.value = v
+
+
 class fit_test(object):
 
     def __init__(self, proxy, nsigma=5, simultaneous=False, fails=False):
@@ -171,10 +194,10 @@ class fit_test(object):
                 self.initials.update(c.pdf.get_values())
             # Do it in a separate loop to avoid modifying the initial values
             for c in self.proxy:
-                self._variate(c.pdf)
+                randomize(c.pdf)
         else:
             self.initials = self.proxy.get_values()
-            self._variate(self.proxy)
+            randomize(self.proxy)
 
         super(fit_test, self).__init__()
 
@@ -223,25 +246,3 @@ class fit_test(object):
         else:
             raise RuntimeError(
                 'Must set the attribute "result" to the result from the minimization')
-
-    def _variate(self, pdf):
-        '''
-        Variate the values of a PDF following a normal distribution centered
-        in the central value of the parameter, and with standard deviation equal
-        to the distance from the bounds divided by the square root of 12.
-        If it falls out of bounds, the middle distance between the closest bound
-        and the current value is used.
-        '''
-        for p in filter(lambda a: not a.constant, pdf.all_real_args):
-
-            l, r = p.bounds
-
-            c = 0.5 * (r + l)
-
-            def gen(): return rndm_gen.normal(c, 0.2886751345948129 * (r - l))
-
-            v = gen()
-            while v > r or v < l:
-                v = gen()
-
-            p.value = v

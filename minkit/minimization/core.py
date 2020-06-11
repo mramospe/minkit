@@ -13,7 +13,9 @@ from ..base.core import DocMeta
 
 import collections
 import contextlib
+import numdifftools
 import numpy as np
+import uncertainties
 import warnings
 
 DEFAULT_ASYM_ERROR_ATOL = 1e-8  # same as numpy.allclose
@@ -25,6 +27,59 @@ __all__ = ['Minimizer']
 
 MinimizationResult = collections.namedtuple(
     'MinimizationResult', ['valid', 'fcn', 'cov'])
+
+
+def errors_and_covariance_matrix(evaluate, result, hessian_opts=None):
+    '''
+    Calculate the covariance matrix given a function to evaluate the FCN
+    and the values of the parameters at the minimum.
+
+    :param evaluate: function used to evaluate the FCN. It must take all the \
+    parameters that are not constant.
+    :param result: values at the FCN minimum.
+    :type result: numpy.ndarray
+    :param hessian_opts: options to be passed to :class:`numdifftools.core.Hessian`.
+    :type hessian_opts: dict or None
+    :returns: values with the errors and covariance matrix.
+    :rtype: numpy.ndarray(uncertainties.core.Variable), numpy.ndarray
+    '''
+    hessian_opts = hessian_opts or {}
+
+    with warnings.catch_warnings():
+        warnings.simplefilter('ignore')
+        hessian = numdifftools.Hessian(
+            lambda a: evaluate(*a), **hessian_opts)
+        cov = 2. * np.linalg.inv(hessian(result))
+
+    values = uncertainties.correlated_values(result, cov)
+
+    return values, cov
+
+
+def determine_varargs_values_varids(args):
+    '''
+    Check the arguments that are constant and create three collections: one
+    containing the arguments that are constant, the values of these parameters
+    and the position in the list.
+
+    :param args: collection of arguments.
+    :type args: Registry(Parameter)
+    :returns: constant parameters, values and indices in the registry.
+    :rtype: Registry(Parameter), numpy.ndarray, numpy.ndarray
+    '''
+    varargs = parameters.Registry(filter(lambda v: not v.constant, args))
+
+    # We must create an array with all the values
+    varids = []
+    values = data_types.empty_float(len(args))
+
+    for i, a in enumerate(args):
+        if a.constant:
+            values[i] = a.value
+        else:
+            varids.append(i)
+
+    return varargs, values, varids
 
 
 def _process_parameters(args, wa, values):
@@ -40,6 +95,8 @@ def _process_parameters(args, wa, values):
     :type values: numpy.ndarray
     :returns: registry of parameters and values.
     :rtype: Registry, numpy.ndarray
+    :raises RuntimeError: If the number of provided sets of values is differet \
+    to the number of profile parameters.
     '''
     values = np.asarray(values)
 
@@ -70,7 +127,7 @@ class Minimizer(object, metaclass=DocMeta):
 
         self.__eval = evaluator
 
-    def _asym_error(self, par, bound, cov, nsigma=1, atol=DEFAULT_ASYM_ERROR_ATOL, rtol=DEFAULT_ASYM_ERROR_RTOL, maxcall=None):
+    def _asym_error(self, par, bound, cov, var=1, atol=DEFAULT_ASYM_ERROR_ATOL, rtol=DEFAULT_ASYM_ERROR_RTOL, maxcall=None):
         '''
         Calculate the asymmetric error using the variation of the FCN from
         *value* to *bound*.
@@ -80,8 +137,10 @@ class Minimizer(object, metaclass=DocMeta):
         :param bound: bound of the parameter.
         :type bound: float
         :param cov: covariance matrix. If provided, the initial values of the \
-        parameters will be obtained from them.
+        parameters will be obtained from it.
         :type cov: numpy.ndarray
+        :param var: squared number of standard deviations.
+        :type var: float
         :param atol: absolute tolerance for the error.
         :type atol: float
         :param rtol: relative tolerance for the error.
@@ -90,6 +149,8 @@ class Minimizer(object, metaclass=DocMeta):
         :type maxcall: int or None
         :returns: Absolute value of the error.
         :rtype: float
+        :raises RuntimeError: If the bounds are too small to calculate the \
+        error associated to the provided number of standard deviations.
         '''
         with self.restoring_state():
 
@@ -110,16 +171,16 @@ class Minimizer(object, metaclass=DocMeta):
 
             fcn_r = self._minimize_check_minimum(par)
 
-            if fcn_r - ref_fcn < nsigma:
+            if fcn_r - ref_fcn < var:
                 raise RuntimeError(
                     'Parameter bounds are smaller than the provided number of standard deviations')
-            elif fcn_r - ref_fcn == nsigma:
+            elif np.allclose(fcn_r - ref_fcn, var, atol=atol, rtol=rtol):
                 return abs(par.value - bound)
 
             closest_fcn = fcn_r
 
             i = 0
-            while not np.allclose(abs(closest_fcn - ref_fcn), nsigma, atol=atol, rtol=rtol) and (True if maxcall is None else i < maxcall):
+            while not np.allclose(abs(closest_fcn - ref_fcn), var, atol=atol, rtol=rtol) and (True if maxcall is None else i < maxcall):
 
                 i += 1  # increase the internal counter (for maxcall)
 
@@ -127,12 +188,12 @@ class Minimizer(object, metaclass=DocMeta):
 
                 fcn = self._minimize_check_minimum(par)
 
-                if abs(fcn - ref_fcn) < 1:
+                if abs(fcn - ref_fcn) < var:
                     l, fcn_l = par.value, fcn
                 else:
                     r, fcn_r = par.value, fcn
 
-                if nsigma - (fcn_l - ref_fcn) < (fcn_r - ref_fcn) - nsigma:
+                if var - (fcn_l - ref_fcn) < (fcn_r - ref_fcn) - var:
                     bound, closest_fcn = l, fcn_l
                 else:
                     bound, closest_fcn = r, fcn_r
@@ -183,7 +244,7 @@ class Minimizer(object, metaclass=DocMeta):
         '''
         return self.__eval
 
-    def asymmetric_errors(self, name, cov=None, nsigma=1, atol=DEFAULT_ASYM_ERROR_ATOL, rtol=DEFAULT_ASYM_ERROR_RTOL, maxcall=None):
+    def asymmetric_errors(self, name, cov=None, sigma=1, atol=DEFAULT_ASYM_ERROR_ATOL, rtol=DEFAULT_ASYM_ERROR_RTOL, maxcall=None):
         '''
         Calculate the asymmetric errors for the given parameter. This is done
         by subdividing the bounds of the parameter into two till the variation
@@ -194,9 +255,9 @@ class Minimizer(object, metaclass=DocMeta):
         :type name: str
         :param cov: covariance matrix. If provided, the initial values of the \
         parameters will be obtained from them.
-        :type cov: numpy.ndarray
-        :param nsigma: number of standard deviations to compute.
-        :type nsigma: float
+        :type cov: numpy.ndarray or None
+        :param sigma: number of standard deviations to compute.
+        :type sigma: float
         :param atol: absolute tolerance for the error.
         :type atol: float
         :param rtol: relative tolerance for the error.
@@ -208,8 +269,10 @@ class Minimizer(object, metaclass=DocMeta):
 
         lb, ub = par.bounds
 
-        lo = self._asym_error(par, lb, cov, nsigma, atol, rtol, maxcall)
-        hi = self._asym_error(par, ub, cov, nsigma, atol, rtol, maxcall)
+        var = sigma * sigma
+
+        lo = self._asym_error(par, lb, cov, var, atol, rtol, maxcall)
+        hi = self._asym_error(par, ub, cov, var, atol, rtol, maxcall)
 
         par.asym_errors = lo, hi
 
@@ -240,7 +303,7 @@ class Minimizer(object, metaclass=DocMeta):
             with self.__eval.using_caches():
                 for i, vals in enumerate(values.T):
                     for p, v in zip(profile_pars, vals):
-                        p.value = v
+                        self._set_parameter_state(p, value=v)
                     fcn_values[i] = self.__eval.fcn()
 
         return fcn_values
@@ -254,7 +317,7 @@ class Minimizer(object, metaclass=DocMeta):
         raise exceptions.MethodNotDefinedError(
             self.__class__, 'minimize')
 
-    def minimization_profile(self, wa, values, minimizer_config=None):
+    def minimization_profile(self, wa, values, minimization_results=False, minimizer_config=None):
         '''
         Minimize a PDF an calculate the FCN for each set of parameters and values.
 
@@ -262,10 +325,13 @@ class Minimizer(object, metaclass=DocMeta):
         :type wa: str or list(str).
         :param values: values for each parameter specified in *wa*.
         :type values: numpy.ndarray
+        :param minimization_results: if set to True, then the results for each \
+        step are returned.
+        :type minimization_results: bool
         :param minimizer_config: arguments passed to :meth:`Minimizer.minimize`.
         :type minimizer_config: dict or None
         :returns: Profile of the FCN for the given values.
-        :rtype: numpy.ndarray
+        :rtype: numpy.ndarray, (list(MinimizationResult))
         '''
         profile_pars, values = _process_parameters(
             self.__eval.args, wa, values)
@@ -273,6 +339,8 @@ class Minimizer(object, metaclass=DocMeta):
         fcn_values = data_types.empty_float(len(values[0]))
 
         minimizer_config = minimizer_config or {}
+
+        results = []
 
         with self.restoring_state():
 
@@ -291,18 +359,20 @@ class Minimizer(object, metaclass=DocMeta):
 
                 fcn_values[i] = res.fcn
 
-        return fcn_values
+                results.append(res)
+
+        if minimization_results:
+            return fcn_values, res
+        else:
+            return fcn_values
 
     @contextlib.contextmanager
     def restoring_state(self):
         '''
         Method to ensure that modifications of parameters within a minimizer
-        context are reset properly. Sadly, the :class:`iminuit.Minuit` class
-        is not stateless, so each time a parameter is modified it must be
-        notified of the change.
+        context are reset properly.
 
-        .. warning:: For the :class:`MinuitMinimizer` class, a call to this
-           method does not preserve the minimization state of MIGRAD.
+        .. seealso:: :meth:`MinuitMinimizer.restoring_state`, :meth:`SciPyMinimizer.restoring_state`
         '''
         with self.__eval.args.restoring_state():
             yield self

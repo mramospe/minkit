@@ -120,6 +120,10 @@ class CPUOperations(object):
 
         :param backend: user interface to the backend.
         :type backend: Backend
+        :param tmpdir: optional temporary directory to write the compiled \
+        libraries. If none is provided, then a proper temporary directory \
+        is created.
+        :type tmpdir: tempfile.TemporaryDirectory or None
         '''
         self.__backend = backend
 
@@ -164,6 +168,7 @@ class CPUOperations(object):
         :type name: str
         :returns: compiled module.
         :rtype: module
+        :raises FileNotFoundError: If the XML file can not be found.
         '''
         modname = core.parse_module_name(name, nvar_arg_pars)
 
@@ -183,7 +188,7 @@ class CPUOperations(object):
                     break
 
             if xml_source is None:
-                raise RuntimeError(
+                raise FileNotFoundError(
                     f'XML file for function {name} not found in any of the provided paths: {pdf_paths}')
 
             # Write the code
@@ -204,10 +209,10 @@ class CPUOperations(object):
                 compiler.link(f'{modname} library', objects, libname,
                               extra_preargs=CFLAGS, libraries=['stdc++', 'gsl', 'gslcblas'])
             except Exception as ex:
-                nl = len(str(code.count('\n')))
-                code = '\n'.join(f'{i + 1:>{nl}}: {l}' for i,
-                                 l in enumerate(code.split('\n')))
-                logger.error(f'Error found compiling:\n{code}')
+                nl = len(str(code.count(os.linesep)))
+                code = os.linesep.join(f'{i + 1:>{nl}}: {l}' for i,
+                                       l in enumerate(code.split(os.linesep)))
+                logger.error(f'Error found compiling:{os.linesep}{code}')
                 raise ex
 
             module = ctypes.cdll.LoadLibrary(libname)

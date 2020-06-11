@@ -104,6 +104,7 @@ class GPUOperations(object):
         :type name: str
         :returns: compiled module.
         :rtype: module
+        :raises FileNotFoundError: If the XML file can not be found.
         '''
         pdf_paths = core.get_pdf_src()
 
@@ -121,7 +122,7 @@ class GPUOperations(object):
                     break
 
             if not os.path.isfile(xml_source):
-                raise RuntimeError(
+                raise FileNotFoundError(
                     f'XML file for function {name} not found in any of the provided paths: {pdf_paths}')
 
             # Write the code
@@ -135,10 +136,10 @@ class GPUOperations(object):
                 try:
                     module = self.__context.compile(fi.read())
                 except Exception as ex:
-                    nl = len(str(code.count('\n')))
-                    code = '\n'.join(f'{i + 1:>{nl}}: {l}' for i,
-                                     l in enumerate(code.split('\n')))
-                    logger.error(f'Error found compiling:\n{code}')
+                    nl = len(str(code.count(os.linesep)))
+                    code = os.linesep.join(f'{i + 1:>{nl}}: {l}' for i,
+                                           l in enumerate(code.split(os.linesep)))
+                    logger.error(f'Error found compiling:{os.linesep}{code}')
                     raise ex
 
             self.__gpu_module_cache[modname] = module

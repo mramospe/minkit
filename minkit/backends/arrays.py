@@ -69,10 +69,12 @@ class marray(object, metaclass=DocMeta):
 
         :param array: original array.
         :type array: numpy.ndarray or reikna.cluda.api.Array
-        :param int: (GPU only) actual size of the array.
-        :type length: int
+        :param dtype: data type.
+        :type dtype: numpy.dtype
+        :param length: (GPU only) actual size of the array.
+        :type length: int or None
         :param backend: backend where to put the array.
-        :type backend: Backend
+        :type backend: Backend or None
         '''
         super().__init__()
         self.__aop = core.parse_backend(backend)
@@ -187,6 +189,7 @@ array  = {self.as_ndarray()}'''
         :type i: int
         :returns: value at the given index.
         :rtype: float, int or bool
+        :raises IndexError: If there is an attempt to access an element out of range.
         '''
         if i >= self.__length:
             raise IndexError(
@@ -225,8 +228,10 @@ class barray(marray):
 
         :param array: original array.
         :type array: numpy.ndarray or reikna.cluda.api.Array
+        :param length: length of the array.
+        :type length: int or None
         :param backend: backend where to put the array.
-        :tye backend: Backend
+        :type backend: Backend or None
         '''
         super().__init__(
             array, backend.aop.bool_type, length, backend)
@@ -312,8 +317,14 @@ class farray(marray):
 
         :param array: original array.
         :type array: numpy.ndarray or reikna.cluda.api.Array
+        :param dtype: data type.
+        :type dtype: numpy.ndarray
+        :param ndim: number of dimensions.
+        :type ndim: int
+        :param length: length of the array.
+        :type length: int or None
         :param backend: backend where to put the array.
-        :tye backend: Backend
+        :type backend: Backend or None
         '''
         if length is None:
             length = len(array) // ndim
@@ -562,8 +573,12 @@ class carray(farray):
 
         :param array: original array.
         :type array: numpy.ndarray or reikna.cluda.api.Array
+        :param ndim: number of dimensions.
+        :type ndim: int
+        :param length: length of the array.
+        :type length: int or None
         :param backend: backend where to put the array.
-        :tye backend: Backend
+        :type backend: Backend or None
         '''
         super().__init__(
             array, data_types.cpu_complex, ndim, length, backend)
@@ -591,8 +606,12 @@ class darray(farray):
 
         :param array: original array.
         :type array: numpy.ndarray or reikna.cluda.api.Array
+        :param ndim: number of dimensions.
+        :type ndim: int
+        :param length: length of the array.
+        :type length: int or None
         :param backend: backend where to put the array.
-        :tye backend: Backend
+        :type backend: Backend or None
         '''
         super().__init__(
             array, data_types.cpu_float, ndim, length, backend)
@@ -681,6 +700,7 @@ class darray(farray):
         :type a: barray or iarray
         :returns: slice of this array.
         :rtype: darray
+        :raises ValueError: If the method is called for a data type different to bool or integer.
         '''
         if self.aop.is_bool(a):
             return self.aop.slice_from_boolean(self, a)
@@ -716,7 +736,7 @@ class darray(farray):
         :param start: where to start taking entries.
         :type start: int
         :param end: where to end taking entries.
-        :type end: int
+        :type end: int or None
         :returns: slice of the array.
         :rtype: marray
         '''
@@ -731,8 +751,10 @@ class iarray(marray):
 
         :param array: original array.
         :type array: numpy.ndarray or reikna.cluda.api.Array
+        :param length: length of the array.
+        :type length: int or None
         :param backend: backend where to put the array.
-        :tye backend: Backend
+        :tye backend: Backend or None
         '''
         super().__init__(
             array, data_types.cpu_int, length, backend)

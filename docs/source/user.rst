@@ -15,3 +15,4 @@ For a detailed description of the different functions and classes of the package
    notebooks/fit_stability
    notebooks/multidimensional
    notebooks/extension
+   notebooks/blinding

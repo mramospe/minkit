@@ -119,7 +119,7 @@ def parse_module_name(name, nvar_arg_pars=None):
     :param name: name of the module.
     :type name: str
     :param nvar_arg_pars: number of variable arguments.
-    :type nvar_arg_pars: int
+    :type nvar_arg_pars: int or None
     :returns: name of the module.
     :rtype: str
     '''

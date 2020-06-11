@@ -109,11 +109,11 @@ class MiserConfig(NumIntConfig):
         :type estimate_frac: float
         :param min_calls: minimum number of function calls required to proceed \
         with a bisection step. The default value is set to :math:`16 \times \text{ndim}`.
-        :type min_calls: int
+        :type min_calls: int or None
         :param min_calls_per_bisection: this parameter specifies the minimum \
         number of function calls required to proceed with a bisection step. \
         The default value is set to :math:`32 \times \text{min_calls}`.
-        :type min_calls_per_bisection: int
+        :type min_calls_per_bisection: int or None
         :param alpha: parameter to control how the estimated variances for the \
         two sub-regions of a bisection are combined when allocating points.
         :type alpha: float

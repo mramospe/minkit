@@ -26,6 +26,6 @@ The results can be seen in the following figures:
 
 If the model is simple, generating random numbers is faster for `RooFit <https://root.cern.ch/roofit>`__ than for MinKit, for all the backends, but it soon becomes similar once the model starts to be a bit more complicated.
 For a small number of entries, the timing for fitting remains around the same order of magnitude for the CPU implementation and `RooFit <https://root.cern.ch/roofit>`__, being the GPU backends a bit slower.
-Howerver, once the number of entries is greater than 10000, the GPU starts to be drastically faster with respect to any CPU implementation.
+However, once the number of entries is greater than 10000, the GPU starts to be drastically faster with respect to any CPU implementation.
 Once the model starts to be slightly complicated, one can find two orders of magnitude of difference in timing between CPU and GPU.
 Note that the CPU implementation of MinKit has an speed close to that of `RooFit <https://root.cern.ch/roofit>`__, despite the latter is purely implemented in C++.

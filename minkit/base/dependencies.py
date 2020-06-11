@@ -44,8 +44,8 @@ def _split_dependent_objects(obj):
     :type obj: PDF or ParameterBase
     :returns: Independent and dependent objects.
     '''
-    iobjs = list(filter(lambda p: not p.dependent, obj.dependencies))
-    dobjs = list(filter(lambda p: p.dependent, obj.dependencies))
+    iobjs = list(filter(lambda p: not p._dependent, obj.dependencies))
+    dobjs = list(filter(lambda p: p._dependent, obj.dependencies))
     for p in dobjs:
         ip, dp = _split_dependent_objects(p)
         iobjs += ip
@@ -64,7 +64,7 @@ def split_dependent_objects_with_resolution_order(objs):
     '''
     iobjs, _dobjs = [], []
     for p in objs:
-        if p.dependent:
+        if p._dependent:
             _dobjs.append(p)
             ip, dp = _split_dependent_objects(p)
             iobjs += [i for i in ip if not i in iobjs]

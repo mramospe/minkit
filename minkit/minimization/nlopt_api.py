@@ -4,26 +4,33 @@
 # Copyright (c) 2020 Miguel Ramos Pernas
 ########################################
 '''
-Definition of the interface functions and classes with :mod:`scipy`.
+Definition of the interface functions and classes with :mod:`nlopt`.
 '''
 from . import core
 
-import scipy.optimize as scipyopt
-import warnings
+import nlopt
 
-__all__ = ['SciPyMinimizer']
+__all__ = ['NLoptMinimizer']
 
-# Choices and default method to minimize with SciPy
-SCIPY_CHOICES = ('L-BFGS-B', 'TNC', 'SLSQP', 'trust-constr')
+# Choices and default method to minimize with NLopt
+NLOPT_DICT = {
+    'COBYLA': nlopt.LN_COBYLA,
+    'BOBYQA': nlopt.LN_BOBYQA,
+    'NEWUOA': nlopt.LN_NEWUOA,
+    'PRAXIS': nlopt.LN_PRAXIS,
+    'NELDERMEAD': nlopt.LN_NELDERMEAD,
+    'SBPLX': nlopt.LN_SBPLX,
+}
+NLOPT_CHOICES = tuple(NLOPT_DICT.keys())
 
 
-class SciPyMinimizer(core.Minimizer):
+class NLoptMinimizer(core.Minimizer):
 
     def __init__(self, method, evaluator, **minimizer_config):
         '''
-        Interface with the :func:`scipy.optimize.minimize` function.
+        Interface with the :mod:`nlopt` minimizers.
 
-        :param method: method parsed by :func:`scipy.optimize.minimize`.
+        :param method: method name in :mod:`nlopt`.
         :type method: str
         :param evaluator: evaluator to be used in the minimization.
         :type evaluator: UnbinnedEvaluator, BinnedEvaluator or SimultaneousEvaluator
@@ -33,7 +40,7 @@ class SciPyMinimizer(core.Minimizer):
         '''
         super().__init__(evaluator)
 
-        if method not in SCIPY_CHOICES:
+        if method not in NLOPT_CHOICES:
             raise ValueError(f'Unknown minimization method "{method}"')
 
         self.__method = method
@@ -44,23 +51,23 @@ class SciPyMinimizer(core.Minimizer):
         with the information whether the minimization succeded and the
         covariance matrix.
 
-        .. seealso:: :meth:`SciPyMinimizer.scipy_minimize`
+        .. seealso:: :meth:`NLoptMinimizer.nlopt_minimize`
         '''
-        res, cov = self.scipy_minimize(*args, **kwargs)
-        return core.MinimizationResult(res.success, res.fun, cov)
+        status, fcn, cov = self.nlopt_minimize(*args, **kwargs)
+        return core.MinimizationResult(status, fcn, cov)
 
-    def scipy_minimize(self, tol=None, hessian_opts=None):
+    def nlopt_minimize(self, tol=1e-7, hessian_opts=None):
         '''
         Minimize the PDF.
 
         :param tol: tolerance to be used in the minimization.
-        :type tol: float or None
+        :type tol: float
         :param hessian_opts: options to be passed to :class:`numdifftools.core.Hessian`.
         :type hessian_opts: dict or None
-        :returns: Result of the minimization and covariance matrix.
-        :rtype: scipy.optimize.OptimizeResult, numpy.ndarray
+        :returns: Result of the minimization, covariance matrix and FCN at the minimum.
+        :rtype: int, numpy.ndarray, float
 
-        .. seealso:: :meth:`SciPyMinimizer.minimize`
+        .. seealso:: :meth:`NLoptMinimizer.minimize`
         '''
         varargs, values, varids = core.determine_varargs_values_varids(
             self.evaluator.args)
@@ -71,22 +78,26 @@ class SciPyMinimizer(core.Minimizer):
             values[varids] = args
             return self.evaluator(*values)
 
-        bounds = [p.bounds for p in varargs]
+        # Build and call the minimizer
+        minimizer = nlopt.opt(NLOPT_DICT[self.__method], len(varargs))
+        minimizer.set_lower_bounds([p.bounds[0] for p in varargs])
+        minimizer.set_upper_bounds([p.bounds[1] for p in varargs])
+        minimizer.set_min_objective(lambda args, grad: _evaluate(*args))
 
-        with self.evaluator.using_caches(), warnings.catch_warnings():
-            warnings.filterwarnings(
-                'ignore', category=UserWarning, module=r'.*_hessian_update_strategy')
-            warnings.filterwarnings('once', category=RuntimeWarning)
-            result = scipyopt.minimize(
-                _evaluate, initials, method=self.__method, bounds=bounds, tol=tol)
+        minimizer.set_xtol_rel(tol)
 
-        # Disable warnings, since "numdifftools" does not allow to set bounds
+        with self.evaluator.using_caches():
+            result = minimizer.optimize(initials)
+
+        fcn = minimizer.last_optimum_value()
+
         with self.restoring_state():
-            values, cov = core.errors_and_covariance_matrix(
-                _evaluate, result.x)
+            values, cov = core.errors_and_covariance_matrix(_evaluate, result)
 
         # Update the values and errors of the parameters
         for p, v in zip(varargs, values):
             p.value, p.error = v.nominal_value, v.std_dev
 
-        return result, cov
+        status = minimizer.last_optimize_result() > 0  # positive values are OK
+
+        return status, fcn, cov

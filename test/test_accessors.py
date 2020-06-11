@@ -27,7 +27,7 @@ def test_add_pdf_src(tmpdir):
 
     x = minkit.Parameter('x', bounds=(0, 10))
 
-    with pytest.raises(RuntimeError):
+    with pytest.raises(FileNotFoundError):
         NonExistingPDF('non-existing', x)
 
     with open(os.path.join(tmpdir, 'ExistingPDF.xml'), 'wt') as fi:

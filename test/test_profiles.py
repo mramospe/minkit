@@ -61,6 +61,7 @@ def test_minimization_profile():
 
     with minkit.minimizer('uml', pdf, data) as minimizer:
         minimizer.minimize()
+        minimizer.minos_profile('c')
         minimizer.minimization_profile('c', cv)
         minimizer.minimization_profile(['c', 's'], mp)
 
@@ -115,5 +116,6 @@ def test_simultaneous_minimization_profile():
 
     with minkit.simultaneous_minimizer(cats) as minimizer:
         minimizer.minimize()
+        minimizer.minos_profile('c1')
         minimizer.minimization_profile('c1', cv)
         minimizer.minimization_profile(['c1', 's2'], mp)

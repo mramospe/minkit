@@ -38,6 +38,8 @@ class Amoroso(pdf_core.SourcePDF):
         :type alpha: Parameter
         :param beta: power of the exponential.
         :type beta: Parameter
+        :param backend: backend where the PDF will operate.
+        :type backend: Backend or None
 
         .. warning: This function is unstable and the evaluation can explode easily for certain combination of parameters, as the normalization is currently done numerically.
         '''
@@ -73,6 +75,8 @@ class Argus(pdf_core.SourcePDF):
         :type c: Parameter
         :param p: power ruling the peaking strength of the distribution.
         :type p: Parameter
+        :param backend: backend where the PDF will operate.
+        :type backend: Backend or None
         '''
         super().__init__(name, [x], [mu, c, p], backend=backend)
 
@@ -100,6 +104,8 @@ class Chebyshev(pdf_core.SourcePDF):
         :type x: Parameter
         :param coeffs: coefficients for the polynomial
         :type coeffs: tuple(Parameter)
+        :param backend: backend where the PDF will operate.
+        :type backend: Backend or None
         '''
         super().__init__(name, [x], None, coeffs, backend)
 
@@ -140,6 +146,8 @@ class CrystalBall(pdf_core.SourcePDF):
         :type a: Parameter
         :param n: power of the power-law.
         :type n: Parameter
+        :param backend: backend where the PDF will operate.
+        :type backend: Backend or None
         '''
         super().__init__(name, [x], [c, s, a, n], backend=backend)
 
@@ -160,6 +168,8 @@ class Exponential(pdf_core.SourcePDF):
         :type x: Parameter
         :param k: parameter of the exponential.
         :type k: Parameter
+        :param backend: backend where the PDF will operate.
+        :type backend: Backend or None
         '''
         super().__init__(name, [x], [k], backend=backend)
 
@@ -185,6 +195,8 @@ class ExpPoly(pdf_core.SourcePDF):
         :type k: Parameter
         :param coeffs: coefficients for the polynomial
         :type coeffs: tuple(Parameter)
+        :param backend: backend where the PDF will operate.
+        :type backend: Backend or None
         '''
         super().__init__(name, [x], [k], coeffs, backend)
 
@@ -208,6 +220,8 @@ class Gaussian(pdf_core.SourcePDF):
         :type center: Parameter
         :param sigma: standard deviation.
         :type sigma: Parameter
+        :param backend: backend where the PDF will operate.
+        :type backend: Backend or None
         '''
         super().__init__(name, [x], [center, sigma], backend=backend)
 
@@ -233,6 +247,8 @@ class Landau(pdf_core.SourcePDF):
         :type center: Parameter
         :param sigma: scale parameter.
         :type sigma: Parameter
+        :param backend: backend where the PDF will operate.
+        :type backend: Backend or None
         '''
         super().__init__(name, [x], [center, sigma], backend=backend)
 
@@ -256,6 +272,8 @@ class Polynomial(pdf_core.SourcePDF):
         :type x: Parameter
         :param coeffs: coefficients for the polynomial
         :type coeffs: tuple(Parameter)
+        :param backend: backend where the PDF will operate.
+        :type backend: Backend or None
         '''
         super().__init__(name, [x], None, coeffs, backend)
 
@@ -278,6 +296,8 @@ class PowerLaw(pdf_core.SourcePDF):
         :type c: Parameter
         :param n: power of the function.
         :type n: Parameter
+        :param backend: backend where the PDF will operate.
+        :type backend: Backend or None
         '''
         if c.value > x.bounds[0] and c.value < x.bounds[1]:
             logger.warning(

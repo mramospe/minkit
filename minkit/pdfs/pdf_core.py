@@ -9,7 +9,7 @@ Base classes to define PDF data_types.
 from . import dataset
 from ..backends import gsl_api
 
-from ..backends.core import common_backend, parse_backend
+from ..backends.core import common_backend, is_gpu_backend, parse_backend
 from ..base import core
 from ..base import bindings
 from ..base import data_types
@@ -21,6 +21,7 @@ import contextlib
 import functools
 import logging
 import numpy as np
+import os
 import textwrap
 import warnings
 
@@ -34,7 +35,14 @@ DEFAULT_EVB_SIZE = 100
 DEFAULT_CONV_SIZE = 10000
 
 # Default number of events to generate in a single step
-DEFAULT_GEN_SIZE = 10000
+DEFAULT_GEN_SIZE_CPU = 10000
+DEFAULT_GEN_SIZE_GPU = 100000
+
+# Cache types
+BIND = 'bind'
+CONST = 'const'
+
+CACHE_TYPES = (BIND, CONST)
 
 # Registry of PDF classes so they can be built by name
 PDF_REGISTRY = {}
@@ -88,7 +96,7 @@ def allows_bind_cache(method):
     '''
     @functools.wraps(method)
     def __wrapper(self, *args, **kwargs):
-        if self.cache_type == PDF.BIND:
+        if self.cache_type == BIND:
             return process_cache(self.cache, method, self, args, kwargs)
         else:
             return method(self, *args, **kwargs)
@@ -101,7 +109,7 @@ def allows_const_cache(method):
     '''
     @functools.wraps(method)
     def __wrapper(self, *args, **kwargs):
-        if self.cache_type == PDF.CONST and self.constant:
+        if self.cache_type == CONST and self.constant:
             return process_cache(self.cache, method, self, args, kwargs)
         else:
             return method(self, *args, **kwargs)
@@ -127,17 +135,11 @@ def safe_division(first, second):
 
 class PDF(object, metaclass=core.DocMeta):
 
-    # Cache types
-    BIND = 'bind'
-    CONST = 'const'
-
-    CACHE_TYPES = (BIND, CONST)
-
     # Allow to define if a PDF object depends on other PDFs. All PDF objects
     # with this value set to "True" must have the property "pdfs" implemented.
-    dependent = False
+    _dependent = False
 
-    def __init__(self, name, data_pars, args_pars, backend=None):
+    def __init__(self, name, data_pars, arg_pars, backend=None):
         '''
         Build the class from a name, a set of data parameters and argument parameters.
         The first correspond to those that must be present on any :class:`DataSet` or
@@ -150,6 +152,8 @@ class PDF(object, metaclass=core.DocMeta):
         :type data_pars: Registry(Parameter)
         :param arg_pars: argument parameters.
         :type arg_pars: Registry(Parameter)
+        :param backend: backend where the PDF will operate.
+        :type backend: Backend or None
         :ivar name: name of the PDF.
         :ivar evb_size: number of points to use when evaluating the PDF \
         numerically on a binned data set.
@@ -159,7 +163,7 @@ class PDF(object, metaclass=core.DocMeta):
         self.evb_size = DEFAULT_EVB_SIZE
         self.__aop = parse_backend(backend)
         self.__data_pars = data_pars
-        self.__arg_pars = args_pars
+        self.__arg_pars = arg_pars
 
         # The cache is saved on a dictionary, and inherited classes must avoid colliding names
         self.__cache = None
@@ -187,9 +191,14 @@ class PDF(object, metaclass=core.DocMeta):
         '''
         Attributes of the class as a string.
         '''
-        out = f'{self.__class__.__name__}({self.name}):\n'
-        out += textwrap.indent('\n'.join(tuple(str(p)
-                                               for p in self.args)), ' ')
+        out = f'{self.__class__.__name__}({self.name}):{os.linesep}'
+
+        out += textwrap.indent(f'Data parameters:{os.linesep}' + textwrap.indent(os.linesep.join(tuple(str(p)
+                                                                                                       for p in self.data_pars)), ' '), ' ')
+
+        if len(self.args) != 0:
+            out += textwrap.indent(f'{os.linesep}Arguments:{os.linesep}' + textwrap.indent(os.linesep.join(tuple(str(p)
+                                                                                                                 for p in self.args)), ' '), ' ')
         return out
 
     @property
@@ -216,22 +225,17 @@ class PDF(object, metaclass=core.DocMeta):
 
         :param ctype: cache type, it can be any of ('bind', 'const').
         :type ctype: str
-
-        .. warning:: This method is not meant to be utilized by users since \
-        it can turn really harmful if not handled properly.
+        :raise ValueError: If the cache type is unknown.
         '''
-        if ctype not in PDF.CACHE_TYPES:
+        if ctype not in CACHE_TYPES:
             raise ValueError(
-                f'Unknown cache type "{ctype}"; select from: {PDF.CACHE_TYPES}')
+                f'Unknown cache type "{ctype}"; select from: {CACHE_TYPES}')
         self.__cache = {}
         self.__cache_type = ctype
 
     def _free_cache(self):
         '''
         Free the cache from memory.
-
-        .. warning:: This method is not meant to be utilized by users since \
-        it can turn really harmful if not handled properly.
         '''
         self.__cache = None
         self.__cache_type = None
@@ -241,7 +245,7 @@ class PDF(object, metaclass=core.DocMeta):
         Create a copy of this PDF.
 
         :param backend: new backend.
-        :type backend: Backend
+        :type backend: Backend or None
         :returns: A copy of this PDF.
         '''
         return pdf_from_json(pdf_to_json(self), backend)
@@ -274,6 +278,8 @@ class PDF(object, metaclass=core.DocMeta):
         :param backend: backend to build the PDF.
         :type backend: Backend
         :returns: This type of PDF constructed together with its parameters.
+
+        .. seealso:: :meth:`PDF.to_json_object`
         '''
         class_name = obj['class']
         if class_name == 'PDF':
@@ -338,7 +344,7 @@ class PDF(object, metaclass=core.DocMeta):
         :type: Registry(Parameter)
         '''
         args = parameters.Registry(self.args)
-        for p in filter(lambda p: p.dependent, self.args):
+        for p in filter(lambda p: p._dependent, self.args):
             args += p.all_args
         return args
 
@@ -359,7 +365,7 @@ class PDF(object, metaclass=core.DocMeta):
 
         :type: Registry(Parameter)
         '''
-        return parameters.Registry(filter(lambda p: not p.dependent, self.all_args))
+        return parameters.Registry(filter(lambda p: not p._dependent, self.all_args))
 
     @property
     def args(self):
@@ -377,7 +383,7 @@ class PDF(object, metaclass=core.DocMeta):
 
         :type: Registry(Parameter)
         '''
-        return parameters.Registry(filter(lambda p: not p.dependent, self.__arg_pars))
+        return parameters.Registry(filter(lambda p: not p._dependent, self.__arg_pars))
 
     @property
     def cache(self):
@@ -400,7 +406,7 @@ class PDF(object, metaclass=core.DocMeta):
     @property
     def constant(self):
         '''
-        Whether this is a constant :class:`PDF`.
+        Whether this is a constant PDF.
 
         :type: bool
         '''
@@ -428,22 +434,24 @@ class PDF(object, metaclass=core.DocMeta):
         :param normalized: whether to return a normalized output.
         :type normalized: bool
         '''
-        with self.using_cache(PDF.BIND):
+        with self.using_cache(BIND):
             yield bindings.bind_class_arguments(self, range=range, normalized=normalized)
 
     def generate(self, size=10000, mapsize=1000, gensize=None, safe_factor=1.1, range=parameters.FULL):
         '''
         Generate random data.
         A call to :meth:`PDF.bind` is implicit, since several calls will be done
-        to the PDF with the same sets of values.
+        to the PDF with the same set of values.
 
         :param size: size (or minimum size) of the output sample.
         :type size: int
         :param mapsize: number of points to consider per dimension (data parameter) \
         in order to calculate the maximum value of the PDF.
         :type mapsize: int
-        :param gensize: number of entries to generate per iteration.
-        :type gensize: int
+        :param gensize: number of entries to generate per iteration. By default it \
+        is set to :math:`10^4` and :math:`10^5` for CPU and GPU backends, \
+        respectively.
+        :type gensize: int or None
         :param safe_factor: additional factor to multiply the numerically calculated \
         maximum of the function. In general this must be modified if the function is \
         not well-behaved.
@@ -454,7 +462,10 @@ class PDF(object, metaclass=core.DocMeta):
         :rtype: DataSet
         '''
         if gensize is None:
-            gensize = DEFAULT_GEN_SIZE**len(self.data_pars)
+            if is_gpu_backend(self.__aop.backend.btype):
+                gensize = DEFAULT_GEN_SIZE_GPU
+            else:
+                gensize = DEFAULT_GEN_SIZE_CPU
 
         with self.bind(range, normalized=False) as proxy:
 
@@ -559,7 +570,7 @@ class PDF(object, metaclass=core.DocMeta):
         :param kwargs: keyword arguments with "name"/"value".
         :type kwargs: dict(str, float)
 
-        .. note:: Any PDF sharing parameters with this will also change its behaviour.
+        .. note:: Parameters of this PDF might be shared with others.
         '''
         for a in self.all_real_args:
             a.value = kwargs.get(a.name, a.value)
@@ -581,6 +592,8 @@ class PDF(object, metaclass=core.DocMeta):
 
         :returns: Object that can be saved into a JSON file.
         :rtype: dict
+
+        .. seealso:: :meth:`PDF.from_json_object`
         '''
         raise exceptions.MethodNotDefinedError(
             self.__class__, 'to_json_object')
@@ -600,11 +613,11 @@ class PDF(object, metaclass=core.DocMeta):
           :class:`PDF`. However, the function can be called in different data
           sets.
 
-        .. warning:: It is responsibility of the user to ensure that the \
-           conditions for the cache to be valid are preserved.
-
         :param ctype: cache type.
         :type ctype: str
+
+        .. warning:: It is responsibility of the user to ensure that the \
+           conditions for the cache to be valid are preserved.
         '''
         self._enable_cache(ctype)
         with self.aop.using_caches():
@@ -637,9 +650,11 @@ class SourcePDF(PDF):
         :param data_pars: data parameters.
         :type data_pars: Registry(Parameter)
         :param arg_pars: argument parameters.
-        :type arg_pars: Registry(Parameter)
+        :type arg_pars: Registry(Parameter) or None
         :param var_arg_pars: argument parameters whose number can vary.
-        :type var_arg_pars: Registry(Parameter)
+        :type var_arg_pars: Registry(Parameter) or None
+        :param backend: backend where the PDF will operate.
+        :type backend: Backend or None
         '''
         arg_pars = arg_pars or []
 
@@ -653,7 +668,7 @@ class SourcePDF(PDF):
             var_arg_pars = list(var_arg_pars)
 
         super().__init__(name, parameters.Registry(
-            data_pars), parameters.Registry(arg_pars + var_arg_pars), backend)
+            data_pars), parameters.Registry(arg_pars) + parameters.Registry(var_arg_pars), backend)
 
         # Access the PDF
         self.__function_proxies = self.aop.access_pdf(
@@ -747,6 +762,13 @@ class SourcePDF(PDF):
           * *iterations*: number of iterations to perform for each call to the
             routine.
           * *mode*: sampling method to use.
+
+        An example of how to set VEGAS as the numerical integrator with 100
+        calls is:
+
+        .. code-block:: python
+
+           pdf.numint_config = {'method': 'vegas': 'calls': 100}
 
         In addition, it is possible to define a maximum tolerance for the
         relative error on the calculation of the integral, which is set through
@@ -910,7 +932,7 @@ class MultiPDF(PDF):
 
     # Allow to define if a PDF object depends on other PDFs. All PDF objects
     # with this value set to "True" must have the property "pdfs" implemented.
-    dependent = True
+    _dependent = True
 
     def __init__(self, name, pdfs, arg_pars=None):
         '''
@@ -921,7 +943,7 @@ class MultiPDF(PDF):
         :param pdfs: :class:`PDF` objects to hold.
         :type pdfs: list(PDF)
         :param arg_pars: possible argument parameters.
-        :type arg_pars: Registry(Parameter)
+        :type arg_pars: Registry(Parameter) or None
         '''
         if arg_pars is not None:
             arg_pars = parameters.Registry(arg_pars)
@@ -940,10 +962,10 @@ class MultiPDF(PDF):
 
     def __repr__(self):
         out = f'{self.__class__.__name__}({self.name}):'
-        out += '\n' + textwrap.indent('Parameters:\n' + textwrap.indent(
-            '\n'.join(tuple(str(p) for p in self.args)), ' '), ' ')
-        out += '\n' + textwrap.indent('PDFs:\n' + textwrap.indent(
-            '\n'.join(tuple(str(p) for p in self.pdfs)), ' '), ' ')
+        out += os.linesep + textwrap.indent(f'Parameters:{os.linesep}' + textwrap.indent(
+            os.linesep.join(tuple(str(p) for p in self.args)), ' '), ' ')
+        out += os.linesep + textwrap.indent(f'PDFs:{os.linesep}' + textwrap.indent(
+            os.linesep.join(tuple(str(p) for p in self.pdfs)), ' '), ' ')
         return out
 
     @property
@@ -970,7 +992,7 @@ class MultiPDF(PDF):
         Recursively get all the possible PDFs belonging to this object.
         '''
         pdfs = parameters.Registry(self.__pdfs)
-        for pdf in filter(lambda p: p.dependent, self.__pdfs):
+        for pdf in filter(lambda p: p._dependent, self.__pdfs):
             pdfs += pdf.all_pdfs
         return pdfs
 
@@ -1023,7 +1045,7 @@ class MultiPDF(PDF):
     @contextlib.contextmanager
     def bind(self, range=parameters.FULL, normalized=True):
 
-        with self.using_cache(PDF.BIND), super().bind(range, normalized) as base:
+        with self.using_cache(BIND), super().bind(range, normalized) as base:
             yield base
 
     def component(self, name):
@@ -1130,7 +1152,7 @@ class AddPDFs(MultiPDF):
         associated to the first PDF.
         :type yf: Parameter
         :param ys: possible yield for the second PDF.
-        :type ys: Parameter
+        :type ys: Parameter or None
         :returns: The built class.
         :rtype: AddPDFs
         '''
@@ -1200,7 +1222,9 @@ class ConvPDFs(MultiPDF):
         :type second: PDF
         :param range: range of the convolution. This is needed in case part of the \
         PDFs lie outside the evaluation range. It is set to "full" by default.
-        :type range: str
+        :type range: str or None
+        :raises ValueError: If an attempt to define convolution in more than \
+        one dimension is done.
         '''
         if len(first.data_pars) != 1 or len(second.data_pars) != 1:
             raise ValueError(
@@ -1215,9 +1239,9 @@ class ConvPDFs(MultiPDF):
         self.conv_size = DEFAULT_CONV_SIZE
 
     def __repr__(self):
-        out = f'{self.__class__.__name__}({self.name}):\n'
-        out += textwrap.indent('\n'.join(tuple(str(p)
-                                               for p in self.pdfs)), ' ')
+        out = f'{self.__class__.__name__}({self.name}):{os.linesep}'
+        out += textwrap.indent(os.linesep.join(tuple(str(p)
+                                                     for p in self.pdfs)), ' ')
         return out
 
     def _norm(self, interpolator, range=parameters.FULL):
@@ -1226,6 +1250,8 @@ class ConvPDFs(MultiPDF):
         and the integration range.
 
         :param interpolator: function to use in order to interpolate.
+        :param range: normalization range.
+        :type range: str
         :returns: Normalization.
         :rtype: float
         '''
@@ -1314,6 +1340,8 @@ class ConvPDFs(MultiPDF):
         :type normalized: bool
         :returns: Data and result of the evaluation.
         :rtype: numpy.ndarray, numpy.ndarray
+        :raises RuntimeError: If the bounds of the parameter in the \
+        convolution range are disjointed.
         '''
         first, second = tuple(self.pdfs)
 
@@ -1406,9 +1434,9 @@ class ProdPDFs(MultiPDF):
         return out
 
     def __repr__(self):
-        out = f'{self.__class__.__name__}({self.name}):\n'
-        out += textwrap.indent('\n'.join(tuple(str(p)
-                                               for p in self.pdfs)), ' ')
+        out = f'{self.__class__.__name__}({self.name}):{os.linesep}'
+        out += textwrap.indent(os.linesep.join(tuple(str(p)
+                                                     for p in self.pdfs)), ' ')
         return out
 
     @allows_const_cache
@@ -1473,9 +1501,11 @@ def pdf_from_json(obj, backend=None):
     :param obj: JSON-like object.
     :type obj: dict
     :param backend: backend to build the PDF.
-    :type backend: Backend
+    :type backend: Backend or None
     :returns: A PDF with the configuration from the object.
     :rtype: PDF
+
+    .. seealso:: :meth:`pdf_to_json`
     '''
     # Parse parameters
     pars = parameters.Registry(
@@ -1503,13 +1533,15 @@ def pdf_to_json(pdf):
     :type pdf: PDF
     :returns: JSON-like object.
     :rtype: dict
+
+    .. seealso:: :meth:`pdf_from_json`
     '''
     # Solve dependencies for parameters
     ipars, dpars = dependencies.split_dependent_objects_with_resolution_order(
         pdf.all_pars)
 
     # Solve dependencies for PDF objects
-    if pdf.dependent:
+    if pdf._dependent:
         ipdfs, dpdfs = dependencies.split_dependent_objects_with_resolution_order(
             pdf.pdfs)
         dpdfs.insert(0, pdf)  # must include this PDF

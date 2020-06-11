@@ -11,6 +11,7 @@ import importlib
 import inspect
 import logging
 import math
+import numpy as np
 import os
 import pkgutil
 import time
@@ -19,6 +20,9 @@ __all__ = ['timer']
 
 
 logger = logging.getLogger(__name__)
+
+# Global random number generator (not used for sampling)
+GLOBAL_RND_GEN = np.random.RandomState(4587)
 
 
 class DocMeta(type):
@@ -89,6 +93,8 @@ def eval_math_expression(expression):
     :param expression: input expression.
     :type expression: str
     :returns: evaluation of the expression.
+    :raises NameError: If an identifier is found in the string that is not \
+    allowed as a mathematical expression.
     '''
     code = compile(expression, '', 'eval')
 

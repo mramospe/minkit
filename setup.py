@@ -2,6 +2,8 @@
 Setup script for the "minkit" package
 '''
 
+import importlib
+import inspect
 import os
 import re
 import subprocess
@@ -228,7 +230,11 @@ class CheckPyFlakesCommand(DirectoryWorker):
                                        stdout=subprocess.PIPE,
                                        stderr=subprocess.PIPE)
 
-            check_format_process('pyflakes', directory, process)
+            try:
+                check_format_process('pyflakes', directory, process)
+            except RuntimeError:
+                files = os.linesep.join(python_files)
+                raise RuntimeError(f'PyFlakes failed to process files:{os.linesep}{files}')
 
 
 class CheckCopyrightCommand(DirectoryWorker):
@@ -308,6 +314,73 @@ class RemoveCopyrightCommand(DirectoryWorker):
                 self._remove_copyright(xf, lic)
 
 
+class CheckDocumentationCommand(Command):
+
+    description = 'check that all the exposed functions have documentation about them and their arguments'
+
+    user_options = []
+
+    def initialize_options(self):
+        pass
+
+    def finalize_options(self):
+        pass
+
+    def _get_missing_descriptions(self, obj, from_class=False):
+        '''
+        Get the names of the arguments that are not documented in the provided
+        function. If *from_class* is provided, then the object is assumed to
+        be a class member.
+        '''
+        s = inspect.getfullargspec(obj)
+
+        missing = []
+        if s.args is not None and obj.__doc__:
+
+            if from_class:
+                args = s.args[1:] # first argument is the class
+            else:
+                args = s.args
+
+            for a in filter(lambda s: not f':param {s}:' in obj.__doc__, args):
+                missing.append(a)
+
+        return missing
+
+    def run(self):
+        '''
+        Execution of the command action.
+        '''
+        module = importlib.import_module('minkit') # import the package even if it is not installed
+
+        missing_args = {}
+
+        for m in module.__all__: # iterate over exposed objects
+
+            o = getattr(module, m)
+
+            if inspect.isfunction(o): # check functions
+                missing = self._get_missing_descriptions(o)
+                if missing:
+                    missing_args[m] = missing
+
+            elif inspect.isclass(o): # check classes
+
+                for n, f in inspect.getmembers(o, predicate=inspect.isfunction):
+                    missing = self._get_missing_descriptions(f, from_class=True)
+                    if missing:
+                        missing_args[f'{o.__name__}.{n}'] = missing
+
+                for n, f in inspect.getmembers(o, predicate=inspect.ismethod):
+                    missing = self._get_missing_descriptions(f, from_class=True)
+                    if missing:
+                        missing_args[f'{o.__name__}.{n}'] = missing
+
+        if missing_args:
+            output = os.linesep.join(f'- {m}: {s}' for m, s in sorted(missing_args.items()))
+            raise RuntimeError(f'Missing descriptions in the following functions:{os.linesep}{output}')
+
+
 # Determine the source files
 src_path = os.path.join(PWD, 'minkit', 'backends', 'src')
 rel_path = os.path.join('backends', 'src')
@@ -327,10 +400,11 @@ setup(
               'check_copyright': CheckCopyrightCommand,
               'check_format': CheckFormatCommand,
               'check_pyflakes': CheckPyFlakesCommand,
-              'remove_copyright': RemoveCopyrightCommand},
+              'remove_copyright': RemoveCopyrightCommand,
+              'check_documentation': CheckDocumentationCommand},
 
     # Read the long description from the README
-    long_description=open('README.rst').read(),
+    long_description=open(os.path.join(PWD, 'README.rst')).read(),
 
     # Keywords to search for the package
     keywords='hep high energy physics fit pdf probability',
@@ -344,7 +418,7 @@ setup(
 
     # Install requirements
     install_requires=['iminuit>=1.3', 'numpy>=1.17', 'numdifftools>=0.9.39',
-                      'scipy>=1.3.2', 'uncertainties>=3.1.2'],
+                      'scipy>=1.3.2', 'nlopt>=1.17.4', 'uncertainties>=3.1.2'],
 
     tests_require=['pytest', 'pytest-runner'],
 )

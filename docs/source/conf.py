@@ -86,7 +86,7 @@ templates_path = ['_templates']
 # You can specify multiple suffix as a list of string:
 #
 # source_suffix = ['.rst', '.md']
-source_suffix = '.rst'
+source_suffix = ['.rst', '.ipynb']
 
 # The master toctree document.
 master_doc = 'index'
@@ -227,6 +227,8 @@ intersphinx_mapping = {
     'http://docs.scipy.org/doc/scipy/reference/': None,
     'http://matplotlib.sourceforge.net/': None,
     'https://iminuit.readthedocs.io/en/latest': None,
+    'https://numdifftools.readthedocs.io/en/latest': None,
+    'https://pythonhosted.org/uncertainties': None,
     'https://documen.tician.de/pycuda/': None,
     'http://reikna.publicfields.net/en/latest': None,
 }
