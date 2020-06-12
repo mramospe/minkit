@@ -38,10 +38,13 @@ class GPUOperations(object):
         '''
         Initialize the class with the interface to the user backend.
 
-        :param kwargs: it may contain any of the following values: \
-        - interactive: (bool) whether to select the device manually (defaults to False) \
-        - device: (int) number of the device to use (defaults to None).
+        :param kwargs: configuration for the device lookup (see below for details).
         :type kwargs: dict
+
+        * *interactive*: (bool) whether to select the device manually
+           (defaults to False).
+
+        * *device*: (int) number of the device to use (defaults to None).
 
         .. note:: The device can be selected using the MINKIT_DEVICE environment variable.
         '''

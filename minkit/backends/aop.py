@@ -27,8 +27,8 @@ class ArrayOperations(object):
 
         :param backend: backend where the operations will be done.
         :type backend: Backend
-        :param kwargs: arguments forwarded to the backend constructor \
-        (cuda and opencl backends only).
+        :param kwargs: arguments forwarded to the backend constructor
+           (cuda and opencl backends only).
         :type kwargs: dict
 
         The possible keyword arguments in GPU backends are:
@@ -104,7 +104,7 @@ class ArrayOperations(object):
         :returns: array representation in the given backend.
         :rtype: numpy.ndarray or reikna.cluda.api.Array
 
-        .. warning:: This function must be used carefully since the output array \
+        .. warning:: This function must be used carefully since the output array
            does not track to which backend it belongs.
         '''
         return self.__oper.ndarray_to_backend(a)
@@ -435,7 +435,7 @@ class ArrayOperations(object):
         return self.__oper.max(a)
 
     def meshgrid(self, lb, ub, size):
-        '''
+        r'''
         Create a grid of values using the given set of bounds. The size can
         be specified as a single value or as a set of sizes for each dimension.
         If it is a single value, then the output array will be of length
@@ -508,7 +508,7 @@ class ArrayOperations(object):
         return self.__oper.fzeros(size, ndim)
 
     def random_grid(self, lb, ub, size):
-        '''
+        r'''
         Create a random grid using the given bounds. The size can be specified
         as a single value or as a set of sizes for each dimension. If it is a
         single value, then the output array will be of length

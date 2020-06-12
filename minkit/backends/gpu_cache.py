@@ -60,8 +60,8 @@ class FunctionCache(metaclass=DocMeta):
         cache, so it must be *hashable*.
 
         :param identifier: argument defining the operation to do.
-        :param build_arg: if provided, this argument will be passed to \
-        :meth:`FunctionCache.build_object` instead of *identifier*.
+        :param build_arg: if provided, this argument will be passed to
+           :meth:`FunctionCache.build_object` instead of *identifier*.
         :returns: object related to this cache.
         '''
         if self.__cache is not None:

@@ -120,9 +120,9 @@ class CPUOperations(object):
 
         :param backend: user interface to the backend.
         :type backend: Backend
-        :param tmpdir: optional temporary directory to write the compiled \
-        libraries. If none is provided, then a proper temporary directory \
-        is created.
+        :param tmpdir: optional temporary directory to write the compiled
+           libraries. If none is provided, then a proper temporary directory
+           is created.
         :type tmpdir: tempfile.TemporaryDirectory or None
         '''
         self.__backend = backend

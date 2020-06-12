@@ -158,8 +158,8 @@ class DataSet(DataObject):
 
         :param arr: array of data.
         :type arr: numpy.ndarray
-        :param arg: if *arr* only contains one set of values, it must be \
-        a single data parameter. Otherwise a collection of parameters.
+        :param arg: if *arr* only contains one set of values, it must be
+           a single data parameter. Otherwise a collection of parameters.
         :type arg: Registry(Parameter)
         :param weights: possible weights to use.
         :type weights: numpy.ndarray or None
@@ -245,8 +245,8 @@ class DataSet(DataObject):
         :type maximum: int or None
         :returns: Merged sample.
         :rtype: DataSet
-        :raise RuntimeError: If the samples have different parameters or if \
-        only some of them have weights.
+        :raise RuntimeError: If the samples have different parameters or if
+           only some of them have weights.
 
         ... warning:: If *maximum* is specified, the last elements corresponding to the
             last samples might be dropped.
@@ -499,8 +499,7 @@ def edges_indices(gaps, edges):
     Calculate the indices to access the first element and
     that following to the last of a list of edges.
 
-    :param gaps: gaps used to address the correct edges from \
-    a common array.
+    :param gaps: gaps used to address the correct edges from a common array.
     :type gaps: numpy.ndarray
     :param edges: common array of edges.
     :type edges: numpy.ndarray
@@ -519,12 +518,12 @@ def evaluation_grid(aop, data_pars, bounds, size):
 
     :param data_pars: data parameters.
     :type data_pars: list(Parameter)
-    :param size: number of entries in the output sample per set of bounds. \
-    This means that *size* entries will be generated for each pair of (min, max) \
-    provided, that is, per data parameter.
+    :param size: number of entries in the output sample per set of bounds. This
+       means that *size* entries will be generated for each pair of (min, max)
+       provided, that is, per data parameter.
     :type size: int or tuple(int)
-    :param bounds: bounds of the different data parameters. Even indices for \
-    the lower bounds, and odd indices for the upper bounds.
+    :param bounds: bounds of the different data parameters. Even indices for
+       the lower bounds, and odd indices for the upper bounds.
     :type bounds: numpy.ndarray
     :returns: Uniform sample.
     :rtype: DataSet

@@ -103,22 +103,22 @@ class MiserConfig(NumIntConfig):
         :type proxy: NumericalIntegration
         :param calls: number of calls per iteration.
         :type calls: int
-        :param estimate_frac: parameter to specify the fraction of the \
-        currently available number of function calls which are allocated to \
-        estimating the variance at each recursive step.
+        :param estimate_frac: parameter to specify the fraction of the
+           currently available number of function calls which are allocated to
+           estimating the variance at each recursive step.
         :type estimate_frac: float
-        :param min_calls: minimum number of function calls required to proceed \
-        with a bisection step. The default value is set to :math:`16 \times \text{ndim}`.
+        :param min_calls: minimum number of function calls required to proceed
+           with a bisection step. The default value is set to :math:`16 \times \text{ndim}`.
         :type min_calls: int or None
-        :param min_calls_per_bisection: this parameter specifies the minimum \
-        number of function calls required to proceed with a bisection step. \
-        The default value is set to :math:`32 \times \text{min_calls}`.
+        :param min_calls_per_bisection: this parameter specifies the minimum
+           number of function calls required to proceed with a bisection step.
+           The default value is set to :math:`32 \times \text{min_calls}`.
         :type min_calls_per_bisection: int or None
-        :param alpha: parameter to control how the estimated variances for the \
-        two sub-regions of a bisection are combined when allocating points.
+        :param alpha: parameter to control how the estimated variances for the
+           two sub-regions of a bisection are combined when allocating points.
         :type alpha: float
-        :param dither: parameter introduces a random fractional variation of \
-        into each bisection
+        :param dither: parameter introduces a random fractional variation of
+           into each bisection
         :type dither: float
         :param tolerance: maximum relative error allowed in the integral.
         :type tolerance: float
@@ -158,17 +158,17 @@ class VegasConfig(NumIntConfig):
 
         :param proxy: proxy of numerical integration functions.
         :type proxy: NumericalIntegration
-        :param alpha: controls the stiffness of the rebinning algorithm. It is \
-        typically set between one and two. A value of zero prevents rebinning \
-        of the grid.
+        :param alpha: controls the stiffness of the rebinning algorithm. It is
+           typically set between one and two. A value of zero prevents rebinning
+           of the grid.
         :type alpha: float
         :param calls: number of calls per iteration.
         :type calls: int
-        :param iterations: number of iterations to perform for each call to\
-        the routine.
+        :param iterations: number of iterations to perform for each call to
+           the routine.
         :type iterations: int
-        :param mode: whether the algorithm must use importance sampling or \
-        stratified sampling, or whether it can pick on its own.
+        :param mode: whether the algorithm must use importance sampling or
+           stratified sampling, or whether it can pick on its own.
         :param tolerance: maximum relative error allowed in the integral.
         :type tolerance: float
         '''

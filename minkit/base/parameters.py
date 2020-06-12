@@ -110,8 +110,8 @@ class Parameter(ParameterBase):
         :type constant: bool
         :param asym_errors: asymmetric errors.
         :type asym_errors: tuple(float, float) or None
-        :param blind: if provided, set the blinding configuration. \
-        Arguments are forwarded to :meth:`Parameter.set_blinding_configuration`.
+        :param blind: if provided, set the blinding configuration.
+           Arguments are forwarded to :meth:`Parameter.set_blinding_configuration`.
         :type blind: dict
         :ivar name: name of the parameter.
 
@@ -289,8 +289,8 @@ class Parameter(ParameterBase):
 
         :param status: blinding status.
         :type status: bool
-        :raises RuntimeError: If the parameter is requested to be blinded and \
-        no blinding configuration is present.
+        :raises RuntimeError: If the parameter is requested to be blinded and
+           no blinding configuration is present.
         '''
         if self.__blind is None and status == True:
             raise RuntimeError(
@@ -441,8 +441,8 @@ class Formula(ParameterBase):
 
         * *Parameter names*: "a * b" will multiply *a* and *b*.
         * *Indices*: "{0} * {1}" will multiply the first and second elements in *pars*.
-        * *Mixed*: "{a} * {b} + {1}" will multiply *a* and *b* and sum the second element \
-        in *pars*.
+        * *Mixed*: "{a} * {b} + {1}" will multiply *a* and *b* and sum the second element
+           in *pars*.
 
         :param name: name of the parameter.
         :type name: str
@@ -585,8 +585,8 @@ class Registry(list):
         :type other: Registry
         :returns: This object with the new elements added.
         :rtype: Registry
-        :raises ValueError: If an element is found with the same name as \
-        another in the new registry, but they are different instances.
+        :raises ValueError: If an element is found with the same name as
+           another in the new registry, but they are different instances.
         '''
         for el in filter(lambda p: p.name in self.names, other):
             self._raise_if_not_same(el)
@@ -599,8 +599,8 @@ class Registry(list):
         The name of the element is assumed to be already in the registry.
 
         :param el: object to check.
-        :raises ValueError: If an element is found with the same name as \
-        another in the new registry, but they are different instances.
+        :raises ValueError: If an element is found with the same name as
+           another in the new registry, but they are different instances.
         '''
         curr = self.get(el.name)
         if curr is not el:
@@ -635,8 +635,8 @@ class Registry(list):
 
         :param el: new element to add.
         :type el: object
-        :raises ValueError: If an element is found with the same name as \
-        that provided, but they are different instances.
+        :raises ValueError: If an element is found with the same name as
+           that provided, but they are different instances.
         '''
         if el.name not in self.names:
             super().append(el)
@@ -723,8 +723,8 @@ class Registry(list):
         :type i: int
         :param p: object to insert.
         :type p: object
-        :raises ValueError: If an element is found with the same name as \
-        that provided, but they are different instances.
+        :raises ValueError: If an element is found with the same name as
+           that provided, but they are different instances.
         '''
         if p.name in self.names:
             self._raise_if_not_same(p)

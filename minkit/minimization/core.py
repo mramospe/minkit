@@ -34,8 +34,8 @@ def errors_and_covariance_matrix(evaluate, result, hessian_opts=None):
     Calculate the covariance matrix given a function to evaluate the FCN
     and the values of the parameters at the minimum.
 
-    :param evaluate: function used to evaluate the FCN. It must take all the \
-    parameters that are not constant.
+    :param evaluate: function used to evaluate the FCN. It must take all the
+       parameters that are not constant.
     :param result: values at the FCN minimum.
     :type result: numpy.ndarray
     :param hessian_opts: options to be passed to :class:`numdifftools.core.Hessian`.
@@ -95,8 +95,8 @@ def _process_parameters(args, wa, values):
     :type values: numpy.ndarray
     :returns: registry of parameters and values.
     :rtype: Registry, numpy.ndarray
-    :raises RuntimeError: If the number of provided sets of values is differet \
-    to the number of profile parameters.
+    :raises RuntimeError: If the number of provided sets of values is differet
+       to the number of profile parameters.
     '''
     values = np.asarray(values)
 
@@ -136,8 +136,8 @@ class Minimizer(object, metaclass=DocMeta):
         :type par: float
         :param bound: bound of the parameter.
         :type bound: float
-        :param cov: covariance matrix. If provided, the initial values of the \
-        parameters will be obtained from it.
+        :param cov: covariance matrix. If provided, the initial values of the
+           parameters will be obtained from it.
         :type cov: numpy.ndarray
         :param var: squared number of standard deviations.
         :type var: float
@@ -149,8 +149,8 @@ class Minimizer(object, metaclass=DocMeta):
         :type maxcall: int or None
         :returns: Absolute value of the error.
         :rtype: float
-        :raises RuntimeError: If the bounds are too small to calculate the \
-        error associated to the provided number of standard deviations.
+        :raises RuntimeError: If the bounds are too small to calculate the
+           error associated to the provided number of standard deviations.
         '''
         with self.restoring_state():
 
@@ -253,8 +253,8 @@ class Minimizer(object, metaclass=DocMeta):
 
         :param name: name of the parameter.
         :type name: str
-        :param cov: covariance matrix. If provided, the initial values of the \
-        parameters will be obtained from them.
+        :param cov: covariance matrix. If provided, the initial values of the
+           parameters will be obtained from them.
         :type cov: numpy.ndarray or None
         :param sigma: number of standard deviations to compute.
         :type sigma: float
@@ -325,8 +325,8 @@ class Minimizer(object, metaclass=DocMeta):
         :type wa: str or list(str).
         :param values: values for each parameter specified in *wa*.
         :type values: numpy.ndarray
-        :param minimization_results: if set to True, then the results for each \
-        step are returned.
+        :param minimization_results: if set to True, then the results for each
+           step are returned.
         :type minimization_results: bool
         :param minimizer_config: arguments passed to :meth:`Minimizer.minimize`.
         :type minimizer_config: dict or None

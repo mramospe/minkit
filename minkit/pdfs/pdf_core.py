@@ -155,8 +155,8 @@ class PDF(object, metaclass=core.DocMeta):
         :param backend: backend where the PDF will operate.
         :type backend: Backend or None
         :ivar name: name of the PDF.
-        :ivar evb_size: number of points to use when evaluating the PDF \
-        numerically on a binned data set.
+        :ivar evb_size: number of points to use when evaluating the PDF
+           numerically on a binned data set.
         '''
         self.name = name
         # Number of points to consider when evaluating numerically a binned sample
@@ -297,14 +297,14 @@ class PDF(object, metaclass=core.DocMeta):
 
         :param size: size (or minimum size) of the output sample.
         :type size: int
-        :param mapsize: number of points to consider per dimension (data parameter) \
-        in order to calculate the maximum value of the PDF.
+        :param mapsize: number of points to consider per dimension (data parameter)
+           in order to calculate the maximum value of the PDF.
         :type mapsize: int
         :param gensize: number of entries to generate per iteration.
         :type gensize: int
-        :param safe_factor: additional factor to multiply the numerically calculated \
-        maximum of the function. In general this must be modified if the function is \
-        not well-behaved.
+        :param safe_factor: additional factor to multiply the numerically calculated
+           maximum of the function. In general this must be modified if the function is
+           not well-behaved.
         :type safe_factor: float
         :param bounds: bounds of the different data parameters (must be sorted).
         :type bounds: numpy.ndarray
@@ -445,16 +445,16 @@ class PDF(object, metaclass=core.DocMeta):
 
         :param size: size (or minimum size) of the output sample.
         :type size: int
-        :param mapsize: number of points to consider per dimension (data parameter) \
-        in order to calculate the maximum value of the PDF.
+        :param mapsize: number of points to consider per dimension (data parameter)
+           in order to calculate the maximum value of the PDF.
         :type mapsize: int
-        :param gensize: number of entries to generate per iteration. By default it \
-        is set to :math:`10^4` and :math:`10^5` for CPU and GPU backends, \
-        respectively.
+        :param gensize: number of entries to generate per iteration. By default it
+           is set to :math:`10^4` and :math:`10^5` for CPU and GPU backends,
+           respectively.
         :type gensize: int or None
-        :param safe_factor: additional factor to multiply the numerically calculated \
-        maximum of the function. In general this must be modified if the function is \
-        not well-behaved.
+        :param safe_factor: additional factor to multiply the numerically calculated
+           maximum of the function. In general this must be modified if the function is
+           not well-behaved.
         :type safe_factor: float
         :param range: range of the data parameters where to generate data.
         :type range: str
@@ -616,7 +616,7 @@ class PDF(object, metaclass=core.DocMeta):
         :param ctype: cache type.
         :type ctype: str
 
-        .. warning:: It is responsibility of the user to ensure that the \
+        .. warning:: It is responsibility of the user to ensure that the
            conditions for the cache to be valid are preserved.
         '''
         self._enable_cache(ctype)
@@ -726,10 +726,10 @@ class SourcePDF(PDF):
         '''
         Configuration of the numerical integration method.
 
-        :getter: Return a configurable object for the specified numerical \
-        integration method.
-        :setter: Set the configuration to do a numerical integration from a \
-        dictionary.
+        :getter: Return a configurable object for the specified numerical
+           integration method.
+        :setter: Set the configuration to do a numerical integration from a
+           dictionary.
 
         The dictionary must contain at least the key "method", and the rest of
         the keys depend on it:
@@ -1147,9 +1147,9 @@ class AddPDFs(MultiPDF):
         :type first: PDF
         :param second: second PDF to use.
         :type second: PDF
-        :param yf: yield associated to the first PDF, if both "yf" and "ys" \
-        are provided. If "ys" is not provided, then "yf" is the faction \
-        associated to the first PDF.
+        :param yf: yield associated to the first PDF, if both "yf" and "ys"
+           are provided. If "ys" is not provided, then "yf" is the faction
+           associated to the first PDF.
         :type yf: Parameter
         :param ys: possible yield for the second PDF.
         :type ys: Parameter or None
@@ -1220,11 +1220,11 @@ class ConvPDFs(MultiPDF):
         :type first: PDF
         :param second: second PDF.
         :type second: PDF
-        :param range: range of the convolution. This is needed in case part of the \
-        PDFs lie outside the evaluation range. It is set to "full" by default.
+        :param range: range of the convolution. This is needed in case part of the
+           PDFs lie outside the evaluation range. It is set to "full" by default.
         :type range: str or None
-        :raises ValueError: If an attempt to define convolution in more than \
-        one dimension is done.
+        :raises ValueError: If an attempt to define convolution in more than
+           one dimension is done.
         '''
         if len(first.data_pars) != 1 or len(second.data_pars) != 1:
             raise ValueError(
@@ -1340,8 +1340,8 @@ class ConvPDFs(MultiPDF):
         :type normalized: bool
         :returns: Data and result of the evaluation.
         :rtype: numpy.ndarray, numpy.ndarray
-        :raises RuntimeError: If the bounds of the parameter in the \
-        convolution range are disjointed.
+        :raises RuntimeError: If the bounds of the parameter in the
+           convolution range are disjointed.
         '''
         first, second = tuple(self.pdfs)
 
