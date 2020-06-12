@@ -30,7 +30,7 @@ def unblind_parameters(method):
     @functools.wraps(method)
     def wrapper(self, *args, **kwargs):
         with contextlib.ExitStack() as stack:
-            for p in filter(lambda p: p.blind_config is not None, self.args):
+            for p in filter(lambda p: p.blinded is not None, self.args):
                 stack.enter_context(p.blind(status=False))
             return method(self, *args, **kwargs)
     return wrapper

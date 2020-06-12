@@ -229,7 +229,7 @@ def test_blinding(tmpdir):
 
     p = minkit.Parameter('p', value=iv, bounds=ib)
 
-    p.blind_config = 10, 2
+    p.set_blinding_configuration('full', scale=10, offset=2)
 
     assert not np.allclose(p.value, iv)  # value is hidden
     assert not np.allclose(p.bounds, ib)  # bounds are hidden
@@ -264,7 +264,7 @@ def test_blinding(tmpdir):
 
     initial = pdf.get_values()
 
-    c.blind_config = 10, 2
+    c.set_blinding_configuration('full', scale=10, offset=2)
 
     for m in 'minuit', 'L-BFGS-B', 'COBYLA':  # test all the minimizers
 
@@ -297,7 +297,7 @@ def test_blinding(tmpdir):
 
     iv = nsig.value
 
-    nsig.blind_config = 10000, 100
+    nsig.set_blinding_configuration('full', scale=10000, offset=100)
 
     helpers.randomize(pdf)
     with minkit.minimizer('ueml', pdf, data) as minimizer:
@@ -357,3 +357,39 @@ def test_blinding(tmpdir):
         errors = nsig.asym_errors
         with nsig.blind(status=False):
             assert not np.allclose(errors, nsig.asym_errors)
+
+    # Check that with an offset-based blinding the error of the true value
+    # is the same to that of the blinded.
+    pdf = helpers.default_gaussian(center='c')
+
+    data = pdf.generate(10000)
+
+    c = pdf.args.get('c')
+
+    c.set_blinding_configuration('offset', offset=2)
+
+    helpers.randomize(pdf)
+    with minkit.minimizer('uml', pdf, data) as minimizer:
+
+        minimizer.minimize()
+
+        blinded = c.error
+        with c.blind(status=False):
+            unblinded = c.error
+
+        assert np.allclose(blinded, unblinded)
+
+    # Check that with an scale-based blinding the relative error of the true
+    # value is the same to that of the blinded
+    c.set_blinding_configuration('scale', scale=100)
+
+    helpers.randomize(pdf)
+    with minkit.minimizer('uml', pdf, data) as minimizer:
+
+        minimizer.minimize()
+
+        blinded = c.error / c.value
+        with c.blind(status=False):
+            unblinded = c.error / c.value
+
+        assert np.allclose(blinded, unblinded)
