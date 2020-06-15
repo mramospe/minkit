@@ -113,19 +113,17 @@ def data_plotting_arrays(data, **kwargs):
 
     **Unbinned**
 
-    * *bins* (int or tuple(int, ...)): number of bins per
-       dimension of data.
+    * *bins* (int or tuple(int, ...)): number of bins per dimension of data.
 
     * *projection* (str): project the output data in the given dimension.
 
-    * *sw2* (bool): if the sample has weights and is set to True, return also the errors
-       calculated as the square root of the sum of weights per bin:
-       :math:`\sigma_j = \sqrt{\sum_i^n (\omega_j^i)^2}`
+    * *sw2* (bool): if the sample has weights and is set to True, return also the errors.
+       The errors are calculated as the square root of the sum of weights per
+       bin: :math:`\sigma_j = \sqrt{\sum_i^n (\omega_j^i)^2}`
 
     **Binned**
 
-    * *rebin* (int or tuple(int, ...)): change the bins
-       by mergin *rebin* bins together.
+    * *rebin* (int or tuple(int, ...)): change the bins by mergin *rebin* bins together.
 
     * *projection* (str): project the output data in the given dimension.
 

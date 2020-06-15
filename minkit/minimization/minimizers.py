@@ -53,21 +53,20 @@ def minimizer(fcn, pdf, data, minimizer=minuit_api.MINUIT, minimizer_config=None
 
     * *minuit*: use MIGRAD from the Minuit package for minimization.
 
-    * From the SciPy package, the methods *L-BFGS-B*, *TNC*, *SLSQP* and
-      *trust-constr* are available.
+    * From the SciPy package, the methods *L-BFGS-B*, *TNC*, *SLSQP* and *trust-constr* are available.
 
-    * From the NLopt package, the methods *COBYLA*, *BOBYQA*, *NEWUOA*,
-      *PRAXIS*, *NELDERMEAD*, *SBPLX* are available.
+    * From the NLopt package, the methods *COBYLA*, *BOBYQA*, *NEWUOA*, *PRAXIS*, *NELDERMEAD*, *SBPLX* are available.
 
     The treatment of weights when calculating FCNs can lead to unreliable errors
     for the parameters. In general there is no correct way of processing
     the likelihoods. In this package the following methods are supported:
 
-    * *none*: the raw weights are used to calculate the FCN. This will lead to
-      completely incorrect uncertainties, since the statistical weight of the
-      events in the data sample will not be proportional to the sample weight.
-    * *rescale*: in this case the weights are rescaled so
-      :math:`\omega^\prime_i = \omega_i \times \frac{\sum_{j = 0}^n \omega_j}{\sum_{j = 0}^n \omega_j^2}`.
+    * *none*: the raw weights are used to calculate the FCN.
+      This will lead to completely incorrect uncertainties, since the
+      statistical weight of the events in the data sample will not be
+      proportional to the sample weight.
+
+    * *rescale*: weights are rescaled so :math:`\omega^\prime_i = \omega_i \times \frac{\sum_{j = 0}^n \omega_j}{\sum_{j = 0}^n \omega_j^2}`.
       In this case the statistical weight of each event is proportional to the
       sample weight, although the uncertainties will still be incorrect.
 
@@ -141,11 +140,12 @@ def simultaneous_minimizer(categories, minimizer=minuit_api.MINUIT, minimizer_co
     for the parameters. In general there is no correct way of processing
     the likelihoods. In this package the following methods are supported:
 
-    * *none*: the raw weights are used to calculate the FCN. This will lead to
-      completely incorrect uncertainties, since the statistical weight of the
-      events in the data sample will not be proportional to the sample weight.
-    * *rescale*: in this case the weights are rescaled so
-      :math:`\omega^\prime_i = \omega_i \times \frac{\sum_{j = 0}^n \omega_j}{\sum_{j = 0}^n \omega_j^2}`.
+    * *none*: the raw weights are used to calculate the FCN.
+      This will lead to completely incorrect uncertainties, since the
+      statistical weight of the events in the data sample will not be
+      proportional to the sample weight.
+
+    * *rescale*: weights are rescaled so :math:`\omega^\prime_i = \omega_i \times \frac{\sum_{j = 0}^n \omega_j}{\sum_{j = 0}^n \omega_j^2}`.
       In this case the statistical weight of each event is proportional to the
       sample weight, although the uncertainties will still be incorrect.
 

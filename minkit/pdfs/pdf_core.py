@@ -603,12 +603,15 @@ class PDF(object, metaclass=core.DocMeta):
         '''
         Safe method to enable a cache of the PDF. There are two types of cache:
 
-        * *const*: it means that we plan to call the :class:`PDF` consecutively
+        * *const*: evaluation with a fixed *constant* state.
+          It means that we plan to call the :class:`PDF` consecutively
           in the same data set, but the value of the parameters that are not
           constant is allowed to change. This means that any :class:`PDF` that
           has all its arguments as constant is assumed to have the same value
           in each evaluation.
-        * *bind*: this is reserved for those processes where the normalization
+
+        * *bind*: evaluation with the same parameter values and bounds.
+          This is reserved for those processes where the normalization
           range will be the same, as well as the values of the parameters of the
           :class:`PDF`. However, the function can be called in different data
           sets.

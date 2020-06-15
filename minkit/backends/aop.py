@@ -34,8 +34,8 @@ class ArrayOperations(object):
         The possible keyword arguments in GPU backends are:
 
         * *device*: device to be used.
-        * *interactive*: whether to ask the user a device if not specified or
-          if the proposed device is not available.
+
+        * *interactive*: whether to ask the user a device if not specified or if the proposed device is not available.
         '''
         super().__init__()
 

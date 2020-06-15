@@ -379,19 +379,18 @@ class Parameter(ParameterBase):
 
         The blinding method depends on the provided arguments:
 
-        * *offset*: when only the *offset* argument is provided. In this case,
-           :math:`v^\prime = v + \beta` is used as the transformation
-           function. The absolute error of the blinded parameter is the same as
+        * *offset*:
+           Use :math:`v^\prime = v + \beta` as the transformation function.
+           The absolute error of the blinded parameter is the same as
            as that of the true value. Only the argument *offset* is accepted.
 
-        * *scale*: if only the *scale* argument is specified. The function
-           :math:`v^\prime = \alpha v` is used to blind values. This method
-           allows to preserve the relative error after blinding. The argument
-           *scale* is accepted.
+        * *scale*:
+           The function :math:`v^\prime = \alpha v` is used to blind values.
+           This method allows to preserve the relative error after blinding. The
+           argument *scale* is accepted.
 
-        * *full*: in this case both the offset and the scale must be provided.
-           The blinding transformation is of the type
-           :math:`v^\prime = \alpha (v + \beta)`.
+        * *offset* and *scale*:
+           The blinding transformation is :math:`v^\prime = \alpha (v + \beta)`.
         '''
         if offset is None and scale is None:
             self.__blind = None
@@ -461,9 +460,10 @@ class Formula(ParameterBase):
         of indices or a mixture of the two, like:
 
         * *Parameter names*: "a * b" will multiply *a* and *b*.
+
         * *Indices*: "{0} * {1}" will multiply the first and second elements in *pars*.
-        * *Mixed*: "{a} * {b} + {1}" will multiply *a* and *b* and sum the second element
-           in *pars*.
+
+        * *Mixed*: "{a} * {b} + {1}" will multiply *a* and *b* and sum the second element in *pars*.
 
         :param name: name of the parameter.
         :type name: str
