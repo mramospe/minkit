@@ -13,13 +13,6 @@ import functools
 
 __all__ = []
 
-# Blinding methods
-FULL = 'full'
-OFFSET = 'offset'
-SCALE = 'scale'
-
-BLINDING_METHODS = {}
-
 
 def check_return_none(method):
     '''
@@ -35,32 +28,49 @@ def check_return_none(method):
     return wrapper
 
 
-def register_blinding_method(name):
-    '''
-    Register a new blinding method with the given name.
-    '''
-    def wrapper(cls):
-        BLINDING_METHODS[name] = cls
-        return cls
-    return wrapper
-
-
-def build_blinding(method, **state):
+def build_blinding(offset=None, scale=None):
     '''
     Build the instance from the state
+    (returned by the :meth:`Blinding.state` method). Classes are built using the
+    :meth:`Blinding.build` method.
+
+    :param offset: prototype of the blinding offset.
+    :type offset: float or None
+    :param scale: prototype of the blinding scale.
+    :type scale: float or None
+    :returns: Instance to blind values and errors.
+    :rtype: Blinding
+    '''
+    if offset is None and scale is None:
+        raise ValueError('Must specify the blinding parameters (offset/scale)')
+    elif scale is None:
+        return BlindingOffset.build(offset)
+    elif offset is None:
+        return BlindingScale.build(scale)
+    else:
+        return BlindingFull.build(offset, scale)
+
+
+def initialize_from_args(offset=None, scale=None):
+    '''
+    Initialize the instance from the state
     (returned by the :meth:`Blinding.state` method).
 
-    :param method: blinding method.
-    :type method: str
-    :param state: state of the blinding.
-    :type state: tuple
+    :param offset: prototype of the blinding offset.
+    :type offset: float or None
+    :param scale: prototype of the blinding scale.
+    :type scale: float or None
+    :returns: Instance to blind values and errors.
+    :rtype: Blinding
     '''
-    constructor = BLINDING_METHODS.get(method, None)
-
-    if method is None:
-        raise ValueError(f'Unknown blinding method "{method}"')
+    if offset is None and scale is None:
+        raise ValueError('Must specify the blinding parameters (offset/scale)')
+    elif scale is None:
+        return BlindingOffset(offset)
+    elif offset is None:
+        return BlindingScale(scale)
     else:
-        return constructor.build(**state)
+        return BlindingFull(offset, scale)
 
 
 class Blinding(object):
@@ -140,7 +150,6 @@ class Blinding(object):
         raise exceptions.MethodNotDefinedError(self.__class__, 'unblind_error')
 
 
-@register_blinding_method(FULL)
 class BlindingFull(Blinding):
 
     def __init__(self, offset, scale):
@@ -159,7 +168,7 @@ class BlindingFull(Blinding):
 
     @property
     def state(self):
-        return {'method': FULL, 'offset': self.__offset, 'scale': self.__scale}
+        return {'offset': self.__offset, 'scale': self.__scale}
 
     @classmethod
     def build(cls, offset, scale):
@@ -193,7 +202,6 @@ class BlindingFull(Blinding):
         return error / abs(self.__scale)
 
 
-@register_blinding_method(OFFSET)
 class BlindingOffset(Blinding):
 
     def __init__(self, offset):
@@ -211,7 +219,7 @@ class BlindingOffset(Blinding):
 
     @property
     def state(self):
-        return {'method': OFFSET, 'offset': self.__offset}
+        return {'offset': self.__offset}
 
     @classmethod
     def build(cls, offset):
@@ -242,7 +250,6 @@ class BlindingOffset(Blinding):
         return error
 
 
-@register_blinding_method(SCALE)
 class BlindingScale(Blinding):
 
     def __init__(self, scale):
@@ -260,7 +267,7 @@ class BlindingScale(Blinding):
 
     @property
     def state(self):
-        return {'method': SCALE, 'scale': self.__scale}
+        return {'scale': self.__scale}
 
     @classmethod
     def build(cls, scale):

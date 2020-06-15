@@ -330,9 +330,30 @@ class Parameter(ParameterBase):
 
         obj['ranges'] = {n: o for n, o in obj['ranges'].items()}
 
-        instance = cls(**obj)
+        blind = obj.pop('blind')
 
-        return instance
+        if blind is None:
+            return cls(**obj)
+        else:
+
+            blinder = blinding.initialize_from_args(**blind)
+
+            # Saved values are blinded
+            value, bounds, error, asym_errors = obj['value'], obj['bounds'], obj['error'], obj['asym_errors']
+
+            obj['value'] = value if value is None else blinder.unblind(value)
+            obj['bounds'] = bounds if bounds is None else tuple(
+                map(blinder.unblind, bounds))
+            obj['error'] = error if error is None else blinder.unblind_error(
+                error)
+            obj['asym_errors'] = asym_errors if asym_errors is None else tuple(
+                map(blinder.unblind_error, asym_errors))
+
+            instance = cls(**obj)
+
+            instance.__blind = blinder  # do not recalculate the offset and/or scale
+
+            return instance
 
     def get_range(self, name):
         '''
@@ -345,38 +366,37 @@ class Parameter(ParameterBase):
         '''
         return self.__ranges[name]
 
-    def set_blinding_configuration(self, method, **kwargs):
+    def set_blinding_configuration(self, offset=None, scale=None):
         r'''
         Define the blinding configuration of the parameter. Once this method
         is called, the parameter is considered to be on a *blinded* state. The
         keyword arguments depend on the method used.
 
-        :param method: blinding method to use. It can be any of *full*,
-           *offset* or *scale*. If set to None, the blinding is removed.
-        :type method: str or None
-        :param kwargs: keyword arguments forwarded to the underlying blinding
-           class (see below for more details).
-        :type kwargs: dict
+        :param offset: prototype of the blinding offset.
+        :type offset: float or None
+        :param scale: prototype of the blinding scale.
+        :type scale: float or None
 
-        The blinding methods that are allowed are:
+        The blinding method depends on the provided arguments:
 
-        * *full*: in this case the blinding transformation is of the type
-           :math:`v^\prime = \alpha (v + \beta)`. The arguments that can be
-           specified are *offset* (:math:`\beta`) and *scale* (:math:`\alpha`).
+        * *offset*: when only the *offset* argument is provided. In this case,
+           :math:`v^\prime = v + \beta` is used as the transformation
+           function. The absolute error of the blinded parameter is the same as
+           as that of the true value. Only the argument *offset* is accepted.
 
-        * *offset*: use :math:`v^\prime = v + \beta` as the transformation
-           function. In this case the absolute error of the blinded parameter
-           is the same as that of the true value. Only the argument *offset* is
-           accepted.
+        * *scale*: if only the *scale* argument is specified. The function
+           :math:`v^\prime = \alpha v` is used to blind values. This method
+           allows to preserve the relative error after blinding. The argument
+           *scale* is accepted.
 
-        * *scale*: the function :math:`v^\prime = \alpha v` is used to blind
-           the values. This method allows to preserve the relative error
-           after blinding. The argument *scale* is accepted.
+        * *full*: in this case both the offset and the scale must be provided.
+           The blinding transformation is of the type
+           :math:`v^\prime = \alpha (v + \beta)`.
         '''
-        if method is None:
+        if offset is None and scale is None:
             self.__blind = None
         else:
-            self.__blind = blinding.build_blinding(method, **kwargs)
+            self.__blind = blinding.build_blinding(offset, scale)
 
     def set_range(self, name, values):
         '''
@@ -425,6 +445,7 @@ class Parameter(ParameterBase):
                 'bounds': bounds,
                 'ranges': {n: r.tolist() for n, r in self.__ranges.items() if n != FULL},
                 'error': self.error,
+                'asym_errors': self.asym_errors,
                 'blind': self.__blind if self.__blind is None else self.__blind.state,
                 'constant': self.constant}
 
