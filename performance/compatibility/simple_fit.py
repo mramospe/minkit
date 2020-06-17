@@ -18,8 +18,6 @@ rt.PyConfig.IgnoreCommandLineOptions = True
 RooFitModel = collections.namedtuple(
     'RooFitModel', ['pdf', 'data_par', 'args'])
 
-RTOL = 0.1  # relative tolerance for the difference between RooFit and minkit
-
 
 def gaussian_constraint(backend, var, std=0.1):
     '''
@@ -79,8 +77,8 @@ def fit_and_check(fcn, minkit_model, minkit_data, roofit_model, roofit_data, con
 
     for p in roofit_model.args:  # check that the value and errors coincide
         mp = minkit_model.args.get(p.GetName())
-        assert np.allclose(mp.value, p.getVal(), rtol=RTOL)
-        assert np.allclose(mp.error, p.getError(), rtol=RTOL)
+        assert np.allclose(mp.value, p.getVal())
+        assert np.allclose(mp.error, p.getError())
 
 
 def minkit_data_to_roofit(var, data):
