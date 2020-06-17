@@ -74,8 +74,8 @@ def fit_and_check(fcn, minkit_model, minkit_data, roofit_model, roofit_data, con
 
     roofit_model.pdf.fitTo(
         roofit_data, rt.RooFit.Save(), roofit_constraint)
-    with minkit.minimizer(fcn, minkit_model, minkit_data, constraints=minkit_constraint) as minuit:
-        print(minuit.migrad())
+    with minkit.minimizer(fcn, minkit_model, minkit_data, constraints=minkit_constraint) as minimizer:
+        minimizer.migrad()
 
     for p in roofit_model.args:  # check that the value and errors coincide
         mp = minkit_model.args.get(p.GetName())
@@ -87,7 +87,7 @@ def minkit_data_to_roofit(var, data):
     '''
     Convert a DataSet or BinnedDataSet into a RooDataSet or RooDataHist
     '''
-    if data.sample_type == 'binned':
+    if data._sample_type == 'binned':
         h = rt.TH1D('', '', len(data), *data.data_pars[0].bounds)
         for i, v in enumerate(data.values.as_ndarray()):
             h.SetBinContent(i + 1, v)
