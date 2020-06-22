@@ -119,7 +119,7 @@ class ArrayOperations(object):
         :param maximum: possible maximum length of the output array.
         :type maximum: int or None
         :returns: concatenated array.
-        :rtype: farray
+        :rtype: darray
         '''
         return self.__oper.concatenate(tuple(a for a in arrays), maximum)
 
@@ -145,7 +145,7 @@ class ArrayOperations(object):
         '''
         return self.__oper.bempty(size)
 
-    def fempty(self, size, ndim=1):
+    def dempty(self, size, ndim=1):
         '''
         Create an empty :class:`darray` instance with the given length.
 
@@ -156,7 +156,7 @@ class ArrayOperations(object):
         :returns: empty array.
         :rtype: darray
         '''
-        return self.__oper.fempty(size, ndim)
+        return self.__oper.dempty(size, ndim)
 
     def iempty(self, size):
         '''
@@ -180,7 +180,7 @@ class ArrayOperations(object):
         '''
         return self.__oper.cexp(a)
 
-    def fexp(self, a):
+    def dexp(self, a):
         '''
         Calculate the exponential of an array of numbers. The input array must
         be unidimensional.
@@ -190,7 +190,7 @@ class ArrayOperations(object):
         :returns: exponential values.
         :rtype: darray
         '''
-        return self.__oper.fexp(a)
+        return self.__oper.dexp(a)
 
     def fftconvolve(self, a, b, data):
         '''
@@ -204,7 +204,7 @@ class ArrayOperations(object):
         :param data: array of data (only 1D is supported).
         :type data: farray
         :returns: convolution of the two arrays.
-        :rtype: farray
+        :rtype: darray
         '''
         return self.__oper.fftconvolve(a, b, data)
 
@@ -369,7 +369,7 @@ class ArrayOperations(object):
         :param size: length of the output array.
         :type size: int
         :returns: array.
-        :rtype: farray
+        :rtype: darray
         '''
         return self.__oper.linspace(vmin, vmax, size)
 
@@ -381,7 +381,7 @@ class ArrayOperations(object):
         :param a: input array.
         :type a: farray
         :returns: logarithm values.
-        :rtype: farray
+        :rtype: darray
         '''
         return self.__oper.log(a)
 
@@ -483,18 +483,18 @@ class ArrayOperations(object):
         '''
         return self.__oper.bzeros(size)
 
-    def fones(self, size):
+    def dones(self, size):
         '''
         Create an array of the given size filled with ones.
 
         :param size: length of the output array.
         :type size: int
         :returns: array of ones.
-        :rtype: farray
+        :rtype: darray
         '''
-        return self.__oper.fones(size)
+        return self.__oper.dones(size)
 
-    def fzeros(self, size, ndim=1):
+    def dzeros(self, size, ndim=1):
         '''
         Create an array of the given size filled with zeros.
 
@@ -503,9 +503,9 @@ class ArrayOperations(object):
         :param ndim: number of dimensions of the output array.
         :type ndim: int
         :returns: array of zeros.
-        :rtype: farray
+        :rtype: darray
         '''
-        return self.__oper.fzeros(size, ndim)
+        return self.__oper.dzeros(size, ndim)
 
     def random_grid(self, lb, ub, size):
         r'''
@@ -521,7 +521,7 @@ class ArrayOperations(object):
         :param size: size of the grid.
         :type size: int or numpy.ndarray
         :returns: random grid.
-        :rtype: farray
+        :rtype: darray
         '''
         return self.__oper.random_grid(lb, ub, size)
 
@@ -537,7 +537,7 @@ class ArrayOperations(object):
         :param data: data sample.
         :type data: farray
         :returns: reduced data array.
-        :rtype: farray
+        :rtype: darray
         '''
         return self.__oper.restrict_data_size(maximum, data)
 
@@ -569,7 +569,7 @@ class ArrayOperations(object):
         :param size: number of steps.
         :type size: int
         :returns: Array with the coefficients.
-        :rtype: farray
+        :rtype: darray
         '''
         if size % 2 == 0:
             raise ValueError('Size must be an odd number')
@@ -593,9 +593,9 @@ class ArrayOperations(object):
         :param arrays: set of arrays.
         :type arrays: tuple(farray)
         :returns: array with the sum.
-        :rtype: farray
+        :rtype: darray
         '''
-        out = self.fzeros(len(arrays[0]))
+        out = self.dzeros(len(arrays[0]))
         for a in arrays:
             out += a
         return out
@@ -616,7 +616,7 @@ class ArrayOperations(object):
         :param values: possible values (or weights) associated to the data sample.
         :type values: farray or None
         :returns: sum inside each bin.
-        :rtype: farray
+        :rtype: darray
         '''
         return self.__oper.sum_inside(indices, gaps, centers, edges, values)
 
@@ -629,7 +629,7 @@ class ArrayOperations(object):
         :param v: mask array.
         :type v: barray
         :returns: slice of the array.
-        :rtype: farray
+        :rtype: darray
         '''
         return self.__oper.slice_from_boolean(a, v)
 
@@ -642,7 +642,7 @@ class ArrayOperations(object):
         :param i: array of indices.
         :type i: iarray
         :returns: slice of the array.
-        :rtype: farray
+        :rtype: darray
         '''
         return self.__oper.slice_from_integer(a, i)
 
@@ -655,7 +655,7 @@ class ArrayOperations(object):
         :param i: column to take the elements.
         :type i: int
         :returns: reduced array.
-        :rtype: farray
+        :rtype: darray
         '''
         return self.__oper.take_column(a, i)
 
@@ -670,7 +670,7 @@ class ArrayOperations(object):
         :param end: where to end taking entries.
         :type end: int or None
         :returns: slice of the array.
-        :rtype: farray
+        :rtype: darray
         '''
         end = end if end is not None else len(a)
         return self.__oper.take_slice(a, start, end)

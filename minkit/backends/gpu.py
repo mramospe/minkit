@@ -177,7 +177,7 @@ class GPUOperations(object):
 
             if len(args) == 0:
                 # It seems we can not pass a null pointer in OpenCL
-                ac = self.fzeros(1).ua
+                ac = self.dzeros(1).ua
             else:
                 ac = self.args_to_array(args, dtype=data_types.cpu_float)
 
@@ -197,7 +197,7 @@ class GPUOperations(object):
 
             if len(args) == 0:
                 # It seems we can not pass a null pointer in OpenCL
-                ac = self.fzeros(1).ua
+                ac = self.dzeros(1).ua
             else:
                 ac = self.args_to_array(
                     args, dtype=data_types.cpu_float)
@@ -219,7 +219,7 @@ class GPUOperations(object):
 
                 if len(args) == 0:
                     # It seems we can not pass a null pointer in OpenCL
-                    ac = self.fzeros(1).ua
+                    ac = self.dzeros(1).ua
                 else:
                     ac = self.args_to_array(
                         args, dtype=data_types.cpu_float)
@@ -332,7 +332,7 @@ class GPUOperations(object):
 
     @core.document_operations_method
     def product_by_zero_is_zero(self, f, s):
-        out = self.fempty(len(f))
+        out = self.dempty(len(f))
         gs, ls = self.__context.get_sizes(f.length)
         self.__fbe.product_by_zero_is_zero(f.length, out.ua, f.ua, s.ua,
                                            global_size=gs, local_size=ls)
@@ -352,7 +352,7 @@ class GPUOperations(object):
 
         if dtype == data_types.cpu_float:
             function = self.__fbe.assign_double_with_offset
-            out = self.fzeros(maximum, ndim)
+            out = self.dzeros(maximum, ndim)
         elif dtype == data_types.cpu_bool:
             function = self.__fbe.assign_bool_with_offset
             out = self.bempty(maximum)
@@ -388,7 +388,7 @@ class GPUOperations(object):
         return self.get_array_cache(data_types.cpu_bool).get_array(size)
 
     @core.document_operations_method
-    def fempty(self, size, ndim=1):
+    def dempty(self, size, ndim=1):
         return self.get_array_cache(data_types.cpu_float).get_array(size, ndim)
 
     @core.document_operations_method
@@ -396,7 +396,7 @@ class GPUOperations(object):
         return self.get_array_cache(data_types.cpu_int).get_array(size)
 
     @core.document_operations_method
-    def fones(self, n):
+    def dones(self, n):
         return self.__fbe.ones_double(n)
 
     @core.document_operations_method
@@ -404,7 +404,7 @@ class GPUOperations(object):
         return self.__fbe.ones_bool(n)
 
     @core.document_operations_method
-    def fzeros(self, n, ndim=1):
+    def dzeros(self, n, ndim=1):
         out = self.get_array_cache(data_types.cpu_float).get_array(n, ndim)
         gs, ls = self.__context.get_sizes(out.size)
         self.__fbe.zeros_double(
@@ -420,7 +420,7 @@ class GPUOperations(object):
         return self.__fbe.exponential_complex(a)
 
     @core.document_operations_method
-    def fexp(self, a):
+    def dexp(self, a):
         return self.__fbe.exponential_double(a)
 
     @core.document_operations_method
@@ -459,7 +459,7 @@ class GPUOperations(object):
 
             idx = data_types.as_integer(idx)
 
-            out = self.fempty(x.length)
+            out = self.dempty(x.length)
 
             gs_x, ls_x, gs_y, ls_y = self.__context.get_sizes(
                 xp.length, out.length)
@@ -486,7 +486,7 @@ class GPUOperations(object):
 
             idx = data_types.as_integer(idx)
 
-            out = self.fempty(len(x))
+            out = self.dempty(len(x))
 
             gs_x, ls_x, gs_y, ls_y = self.__context.get_sizes(
                 t.length, out.length)
@@ -592,7 +592,7 @@ class GPUOperations(object):
             np.cumprod(n, dtype=data_types.cpu_int) // n[0])
 
         # Evaluate the function
-        out = self.fzeros(lgth, ndim)
+        out = self.dzeros(lgth, ndim)
 
         gs, ls = self.__context.get_sizes(out.length)
 
@@ -619,7 +619,7 @@ class GPUOperations(object):
         dest = self.__rndm_gen.generate(n, ndim)
 
         # Build the output array
-        out = self.fzeros(n, ndim)
+        out = self.dzeros(n, ndim)
 
         gs, ls = self.__context.get_sizes(out.length // ndim)
 
@@ -665,7 +665,7 @@ class GPUOperations(object):
 
         ndata_blocks = data_types.cpu_int(gs_data // ls_data)
 
-        partial_sum = self.fzeros(nbins * ndata_blocks)
+        partial_sum = self.dzeros(nbins * ndata_blocks)
 
         if values is None:
             self.__tplf_2d.get_object((ls_data, ls_bins)).sum_inside_bins(lgth, nbins, partial_sum.ua, centers.ndim, centers.ua, gaps, edges.ua,
@@ -675,7 +675,7 @@ class GPUOperations(object):
                                                                                       global_size=(gs_data, gs_bins), local_size=(ls_data, ls_bins))
 
         # Sum entries in each bin
-        out = self.fzeros(nbins)
+        out = self.dzeros(nbins)
 
         self.__fbe.stepped_sum(out.length, out.ua, nbins, ndata_blocks, partial_sum.ua,
                                global_size=gs_bins, local_size=ls_bins)
@@ -696,7 +696,7 @@ class GPUOperations(object):
         nz = data_types.cpu_int(self.count_nonzero(valid))
 
         if nz == 0:
-            return self.fempty(0, a.ndim)  # empty array
+            return self.dempty(0, a.ndim)  # empty array
 
         # Calculate the compact indices
         indices = self.__fbe.invalid_indices(len(valid))
@@ -709,7 +709,7 @@ class GPUOperations(object):
                                                       valid.ua, global_size=gs, local_size=ls)
 
         # Build the output array
-        out = self.fzeros(nz, a.ndim)
+        out = self.dzeros(nz, a.ndim)
 
         self.__fbe.take(indices.length, out.ua, a.ndim, sizes.ua,
                         indices.ua, a.ua, global_size=gs, local_size=ls)
@@ -721,7 +721,7 @@ class GPUOperations(object):
 
         l = len(indices)
 
-        out = self.fzeros(l, a.ndim)
+        out = self.dzeros(l, a.ndim)
 
         gs, ls = self.__context.get_sizes(l)
 
@@ -735,7 +735,7 @@ class GPUOperations(object):
 
         i = data_types.as_integer(i)
 
-        out = self.fzeros(a.length)
+        out = self.dzeros(a.length)
 
         gs, ls = self.__context.get_sizes(out.length)
 
@@ -749,7 +749,7 @@ class GPUOperations(object):
 
         start, end = data_types.as_integer(start, end)
 
-        out = self.fzeros(end - start)
+        out = self.dzeros(end - start)
 
         gs, ls = self.__context.get_sizes(out.length)
 
@@ -812,7 +812,7 @@ class RandomUniformGenerator(object):
         :return: Array with values between 0 and 1.
         :rtype: darray
         '''
-        dest = self.__aop.fzeros(lgth, ndim)
+        dest = self.__aop.dzeros(lgth, ndim)
 
         l = (dest.size // 4) + (dest.size %
                                 4 != 0)  # each thread sets 4 numbers

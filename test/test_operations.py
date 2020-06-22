@@ -43,7 +43,7 @@ def test_aop():
     assert np.allclose(ones.as_ndarray(), np.ones(
         n, dtype=data_types.cpu_bool))
 
-    ones = aop.fones(n)  # Keep as double
+    ones = aop.dones(n)  # Keep as double
     assert np.allclose(ones.as_ndarray(), np.ones(n))
 
     assert np.allclose((ones * ones).as_ndarray(), np.ones(n))
@@ -52,7 +52,7 @@ def test_aop():
     zeros = aop.bzeros(n)
     assert np.allclose(zeros.as_ndarray(), np.zeros(n))
 
-    zeros = aop.fzeros(n)  # Keep as double
+    zeros = aop.dzeros(n)  # Keep as double
     assert np.allclose(zeros.as_ndarray(), np.zeros(n))
 
     assert np.allclose((zeros * zeros).as_ndarray(), np.zeros(n))
@@ -64,12 +64,12 @@ def test_aop():
     assert np.allclose(aop.count_nonzero(zeros), 0)
 
     # Exponential
-    zeros = aop.fzeros(n)
-    ez = aop.fexp(zeros)
+    zeros = aop.dzeros(n)
+    ez = aop.dexp(zeros)
     assert np.allclose(ez.as_ndarray(), np.ones(n))
 
     # Logarithm
-    ones = aop.fones(n)
+    ones = aop.dones(n)
     lo = aop.log(ones)
     assert np.allclose(lo.as_ndarray(), np.zeros(n))
 
@@ -167,7 +167,7 @@ def test_aop():
     r = aop.sum_inside(i, g, c, e)
     assert np.allclose(r.as_ndarray(), np.full(len(r), 10))
 
-    v = aop.fzeros(len(c))
+    v = aop.dzeros(len(c))
     r = aop.sum_inside(i, g, c, e, v)
     assert np.allclose(r.as_ndarray(), np.zeros(len(r)))
 
@@ -214,5 +214,5 @@ def test_display_arrays():
     print(aop.bzeros(10))  # array of booleans
     print(aop.carange(10))  # array of complex numbers
     print(aop.iarange(10))  # array of integers
-    print(aop.fzeros(10))  # array of doubles dim 1
-    print(aop.fzeros(10, 2))  # array of doubles dim 2
+    print(aop.dzeros(10))  # array of doubles dim 1
+    print(aop.dzeros(10, 2))  # array of doubles dim 2

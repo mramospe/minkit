@@ -809,7 +809,7 @@ class SourcePDF(PDF):
         fvals = data_types.fromiter_float((v.value for v in self.args))
 
         # Prepare the data arrays I/O
-        out = self.aop.fempty(len(data))
+        out = self.aop.dempty(len(data))
 
         di = data_types.fromiter_int(
             (i for i, p in enumerate(data.data_pars) if p in self.data_pars))
@@ -831,7 +831,7 @@ class SourcePDF(PDF):
         gaps_idx = data_types.array_int(
             [data.data_pars.index(p.name) for p in self.data_pars])
 
-        out = self.aop.fempty(len(data))
+        out = self.aop.dempty(len(data))
 
         if self.__function_proxies.evaluate_binned is not None:
             self.__function_proxies.evaluate_binned(
@@ -1108,7 +1108,7 @@ class AddPDFs(MultiPDF):
 
         yields = self.yields
 
-        out = self.aop.fzeros(len(data))
+        out = self.aop.dzeros(len(data))
         for y, pdf in zip(yields, self.pdfs):
             out += y * pdf(data, range, normalized=True)
 
@@ -1122,7 +1122,7 @@ class AddPDFs(MultiPDF):
 
         yields = self.yields
 
-        out = self.aop.fzeros(len(data))
+        out = self.aop.dzeros(len(data))
         for y, pdf in zip(yields, self.pdfs):
             out += y * pdf.evaluate_binned(data)
 
@@ -1446,7 +1446,7 @@ class ProdPDFs(MultiPDF):
     @allows_const_cache
     def __call__(self, data, range=parameters.FULL, normalized=True):
 
-        out = self.aop.fones(len(data))
+        out = self.aop.dones(len(data))
         for pdf in self.pdfs:
             out *= pdf(data, range, normalized=normalized)
 
@@ -1461,7 +1461,7 @@ class ProdPDFs(MultiPDF):
     @allows_const_cache
     def evaluate_binned(self, data, normalized=True):
 
-        out = self.aop.fones(len(data))
+        out = self.aop.dones(len(data))
         for pdf in self.pdfs:
             out *= pdf.evaluate_binned(data, normalized=False)
 

@@ -389,7 +389,7 @@ class CPUOperations(object):
 
     @return_darray
     @core.document_operations_method
-    def fempty(self, size, ndim=1):
+    def dempty(self, size, ndim=1):
         return np.empty(ndim * size, dtype=data_types.cpu_float), ndim
 
     @return_iarray
@@ -399,12 +399,12 @@ class CPUOperations(object):
 
     @return_darray_one_dim
     @core.document_operations_method
-    def fones(self, n):
+    def dones(self, n):
         return np.ones(n, dtype=data_types.cpu_float)
 
     @return_darray
     @core.document_operations_method
-    def fzeros(self, n, ndim=1):
+    def dzeros(self, n, ndim=1):
         return np.zeros(ndim * n, dtype=data_types.cpu_float), ndim
 
     @return_darray
@@ -427,7 +427,7 @@ class CPUOperations(object):
 
     @return_darray
     @core.document_operations_method
-    def fexp(self, a):
+    def dexp(self, a):
         return np.exp(a.ua), a.ndim
 
     @return_darray_one_dim
@@ -577,7 +577,7 @@ class CPUOperations(object):
 
     @core.document_operations_method
     def simpson_factors(self, size):
-        f = self.fones(size)
+        f = self.dones(size)
         f[1::2] = 4.
         f[2:-1:2] = 2.
         return f
