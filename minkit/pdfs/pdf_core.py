@@ -9,6 +9,7 @@ Base classes to define PDF data_types.
 from . import dataset
 from ..backends import gsl_api
 
+from ..backends.arrays import darray
 from ..backends.core import common_backend, is_gpu_backend, parse_backend
 from ..base import core
 from ..base import bindings
@@ -25,14 +26,14 @@ import os
 import textwrap
 import warnings
 
-__all__ = ['AddPDFs', 'ConvPDFs', 'MultiPDF', 'pdf_from_json', 'pdf_to_json',
+__all__ = ['AddPDFs', 'ConvPDFs', 'InterpPDF', 'MultiPDF', 'pdf_from_json', 'pdf_to_json',
            'PDF', 'ProdPDFs', 'register_pdf', 'SourcePDF']
 
 # Number of points to use to evaluate a binned sample
 DEFAULT_EVB_SIZE = 100
 
 # Default size of the grid for the convolution PDFs
-DEFAULT_CONV_SIZE = 10000
+DEFAULT_INTERP_SIZE = 10000
 
 # Default number of events to generate in a single step
 DEFAULT_GEN_SIZE_CPU = 10000
@@ -139,7 +140,7 @@ class PDF(object, metaclass=core.DocMeta):
     # with this value set to "True" must have the property "pdfs" implemented.
     _dependent = False
 
-    def __init__(self, name, data_pars, arg_pars, backend=None):
+    def __init__(self, name, data_pars, arg_pars=None, backend=None):
         '''
         Build the class from a name, a set of data parameters and argument parameters.
         The first correspond to those that must be present on any :class:`DataSet` or
@@ -151,7 +152,7 @@ class PDF(object, metaclass=core.DocMeta):
         :param data_pars: data parameters.
         :type data_pars: Registry(Parameter)
         :param arg_pars: argument parameters.
-        :type arg_pars: Registry(Parameter)
+        :type arg_pars: Registry(Parameter) or None
         :param backend: backend where the PDF will operate.
         :type backend: Backend or None
         :ivar name: name of the PDF.
@@ -163,7 +164,7 @@ class PDF(object, metaclass=core.DocMeta):
         self.evb_size = DEFAULT_EVB_SIZE
         self.__aop = parse_backend(backend)
         self.__data_pars = data_pars
-        self.__arg_pars = arg_pars
+        self.__arg_pars = arg_pars if arg_pars is not None else parameters.Registry()
 
         # The cache is saved on a dictionary, and inherited classes must avoid colliding names
         self.__cache = None
@@ -1239,7 +1240,7 @@ class ConvPDFs(MultiPDF):
 
         # The convolution size and range can be changed by the user
         self.range = range or parameters.FULL
-        self.conv_size = DEFAULT_CONV_SIZE
+        self.conv_size = DEFAULT_INTERP_SIZE
 
     def __repr__(self):
         out = f'{self.__class__.__name__}({self.name}):{os.linesep}'
@@ -1297,7 +1298,6 @@ class ConvPDFs(MultiPDF):
         '''
         Function used to do the interpolation.
 
-        :getter: Function used to do the interpolation.
         :setter: Set the function to use from a string.
         '''
         return self.__interp
@@ -1409,7 +1409,7 @@ class ConvPDFs(MultiPDF):
     @allows_const_cache
     def numerical_normalization(self, range=parameters.FULL):
 
-        return 1.
+        return self.norm(range)
 
     def to_backend(self, backend):
 
@@ -1511,6 +1511,214 @@ class ProdPDFs(MultiPDF):
         return {'class': self.__class__.__name__,  # Save also the class name of the PDF
                 'name': self.name,
                 'pdfs': self.pdfs.names}
+
+
+@register_pdf
+class InterpPDF(PDF):
+
+    def __init__(self, name, data_par, centers, values, backend=None):
+        '''
+        Represent the convolution of two different PDFs.
+
+        :param name: name of the PDF.
+        :type name: str
+        :param data_par: data parameter to consider.
+        :type data_par: Parameter
+        :param centers: centers to use in the interpolation process.
+        :type centers: darray
+        :param values: values to use in the interpolation process.
+        :type values: darray
+        :param backend: backend to build the PDF.
+        :type backend: Backend or None
+        :raises ValueError: If an attempt to define the PDF in more than
+           one dimension is done.
+        '''
+        super().__init__(name, parameters.Registry(
+            [data_par]), backend=backend)
+
+        self.__centers = centers
+        self.__values = values
+
+        self.interpolation_method = 'spline'
+
+        self.interp_size = DEFAULT_INTERP_SIZE
+
+    def __repr__(self):
+        vmin = self.__centers.min()
+        vmax = self.__centers.max()
+        size = len(self.__centers)
+        return f'{self.__class__.__name__}({self.name}, range=({vmin}, {vmax}), size={size})'
+
+    def _norm(self, range=parameters.FULL):
+        '''
+        Calculate the normalization using the processed interpolation values
+        and the integration range.
+
+        :param range: normalization range.
+        :type range: str
+        :returns: Normalization.
+        :rtype: float
+        '''
+        # we are using the a grid of dimension one
+        s = 0
+        for b in parameters.bounds_for_range(self.data_pars, range):
+
+            grid = dataset.evaluation_grid(self.aop,
+                                           self.data_pars, b, size=self.__interp_size + 1)
+
+            pdf_values = self.__interpolator(0, grid.values)
+
+            pdf_values *= (grid.values.get(1) - grid.values.get(0)) / 3.
+            pdf_values *= self.aop.simpson_factors(self.__interp_size + 1)
+
+            s += pdf_values.sum()
+
+        return s
+
+    @property
+    def interp_size(self):
+        '''
+        Size of the sample used to calculate the convolution. It must be an
+        odd number.
+        '''
+        return self.__interp_size
+
+    @interp_size.setter
+    def interp_size(self, size):
+        if size % 2 != 0:
+            raise ValueError('Size must be an even number')
+        self.__interp_size = size
+
+    @property
+    def interpolation_method(self):
+        '''
+        Function used to do the interpolation.
+
+        :setter: Set the function to use from a string.
+        '''
+        return self.__interpolator
+
+    @interpolation_method.setter
+    def interpolation_method(self, method):
+        if method == 'linear':
+            self.__interpolator = self.aop.make_linear_interpolator(
+                self.__centers, self.__values)
+        elif method == 'spline':
+            self.__interpolator = self.aop.make_spline_interpolator(
+                self.__centers, self.__values)
+        else:
+            raise ValueError(f'Unknown interpolation method "{method}"')
+
+    @classmethod
+    def from_binned_dataset(cls, name, data):
+        '''
+        Build the instance from a binned data set. The data set must be
+        unidimensional.
+
+        :param name: name of the PDF.
+        :type name: str
+        :param data: binned data set.
+        :type data: BinnedDataSet
+        '''
+        data_par = data.data_pars[0]
+        edges, values = data[data_par.name].as_ndarray(
+        ), data.values.as_ndarray()
+
+        centers = 0.5 * (edges[1:] + edges[:-1])
+
+        return cls.from_ndarray(name, data_par, centers, values, backend=data.backend)
+
+    @classmethod
+    def from_ndarray(cls, name, data_par, centers, values, backend=None):
+        '''
+        Build the class from :class:`numpy.ndarray` instances.
+
+        :param name: name of the PDF.
+        :type name: str
+        :param data_par: data parameter.
+        :type data_par: Parameter
+        :param centers: centers to use in the interpolation.
+        :type centers: numpy.ndarray
+        :param values: values to use in the interpolation.
+        :type values: numpy.ndarray
+        :param backend: backend where the PDF will operate.
+        :type backend: Backend or None
+        '''
+        aop = parse_backend(backend)
+        c = darray.from_ndarray(centers, aop.backend)
+        v = darray.from_ndarray(values, aop.backend)
+        return cls(name, data_par, c, v, backend)
+
+    @allows_const_cache
+    def __call__(self, data, range=parameters.FULL, normalized=True):
+
+        idx = data.data_pars.index(self.data_pars[0].name)
+
+        pdf_values = self.__interpolator(idx, data.values)
+
+        if normalized:
+            return pdf_values / self._norm(range)
+        else:
+            return pdf_values
+
+    @allows_const_cache
+    def evaluate_binned(self, data, normalized=True):
+
+        idx = data.data_pars.index(self.data_pars[0].name)
+
+        out = self.__interpolator(idx, data.values)
+
+        if normalized:
+            return safe_division(out, out.sum())
+        else:
+            return out
+
+    @classmethod
+    def from_json_object(cls, obj, pars, backend):
+
+        data_par = pars.get(obj['data_par']['name'])
+
+        c, v = data_types.array_float(
+            obj['centers']), data_types.array_float(obj['values'])
+
+        return cls.from_ndarray(obj['name'], data_par, c, v, backend)
+
+    @allows_bind_cache
+    @allows_const_cache
+    def norm(self, range=parameters.FULL):
+        return self._norm(range)
+
+    def numerical_integral(self, integral_range=parameters.FULL, range=parameters.FULL):
+
+        if integral_range == range:
+            return 1.
+
+        num = self._norm(integral_range)
+        den = self._norm(range)
+
+        return num / den
+
+    @allows_bind_cache
+    @allows_const_cache
+    def numerical_normalization(self, range=parameters.FULL):
+
+        return self.norm(range)
+
+    def to_backend(self, backend):
+
+        c, v = self.__centers.to_backend(
+            backend), self.__values.to_backend(backend)
+
+        return self.__class__(self.name, self.data_pars, c, v, backend)
+
+    def to_json_object(self):
+
+        return {'class': self.__class__.__name__,  # Save also the class name of the PDF
+                'name': self.name,
+                # there is only one element
+                'data_par': self.data_pars[0].to_json_object(),
+                'centers': self.__centers.as_ndarray().tolist(),
+                'values': self.__values.as_ndarray().tolist()}
 
 
 def pdf_from_json(obj, backend=None):

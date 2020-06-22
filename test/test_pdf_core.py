@@ -374,3 +374,43 @@ def test_restoring_state():
     # The values of the PDF must be those of the first minimization
     for f, s in zip(result, g.real_args):
         helpers.check_parameters(f, s)
+
+
+@pytest.mark.pdfs
+@pytest.mark.source_pdf
+def test_interppdf(tmpdir):
+    '''
+    Test the InterpPDF class.
+    '''
+    m = minkit.Parameter('m', bounds=(-3, +3))
+    centers = np.linspace(*m.bounds, 100)
+    values = np.exp(-0.5 * centers**2)
+
+    pdf = minkit.InterpPDF.from_ndarray('pdf', m, centers, values)
+
+    # Test the JSON conversion
+    with open(os.path.join(tmpdir, 'pdf.json'), 'wt') as fi:
+        json.dump(minkit.pdf_to_json(pdf), fi)
+
+    with open(os.path.join(tmpdir, 'pdf.json'), 'rt') as fi:
+        p = minkit.pdf_from_json(json.load(fi))
+
+    check_pdfs(p, pdf)
+
+    # Check copying the PDF
+    pdf.copy()
+
+    data = pdf.generate(10000)
+
+    with fit_test(pdf) as test:
+        with minkit.minimizer('uml', pdf, data, minimizer='minuit') as minimizer:
+            test.result, _ = minimizer.migrad()
+
+    bdata = data.make_binned(20)
+
+    with fit_test(pdf) as test:
+        with minkit.minimizer('bml', pdf, bdata, minimizer='minuit') as minimizer:
+            test.result, _ = minimizer.migrad()
+
+    # Test the construction from a binned data set
+    minkit.InterpPDF.from_binned_dataset('pdf', bdata)

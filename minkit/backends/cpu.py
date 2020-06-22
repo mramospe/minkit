@@ -578,8 +578,8 @@ class CPUOperations(object):
     @core.document_operations_method
     def simpson_factors(self, size):
         f = self.dones(size)
-        f[1::2] = 4.
-        f[2:-1:2] = 2.
+        f.ua[1::2] = 4.
+        f.ua[2:-1:2] = 2.
         return f
 
     @core.document_operations_method
