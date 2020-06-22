@@ -576,6 +576,13 @@ class CPUOperations(object):
         self.__rndm_gen.seed(seed)
 
     @core.document_operations_method
+    def simpson_factors(self, size):
+        f = self.fones(size)
+        f[1::2] = 4.
+        f[2:-1:2] = 2.
+        return f
+
+    @core.document_operations_method
     def sum(self, a):
         return np.sum(a.ua)
 

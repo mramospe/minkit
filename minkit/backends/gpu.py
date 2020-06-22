@@ -643,6 +643,10 @@ class GPUOperations(object):
         self.__rndm_gen.seed(seed)
 
     @core.document_operations_method
+    def simpson_factors(self, size):
+        return self.__fbe.simpson_factors_1d(size)
+
+    @core.document_operations_method
     def sum(self, a):
         return self.__rfu.rsum(a)
 

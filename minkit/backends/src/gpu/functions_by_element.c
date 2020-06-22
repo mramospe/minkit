@@ -375,6 +375,22 @@ KERNEL void real(int lgth, GLOBAL_MEM double *out, GLOBAL_MEM double2 *in) {
   out[idx] = in[idx].x;
 }
 
+/// Calculate the factors for the Simpson's rule in 1D
+KERNEL void simpson_factors_1d(int lgth, GLOBAL_MEM double *out) {
+
+  int idx = get_global_id(0);
+
+  if (idx >= lgth) // pad condition
+    return;
+
+  if (idx == 0 || idx == lgth - 1)
+    out[idx] == 1.;
+  else if (idx % 2 == 0)
+    out[idx] = 2.;
+  else
+    out[idx] = 4.;
+}
+
 /// Get elements from an array by indices
 KERNEL void slice_from_integer(int lgth, GLOBAL_MEM double *out, int ndim,
                                GLOBAL_MEM double *in, GLOBAL_MEM int *indices) {

@@ -135,7 +135,7 @@ def make_functions(ops_mgr):
                 getattr(funcs_by_element, function)))
 
     # These functions create e new array of doubles
-    for function in ('linspace', 'ones_double'):
+    for function in ('linspace', 'ones_double', 'simpson_factors_1d'):
         setattr(funcs_by_element, function, create_double(
                 getattr(funcs_by_element, function)))
 

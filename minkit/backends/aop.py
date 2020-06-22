@@ -561,6 +561,20 @@ class ArrayOperations(object):
         '''
         return self.__oper.shuffling_index(n)
 
+    def simpson_factors(self, size):
+        '''
+        Return an array with the coefficients for the Simpson numerical
+        integration method.
+
+        :param size: number of steps.
+        :type size: int
+        :returns: Array with the coefficients.
+        :rtype: farray
+        '''
+        if size % 2 == 0:
+            raise ValueError('Size must be an odd number')
+        return self.__oper.simpson_factors(size)
+
     def sum(self, a):
         '''
         Sum the elements of the given array.

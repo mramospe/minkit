@@ -1266,15 +1266,31 @@ class ConvPDFs(MultiPDF):
         for b in parameters.bounds_for_range(self.data_pars, range):
 
             grid = dataset.evaluation_grid(self.aop,
-                                           self.data_pars, b, size=self.conv_size)
+                                           self.data_pars, b, size=self.__conv_size + 1)
 
             pdf_values = interpolator(0, grid.values)
 
-            pdf_values *= (grid.values.get(1) - grid.values.get(0))
+            pdf_values *= (grid.values.get(1) - grid.values.get(0)
+                           ) / (3. * self.__conv_size)
+            pdf_values *= self.aop.simpson_factors(self.__conv_size + 1)
 
             s += pdf_values.sum()
 
         return s
+
+    @property
+    def conv_size(self):
+        '''
+        Size of the sample used to calculate the convolution. It must be an
+        odd number.
+        '''
+        return self.__conv_size
+
+    @conv_size.setter
+    def conv_size(self, size):
+        if size % 2 != 0:
+            raise ValueError('Size must be an even number')
+        self.__conv_size = size
 
     @property
     def interpolation_method(self):
@@ -1356,7 +1372,7 @@ class ConvPDFs(MultiPDF):
 
         # Only works for the 1-dimensional case
         grid = dataset.evaluation_grid(self.aop,
-                                       self.data_pars, bounds[0], size=self.conv_size)
+                                       self.data_pars, bounds[0], size=self.__conv_size)
 
         fv = first(grid, self.range, normalized)
         sv = second(grid, self.range, normalized)
