@@ -593,7 +593,7 @@ class CPUOperations(object):
             f = self.dempty(nbins * (size - 1) + 1)
             f.ua[1::2] = 4.
             f.ua[2::2] = 2.  # last element is corrected in the next line
-            f.ua[0::size] = 1.
+            f.ua[0::size - 1] = 1.
             return f
 
     @return_darray_one_dim
