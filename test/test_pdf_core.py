@@ -126,7 +126,7 @@ def test_constpdf(tmpdir):
 
     with fit_test(pdf) as test:
         with minkit.minimizer('uml', pdf, data, minimizer='minuit') as minuit:
-            test.result, _ = minuit.migrad()
+            test.result = minuit.migrad()
 
     # Test the JSON conversion
     with open(os.path.join(tmpdir, 'pdf.json'), 'wt') as fi:
@@ -182,7 +182,7 @@ def test_convpdfs(tmpdir):
 
     with fit_test(pdf) as test:
         with minkit.minimizer('uml', pdf, data, minimizer='minuit') as minuit:
-            test.result, _ = minuit.migrad()
+            test.result = minuit.migrad()
 
     # Test the JSON conversion
     with open(os.path.join(tmpdir, 'pdf.json'), 'wt') as fi:
@@ -201,7 +201,7 @@ def test_convpdfs(tmpdir):
 
     with fit_test(pdf) as test:
         with minkit.minimizer('bml', pdf, bdata, minimizer='minuit') as minuit:
-            test.result, _ = minuit.migrad()
+            test.result = minuit.migrad()
 
 
 @pytest.mark.pdfs
@@ -255,7 +255,7 @@ def test_prodpdfs(tmpdir):
 
     with fit_test(pdf) as test:
         with minkit.minimizer('uml', pdf, data) as minimizer:
-            test.result, _ = minimizer.migrad()
+            test.result = minimizer.migrad()
 
 
 @pytest.mark.pdfs
@@ -419,13 +419,13 @@ def test_interppdf(tmpdir):
 
     with fit_test(pdf) as test:
         with minkit.minimizer('uml', pdf, data, minimizer='minuit') as minimizer:
-            test.result, _ = minimizer.migrad()
+            test.result = minimizer.migrad()
 
     bdata = data.make_binned(20)
 
     with fit_test(pdf) as test:
         with minkit.minimizer('bml', pdf, bdata, minimizer='minuit') as minimizer:
-            test.result, _ = minimizer.migrad()
+            test.result = minimizer.migrad()
 
     # Test the construction from a binned data set
     minkit.InterpPDF.from_binned_dataset('pdf', bdata)

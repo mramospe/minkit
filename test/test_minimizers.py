@@ -40,7 +40,7 @@ def test_minimizer():
 
     with helpers.fit_test(g) as test:
         with minkit.minimizer('uml', g, data, minimizer='minuit') as minuit:
-            test.result, _ = pytest.shared_result = minuit.migrad()
+            test.result = pytest.shared_result = minuit.migrad()
 
     pytest.shared_names = [p.name for p in g.all_args]
 
@@ -50,7 +50,7 @@ def test_minimizer():
 
     with g.restoring_state(), helpers.fit_test(g, fails=True) as test:
         with minkit.minimizer('uml', g, data, minimizer='minuit') as minuit:
-            test.result, _ = minuit.migrad()
+            test.result = minuit.migrad()
 
         reg = g.args.copy()
 
@@ -61,14 +61,14 @@ def test_minimizer():
 
     with helpers.fit_test(g) as test:
         with minkit.minimizer('uml', g, data, minimizer='minuit') as minuit:
-            test.result, _ = minuit.migrad()
+            test.result = minuit.migrad()
 
     # Test the binned case
     data = data.make_binned(bins=100)
 
     with helpers.fit_test(g) as test:
         with minkit.minimizer('chi2', g, data, minimizer='minuit') as minuit:
-            test.result, _ = minuit.migrad()
+            test.result = minuit.migrad()
 
 
 @pytest.mark.minimization
@@ -99,7 +99,7 @@ def test_simultaneous_minimizer():
 
     with helpers.fit_test(categories, simultaneous=True) as test:
         with minkit.simultaneous_minimizer(categories, minimizer='minuit') as minuit:
-            test.result, _ = minuit.migrad()
+            test.result = minuit.migrad()
 
 
 @pytest.mark.minimization

@@ -33,7 +33,7 @@ def test_binned_maximum_likelihood():
 
     with helpers.fit_test(g) as test:
         with minkit.minimizer('bml', g, data, minimizer='minuit') as minuit:
-            test.result, _ = minuit.migrad()
+            test.result = minuit.migrad()
 
     # Add constraints
     cc = minkit.Parameter('cc', 10)
@@ -42,7 +42,7 @@ def test_binned_maximum_likelihood():
 
     with helpers.fit_test(g) as test:
         with minkit.minimizer('bml', g, data, minimizer='minuit', constraints=[gc]) as minuit:
-            test.result, _ = minuit.migrad()
+            test.result = minuit.migrad()
 
     # Test for a composed PDF
     k = minkit.Parameter('k', -0.1, bounds=(-1, 0))
@@ -61,7 +61,7 @@ def test_binned_maximum_likelihood():
 
     with helpers.fit_test(pdf) as test:
         with minkit.minimizer('bml', pdf, data) as minimizer:
-            test.result, _ = minimizer.migrad()
+            test.result = minimizer.migrad()
 
     # Test for a PDF with no "evaluate_binned" function defined
     m = minkit.Parameter('m', bounds=(0, 10))
@@ -80,7 +80,7 @@ def test_binned_maximum_likelihood():
 
     with helpers.fit_test(pdf) as test:
         with minkit.minimizer('bml', pdf, data) as minimizer:
-            test.result, _ = minimizer.migrad()
+            test.result = minimizer.migrad()
 
 
 @pytest.mark.minimization
@@ -97,7 +97,7 @@ def test_binned_extended_maximum_likelihood():
 
     with helpers.fit_test(pdf) as test:
         with minkit.minimizer('beml', pdf, data) as minimizer:
-            test.result, _ = minimizer.migrad()
+            test.result = minimizer.migrad()
 
 
 @pytest.mark.minimization
@@ -122,7 +122,7 @@ def test_binned_chisquare():
 
     with helpers.fit_test(g) as test:
         with minkit.minimizer('chi2', g, data) as minimizer:
-            test.result, _ = minimizer.migrad()
+            test.result = minimizer.migrad()
 
     # Many PDfs
     k = minkit.Parameter('k', -0.1, bounds=(-1, 0))
@@ -142,7 +142,7 @@ def test_binned_chisquare():
 
     with helpers.fit_test(pdf) as test:
         with minkit.minimizer('chi2', pdf, data) as minimizer:
-            test.result, _ = minimizer.migrad()
+            test.result = minimizer.migrad()
 
 
 @pytest.mark.minimization
@@ -159,7 +159,7 @@ def test_binned_extended_chisquare():
 
     with helpers.fit_test(pdf) as test:
         with minkit.minimizer('echi2', pdf, data) as minimizer:
-            test.result, _ = minimizer.migrad()
+            test.result = minimizer.migrad()
 
 
 @pytest.mark.minimization
@@ -188,7 +188,7 @@ def test_unbinned_extended_maximum_likelihood():
 
     with helpers.fit_test(pdf) as test:
         with minkit.minimizer('ueml', pdf, data, minimizer='minuit') as minuit:
-            test.result, _ = minuit.migrad()
+            test.result = minuit.migrad()
 
     # Add constraints
     cc = minkit.Parameter('cc', 10)
@@ -197,7 +197,7 @@ def test_unbinned_extended_maximum_likelihood():
 
     with helpers.fit_test(pdf) as test:
         with minkit.minimizer('ueml', pdf, data, minimizer='minuit', constraints=[gc]) as minuit:
-            test.result, _ = minuit.migrad()
+            test.result = minuit.migrad()
 
 
 @pytest.mark.minimization
@@ -216,7 +216,7 @@ def test_unbinned_maximum_likelihood():
 
     with helpers.fit_test(g) as test:
         with minkit.minimizer('uml', g, data, minimizer='minuit') as minuit:
-            test.result, _ = minuit.migrad()
+            test.result = minuit.migrad()
 
     # Add constraints
     cc = minkit.Parameter('cc', 10)
@@ -225,4 +225,4 @@ def test_unbinned_maximum_likelihood():
 
     with helpers.fit_test(g) as test:
         with minkit.minimizer('uml', g, data, minimizer='minuit', constraints=[gc]) as minuit:
-            test.result, _ = minuit.migrad()
+            test.result = minuit.migrad()

@@ -86,7 +86,7 @@ def test_formula(tmpdir):
 
     with helpers.fit_test(g) as test:
         with minkit.minimizer('uml', g, data, minimizer='minuit') as minuit:
-            test.result, _ = minuit.migrad()
+            test.result = minuit.migrad()
 
     # Test the JSON (only for formula)
     with open(os.path.join(tmpdir, 'r.json'), 'wt') as fi:
@@ -120,7 +120,7 @@ def test_formula(tmpdir):
 
     with helpers.fit_test(g) as test:
         with minkit.minimizer('uml', g, data, minimizer='minuit') as minuit:
-            test.result, _ = minuit.migrad()
+            test.result = minuit.migrad()
 
     # Test the JSON (only for formula)
     with open(os.path.join(tmpdir, 'r.json'), 'wt') as fi:
@@ -161,14 +161,14 @@ def test_range():
 
     with helpers.fit_test(e) as test:
         with minkit.minimizer('uml', e, data, minimizer='minuit', range='sides') as minuit:
-            test.result, _ = minuit.migrad()
+            test.result = minuit.migrad()
 
     # Test generation of data only in the range
     data = e.generate(10000, range='sides')
 
     with helpers.fit_test(e) as test:
         with minkit.minimizer('uml', e, data, minimizer='minuit', range='sides') as minuit:
-            test.result, _ = minuit.migrad()
+            test.result = minuit.migrad()
 
 
 @pytest.mark.core

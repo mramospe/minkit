@@ -660,6 +660,9 @@ class GPUOperations(object):
 
     @core.document_operations_method
     def simpson_factors(self, size, nbins=None):
+
+        size = data_types.cpu_int(size)
+
         if nbins is None:
             return self.__fbe.simpson_factors_1d(size)
         else:

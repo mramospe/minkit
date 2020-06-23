@@ -204,6 +204,18 @@ def test_aop():
 
     assert np.allclose(aop.sum(fr) * (x[1] - x[0]), 1.)
 
+    # Simpson's rule
+    with pytest.raises(ValueError):
+        aop.simpson_factors(4)
+
+    s = aop.simpson_factors(5).as_ndarray()
+    assert np.allclose(s, [1, 4, 2, 4, 1])
+
+    s = aop.simpson_factors(5, 3).as_ndarray()
+    r = np.ones(len(s))
+    r[:-1] = np.tile([1, 4, 2, 4], 3)
+    assert np.allclose(s, r)
+
 
 @pytest.mark.core
 @pytest.mark.operations

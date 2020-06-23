@@ -71,6 +71,23 @@ def test_dataset():
 
 @pytest.mark.core
 @helpers.setting_seed
+def test_adaptive_grid():
+    '''
+    Test the "adaptive_grid" function.
+    '''
+    x = minkit.Parameter('x', bounds=(0, 20))
+    l = aop.linspace(0, 10, 11)
+    n = 10
+
+    data = dataset.adaptive_grid(aop, x, l, n)
+
+    assert len(data) == (len(l) - 1) * n - n + 1
+
+    assert np.allclose(data.values.as_ndarray(), np.linspace(0, 10, len(data)))
+
+
+@pytest.mark.core
+@helpers.setting_seed
 def test_evaluation_grid():
     '''
     Test the "evaluation_grid" function.

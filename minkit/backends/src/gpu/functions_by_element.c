@@ -223,7 +223,7 @@ KERNEL void concatenated_linspace(int lgth, GLOBAL_MEM double *out,
 
   double step = (vmax - vmin) / (nsteps - 1);
 
-  out[idx] = vmin + step * (idx % nsteps);
+  out[idx] = vmin + step * (idx % nsteps + bid);
 }
 
 /// Logarithm
@@ -403,7 +403,7 @@ KERNEL void simpson_factors_1d(int lgth, GLOBAL_MEM double *out) {
     return;
 
   if (idx == 0 || idx == lgth - 1)
-    out[idx] == 1.;
+    out[idx] = 1.;
   else if (idx % 2 == 0)
     out[idx] = 2.;
   else
@@ -419,7 +419,7 @@ KERNEL void simpson_factors_from_edges_1d(int lgth, GLOBAL_MEM double *out,
   if (idx >= lgth)
     return;
 
-  int r = idx % size;
+  int r = idx % (size - 1);
 
   if (r == 0)
     out[idx] = 1.;
@@ -459,14 +459,14 @@ KERNEL void stepped_sum(int lgth, GLOBAL_MEM double *out, int nbins,
 
 /// Calculate the steps associated to a given set of edges
 KERNEL void steps_from_edges(int lgth, GLOBAL_MEM double *out,
-                             GLOBAL_MEM double *in) {
+                             GLOBAL_MEM double *edges) {
 
   int idx = get_global_id(0);
 
   if (idx >= lgth)
     return;
 
-  in[idx] = out[idx + 1] - out[idx];
+  out[idx] = edges[idx + 1] - edges[idx];
 }
 
 /// Take elements from an array after the compact indices are obtained using
