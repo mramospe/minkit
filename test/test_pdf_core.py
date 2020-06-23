@@ -196,6 +196,13 @@ def test_convpdfs(tmpdir):
     # Check copying the PDF
     pdf.copy()
 
+    # Test for binned data samples
+    bdata = data.make_binned(20)
+
+    with fit_test(pdf) as test:
+        with minkit.minimizer('bml', pdf, bdata, minimizer='minuit') as minuit:
+            test.result, _ = minuit.migrad()
+
 
 @pytest.mark.pdfs
 @pytest.mark.multipdf
@@ -386,19 +393,27 @@ def test_interppdf(tmpdir):
     centers = np.linspace(*m.bounds, 100)
     values = np.exp(-0.5 * centers**2)
 
-    pdf = minkit.InterpPDF.from_ndarray('pdf', m, centers, values)
+    ip = minkit.InterpPDF.from_ndarray('ip', m, centers, values)
 
     # Test the JSON conversion
-    with open(os.path.join(tmpdir, 'pdf.json'), 'wt') as fi:
-        json.dump(minkit.pdf_to_json(pdf), fi)
+    with open(os.path.join(tmpdir, 'ip.json'), 'wt') as fi:
+        json.dump(minkit.pdf_to_json(ip), fi)
 
-    with open(os.path.join(tmpdir, 'pdf.json'), 'rt') as fi:
+    with open(os.path.join(tmpdir, 'ip.json'), 'rt') as fi:
         p = minkit.pdf_from_json(json.load(fi))
 
-    check_pdfs(p, pdf)
+    check_pdfs(p, ip)
 
     # Check copying the PDF
-    pdf.copy()
+    ip.copy()
+
+    # Combine the PDF with another
+    k = minkit.Parameter('k', -0.1, bounds=(-1, +1))
+    e = minkit.Exponential('exp', m, k)
+
+    y = minkit.Parameter('y', 0.5, bounds=(0, 1))
+
+    pdf = minkit.AddPDFs.two_components('pdf', ip, e, y)
 
     data = pdf.generate(10000)
 

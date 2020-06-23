@@ -1330,9 +1330,27 @@ class ConvPDFs(MultiPDF):
 
         interpolator = self.convolve(normalized=True)
 
-        idx = data.data_pars.index(self.data_pars[0].name)
+        par = self.data_pars[0]
 
-        out = interpolator(idx, data.values)
+        edges = data[par.name].as_ndarray()
+
+        out = data_types.empty_float(len(edges) - 1)
+
+        nsteps = (self.__conv_size // len(out))
+
+        if nsteps % 2 == 0:
+            nsteps += 1
+
+        for i, b in enumerate(zip(edges[:-1], edges[1:])):
+
+            grid = dataset.evaluation_grid(self.aop,
+                                           self.data_pars, np.array(b), size=nsteps)
+
+            pdf_values = interpolator(0, grid.values)
+            pdf_values *= (grid.values.get(1) - grid.values.get(0)) / 3.
+            pdf_values *= self.aop.simpson_factors(nsteps)
+
+            out[i] = pdf_values.sum()
 
         if normalized:
             return safe_division(out, out.sum())
@@ -1664,9 +1682,27 @@ class InterpPDF(PDF):
     @allows_const_cache
     def evaluate_binned(self, data, normalized=True):
 
-        idx = data.data_pars.index(self.data_pars[0].name)
+        par = self.data_pars[0]
 
-        out = self.__interpolator(idx, data.values)
+        edges = data[par.name].as_ndarray()
+
+        out = data_types.empty_float(len(edges) - 1)
+
+        nsteps = (self.__interp_size // len(out))
+
+        if nsteps % 2 == 0:
+            nsteps += 1
+
+        for i, b in enumerate(zip(edges[:-1], edges[1:])):
+
+            grid = dataset.evaluation_grid(self.aop,
+                                           self.data_pars, np.array(b), size=nsteps)
+
+            pdf_values = self.__interpolator(0, grid.values)
+            pdf_values *= (grid.values.get(1) - grid.values.get(0)) / 3.
+            pdf_values *= self.aop.simpson_factors(nsteps)
+
+            out[i] = pdf_values.sum()
 
         if normalized:
             return safe_division(out, out.sum())
