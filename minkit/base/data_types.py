@@ -44,6 +44,10 @@ def fromiter_int(i):
     return np.fromiter(i, dtype=cpu_int)
 
 
+def full_float(n, f):
+    return np.full(n, f, dtype=cpu_float)
+
+
 def full_int(n, i):
     return np.full(n, i, dtype=cpu_int)
 

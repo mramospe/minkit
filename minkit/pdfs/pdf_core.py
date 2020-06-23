@@ -39,6 +39,10 @@ DEFAULT_INTERP_SIZE = 10000
 DEFAULT_GEN_SIZE_CPU = 10000
 DEFAULT_GEN_SIZE_GPU = 100000
 
+# Maximum tolerance on the determination of maximum values
+MAX_TOL = 1e-2
+MAX_ITER = 100
+
 # Cache types
 BIND = 'bind'
 CONST = 'const'
@@ -282,6 +286,66 @@ class PDF(object, metaclass=core.DocMeta):
         self.__cache = None
         self.__cache_type = None
 
+    def _max(self, bounds, normalized, range=parameters.FULL, tol=MAX_TOL, maxiter=MAX_ITER, sampling_size=None):
+        '''
+        Calculate the maximum value of the PDF in the given range.
+
+        :param bounds: bounds of the data parameters.
+        :type bounds: numpy.ndarray
+        :param normalized: if set to True, the result corresponds to the
+           maximum of the normalized PDF.
+        :type normalized: bool
+        :param range: normalization range.
+        :type range: str
+        :param tol: relative dispersion that is allowed for convergence.
+        :type tol: float
+        :param maxiter: maximum number of iterations to perform.
+        :type maxiter: int
+        :param sampling_size: number of elements to generate in each call.
+        :type sampling_size: int
+        :type scipy_fmin_opts: dict
+        :returns: Maximum value.
+        :rtype: float
+        '''
+        if sampling_size is None:
+            if is_gpu_backend(self.__aop.backend.btype):
+                sampling_size = DEFAULT_GEN_SIZE_GPU
+            else:
+                sampling_size = DEFAULT_GEN_SIZE_CPU
+
+        if maxiter < 3:
+            raise ValueError(
+                'Maximum number of iterations must be greater than three')
+
+        maximum = -np.infty
+
+        maximums = data_types.full_float(maxiter, 0)
+
+        for i in np.arange(maxiter):
+
+            # calculate a new maximum
+            grid = dataset.uniform_sample(
+                self.__aop, self.data_pars, bounds, sampling_size)
+
+            new_max = self.__call__(grid, range, normalized).max()
+
+            maximums[i] = new_max
+
+            if new_max > maximum:
+                maximum = new_max
+
+            if i > 1:  # runs at least three times
+
+                std = np.sqrt(np.sum((maximum - maximums)**2) / (i * (i - 1)))
+
+                if std / maximum < tol:
+                    return maximum
+
+        warnings.warn(
+            'Maximum number of function evaluations reached to calculate the maximum value')
+
+        return maximum
+
     def copy(self, backend=None):
         '''
         Create a copy of this PDF.
@@ -333,7 +397,7 @@ class PDF(object, metaclass=core.DocMeta):
         # Use the correct constructor
         return cl.from_json_object(obj, pars, backend)
 
-    def _generate_single_bounds(self, size, mapsize, gensize, safe_factor, bounds):
+    def _generate_single_bounds(self, size, mapsize, gensize, bounds, max_safe_factor, max_opts=None):
         '''
         Generate data in a single range given the bounds of the different data parameters.
 
@@ -344,19 +408,33 @@ class PDF(object, metaclass=core.DocMeta):
         :type mapsize: int
         :param gensize: number of entries to generate per iteration.
         :type gensize: int
-        :param safe_factor: additional factor to multiply the numerically calculated
-           maximum of the function. In general this must be modified if the function is
-           not well-behaved.
-        :type safe_factor: float
+        :param max_safe_factor: this number will multiply the maximum value
+           returned by :meth:`PDF.max`. It constitutes a way to ensure that
+           values are generated above the maximum value of the PDF. A high
+           number will affect the performance since it will slow down the
+           generation process.
+        :type max_safe_factor: float
+        :param max_opts: keyword arguments to be passed to the :meth:`PDF.max`
+           function. Allowed arguments are shown below.
+        :type max_opts: dict or None
         :param bounds: bounds of the different data parameters (must be sorted).
         :type bounds: numpy.ndarray
         :returns: Output sample.
         :rtype: DataSet
-        '''
-        grid = dataset.evaluation_grid(
-            self.__aop, self.data_pars, bounds, mapsize)
 
-        m = safe_factor * self.__call__(grid, normalized=False).max()
+        Arguments that can be passed in *max_opts* are:
+
+        * *tol*: relative tolerance allowed for the determination of the maximum.
+
+        * *maxiter*: maximum number of iterations allowed.
+
+        * *sampling_size*: size of the samples used to calculate the maximum.
+
+        .. seealso:: :meth:`PDF.max`
+        '''
+        max_opts = max_opts or {}
+
+        m = max_safe_factor * self._max(bounds, normalized=False, **max_opts)
 
         samples = []
 
@@ -469,7 +547,7 @@ class PDF(object, metaclass=core.DocMeta):
         Prepare an object that will be called many times with the same set of
         values.
         This is usefull for PDFs using a cache, to avoid creating it many times
-        in sucessive calls to :meth:`PDF.__call__`.
+        in successive calls to :meth:`PDF.__call__`.
 
         :param range: normalization range.
         :type range: str
@@ -479,7 +557,7 @@ class PDF(object, metaclass=core.DocMeta):
         with self.using_cache(BIND):
             yield bindings.bind_class_arguments(self, range=range, normalized=normalized)
 
-    def generate(self, size=10000, mapsize=1000, gensize=None, safe_factor=1.1, range=parameters.FULL):
+    def generate(self, size=10000, mapsize=1000, gensize=None, range=parameters.FULL, max_safe_factor=1.1, max_opts=None):
         '''
         Generate random data.
         A call to :meth:`PDF.bind` is implicit, since several calls will be done
@@ -494,14 +572,29 @@ class PDF(object, metaclass=core.DocMeta):
            is set to :math:`10^4` and :math:`10^5` for CPU and GPU backends,
            respectively.
         :type gensize: int or None
-        :param safe_factor: additional factor to multiply the numerically calculated
-           maximum of the function. In general this must be modified if the function is
-           not well-behaved.
-        :type safe_factor: float
+        :param max_safe_factor: this number will multiply the maximum value
+           returned by :meth:`PDF.max`. It constitutes a way to ensure that
+           values are generated above the maximum value of the PDF. A high
+           number will affect the performance since it will slow down the
+           generation process.
+        :type max_safe_factor: float
+        :param max_opts: keyword arguments to be passed to the :meth:`PDF.max`
+           function. Allowed arguments are shown below.
+        :type max_opts: dict or None
         :param range: range of the data parameters where to generate data.
         :type range: str
         :returns: Output sample.
         :rtype: DataSet
+
+        Arguments that can be passed in *max_opts* are:
+
+        * *tol*: relative tolerance allowed for the determination of the maximum.
+
+        * *maxiter*: maximum number of iterations allowed.
+
+        * *sampling_size*: size of the samples used to calculate the maximum.
+
+        .. seealso:: :meth:`PDF.max`
         '''
         if gensize is None:
             if is_gpu_backend(self.__aop.backend.btype):
@@ -515,7 +608,7 @@ class PDF(object, metaclass=core.DocMeta):
 
             if len(bounds) == 1:
                 result = proxy._generate_single_bounds(
-                    size, mapsize, gensize, safe_factor, bounds[0])
+                    size, mapsize, gensize, bounds[0], max_safe_factor, max_opts)
             else:
                 # Get the associated number of entries per bounds
                 fracs = data_types.empty_float(len(bounds))
@@ -538,7 +631,7 @@ class PDF(object, metaclass=core.DocMeta):
                 samples = []
                 for e, b in zip(entries, bounds):
                     samples.append(proxy._generate_single_bounds(
-                        e, mapsize, gensize, safe_factor, b))
+                        e, mapsize, gensize, b, max_safe_factor, max_opts))
                 result = dataset.DataSet.merge(samples)
 
         return result
@@ -564,6 +657,31 @@ class PDF(object, metaclass=core.DocMeta):
         :rtype: float
         '''
         return self.numerical_integral(integral_range, range)
+
+    def max(self, range=parameters.FULL, normalized=True, tol=MAX_TOL, maxiter=MAX_ITER, sampling_size=None):
+        '''
+        Calculate the maximum value of the PDF in the given range. The value
+        is computed from successive uniform samples of size equal to
+        *sampling_size*.
+
+        :param range: range to consider.
+        :type range: str
+        :param normalized: if set to True, the result corresponds to the
+           maximum of the normalized PDF.
+        :type normalized: bool
+        :param sampling_size: size of the samples to use to determine the maximum.
+        :type sampling_size: int
+        :param tol: relative dispersion that is allowed for convergence.
+        :type tol: float
+        :param maxiter: maximum number of iterations to perform. Must be greater
+           than two.
+        :type maxiter: int
+        :param sampling_size: number of elements to generate in each call.
+        :type sampling_size: int
+        :returns: Maximum value.
+        :rtype: float
+        '''
+        return max(self._max(bds, normalized, range, tol, maxiter, sampling_size) for bds in parameters.bounds_for_range(self.data_pars, range))
 
     def numerical_integral(self, integral_range=parameters.FULL, range=parameters.FULL):
         '''
