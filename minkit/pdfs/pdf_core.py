@@ -286,7 +286,7 @@ class PDF(object, metaclass=core.DocMeta):
         self.__cache = None
         self.__cache_type = None
 
-    def _max(self, bounds, normalized, range=parameters.FULL, tol=MAX_TOL, maxiter=MAX_ITER, sampling_size=None):
+    def _max(self, bounds, normalized, range=parameters.FULL, tol=MAX_TOL, maxcall=MAX_ITER, sampling_size=None):
         '''
         Calculate the maximum value of the PDF in the given range.
 
@@ -299,8 +299,8 @@ class PDF(object, metaclass=core.DocMeta):
         :type range: str
         :param tol: relative dispersion that is allowed for convergence.
         :type tol: float
-        :param maxiter: maximum number of iterations to perform.
-        :type maxiter: int
+        :param maxcall: maximum number of iterations to perform.
+        :type maxcall: int
         :param sampling_size: number of elements to generate in each call.
         :type sampling_size: int
         :type scipy_fmin_opts: dict
@@ -313,15 +313,15 @@ class PDF(object, metaclass=core.DocMeta):
             else:
                 sampling_size = DEFAULT_GEN_SIZE_CPU
 
-        if maxiter < 3:
+        if maxcall < 3:
             raise ValueError(
                 'Maximum number of iterations must be greater than three')
 
         maximum = -np.infty
 
-        maximums = data_types.full_float(maxiter, 0)
+        maximums = data_types.full_float(maxcall, 0)
 
-        for i in np.arange(maxiter):
+        for i in np.arange(maxcall):
 
             # calculate a new maximum
             grid = dataset.uniform_sample(
@@ -426,7 +426,7 @@ class PDF(object, metaclass=core.DocMeta):
 
         * *tol*: relative tolerance allowed for the determination of the maximum.
 
-        * *maxiter*: maximum number of iterations allowed.
+        * *maxcall*: maximum number of iterations allowed.
 
         * *sampling_size*: size of the samples used to calculate the maximum.
 
@@ -590,7 +590,7 @@ class PDF(object, metaclass=core.DocMeta):
 
         * *tol*: relative tolerance allowed for the determination of the maximum.
 
-        * *maxiter*: maximum number of iterations allowed.
+        * *maxcall*: maximum number of iterations allowed.
 
         * *sampling_size*: size of the samples used to calculate the maximum.
 
@@ -658,7 +658,7 @@ class PDF(object, metaclass=core.DocMeta):
         '''
         return self.numerical_integral(integral_range, range)
 
-    def max(self, range=parameters.FULL, normalized=True, tol=MAX_TOL, maxiter=MAX_ITER, sampling_size=None):
+    def max(self, range=parameters.FULL, normalized=True, tol=MAX_TOL, maxcall=MAX_ITER, sampling_size=None):
         '''
         Calculate the maximum value of the PDF in the given range. The value
         is computed from successive uniform samples of size equal to
@@ -673,15 +673,15 @@ class PDF(object, metaclass=core.DocMeta):
         :type sampling_size: int
         :param tol: relative dispersion that is allowed for convergence.
         :type tol: float
-        :param maxiter: maximum number of iterations to perform. Must be greater
+        :param maxcall: maximum number of iterations to perform. Must be greater
            than two.
-        :type maxiter: int
+        :type maxcall: int
         :param sampling_size: number of elements to generate in each call.
         :type sampling_size: int
         :returns: Maximum value.
         :rtype: float
         '''
-        return max(self._max(bds, normalized, range, tol, maxiter, sampling_size) for bds in parameters.bounds_for_range(self.data_pars, range))
+        return max(self._max(bds, normalized, range, tol, maxcall, sampling_size) for bds in parameters.bounds_for_range(self.data_pars, range))
 
     def numerical_integral(self, integral_range=parameters.FULL, range=parameters.FULL):
         '''

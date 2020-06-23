@@ -240,15 +240,21 @@ def test_asymmetric_errors():
 
     # Test for 1 sigma
     with minkit.minimizer('uml', g, data) as minimizer:
-        minimizer.minimize()
+        minimum = minimizer.minimize()
         minimizer.minuit.print_level = 0
         minimizer.asymmetric_errors('s', sigma=1.)
-        errors = s.asym_errors
+        errors_default = s.asym_errors
+        minimizer.asymmetric_errors('s', sigma=1., cov=minimum.cov)
+        errors_from_cov = s.asym_errors
         minimizer.minos('s', 1.)
+        errors_minos = s.asym_errors
 
     assert s.asym_errors != ()
 
-    assert np.allclose(s.asym_errors, errors, rtol=1e-4)  # compare with MINOS
+    assert np.allclose(errors_default, errors_minos,
+                       rtol=1e-4)  # same as MINOS
+    # same as those from the covariance matrix
+    assert np.allclose(errors_default, errors_from_cov, rtol=1e-4)
 
     # Test for 2 sigma
     with minkit.minimizer('uml', g, data) as minimizer:
