@@ -8,7 +8,6 @@ Application interface to deal with arrays. The different array classes
 can not define the __getitem__ since numpy objects would use it to do
 arithmetic operations.
 '''
-from . import arrays
 from . import core
 from ..base import data_types
 
@@ -412,11 +411,7 @@ class ArrayOperations(object):
         :returns: array of decisions.
         :rtype: barray
         '''
-        if out is not None:
-            self.__oper.logical_and(a, b, out)
-            return out
-        else:
-            return arrays.barray(*self.__oper.logical_and(a, b), backend=self.backend)
+        return self.__oper.logical_and(a, b, out)
 
     def logical_or(self, a, b, out=None):
         '''
@@ -431,11 +426,7 @@ class ArrayOperations(object):
         :returns: array of decisions.
         :rtype: barray
         '''
-        if out is not None:
-            self.__oper.logical_or(a, b, out)
-            return out
-        else:
-            return arrays.barray(*self.__oper.logical_or(a, b), backend=self.backend)
+        return self.__oper.logical_or(a, b, out)
 
     def max(self, a):
         '''

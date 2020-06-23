@@ -346,21 +346,11 @@ class GPUOperations(object):
             np.fromiter(map(len, arrs), dtype=data_types.cpu_int))
 
         # Parse the data type
-        dtype = arrs[0].dtype
-
         ndim = arrs[0].ndim
 
-        if dtype == data_types.cpu_float:
-            function = self.__fbe.assign_double_with_offset
-            out = self.dzeros(maximum, ndim)
-        elif dtype == data_types.cpu_bool:
-            function = self.__fbe.assign_bool_with_offset
-            out = self.bempty(maximum)
-        else:
-            raise NotImplementedError(
-                f'Function not implemented for data type "{dtype}"')
+        out = self.dzeros(maximum, ndim)
 
-        # Looop over the arrays till the output has the desired length
+        # Loop over the arrays till the output has the desired length
         offset = data_types.cpu_int(0)
         for a in arrs:
 
@@ -370,10 +360,10 @@ class GPUOperations(object):
             m = ndim * data_types.cpu_int(
                 l if l + offset <= maximum else maximum - offset)
 
-            gs, ls = self.__context.get_sizes(a.length)
+            gs, ls = self.__context.get_sizes(a.size)
 
-            function(m, out.ua, a.ua, ndim * offset,
-                     global_size=gs, local_size=ls)
+            self.__fbe.assign_double_with_offset(m, out.ua, a.ua, ndim * offset,
+                                                 global_size=gs, local_size=ls)
 
             offset += l
 
@@ -637,7 +627,7 @@ class GPUOperations(object):
         # Build the output array
         out = self.dzeros(n, ndim)
 
-        gs, ls = self.__context.get_sizes(out.length // ndim)
+        gs, ls = self.__context.get_sizes(out.length)
 
         self.__fbe.parse_random_grid(out.length, out.ua, ndim, lb, ub, dest.ua,
                                      global_size=gs, local_size=ls)
@@ -668,7 +658,7 @@ class GPUOperations(object):
         else:
             out = self.dempty(nbins * (size - 1) + 1)
             gs, ls = self.__context.get_sizes(out.length)
-            self.__fbe.simpson_factors_from_edges_1d(
+            self.__fbe.simpson_factors_for_bins_1d(
                 out.length, out.ua, size, global_size=gs, local_size=ls)
             return out
 

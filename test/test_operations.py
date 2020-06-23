@@ -133,20 +133,37 @@ def test_aop():
 
     # meshgrid
     n = 1000
-    lb = np.array([1.], dtype=data_types.cpu_float)
-    ub = np.array([2.], dtype=data_types.cpu_float)
-    mm = aop.meshgrid(lb, ub, np.array([n], dtype=data_types.cpu_int))
+    lb = data_types.array_float([1.],)
+    ub = data_types.array_float([2.])
+    mm = aop.meshgrid(lb, ub, data_types.array_int([n]))
     nm = np.linspace(lb.item(), ub.item(), n)
     assert np.allclose(mm.as_ndarray(), nm)
 
-    lb = np.array([0., 1.], dtype=data_types.cpu_float)
-    ub = np.array([1., 2.], dtype=data_types.cpu_float)
-    mm = aop.meshgrid(lb, ub, np.array([n, n], dtype=data_types.cpu_int))
+    lb = data_types.array_float([0., 1.])
+    ub = data_types.array_float([1., 2.])
+    mm = aop.meshgrid(lb, ub, data_types.array_int([n, n]))
 
     ng = np.array([a.flatten() for a in np.meshgrid(
         *tuple(np.linspace(l, u, n) for l, u in zip(lb, ub)))]).T.flatten()
 
     assert np.allclose(mm.as_ndarray(), ng)
+
+    # random_grid (do not use a symmetric range around 0)
+    n = 10000
+    lb = data_types.array_float([0, 0])
+    ub = data_types.array_float([20, 20])
+    u = aop.random_grid(lb, ub, n)
+
+    assert u.length == n
+    assert u.size == 2 * n
+
+    x = aop.take_column(u, 0)
+    y = aop.take_column(u, 1)
+
+    for i in range(u.ndim):
+        c = 0.5 * (lb[i] + ub[i])
+        g = aop.count_nonzero(aop.take_column(u, i) >= c) / len(u)
+        assert np.allclose(g, 0.5, rtol=0.05)
 
     # slice_from_boolean
     u = aop.random_uniform(0, 1, 10000)

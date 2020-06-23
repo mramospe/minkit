@@ -521,7 +521,7 @@ class CPUOperations(object):
     @core.document_operations_method
     def logical_and(self, a, b,  out=None):
         if out is None:
-            np.logical_and(a.ua, b.ua)
+            return np.logical_and(a.ua, b.ua)
         else:
             return np.logical_and(a.ua, b.ua, out=out.ua)
 

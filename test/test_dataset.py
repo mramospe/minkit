@@ -119,7 +119,7 @@ def test_uniform_sample():
     x = minkit.Parameter('x', bounds=(0, 20))
     y = minkit.Parameter('y', bounds=(0, 20))
 
-    n = 100
+    n = 10000
 
     # Test single range
     p = minkit.Registry([x])
@@ -127,8 +127,24 @@ def test_uniform_sample():
     g = dataset.uniform_sample(aop, p, b, n)
     assert len(g.values.ua) == n
 
+    a = g['x']
+    lb, ub = x.bounds
+    assert aop.count_nonzero(aop.ge(a, lb) & aop.le(a, ub)) == len(g)
+
     # Test multi-range
     p = minkit.Registry([x, y])
     b = minkit.base.parameters.bounds_for_range(p, 'full')[0]
     g = dataset.uniform_sample(aop, p, b, n)
     assert len(g.values.ua) == len(p) * n
+
+    for p in x, y:
+
+        a = g[p.name]
+
+        lb, ub = p.bounds
+
+        assert aop.count_nonzero(aop.ge(a, lb) & aop.le(a, ub)) == len(g)
+
+        r = aop.count_nonzero(aop.ge(a, 0.5 * (lb + ub))) / len(a)
+
+        assert np.allclose(r, 0.5, rtol=0.05)

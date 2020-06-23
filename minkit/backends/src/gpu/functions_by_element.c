@@ -410,9 +410,9 @@ KERNEL void simpson_factors_1d(int lgth, GLOBAL_MEM double *out) {
     out[idx] = 4.;
 }
 
-///
-KERNEL void simpson_factors_from_edges_1d(int lgth, GLOBAL_MEM double *out,
-                                          int size) {
+/// Calculate the factors for the Simpson's rule in 1D
+KERNEL void simpson_factors_for_bins_1d(int lgth, GLOBAL_MEM double *out,
+                                        int size) {
 
   int idx = get_global_id(0);
 
