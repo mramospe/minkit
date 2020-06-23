@@ -207,6 +207,25 @@ KERNEL void linspace(int lgth, GLOBAL_MEM double *out, double vmin, double vmax,
   out[idx] = vmin + idx * (vmax - vmin) / (size - 1);
 }
 
+/// Create a concatenated sequence of linspaces
+KERNEL void concatenated_linspace(int lgth, GLOBAL_MEM double *out,
+                                  GLOBAL_MEM double *edges, int nsteps) {
+
+  int idx = get_global_id(0);
+
+  if (idx >= lgth)
+    return;
+
+  int bid = idx / nsteps;
+
+  double vmin = edges[bid];
+  double vmax = edges[bid + 1];
+
+  double step = (vmax - vmin) / (nsteps - 1);
+
+  out[idx] = vmin + step * (idx % nsteps);
+}
+
 /// Logarithm
 KERNEL void logarithm(int lgth, GLOBAL_MEM double *out, GLOBAL_MEM double *in) {
   int idx = get_global_id(0);
@@ -391,6 +410,25 @@ KERNEL void simpson_factors_1d(int lgth, GLOBAL_MEM double *out) {
     out[idx] = 4.;
 }
 
+///
+KERNEL void simpson_factors_from_edges_1d(int lgth, GLOBAL_MEM double *out,
+                                          int size) {
+
+  int idx = get_global_id(0);
+
+  if (idx >= lgth)
+    return;
+
+  int r = idx % size;
+
+  if (r == 0)
+    out[idx] = 1.;
+  else if (r % 2 == 0)
+    out[idx] = 2.;
+  else
+    out[idx] = 4.;
+}
+
 /// Get elements from an array by indices
 KERNEL void slice_from_integer(int lgth, GLOBAL_MEM double *out, int ndim,
                                GLOBAL_MEM double *in, GLOBAL_MEM int *indices) {
@@ -417,6 +455,18 @@ KERNEL void stepped_sum(int lgth, GLOBAL_MEM double *out, int nbins,
     s += partial_sum[i * nbins + idx];
 
   out[idx] = s;
+}
+
+/// Calculate the steps associated to a given set of edges
+KERNEL void steps_from_edges(int lgth, GLOBAL_MEM double *out,
+                             GLOBAL_MEM double *in) {
+
+  int idx = get_global_id(0);
+
+  if (idx >= lgth)
+    return;
+
+  in[idx] = out[idx + 1] - out[idx];
 }
 
 /// Take elements from an array after the compact indices are obtained using

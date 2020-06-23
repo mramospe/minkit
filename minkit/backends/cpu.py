@@ -416,6 +416,12 @@ class CPUOperations(object):
         else:
             return a, arrays[0].ndim
 
+    @return_darray_one_dim
+    @core.document_operations_method
+    def concatenated_linspace(self, edges, nsteps):
+        l = np.linspace(edges.ua[:-1], edges.ua[1:], nsteps).T
+        return np.delete(l, nsteps * np.arange(1, len(l)))
+
     @core.document_operations_method
     def count_nonzero(self, a):
         return np.count_nonzero(a.ua)
@@ -576,11 +582,24 @@ class CPUOperations(object):
         self.__rndm_gen.seed(seed)
 
     @core.document_operations_method
-    def simpson_factors(self, size):
-        f = self.dones(size)
-        f.ua[1::2] = 4.
-        f.ua[2:-1:2] = 2.
-        return f
+    def simpson_factors(self, size, nbins=None):
+
+        if nbins is None:
+            f = self.dones(size)
+            f.ua[1::2] = 4.
+            f.ua[2:-1:2] = 2.
+            return f
+        else:
+            f = self.dempty(nbins * (size - 1) + 1)
+            f.ua[1::2] = 4.
+            f.ua[2::2] = 2.  # last element is corrected in the next line
+            f.ua[0::size] = 1.
+            return f
+
+    @return_darray_one_dim
+    @core.document_operations_method
+    def steps_from_edges(self, edges):
+        return edges.ua[1:] - edges.ua[:-1]
 
     @core.document_operations_method
     def sum(self, a):

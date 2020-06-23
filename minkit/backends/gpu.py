@@ -380,6 +380,22 @@ class GPUOperations(object):
         return out
 
     @core.document_operations_method
+    def concatenated_linspace(self, edges, nsteps):
+
+        nbins = len(edges) - 1
+
+        out = self.dempty(nbins * nsteps - (nbins - 1))
+
+        nsteps = data_types.cpu_int(nsteps)
+
+        gs, ls = self.__context.get_sizes(out.length)
+
+        self.__fbe.concatenated_linspace(
+            out.length, out.ua, edges.ua, nsteps, global_size=gs, local_size=ls)
+
+        return out
+
+    @core.document_operations_method
     def count_nonzero(self, a):
         return self.__rfu.count_nonzero(a)
 
@@ -643,8 +659,23 @@ class GPUOperations(object):
         self.__rndm_gen.seed(seed)
 
     @core.document_operations_method
-    def simpson_factors(self, size):
-        return self.__fbe.simpson_factors_1d(size)
+    def simpson_factors(self, size, nbins=None):
+        if nbins is None:
+            return self.__fbe.simpson_factors_1d(size)
+        else:
+            out = self.dempty(nbins * (size - 1) + 1)
+            gs, ls = self.__context.get_sizes(out.length)
+            self.__fbe.simpson_factors_from_edges_1d(
+                out.length, out.ua, size, global_size=gs, local_size=ls)
+            return out
+
+    @core.document_operations_method
+    def steps_from_edges(self, edges):
+        out = self.dempty(len(edges) - 1)
+        gs, ls = self.__context.get_sizes(out.length)
+        self.__fbe.steps_from_edges(out.length, out.ua, edges.ua,
+                                    global_size=gs, local_size=ls)
+        return out
 
     @core.document_operations_method
     def sum(self, a):

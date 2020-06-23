@@ -494,6 +494,26 @@ class BinnedDataSet(DataObject):
         return self.__class__(edges, self.__gaps, self.__data_pars, values)
 
 
+def adaptive_grid(aop, data_par, edges, nsteps):
+    '''
+    Create a data grid where *nsteps* values are generated for each bounds in
+    *edges*.
+
+    :param aop: instance to do array operations.
+    :type aop: ArrayOperations
+    :param data_par: data parameter.
+    :type data_par: Parameter
+    :param edges: edges defining the bins.
+    :type edges: darray
+    :param nsteps: number of steps to consider within each set of bounds.
+    :type nsteps: int
+    :returns: Grid adapted to the given steps.
+    :rtype: DataSet
+    '''
+    values = aop.concatenated_linspace(edges, nsteps)
+    return DataSet(values, [data_par])
+
+
 def edges_indices(gaps, edges):
     '''
     Calculate the indices to access the first element and

@@ -134,6 +134,47 @@ def safe_division(first, second):
         return first / np.nextafter(0, np.infty)
 
 
+def _interpolation_evaluate_binned(aop, interpolator, par, data, evb_size, normalized=True):
+    '''
+    Evaluate on a binned sample using the given interpolator.
+
+    :param aop: instance to do array operations.
+    :type aop: ArrayOperations
+    :param interpolator: instance to interpolate.
+    :param par: parameter in the interpolation.
+    :type par: Parameter
+    :param data: data samples.
+    :type data: BinnedDataSet
+    :param evb_size: number of elements to consider per bin.
+    :type evb_size: int
+    :param normalized: whether to normalized the output.
+    :type normalized: bool
+    :returns: interpolated values.
+    :rtype: darray
+    '''
+    edges = data[par.name]
+
+    nsteps = evb_size if evb_size % 2 != 0 else evb_size + 1
+
+    grid = dataset.adaptive_grid(aop, par, edges, nsteps)
+
+    pdf_values = interpolator(0, grid.values)
+    pdf_values *= aop.simpson_factors(nsteps, len(edges) - 1)
+
+    gaps = data_types.full_int(1, 1)
+    # dataset.edges_indices(gaps, edges)
+    indices = data_types.array_int([0, len(edges)])
+
+    out = aop.sum_inside(indices, gaps, grid.values, edges, pdf_values)
+    out *= aop.steps_from_edges(edges)
+    out /= (3. * (nsteps - 1))
+
+    if normalized:
+        return safe_division(out, out.sum())
+    else:
+        return out
+
+
 class PDF(object, metaclass=core.DocMeta):
 
     # Allow to define if a PDF object depends on other PDFs. All PDF objects
@@ -1240,6 +1281,7 @@ class ConvPDFs(MultiPDF):
 
         # The convolution size and range can be changed by the user
         self.range = range or parameters.FULL
+        self.evb_size = DEFAULT_EVB_SIZE
         self.conv_size = DEFAULT_INTERP_SIZE
 
     def __repr__(self):
@@ -1332,30 +1374,7 @@ class ConvPDFs(MultiPDF):
 
         par = self.data_pars[0]
 
-        edges = data[par.name].as_ndarray()
-
-        out = data_types.empty_float(len(edges) - 1)
-
-        nsteps = (self.__conv_size // len(out))
-
-        if nsteps % 2 == 0:
-            nsteps += 1
-
-        for i, b in enumerate(zip(edges[:-1], edges[1:])):
-
-            grid = dataset.evaluation_grid(self.aop,
-                                           self.data_pars, np.array(b), size=nsteps)
-
-            pdf_values = interpolator(0, grid.values)
-            pdf_values *= (grid.values.get(1) - grid.values.get(0)) / 3.
-            pdf_values *= self.aop.simpson_factors(nsteps)
-
-            out[i] = pdf_values.sum()
-
-        if normalized:
-            return safe_division(out, out.sum())
-        else:
-            return out
+        return _interpolation_evaluate_binned(self.aop, interpolator, par, data, self.evb_size, normalized)
 
     @classmethod
     def from_json_object(cls, obj, pars, pdfs):
@@ -1559,6 +1578,7 @@ class InterpPDF(PDF):
 
         self.interpolation_method = 'spline'
 
+        self.evb_size = DEFAULT_EVB_SIZE
         self.interp_size = DEFAULT_INTERP_SIZE
 
     def __repr__(self):
@@ -1684,30 +1704,7 @@ class InterpPDF(PDF):
 
         par = self.data_pars[0]
 
-        edges = data[par.name].as_ndarray()
-
-        out = data_types.empty_float(len(edges) - 1)
-
-        nsteps = (self.__interp_size // len(out))
-
-        if nsteps % 2 == 0:
-            nsteps += 1
-
-        for i, b in enumerate(zip(edges[:-1], edges[1:])):
-
-            grid = dataset.evaluation_grid(self.aop,
-                                           self.data_pars, np.array(b), size=nsteps)
-
-            pdf_values = self.__interpolator(0, grid.values)
-            pdf_values *= (grid.values.get(1) - grid.values.get(0)) / 3.
-            pdf_values *= self.aop.simpson_factors(nsteps)
-
-            out[i] = pdf_values.sum()
-
-        if normalized:
-            return safe_division(out, out.sum())
-        else:
-            return out
+        return _interpolation_evaluate_binned(self.aop, self.__interpolator, par, data, self.evb_size, normalized)
 
     @classmethod
     def from_json_object(cls, obj, pars, backend):

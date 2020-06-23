@@ -123,6 +123,20 @@ class ArrayOperations(object):
         '''
         return self.__oper.concatenate(tuple(a for a in arrays), maximum)
 
+    def concatenated_linspace(self, edges, nsteps):
+        '''
+        Create a set of concatenated arrays obtained from linspace calls with
+        the given edges.
+
+        :param edges: edges of the bins.
+        :type edges: darray
+        :param nsteps: number of steps in the arrays.
+        :type nsteps: int
+        :returns: Concatenated array.
+        :rtype: darray
+        '''
+        return self.__oper.concatenated_linspace(edges, nsteps)
+
     def count_nonzero(self, a):
         '''
         Count the number of elements that are different from zero.
@@ -561,19 +575,34 @@ class ArrayOperations(object):
         '''
         return self.__oper.shuffling_index(n)
 
-    def simpson_factors(self, size):
+    def simpson_factors(self, size, nbins=None):
         '''
         Return an array with the coefficients for the Simpson numerical
         integration method.
 
         :param size: number of steps.
         :type size: int
+        :param nbins: if provided, the factors are returned assuming that
+           there are *size* values for each bin.
+        :param nbins: int or None
         :returns: Array with the coefficients.
         :rtype: darray
         '''
         if size % 2 == 0:
             raise ValueError('Size must be an odd number')
-        return self.__oper.simpson_factors(size)
+        return self.__oper.simpson_factors(size, nbins)
+
+    def steps_from_edges(self, edges):
+        '''
+        Calculate the bin sizes from the given set of edges. Only works for
+        one-dimensional arrays.
+
+        :param edges: edges defining the bins.
+        :type edges: darray
+        :returns: step for each bin.
+        :rtype: darray
+        '''
+        return self.__oper.steps_from_edges(edges)
 
     def sum(self, a):
         '''
