@@ -58,17 +58,6 @@ KERNEL void assign_double_with_offset(int lgth, GLOBAL_MEM double *out,
   out[idx + offset] = in[idx];
 }
 
-/// Assign values
-KERNEL void assign_bool_with_offset(int lgth, GLOBAL_MEM unsigned *out,
-                                    GLOBAL_MEM unsigned *in, int offset) {
-  int idx = get_global_id(0);
-
-  if (idx >= lgth) // pad condition
-    return;
-
-  out[idx + offset] = in[idx];
-}
-
 /// Exponential (complex)
 KERNEL void exponential_complex(int lgth, GLOBAL_MEM double2 *out,
                                 GLOBAL_MEM double2 *in) {
