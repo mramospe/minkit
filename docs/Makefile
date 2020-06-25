@@ -29,7 +29,7 @@ gh-pages: html
 # Target to update the notebooks. Notebooks are rebuilt in-place, so to avoid
 # circular dependencies the target runs every time we call it.
 %.ipynb: FORCE
-	jupyter nbconvert --execute --to notebook --output $(subst $(NOTEBOOKS_DIR)/,,$@) --output-dir $(NOTEBOOKS_DIR) $@
+	jupyter nbconvert --execute --to notebook --ExecutePreprocessor.timeout=600 --output $(subst $(NOTEBOOKS_DIR)/,,$@) --output-dir $(NOTEBOOKS_DIR) $@
 
 # Target for Jupyter notebooks
 notebooks: $(ALLNOTEBOOKS);

@@ -127,7 +127,7 @@ class Minimizer(object, metaclass=DocMeta):
 
         self.__eval = evaluator
 
-    def _asym_error(self, par, bound, cov=None, var=1, atol=DEFAULT_ASYM_ERROR_ATOL, rtol=DEFAULT_ASYM_ERROR_RTOL, max_call=None):
+    def _asym_error(self, par, bound, var=1, atol=DEFAULT_ASYM_ERROR_ATOL, rtol=DEFAULT_ASYM_ERROR_RTOL, max_call=None):
         '''
         Calculate the asymmetric error using the variation of the FCN from
         *value* to *bound*.
@@ -136,10 +136,6 @@ class Minimizer(object, metaclass=DocMeta):
         :type par: float
         :param bound: bound of the parameter.
         :type bound: float
-        :param cov: covariance matrix. If provided, the initial values of the
-           parameters will be obtained using it. You can get the covariance
-           matrix of a minimum from the output of :meth:`Minimizer.minimize`.
-        :type cov: numpy.ndarray or None
         :param var: squared number of standard deviations.
         :type var: float
         :param atol: absolute tolerance for the error.
@@ -161,7 +157,7 @@ class Minimizer(object, metaclass=DocMeta):
 
             self._set_parameter_state(par, value=bound, fixed=True)
 
-            fcn_r = self._minimize_check_minimum(par, cov)
+            fcn_r = self._minimize_check_minimum(par)
 
             if np.allclose(fcn_r - ref_fcn, var, atol=atol, rtol=rtol):
                 return abs(par.value - bound)
@@ -173,9 +169,9 @@ class Minimizer(object, metaclass=DocMeta):
 
                 i += 1  # increase the internal counter (for max_call)
 
-                self._set_parameter_state(par, 0.5 * (l + r))
+                self._set_parameter_state(par, value=0.5 * (l + r))
 
-                fcn = self._minimize_check_minimum(par, cov)
+                fcn = self._minimize_check_minimum(par)
 
                 if abs(fcn - ref_fcn) < var:
                     l, fcn_l = par.value, fcn
@@ -193,25 +189,15 @@ class Minimizer(object, metaclass=DocMeta):
 
             return abs(initial - bound)
 
-    def _minimize_check_minimum(self, par, cov=None):
+    def _minimize_check_minimum(self, par):
         '''
         Check the minimum of a minimization and warn if it is not valid.
 
         :param par: parameter to work with.
         :type par: Parameter
-        :param cov: covariance matrix.
-        :type cov: numpy.ndarray or None
         :returns: Value of the FCN.
         :rtype: float
         '''
-        if cov is not None:  # set initial values using the covariance matrix
-            s = data_types.full_float(len(self.__eval.args), 0.)
-            s[self.__eval.args.index(par.name)] = par.value
-            vals = np.matmul(cov, s)
-            for p, v in zip(self.__eval.args, vals):
-                if p is not par:
-                    self._set_parameter_state(p, v)
-
         m = self.minimize()
 
         if not m.valid:
@@ -246,7 +232,7 @@ class Minimizer(object, metaclass=DocMeta):
         '''
         return self.__eval
 
-    def asymmetric_errors(self, name, cov=None, sigma=1, atol=DEFAULT_ASYM_ERROR_ATOL, rtol=DEFAULT_ASYM_ERROR_RTOL, max_call=None):
+    def asymmetric_errors(self, name, sigma=1, atol=DEFAULT_ASYM_ERROR_ATOL, rtol=DEFAULT_ASYM_ERROR_RTOL, max_call=None):
         '''
         Calculate the asymmetric errors for the given parameter. This is done
         by subdividing the bounds of the parameter into two till the variation
@@ -256,10 +242,6 @@ class Minimizer(object, metaclass=DocMeta):
 
         :param name: name of the parameter.
         :type name: str
-        :param cov: covariance matrix. If provided, the initial values of the
-           parameters will be obtained using it. You can get the covariance
-           matrix of a minimum from the output of :meth:`Minimizer.minimize`.
-        :type cov: numpy.ndarray or None
         :param sigma: number of standard deviations to compute.
         :type sigma: float
         :param atol: absolute tolerance for the error.
@@ -275,8 +257,8 @@ class Minimizer(object, metaclass=DocMeta):
 
         var = sigma * sigma
 
-        lo = self._asym_error(par, lb, cov, var, atol, rtol, max_call)
-        hi = self._asym_error(par, ub, cov, var, atol, rtol, max_call)
+        lo = self._asym_error(par, lb, var, atol, rtol, max_call)
+        hi = self._asym_error(par, ub, var, atol, rtol, max_call)
 
         par.asym_errors = lo, hi
 
