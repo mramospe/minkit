@@ -416,6 +416,9 @@ setup(
     package_dir={'minkit': 'minkit'},
     package_data={'minkit': data_files},
 
+    # Python version
+    python_requires='>=3.6.8',
+
     # Install requirements
     install_requires=['iminuit>=1.3', 'numpy>=1.17', 'numdifftools>=0.9.39',
                       'scipy>=1.3.2', 'nlopt>=1.17.4'],
