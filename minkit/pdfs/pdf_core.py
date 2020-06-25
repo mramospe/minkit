@@ -18,6 +18,8 @@ from ..base import dependencies
 from ..base import exceptions
 from ..base import parameters
 
+from scipy.optimize import curve_fit
+
 import contextlib
 import functools
 import logging
@@ -39,8 +41,8 @@ DEFAULT_INTERP_SIZE = 10000
 DEFAULT_GEN_SIZE_CPU = 10000
 DEFAULT_GEN_SIZE_GPU = 100000
 
-# Maximum tolerance on the determination of maximum values
-MAX_TOL = 1e-2
+# Tolerance on the determination of maximum values
+MAX_TOL = 1e-7
 MAX_ITER = 100
 
 # Cache types
@@ -53,6 +55,23 @@ CACHE_TYPES = (BIND, CONST)
 PDF_REGISTRY = {}
 
 logger = logging.getLogger(__name__)
+
+
+def asymptotic_maximum(x, a, b, c):
+    '''
+    Function that represents the evolution of a maximum value as a function
+    of the amount of random numbers generated.
+
+    :param x: amount of random numbers generated.
+    :type x: numpy.ndarray
+    :param a: scale.
+    :type a: float
+    :param b: slope.
+    :type b: float
+    :param c: asymptote.
+    :type c: float
+    '''
+    return a * np.exp(-b * x) + c
 
 
 def register_pdf(cl):
@@ -286,7 +305,7 @@ class PDF(object, metaclass=core.DocMeta):
         self.__cache = None
         self.__cache_type = None
 
-    def _max(self, bounds, normalized, range=parameters.FULL, tol=MAX_TOL, maxcall=MAX_ITER, sampling_size=None):
+    def _max(self, bounds, normalized, range=parameters.FULL, tol=MAX_TOL, min_points=4, maxcall=MAX_ITER, sampling_size=None):
         '''
         Calculate the maximum value of the PDF in the given range.
 
@@ -299,6 +318,9 @@ class PDF(object, metaclass=core.DocMeta):
         :type range: str
         :param tol: relative dispersion that is allowed for convergence.
         :type tol: float
+        :param min_points: minimum number of points to estimate the maximum. It
+           must be greater than four.
+        :type min_points: int
         :param maxcall: maximum number of iterations to perform.
         :type maxcall: int
         :param sampling_size: number of elements to generate in each call.
@@ -313,13 +335,15 @@ class PDF(object, metaclass=core.DocMeta):
             else:
                 sampling_size = DEFAULT_GEN_SIZE_CPU
 
-        if maxcall < 3:
+        if min_points > 4:
             raise ValueError(
-                'Maximum number of iterations must be greater than three')
+                'Minimum number of iterations must be greater than four')
 
-        maximum = -np.infty
+        if maxcall < min_points:
+            raise ValueError(
+                'Maximum number of iterations must be greater than the minimum number of points')
 
-        maximums = data_types.full_float(maxcall, 0)
+        maximums = data_types.empty_float(maxcall)
 
         for i in np.arange(maxcall):
 
@@ -329,22 +353,35 @@ class PDF(object, metaclass=core.DocMeta):
 
             new_max = self.__call__(grid, range, normalized).max()
 
-            maximums[i] = new_max
+            if i == 0:
+                maximums[i] = new_max
+            else:
+                maximums[i] = max(maximums[i - 1], new_max)
 
-            if new_max > maximum:
-                maximum = new_max
+                if i + 1 >= min_points:
 
-            if i > 1:  # runs at least three times
+                    m = maximums[:i + 1]
 
-                std = np.sqrt(np.sum((maximum - maximums)**2) / (i * (i - 1)))
+                    valid = (tol * m[-1] + m) > m[-1]
 
-                if std / maximum < tol:
-                    return maximum
+                    maxs = m[valid]
+
+                    if len(maxs) >= min_points:
+
+                        if np.allclose(maxs[0], maxs[-1], rtol=tol):
+                            # the fit will fail, since they are all equal
+                            return maxs[-1]
+
+                        popt, pcov = curve_fit(asymptotic_maximum, np.arange(len(maxs)), maxs,
+                                               bounds=([-np.infty, 0, maxs[-1]], [0, np.infty, np.infty]))
+
+                        if np.sqrt(pcov[-1][-1]) / popt[-1] < tol:  # valid maximum
+                            return popt[-1]  # asymptote
 
         warnings.warn(
             'Maximum number of function evaluations reached to calculate the maximum value')
 
-        return maximum
+        return maximums[-1]
 
     def copy(self, backend=None):
         '''
@@ -397,7 +434,7 @@ class PDF(object, metaclass=core.DocMeta):
         # Use the correct constructor
         return cl.from_json_object(obj, pars, backend)
 
-    def _generate_single_bounds(self, size, mapsize, gensize, bounds, max_safe_factor, max_opts=None):
+    def _generate_single_bounds(self, size, mapsize, gensize, bounds, max_opts=None):
         '''
         Generate data in a single range given the bounds of the different data parameters.
 
@@ -408,12 +445,6 @@ class PDF(object, metaclass=core.DocMeta):
         :type mapsize: int
         :param gensize: number of entries to generate per iteration.
         :type gensize: int
-        :param max_safe_factor: this number will multiply the maximum value
-           returned by :meth:`PDF.max`. It constitutes a way to ensure that
-           values are generated above the maximum value of the PDF. A high
-           number will affect the performance since it will slow down the
-           generation process.
-        :type max_safe_factor: float
         :param max_opts: keyword arguments to be passed to the :meth:`PDF.max`
            function. Allowed arguments are shown below.
         :type max_opts: dict or None
@@ -434,7 +465,7 @@ class PDF(object, metaclass=core.DocMeta):
         '''
         max_opts = max_opts or {}
 
-        m = max_safe_factor * self._max(bounds, normalized=False, **max_opts)
+        m = self._max(bounds, normalized=False, **max_opts)
 
         samples = []
 
@@ -557,7 +588,7 @@ class PDF(object, metaclass=core.DocMeta):
         with self.using_cache(BIND):
             yield bindings.bind_class_arguments(self, range=range, normalized=normalized)
 
-    def generate(self, size=10000, mapsize=1000, gensize=None, range=parameters.FULL, max_safe_factor=1.1, max_opts=None):
+    def generate(self, size=10000, mapsize=1000, gensize=None, range=parameters.FULL, max_opts=None):
         '''
         Generate random data.
         A call to :meth:`PDF.bind` is implicit, since several calls will be done
@@ -572,12 +603,6 @@ class PDF(object, metaclass=core.DocMeta):
            is set to :math:`10^4` and :math:`10^5` for CPU and GPU backends,
            respectively.
         :type gensize: int or None
-        :param max_safe_factor: this number will multiply the maximum value
-           returned by :meth:`PDF.max`. It constitutes a way to ensure that
-           values are generated above the maximum value of the PDF. A high
-           number will affect the performance since it will slow down the
-           generation process.
-        :type max_safe_factor: float
         :param max_opts: keyword arguments to be passed to the :meth:`PDF.max`
            function. Allowed arguments are shown below.
         :type max_opts: dict or None
@@ -608,7 +633,7 @@ class PDF(object, metaclass=core.DocMeta):
 
             if len(bounds) == 1:
                 result = proxy._generate_single_bounds(
-                    size, mapsize, gensize, bounds[0], max_safe_factor, max_opts)
+                    size, mapsize, gensize, bounds[0], max_opts)
             else:
                 # Get the associated number of entries per bounds
                 fracs = data_types.empty_float(len(bounds))
@@ -631,7 +656,7 @@ class PDF(object, metaclass=core.DocMeta):
                 samples = []
                 for e, b in zip(entries, bounds):
                     samples.append(proxy._generate_single_bounds(
-                        e, mapsize, gensize, b, max_safe_factor, max_opts))
+                        e, mapsize, gensize, b, max_opts))
                 result = dataset.DataSet.merge(samples)
 
         return result
@@ -658,11 +683,9 @@ class PDF(object, metaclass=core.DocMeta):
         '''
         return self.numerical_integral(integral_range, range)
 
-    def max(self, range=parameters.FULL, normalized=True, tol=MAX_TOL, maxcall=MAX_ITER, sampling_size=None):
-        '''
-        Calculate the maximum value of the PDF in the given range. The value
-        is computed from successive uniform samples of size equal to
-        *sampling_size*.
+    def max(self, range=parameters.FULL, normalized=True, tol=MAX_TOL, min_points=4, maxcall=MAX_ITER, sampling_size=None):
+        r'''
+        Calculate the maximum value of the PDF in the given range.
 
         :param range: range to consider.
         :type range: str
@@ -673,6 +696,9 @@ class PDF(object, metaclass=core.DocMeta):
         :type sampling_size: int
         :param tol: relative dispersion that is allowed for convergence.
         :type tol: float
+        :param min_points: minimum number of points to estimate the maximum. It
+           must be greater than four.
+        :type min_points: int
         :param maxcall: maximum number of iterations to perform. Must be greater
            than two.
         :type maxcall: int
@@ -680,8 +706,24 @@ class PDF(object, metaclass=core.DocMeta):
         :type sampling_size: int
         :returns: Maximum value.
         :rtype: float
+
+        The maximum is calculated from successive random samples of size
+        equal to *sampling_size*. After running at least *min_points* times,
+        a fit to the function
+
+        .. math::
+           f(n) = \alpha e^{-\beta n} + \delta
+
+        is done, where *n* is the iteration number and :math:`f(n)` is the
+        global maximum in that iteration. The value of :math:`\delta` is
+        returned as long as the error satisfies the given tolerance. To improve
+        the performance, only the iterations where the achieved maximum is
+        within the tolerance with respect to the global maximum are considered.
+        The parameter :math:`\delta` is minimized in such a way that it is
+        always greater or equal to the global maximum achieved from the random
+        samples.
         '''
-        return max(self._max(bds, normalized, range, tol, maxcall, sampling_size) for bds in parameters.bounds_for_range(self.data_pars, range))
+        return max(self._max(bds, normalized, range, tol, min_points, maxcall, sampling_size) for bds in parameters.bounds_for_range(self.data_pars, range))
 
     def numerical_integral(self, integral_range=parameters.FULL, range=parameters.FULL):
         '''
