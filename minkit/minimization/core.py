@@ -127,7 +127,7 @@ class Minimizer(object, metaclass=DocMeta):
 
         self.__eval = evaluator
 
-    def _asym_error(self, par, bound, cov=None, var=1, atol=DEFAULT_ASYM_ERROR_ATOL, rtol=DEFAULT_ASYM_ERROR_RTOL, maxcall=None):
+    def _asym_error(self, par, bound, cov=None, var=1, atol=DEFAULT_ASYM_ERROR_ATOL, rtol=DEFAULT_ASYM_ERROR_RTOL, max_call=None):
         '''
         Calculate the asymmetric error using the variation of the FCN from
         *value* to *bound*.
@@ -146,8 +146,8 @@ class Minimizer(object, metaclass=DocMeta):
         :type atol: float
         :param rtol: relative tolerance for the error.
         :type rtol: float
-        :param maxcall: maximum number of calls to calculate each error bound.
-        :type maxcall: int or None
+        :param max_call: maximum number of calls to calculate each error bound.
+        :type max_call: int or None
         :returns: Absolute value of the error.
         :rtype: float
         '''
@@ -169,9 +169,9 @@ class Minimizer(object, metaclass=DocMeta):
             closest_fcn = fcn_r
 
             i = 0
-            while (True if maxcall is None else i < maxcall) and not np.allclose(abs(closest_fcn - ref_fcn), var, atol=atol, rtol=rtol):
+            while (True if max_call is None else i < max_call) and not np.allclose(abs(closest_fcn - ref_fcn), var, atol=atol, rtol=rtol):
 
-                i += 1  # increase the internal counter (for maxcall)
+                i += 1  # increase the internal counter (for max_call)
 
                 self._set_parameter_state(par, 0.5 * (l + r))
 
@@ -187,7 +187,7 @@ class Minimizer(object, metaclass=DocMeta):
                 else:
                     bound, closest_fcn = r, fcn_r
 
-            if maxcall is not None and i == maxcall:
+            if max_call is not None and i == max_call:
                 warnings.warn(
                     'Reached maximum number of minimization calls', RuntimeWarning, stacklevel=1)
 
@@ -246,7 +246,7 @@ class Minimizer(object, metaclass=DocMeta):
         '''
         return self.__eval
 
-    def asymmetric_errors(self, name, cov=None, sigma=1, atol=DEFAULT_ASYM_ERROR_ATOL, rtol=DEFAULT_ASYM_ERROR_RTOL, maxcall=None):
+    def asymmetric_errors(self, name, cov=None, sigma=1, atol=DEFAULT_ASYM_ERROR_ATOL, rtol=DEFAULT_ASYM_ERROR_RTOL, max_call=None):
         '''
         Calculate the asymmetric errors for the given parameter. This is done
         by subdividing the bounds of the parameter into two till the variation
@@ -266,8 +266,8 @@ class Minimizer(object, metaclass=DocMeta):
         :type atol: float
         :param rtol: relative tolerance for the error.
         :type rtol: float
-        :param maxcall: maximum number of calls to calculate each error bound.
-        :type maxcall: int or None
+        :param max_call: maximum number of calls to calculate each error bound.
+        :type max_call: int or None
         '''
         par = self.__eval.args.get(name)
 
@@ -275,8 +275,8 @@ class Minimizer(object, metaclass=DocMeta):
 
         var = sigma * sigma
 
-        lo = self._asym_error(par, lb, cov, var, atol, rtol, maxcall)
-        hi = self._asym_error(par, ub, cov, var, atol, rtol, maxcall)
+        lo = self._asym_error(par, lb, cov, var, atol, rtol, max_call)
+        hi = self._asym_error(par, ub, cov, var, atol, rtol, max_call)
 
         par.asym_errors = lo, hi
 

@@ -429,3 +429,17 @@ def test_interppdf(tmpdir):
 
     # Test the construction from a binned data set
     minkit.InterpPDF.from_binned_dataset('pdf', bdata)
+
+
+@pytest.mark.pdfs
+def test_pdf_max():
+    '''
+    Test the determination of the maximum value of a PDF.
+    '''
+    pdf = helpers.default_gaussian(sigma='s')
+
+    assert np.allclose(pdf.max(normalized=False), 1.)
+
+    pdf.args.get('s').value = 0.01  # a very narrow peak
+
+    assert np.allclose(pdf.max(normalized=False), 1.)

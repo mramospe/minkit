@@ -113,7 +113,7 @@ def data_plotting_arrays(data, **kwargs):
 
     **Unbinned**
 
-    * *bins* (int or tuple(int, ...)): number of bins per dimension of data.
+    * *bins* (int or tuple(int, ...)): number of bins per dimension of data. By default use 100 bins.
 
     * *projection* (str): project the output data in the given dimension.
 
@@ -149,7 +149,7 @@ def data_plotting_arrays(data, **kwargs):
     if data._sample_type == dataset.UNBINNED:
 
         # Exclusive options for unbinned samples
-        bins = kwargs.get('bins', None)
+        bins = kwargs.get('bins', 100)
         sw2 = kwargs.get('sw2', None)
 
         # Make the histogram of values (common for any case)

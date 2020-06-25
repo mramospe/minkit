@@ -73,9 +73,9 @@ class MinuitMinimizer(core.Minimizer):
                                        **minimizer_config,
                                        **registry_to_minuit_input(self.__args))
 
-    def _asym_error(self, par, bound, cov, var=1, atol=core.DEFAULT_ASYM_ERROR_ATOL, rtol=core.DEFAULT_ASYM_ERROR_RTOL, maxcall=None):
+    def _asym_error(self, par, bound, cov, var=1, atol=core.DEFAULT_ASYM_ERROR_ATOL, rtol=core.DEFAULT_ASYM_ERROR_RTOL, max_call=None):
         with self._restore_minuit():
-            return super()._asym_error(par, bound, cov, var, atol, rtol, maxcall)
+            return super()._asym_error(par, bound, cov, var, atol, rtol, max_call)
 
     @contextlib.contextmanager
     def _restore_minuit(self):
