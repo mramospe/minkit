@@ -92,11 +92,12 @@ class NLoptMinimizer(core.Minimizer):
         fcn = minimizer.last_optimum_value()
 
         with self.restoring_state():
-            values, cov = core.errors_and_covariance_matrix(_evaluate, result)
+            errors, cov = core.errors_and_covariance_matrix(
+                _evaluate, result)
 
         # Update the values and errors of the parameters
-        for p, v in zip(varargs, values):
-            p.value, p.error = v.nominal_value, v.std_dev
+        for p, v, e in zip(varargs, result, errors):
+            p.value, p.error = v, e
 
         status = minimizer.last_optimize_result() > 0  # positive values are OK
 

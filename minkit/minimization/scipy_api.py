@@ -80,13 +80,12 @@ class SciPyMinimizer(core.Minimizer):
             result = scipyopt.minimize(
                 _evaluate, initials, method=self.__method, bounds=bounds, tol=tol)
 
-        # Disable warnings, since "numdifftools" does not allow to set bounds
         with self.restoring_state():
-            values, cov = core.errors_and_covariance_matrix(
+            errors, cov = core.errors_and_covariance_matrix(
                 _evaluate, result.x)
 
         # Update the values and errors of the parameters
-        for p, v in zip(varargs, values):
-            p.value, p.error = v.nominal_value, v.std_dev
+        for p, v, e in zip(varargs, result.x, errors):
+            p.value, p.error = v, e
 
         return result, cov

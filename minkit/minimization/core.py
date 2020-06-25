@@ -15,7 +15,6 @@ import collections
 import contextlib
 import numdifftools
 import numpy as np
-import uncertainties
 import warnings
 
 DEFAULT_ASYM_ERROR_ATOL = 1e-8  # same as numpy.allclose
@@ -45,15 +44,16 @@ def errors_and_covariance_matrix(evaluate, result, hessian_opts=None):
     '''
     hessian_opts = hessian_opts or {}
 
+    # Disable warnings, since "numdifftools" does not allow to set bounds
     with warnings.catch_warnings():
         warnings.simplefilter('ignore')
         hessian = numdifftools.Hessian(
             lambda a: evaluate(*a), **hessian_opts)
         cov = 2. * np.linalg.inv(hessian(result))
 
-    values = uncertainties.correlated_values(result, cov)
+    errors = np.sqrt(np.diag(cov))
 
-    return values, cov
+    return errors, cov
 
 
 def determine_varargs_values_varids(args):

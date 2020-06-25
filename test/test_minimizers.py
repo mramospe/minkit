@@ -240,7 +240,7 @@ def test_asymmetric_errors():
 
     # Test for 1 sigma
     with minkit.minimizer('uml', g, data) as minimizer:
-        minimum = minimizer.minimize()
+        minimizer.minimize()
         minimizer.minuit.print_level = 0
         minimizer.asymmetric_errors('s', sigma=1.)
         errors_default = s.asym_errors
