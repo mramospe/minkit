@@ -202,8 +202,6 @@ def test_polynomial():
     # Test constant PDF
     pol0 = minkit.Polynomial('pol0', m)
 
-    pol0.numint_config = {'method': 'miser', 'calls': 10000}
-
     data = helpers.rndm_gen.uniform(-5, 5, 10000)
 
     compare_with_numpy(pol0, data, m)

@@ -93,7 +93,7 @@ def eval_math_expression(expression):
     :param expression: input expression.
     :type expression: str
     :returns: evaluation of the expression.
-    :raises NameError: If an identifier is found in the string that is not 
+    :raises NameError: If an identifier is found in the string that is not
        allowed as a mathematical expression.
     '''
     code = compile(expression, '', 'eval')

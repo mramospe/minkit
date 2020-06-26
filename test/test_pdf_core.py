@@ -443,3 +443,29 @@ def test_pdf_max():
     pdf.args.get('s').value = 0.01  # a very narrow peak
 
     assert np.allclose(pdf.max(normalized=False), 1.)
+
+
+@pytest.mark.pdfs
+def test_numerical_integral():
+    '''
+    Test the calculation of numerical integrals.
+    '''
+    pdf = helpers.default_gaussian(data_par='x')
+
+    x = pdf.data_pars.get('x')
+
+    x.set_range('reduced', 0.5 * x.bounds)
+
+    values = {}
+    for m in 'qng', 'qag', 'cquad', 'plain', 'miser', 'vegas':
+        pdf.numint_config = {'method': m}
+        values[m] = pdf.numerical_integral(integral_range='reduced')
+
+    def check_for(methods, rtol):
+        vals = np.fromiter((values[m] for m in methods), dtype=np.float64)
+        mean = np.mean(vals)
+        assert np.allclose(vals, mean, rtol=rtol)
+
+    check_for(values.keys(), rtol=1e-2)  # plain Monte Carlo is less accurate
+    check_for(('qng', 'qag', 'cquad', 'miser', 'vegas'), rtol=5e-5)
+    check_for(('qng', 'qag', 'cquad', 'vegas'), rtol=1e-6)  # more precise

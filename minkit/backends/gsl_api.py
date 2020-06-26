@@ -9,36 +9,36 @@ Interface with the GNU scientific library.
 from ..base import core
 from ..base import data_types
 from ..base import exceptions
-from ..base.data_types import c_int, c_double_p, py_object
+from ..base.data_types import c_int, c_double, c_double_p, py_object
 
 import collections
 import warnings
 
-# Integration methods
-PLAIN = 'plain'
-MISER = 'miser'
-VEGAS = 'vegas'
-
 # To store the compiled functions
 NumericalIntegration = collections.namedtuple(
-    'NumericalIntegration', [PLAIN, MISER, VEGAS])
+    'NumericalIntegration', ['qng', 'qag', 'cquad', 'plain', 'miser', 'vegas'])
 
 
-class NumIntConfig(object, metaclass=core.DocMeta):
+class NumInt(object, metaclass=core.DocMeta):
 
-    def __init__(self, function, tolerance):
+    def __init__(self, pdf, function, rtol, atol):
         '''
         Base class for the classes to do numerical integrals.
 
+        :param pdf: PDF this instance will be related to.
+        :param pdf: PDF
         :param function: function to call to integrate a PDF.
-        :param tolerance: maximum relative error allowed in the integral.
-        :type tolerance: float
+        :param rtol: tolerance for the relative error.
+        :type rtol: float
+        :param atol: tolerance for the integration value.
+        :type atol: float
         '''
         super().__init__()
 
-        self.__function = numerical_integral_wrapper(self, function)
-
-        self.tolerance = tolerance
+        self.__pdf = pdf  # so we can track the name of the PDF
+        self.__function = function
+        self.rtol = rtol
+        self.atol = atol
 
     def __call__(self, ndim, lb, ub, args):
         '''
@@ -64,23 +64,182 @@ class NumIntConfig(object, metaclass=core.DocMeta):
         '''
         return self.__function
 
+    @property
+    def pdf_name(self):
+        '''
+        Name of the PDF this instance is related to.
+        '''
+        return self.__pdf.name
 
-class PlainConfig(NumIntConfig):
 
-    method_name = PLAIN
+class NumIntQ(NumInt):
 
-    def __init__(self, proxy, calls=10000, tolerance=1e-3):
+    def __init__(self, pdf, function, rtol, atol):
+        '''
+        Base class for methods based on (non) adaptive size steps.
+
+        :param pdf: PDF this instance will be related to.
+        :param pdf: PDF
+        :param function: function to call to integrate a PDF.
+        :param rtol: tolerance for the relative error.
+        :type rtol: float
+        :param atol: tolerance for the integration value.
+        :type atol: float
+        '''
+        f = numerical_integral_wrapper(self, function)
+        super().__init__(pdf, f, rtol, atol)
+
+
+class NumIntMonte(NumInt):
+
+    def __init__(self, pdf, function, rtol, atol):
+        '''
+        Base class for Monte Carlo methods to calculate numerical integrals.
+
+        :param pdf: PDF this instance will be related to.
+        :param pdf: PDF
+        :param function: function to call to integrate a PDF.
+        :param rtol: tolerance for the relative error.
+        :type rtol: float
+        :param atol: tolerance for the integration value.
+        :type atol: float
+        '''
+        f = monte_numerical_integral_wrapper(self, function)
+        super().__init__(pdf, f, rtol, atol)
+
+
+class QNG(NumIntQ):
+
+    def __init__(self, pdf, proxy, rtol=1e-5, atol=0):
+        '''
+        Use the fixed Gauss-Kronrod-Patterson abscissae to sample the integrand
+        at a maximum of 87 points. This method must be used only in smooth
+        functions.
+
+        :param pdf: PDF this instance will be related to.
+        :param pdf: PDF
+        :param proxy: proxy of numerical integration functions.
+        :type proxy: NumericalIntegration
+        :param rtol: tolerance for the relative error.
+        :type rtol: float
+        :param atol: tolerance for the integration value.
+        :type atol: float
+        '''
+        super().__init__(pdf, proxy.qng, rtol, atol)
+
+    def __call__(self, ndim, lb, ub, args):
+
+        if ndim > 1:
+            raise RuntimeError(
+                'QNG integration method is only available for 1-dimensional PDFs')
+
+        config = (self.atol, self.rtol)
+
+        return self.function(lb.item(), ub.item(), config, args)
+
+
+class QAG(NumIntQ):
+
+    def __init__(self, pdf, proxy, rtol=1e-5, atol=0, limit=1000, key=1, workspace_size=1000):
+        '''
+        Determination of numerical integrals using a simple adaptive integration
+        procedure of interval subdivision based on the error.
+
+        :param pdf: PDF this instance will be related to.
+        :param pdf: PDF
+        :param proxy: proxy of numerical integration functions.
+        :type proxy: NumericalIntegration
+        :param rtol: tolerance for the relative error.
+        :type rtol: float
+        :param atol: tolerance for the integration value.
+        :type atol: float
+        :param limit: maximum number of subintervals. Must be smaller than the
+           workspace size.
+        :type limit: int
+        :param key: Gauss-Kronrod rule to use. Keys go from 1 to 6,
+           corresponding to the 15, 21, 31, 41, 51 and 61 point rules.
+        :type key: int
+        :param workspace_size: size reserved in memory to store values. The
+           space is related to pairs of doubles.
+        :type workspace_size: int
+        '''
+        super().__init__(pdf, proxy.qag, rtol, atol)
+
+        if limit > workspace_size:
+            raise ValueError(
+                'Limit of subintervals must be smaller than the workspace size')
+
+        if key < 1 or key > 6:
+            raise ValueError('Integration rules go from 1 to 6')
+
+        self.__limit = limit
+        self.__key = key
+        self.__workspace_size = workspace_size
+
+    def __call__(self, ndim, lb, ub, args):
+
+        if ndim > 1:
+            raise RuntimeError(
+                'QNG integration method is only available for 1-dimensional PDFs')
+
+        config = (self.atol, self.rtol, self.__limit,
+                  self.__key, self.__workspace_size)
+
+        return self.function(lb.item(), ub.item(), config, args)
+
+
+class CQUAD(NumIntQ):
+
+    def __init__(self, pdf, proxy, rtol=1e-5, atol=0, workspace_size=1000):
+        '''
+        Use a doubly-adaptive general-purpose based on the Clenshaw-Curtis
+        quadrature rules.
+
+        :param pdf: PDF this instance will be related to.
+        :param pdf: PDF
+        :param proxy: proxy of numerical integration functions.
+        :type proxy: NumericalIntegration
+        :param rtol: tolerance for the relative error.
+        :type rtol: float
+        :param atol: tolerance for the integration value.
+        :type atol: float
+        :param workspace_size: size reserved in memory to store values. The
+           space is related to pairs of doubles.
+        :type workspace_size: int
+        '''
+        super().__init__(pdf, proxy.cquad, rtol, atol)
+
+        self.__workspace_size = workspace_size
+
+    def __call__(self, ndim, lb, ub, args):
+
+        if ndim > 1:
+            raise RuntimeError(
+                'QNG integration method is only available for 1-dimensional PDFs')
+
+        config = (self.atol, self.rtol, self.__workspace_size)
+
+        return self.function(lb.item(), ub.item(), config, args)
+
+
+class PLAIN(NumIntMonte):
+
+    def __init__(self, pdf, proxy, calls=100000, rtol=1e-2, atol=0):
         '''
         Configurable class for the Plain algorithm.
 
+        :param pdf: PDF this instance will be related to.
+        :param pdf: PDF
         :param proxy: proxy of numerical integration functions.
         :type proxy: NumericalIntegration
         :param calls: number of calls per iteration.
         :type calls: int
-        :param tolerance: maximum relative error allowed in the integral.
-        :type tolerance: float
+        :param rtol: tolerance for the relative error.
+        :type rtol: float
+        :param atol: tolerance for the integration value.
+        :type atol: float
         '''
-        super().__init__(proxy.plain, tolerance)
+        super().__init__(pdf, proxy.plain, rtol, atol)
 
         self.calls = calls
 
@@ -91,14 +250,14 @@ class PlainConfig(NumIntConfig):
         return self.function(ndim, lb, ub, config, args)
 
 
-class MiserConfig(NumIntConfig):
+class MISER(NumIntMonte):
 
-    method_name = MISER
-
-    def __init__(self, proxy, calls=10000, estimate_frac=0.1, min_calls=None, min_calls_per_bisection=None, alpha=2, dither=0, tolerance=1e-4):
+    def __init__(self, pdf, proxy, calls=100000, estimate_frac=0.1, min_calls=None, min_calls_per_bisection=None, alpha=2, dither=0, rtol=1e-4, atol=0):
         r'''
         Configurable class for the MISER algorithm.
 
+        :param pdf: PDF this instance will be related to.
+        :param pdf: PDF
         :param proxy: proxy of numerical integration functions.
         :type proxy: NumericalIntegration
         :param calls: number of calls per iteration.
@@ -120,10 +279,12 @@ class MiserConfig(NumIntConfig):
         :param dither: parameter introduces a random fractional variation of
            into each bisection
         :type dither: float
-        :param tolerance: maximum relative error allowed in the integral.
-        :type tolerance: float
+        :param rtol: tolerance for the relative error.
+        :type rtol: float
+        :param atol: tolerance for the integration value.
+        :type atol: float
         '''
-        super().__init__(proxy.miser, tolerance)
+        super().__init__(pdf, proxy.miser, rtol, atol)
 
         self.calls = calls
         self.estimate_frac = estimate_frac
@@ -144,18 +305,18 @@ class MiserConfig(NumIntConfig):
         return self.function(ndim, lb, ub, config, args)
 
 
-class VegasConfig(NumIntConfig):
-
-    method_name = VEGAS
+class VEGAS(NumIntMonte):
 
     _importance = 'importance'
     _stratified = 'stratified'
     _importance_only = 'importance_only'
 
-    def __init__(self, proxy, calls=10000, alpha=1.5, iterations=5, mode=_importance, tolerance=1e-5):
+    def __init__(self, pdf, proxy, calls=10000, alpha=1.5, iterations=5, mode=_importance, rtol=1e-5, atol=0):
         '''
         Configurable class to do numerical integration with the VEGAS algorithm.
 
+        :param pdf: PDF this instance will be related to.
+        :param pdf: PDF
         :param proxy: proxy of numerical integration functions.
         :type proxy: NumericalIntegration
         :param alpha: controls the stiffness of the rebinning algorithm. It is
@@ -169,10 +330,12 @@ class VegasConfig(NumIntConfig):
         :type iterations: int
         :param mode: whether the algorithm must use importance sampling or
            stratified sampling, or whether it can pick on its own.
-        :param tolerance: maximum relative error allowed in the integral.
-        :type tolerance: float
+        :param rtol: tolerance for the relative error.
+        :type rtol: float
+        :param atol: tolerance for the integration value.
+        :type atol: float
         '''
-        super().__init__(proxy.vegas, tolerance)
+        super().__init__(pdf, proxy.vegas, rtol, atol)
 
         self.mode = mode
 
@@ -198,19 +361,66 @@ class VegasConfig(NumIntConfig):
 
     @mode.setter
     def mode(self, m):
-        if m == VegasConfig._importance:
+        if m == VEGAS._importance:
             self.__mode = +1  # GSL_VEGAS_MODE_IMPORTANCE
-        elif m == VegasConfig._stratified:
+        elif m == VEGAS._stratified:
             self.__mode = -1  # GSL_VEGAS_MODE_STRATIFIED
-        elif m == VegasConfig._importance_only:
+        elif m == VEGAS._importance_only:
             self.__mode = 0  # GSL_VEGAS_MODE_IMPORTANCE_ONLY
         else:
             raise ValueError(f'Unknown sampling type "{m}"')
 
 
+def check_integration_result(numint, res, err):
+    '''
+    Check the result of a integration process.
+
+    :param numint: numerical integral class.
+    :type numint: NumInt
+    :param res: value of the integral.
+    :type res: float
+    :param err: error of the integral.
+    :type err: float
+    '''
+    if numint.atol > 0:
+        if err > numint.atol:
+            warnings.warn(
+                f'Integral ("{numint.__class__.__name__.lower()}") error for PDF "{numint.pdf_name}" exceeds the absolute tolerance', RuntimeWarning, stacklevel=3)
+
+    if res == 0. and numint.atol == 0:
+        warnings.warn(
+            f'Integral ("{numint.__class__.__name__.lower()}") returns zero for PDF "{numint.pdf_name}" and no absolute tolerance has been specified', RuntimeWarning, stacklevel=3)
+    elif err / res > numint.rtol:
+        warnings.warn(
+            f'Integral ("{numint.__class__.__name__.lower()}") relative error for PDF "{numint.pdf_name}" exceeds the tolerance ({err / res:.2e} > {numint.rtol})', RuntimeWarning, stacklevel=3)
+
+
 def numerical_integral_wrapper(obj, cfunction):
     '''
     Wrapper around numerical integration functions in a library.
+    '''
+    cfunction.argtypes = [c_double, c_double, py_object, c_double_p]
+    cfunction.restype = py_object
+
+    def wrapper(lb, ub, config, args):
+
+        l, u = data_types.as_double(lb, ub)
+        a = data_types.data_as_c_double(args)
+        c = data_types.as_py_object(config)
+
+        res, err = cfunction(l, u, c, a)[:2]  # skip "neval" for some methods
+
+        check_integration_result(obj, res, err)
+
+        return res
+
+    return wrapper
+
+
+def monte_numerical_integral_wrapper(obj, cfunction):
+    '''
+    Wrapper around numerical integration functions using Monte Carlo in a
+    library.
     '''
     cfunction.argtypes = [c_int, c_double_p, c_double_p, py_object, c_double_p]
     cfunction.restype = py_object
@@ -223,9 +433,7 @@ def numerical_integral_wrapper(obj, cfunction):
 
         res, err = cfunction(d, l, u, c, a)
 
-        if err / res > obj.tolerance:
-            warnings.warn(
-                f'Numerical integration for method "{obj.method_name}" exceeds the tolerance ({err / res:.2e} > {obj.tolerance})', RuntimeWarning, stacklevel=2)
+        check_integration_result(obj, res, err)
 
         return res
 
@@ -242,7 +450,10 @@ def parse_functions(module):
     :returns: functions to do numerical integration.
     :rtype: NumericalIntegration
     '''
+    qng = module.integrate_qng
+    qag = module.integrate_qag
+    cquad = module.integrate_cquad
     plain = module.integrate_plain
     miser = module.integrate_miser
     vegas = module.integrate_vegas
-    return NumericalIntegration(plain, miser, vegas)
+    return NumericalIntegration(qng, qag, cquad, plain, miser, vegas)

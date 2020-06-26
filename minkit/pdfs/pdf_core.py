@@ -735,7 +735,7 @@ class PDF(object, metaclass=core.DocMeta):
         .. note::
            For two-dimensional PDFs, the process of calculating the maximum
            can turn really slow, so you might want to consider reducing the
-           precision of the maximum value. 
+           precision of the maximum value.
         '''
         return max(self._max(bds, normalized, range, tol, min_points, max_call, sampling_size) for bds in parameters.bounds_for_range(self.data_pars, range))
 
@@ -894,7 +894,7 @@ class SourcePDF(PDF):
             self.__class__.__name__, ndata_pars=len(data_pars), nvar_arg_pars=nvar_arg_pars)
 
         # Integral configuration (must be done after the proxies are defined)
-        self.numint_config = {'method': 'vegas'}
+        self.numint_config = {'method': 'cquad'}
 
     def _norm(self, values, range=parameters.FULL):
         '''
@@ -951,7 +951,32 @@ class SourcePDF(PDF):
            dictionary.
 
         The dictionary must contain at least the key "method", and the rest of
-        the keys depend on it:
+        the keys depend on it. For unidimensional PDFs, it is possible to use
+        quadrature methods to evaluate the integrals. The available methods are:
+
+        * *qng*: use  the fixed Gauss-Kronrod-Patterson abscissae to sample the
+          integrand at a maximum of 87 points. This method must be used only in
+          smooth functions.
+        * *qag*: determination of numerical integrals using a simple adaptive
+          integration procedure of interval subdivision based on the error.
+
+          * *limit*: maximum number of subintervals. Must be smaller than the
+            workspace size.
+          * *key*: Gauss-Kronrod rule to use. Keys go from 1 to 6,
+            corresponding to the 15, 21, 31, 41, 51 and 61 point rules.
+          * *workspace_size*: size reserved in memory to store values. The
+            space is related to pairs of doubles.
+
+        * *cquad*: this is the default method used to evaluate numerical
+          integrals. It uses a doubly-adaptive general-purpose based on the
+          Clenshaw-Curtis quadrature rules.
+
+          * *workspace_size*: size reserved in memory to store values. The
+            space is related to pairs of doubles.
+
+        For multidimensional PDFs, only Monte Carlo methods are available to
+        determine the integral. These are also available for unidimensional
+        PDFs.
 
         * *plain*: use a plain Monte Carlo algorithm to evaluate the integral.
           Use the argument "calls" in order to define the number of calls to do
@@ -990,11 +1015,14 @@ class SourcePDF(PDF):
            pdf.numint_config = {'method': 'vegas': 'calls': 100}
 
         In addition, it is possible to define a maximum tolerance for the
-        relative error on the calculation of the integral, which is set through
-        the *tolerance* key.
-        For more information about the algorithms please consult the Monte Carlo
-        section of the GNU scientific library, at
-        `GSL <https://www.gnu.org/software/gsl/doc/html/montecarlo.html>`__.
+        relative and absolute error on the calculation of the integral, which
+        is set through the *rtol* and *atol* keys, respectively.
+        For the quadrature-based algorithms, the numerical integration will
+        be done till the desired tolerance is achieved.
+        For more information about the algorithms please consult the sections
+        about `numerical <https://www.gnu.org/software/gsl/doc/html/integration.html>`__
+        and `Monte Carlo <https://www.gnu.org/software/gsl/doc/html/montecarlo.html>`__.
+        integration of the GNU scientific library.
         '''
         return self.__num_intgrl_config
 
@@ -1003,17 +1031,11 @@ class SourcePDF(PDF):
 
         dct = dict(dct)
 
-        method = dct.pop('method')
+        method = dct.pop('method').upper()
 
-        if method == gsl_api.PLAIN:
-            self.__num_intgrl_config = gsl_api.PlainConfig(
-                self.__function_proxies.numerical_integral, **dct)
-        elif method == gsl_api.MISER:
-            self.__num_intgrl_config = gsl_api.MiserConfig(
-                self.__function_proxies.numerical_integral, **dct)
-        elif method == gsl_api.VEGAS:
-            self.__num_intgrl_config = gsl_api.VegasConfig(
-                self.__function_proxies.numerical_integral, **dct)
+        if hasattr(gsl_api, method):
+            self.__num_intgrl_config = getattr(gsl_api, method)(self,
+                                                                self.__function_proxies.numerical_integral, **dct)
         else:
             raise ValueError(
                 f'Unknown numerical integration method "{method}"')
@@ -1125,12 +1147,12 @@ class SourcePDF(PDF):
         if integral_range == range:
             return 1.
         else:
-            num = self._raw_integral(self, integral_range)
-            den = self._raw_integral(self, range)
+            num = self._raw_integral(integral_range)
+            den = self._raw_integral(range)
             res = num / den
             if res > 1.:
                 warnings.warn(
-                    f'Numerical integral for PDF {self.name} is out of bounds; returning one', RuntimeWarning)
+                    f'Numerical integral for PDF "{self.name}" is out of bounds; returning one', RuntimeWarning)
                 return 1.
             else:
                 return res
@@ -1410,6 +1432,12 @@ class AddPDFs(MultiPDF):
         s = np.sum(yields)
 
         return np.sum(data_types.fromiter_float((y * pdf.numerical_integral(integral_range, range) for y, pdf in enumerate(yields, self.pdfs)))) / s
+
+    @allows_bind_cache
+    @allows_const_cache
+    def numerical_normalization(self, range=parameters.FULL):
+
+        return self.norm(range)
 
     def to_backend(self, backend):
 
