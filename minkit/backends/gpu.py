@@ -15,7 +15,6 @@ from . import gpu_cache
 from . import gpu_core
 from .gpu_functions import make_functions
 from ..base import data_types
-from ..base.core import temporary_directory
 
 from scipy.interpolate import splrep
 
@@ -24,6 +23,7 @@ import functools
 import logging
 import numpy as np
 import os
+import tempfile
 
 # Default seed for the random number generators
 DEFAULT_SEED = 49763
@@ -53,8 +53,8 @@ class GPUOperations(object):
 
         self.__backend = backend
 
-        self.__tmpdir = temporary_directory()
-        self.__cpu_aop = cpu.CPUOperations(self.__tmpdir)
+        self.__tmpdir = tempfile.TemporaryDirectory()
+        self.__cpu_aop = cpu.CPUOperations(self.__tmpdir.name)
 
         # Cache for GPU objects
         self.__array_cache = {}

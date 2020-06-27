@@ -1235,17 +1235,18 @@ class FormulaPDF(SourcePDF):
         :type backend: Backend or None
         '''
         with FormulaPDF._tmpdir_lock:
+
             if FormulaPDF._tmpdir is None:
-                FormulaPDF._tmpdir = core.temporary_directory()
+                FormulaPDF._tmpdir = tempfile.TemporaryDirectory()
                 add_pdf_src(FormulaPDF._tmpdir.name)
+
+            # create the XML file to save the PDF
+            self.__file = tempfile.NamedTemporaryFile(
+                'w+t', suffix='.xml', dir=FormulaPDF._tmpdir.name, delete=False)
 
         # keep the arguments so we can save the class to JSON
         self.__formula = formula
         self.__primitive = primitive
-
-        # create the XML file to held the PDF
-        self.__file = tempfile.NamedTemporaryFile(
-            'w+t', suffix='.xml', dir=FormulaPDF._tmpdir.name, delete=False)
 
         code = autocode.xml_from_formula(
             formula, data_pars, arg_pars, primitive)

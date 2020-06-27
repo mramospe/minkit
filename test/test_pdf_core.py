@@ -327,7 +327,7 @@ def test_formulapdf(tmpdir):
     '''
     x = minkit.Parameter('x', bounds=(-2. * np.pi, +2 * np.pi))
     a = minkit.Parameter('a', 1., bounds=(0.9, 1.1))
-    b = minkit.Parameter('b', 0., bounds=(-0.5, 0.5))
+    b = minkit.Parameter('b', 0., bounds=(-0.1, 0.1))
     pdf = minkit.FormulaPDF.unidimensional(
         'pdf', 'pow(sin(a * x + b), 2)', x, [a, b])
 

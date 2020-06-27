@@ -11,11 +11,9 @@ import importlib
 import inspect
 import logging
 import math
-import threading
 import numpy as np
 import os
 import pkgutil
-import tempfile
 import time
 
 __all__ = ['timer']
@@ -25,10 +23,6 @@ logger = logging.getLogger(__name__)
 
 # Global random number generator (not used for sampling)
 GLOBAL_RND_GEN = np.random.RandomState(4587)
-
-# Temporary directory for this package on execution
-TMPDIR = None
-TMPDIR_LOCK = threading.Lock()
 
 
 class DocMeta(type):
@@ -110,23 +104,6 @@ def eval_math_expression(expression):
                 f'Use of {name} not allowed in a mathematical expression; functions and constants allowed: {sorted(MATH_OBJECTS.keys())}')
 
     return eval(code, {'__builtins__': {}}, MATH_OBJECTS)
-
-
-def temporary_directory():
-    '''
-    Create a new temporary directory.
-
-    :returns: Temporary directory.
-    :rtype: tempfile.TemporaryDirectory
-    '''
-    global TMPDIR
-
-    with TMPDIR_LOCK:
-
-        if TMPDIR is None:
-            TMPDIR = tempfile.TemporaryDirectory()
-
-        return tempfile.TemporaryDirectory(dir=TMPDIR.name)
 
 
 @contextlib.contextmanager

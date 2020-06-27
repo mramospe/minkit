@@ -12,7 +12,6 @@ from . import arrays
 from . import core
 from . import gsl_api
 from ..base import data_types
-from ..base.core import temporary_directory
 from ..base.data_types import c_int, c_int_p, c_double, c_double_p
 
 from distutils import ccompiler, sysconfig
@@ -22,6 +21,7 @@ import functools
 import logging
 import numpy as np
 import os
+import tempfile
 
 # Default seed for the random number generators
 DEFAULT_SEED = 49763
@@ -132,7 +132,7 @@ class CPUOperations(object):
         self.__cpu_pdf_cache = {}
 
         if tmpdir is None:
-            self.__tmpdir = temporary_directory()
+            self.__tmpdir = tempfile.TemporaryDirectory()
         else:
             self.__tmpdir = tmpdir
 
