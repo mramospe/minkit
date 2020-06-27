@@ -440,7 +440,7 @@ def test_interppdf(tmpdir):
 
     ip = minkit.InterpPDF.from_ndarray('ip', m, centers, values)
 
-    ip.max() # check that we can calculate the maximum
+    ip.max()  # check that we can calculate the maximum
 
     # Test the JSON conversion
     with open(os.path.join(tmpdir, 'ip.json'), 'wt') as fi:
