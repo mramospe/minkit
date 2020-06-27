@@ -4,7 +4,7 @@ env:
   - CFLAGS="-shared -fPIC -std=c++0x"
 before_install:
   - python --version
-  - sudo apt-get install libgsl-dev
+  - sudo apt-get install libgsl-dev libxkbcommon-x11-0
   - pip install pytest
   - pip install pytest-cov
   - pip install codecov
