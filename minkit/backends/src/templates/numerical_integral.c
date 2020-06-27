@@ -81,7 +81,7 @@ PyObject *integrate_cquad(double lb, double ub, PyObject *config,
   gsl_function func = {&function_proxy, params};
 
   double atol, rtol;
-  size_t workspace_size;
+  int workspace_size;
   PyArg_ParseTuple(config, "ddi", &atol, &rtol, &workspace_size);
 
   gsl_integration_cquad_workspace *w =
