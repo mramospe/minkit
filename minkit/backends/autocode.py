@@ -63,25 +63,20 @@ def generate_code(xmlfile, backend, nvar_arg_pars):
         double_ptr = 'GLOBAL_MEM double *'
         format_kwargs['backend'] = -10  # Must be smaller than zero for GPU
 
-    tags = [c.tag for c in root.getchildren()]
-
-    if 'function' not in tags:
-        raise RuntimeError('Expected field "function"')
-
     # Parse the parameters
-    c = root.find('parameters')
+    c = root.get('parameters')
     if c is not None:
-        params = list(f'double {v}' for _, v in c.items())
-        params_arg_names = [v for _, v in c.items()]
+        params_arg_names = list(c.split())
+        params = list(f'double {v}' for v in params_arg_names)
     else:
         params = []
         params_arg_names = []
 
     format_kwargs['number_of_parameters'] = len(params)
 
-    c = root.find('variable_parameters')
+    c = root.get('variable_parameters')
     if c is not None:
-        n, p = tuple(v for _, v in c.items())
+        n, p = tuple(c.split())
         params += [f'int {n}', f'{double_ptr}{p}']
         params_arg_names += [n, p]
         format_kwargs['has_variable_parameters'] = 'true'
@@ -102,16 +97,14 @@ def generate_code(xmlfile, backend, nvar_arg_pars):
     # Process the function
     p = root.find('function')
 
-    d = p.find('data')
+    data_arg_names = root.get('data').split()
 
-    format_kwargs['ndimensions'] = len(d.items())
+    format_kwargs['ndimensions'] = len(data_arg_names)
 
-    data_args = ', '.join(f'double {v}' for _, v in d.items())
+    data_args = ', '.join(f'double {v}' for v in data_arg_names)
 
-    format_kwargs['function'] = FUNCTION_CACHE.substitute(function_code=p.find('code').text,
+    format_kwargs['function'] = FUNCTION_CACHE.substitute(function_code=p.text,
                                                           function_arguments=', '.join([data_args, params_args]))
-
-    data_arg_names = [v for _, v in d.items()]
 
     # Check if the "integral" field has been filled
     pi = root.find('integral')
@@ -125,11 +118,11 @@ def generate_code(xmlfile, backend, nvar_arg_pars):
 
         if pi is not None:  # use the integral
 
-            xml_bounds = pi.find('bounds')
+            xml_bounds = pi.get('bounds').split()
 
-            bounds = ', '.join(f'double {v}' for _, v in xml_bounds.items())
+            bounds = ', '.join(f'double {v}' for v in xml_bounds)
 
-            format_kwargs['integral'] = INTEGRAL_CACHE.substitute(integral_code=pi.find('code').text,
+            format_kwargs['integral'] = INTEGRAL_CACHE.substitute(integral_code=pi.text,
                                                                   integral_arguments=', '.join((bounds, params_args)))
 
         else:  # use the primitive
@@ -142,9 +135,8 @@ def generate_code(xmlfile, backend, nvar_arg_pars):
             famax = ', '.join(
                 s for s in [f'{p}_max' for p in data_arg_names] + params_arg_names)
 
-            format_kwargs['integral'] = PRIMITIVE_CACHE.substitute(primitive_arguments=', '.join([data_args, params_args]),
-                                                                   primitive_code=pp.find(
-                                                                       'code').text,
+            format_kwargs['integral'] = PRIMITIVE_CACHE.substitute(primitive_arguments=', '.join((data_args, params_args)),
+                                                                   primitive_code=pp.text,
                                                                    integral_arguments=', '.join(
                                                                        (bounds, params_args)),
                                                                    primitive_fwd_args_min=famin,
@@ -176,18 +168,16 @@ def xml_from_formula(formula, data_pars, arg_pars, primitive=None):
        the primitive.
     :type primitive: str or None
     '''
-    top = ET.Element('PDF')
+    data = ' '.join(p.name for p in data_pars)
+    parameters = ' '.join(p.name for p in arg_pars)
+
+    top = ET.Element('PDF', {'data': data, 'parameters': parameters})
 
     if os.linesep in formula:
         raise ValueError('Line breaks are not allowed inside formulas')
 
-    ET.SubElement(
-        top, 'parameters', {p.name: p.name for p in arg_pars})
-
     function = ET.SubElement(top, 'function')
-    ET.SubElement(function, 'data', {p.name: p.name for p in data_pars})
-    code = ET.SubElement(function, 'code')
-    code.text = f'return {formula}'
+    function.text = f'return {formula};'
 
     if primitive is not None:
 
@@ -195,15 +185,6 @@ def xml_from_formula(formula, data_pars, arg_pars, primitive=None):
             raise ValueError('Line breaks are not allowed inside formulas')
 
         primitive_element = ET.SubElement(top, 'primitive')
-        bounds = {}
-
-        for p in data_pars:
-            bounds[f'{p.name}_min'] = f'{p.name}_min'
-            bounds[f'{p.name}_max'] = f'{p.name}_max'
-
-        bounds = ET.SubElement(primitive_element, 'bounds', bounds)
-
-        code = ET.SubElement(primitive_element, 'code')
-        code.text = f'return {primitive}'
+        primitive_element.text = f'return {primitive};'
 
     return ET.tostring(top, encoding='unicode')

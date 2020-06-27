@@ -4,8 +4,7 @@
  Copyright (c) 2020 Miguel Ramos Pernas
 -->
 <!--Landau PDF-->
-<PDF>
-  <parameters center="center" sigma="sigma"/>
+<PDF data="x" parameters="center sigma">
   <preamble>
     CONSTANT_MEM double landau_p1[5] = {0.4259894875,-0.1249762550, 0.03984243700, -0.006298287635,   0.001511162253};
     CONSTANT_MEM double landau_q1[5] = {1.0         ,-0.3388260629, 0.09594393323, -0.01608042283,    0.003778942063};
@@ -80,9 +79,6 @@
     }
   </preamble>
   <function>
-    <data x="x"/>
-    <code>
       return landau_pdf((x - center) / sigma)
-    </code>
   </function>
 </PDF>

@@ -321,13 +321,13 @@ def test_evaluation():
 
 @pytest.mark.pdfs
 @pytest.mark.source_pdf
-def test_formulapdf():
+def test_formulapdf(tmpdir):
     '''
-    Test the "FormulPDF" class.
+    Test the "FormulaPDF" class.
     '''
     x = minkit.Parameter('x', bounds=(-2. * np.pi, +2 * np.pi))
     a = minkit.Parameter('a', 1., bounds=(0.9, 1.1))
-    b = minkit.Parameter('b', 0., bounds=(-1, 1))
+    b = minkit.Parameter('b', 0., bounds=(-0.5, 0.5))
     pdf = minkit.FormulaPDF.unidimensional(
         'pdf', 'pow(sin(a * x + b), 2)', x, [a, b])
 
@@ -362,6 +362,15 @@ def test_formulapdf():
     with helpers.fit_test(pdf) as test:
         with minkit.minimizer('uml', pdf, data) as minimizer:
             test.result = minimizer.migrad()
+
+    # Test the JSON conversion
+    with open(os.path.join(tmpdir, 'pdf.json'), 'wt') as fi:
+        json.dump(minkit.pdf_to_json(pdf), fi)
+
+    with open(os.path.join(tmpdir, 'pdf.json'), 'rt') as fi:
+        p = minkit.pdf_from_json(json.load(fi))
+
+    check_pdfs(p, pdf)
 
 
 @pytest.mark.pdfs

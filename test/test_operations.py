@@ -84,11 +84,11 @@ def test_aop():
     e = np.linspace(10.5, 19.5, 9)
 
     interpolator = aop.make_linear_interpolator(x, y)
-    r = interpolator(0, i)
+    r = interpolator.interpolate(0, i)
     assert np.allclose(r.as_ndarray(), e)
 
     interpolator = aop.make_spline_interpolator(x, y)
-    r = interpolator(0, i)
+    r = interpolator.interpolate(0, i)
     assert np.allclose(r.as_ndarray(), e)
 
     # amax
