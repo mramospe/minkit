@@ -15,6 +15,7 @@ from . import gpu_cache
 from . import gpu_core
 from .gpu_functions import make_functions
 from ..base import data_types
+from ..base.core import temporary_directory
 
 from scipy.interpolate import splrep
 
@@ -23,7 +24,6 @@ import functools
 import logging
 import numpy as np
 import os
-import tempfile
 
 # Default seed for the random number generators
 DEFAULT_SEED = 49763
@@ -53,7 +53,7 @@ class GPUOperations(object):
 
         self.__backend = backend
 
-        self.__tmpdir = tempfile.TemporaryDirectory()
+        self.__tmpdir = temporary_directory()
         self.__cpu_aop = cpu.CPUOperations(self.__tmpdir)
 
         # Cache for GPU objects
@@ -461,19 +461,28 @@ class GPUOperations(object):
     @core.document_operations_method
     def make_linear_interpolator(self, xp, yp):
 
-        def wrapper(idx, x):
+        cpu_impl = self.__cpu_aop.make_linear_interpolator(xp.ua, yp.ua)
 
-            idx = data_types.as_integer(idx)
+        class wrapper(object):
 
-            out = self.dempty(x.length)
+            @staticmethod
+            def interpolate(idx, x):
 
-            gs_x, ls_x, gs_y, ls_y = self.__context.get_sizes(
-                xp.length, out.length)
+                idx = data_types.as_integer(idx)
 
-            self.__fbe.interpolate_linear(xp.length, x.length, out.ua, x.ndim, idx, x.ua, xp.ua, yp.ua,
-                                          global_size=(gs_x, gs_y), local_size=(ls_x, ls_y))
+                out = self.dempty(x.length)
 
-            return out
+                gs_x, ls_x, gs_y, ls_y = self.__context.get_sizes(
+                    xp.length, out.length)
+
+                self.__fbe.interpolate_linear(xp.length, x.length, out.ua, x.ndim, idx, x.ua, xp.ua, yp.ua,
+                                              global_size=(gs_x, gs_y), local_size=(ls_x, ls_y))
+
+                return out
+
+            @staticmethod
+            def interpolate_single_value(v):
+                return cpu_impl.interpolate_single_value(v)
 
         return wrapper
 

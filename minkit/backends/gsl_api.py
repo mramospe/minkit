@@ -9,7 +9,7 @@ Interface with the GNU scientific library.
 from ..base import core
 from ..base import data_types
 from ..base import exceptions
-from ..base.data_types import c_int, c_double, c_double_p, py_object
+from ..base.data_types import c_double, c_double_p, py_object
 
 import collections
 import warnings
@@ -40,12 +40,10 @@ class NumInt(object, metaclass=core.DocMeta):
         self.rtol = rtol
         self.atol = atol
 
-    def __call__(self, ndim, lb, ub, args):
+    def __call__(self, lb, ub, args):
         '''
         Calculate the integral in the given bounds.
 
-        :param ndim: number of dimensions.
-        :type ndim: int
         :param lb: lower bounds.
         :type lb: numpy.ndarray
         :param ub: upper bounds.
@@ -127,9 +125,9 @@ class QNG(NumIntQ):
         '''
         super().__init__(pdf, proxy.qng, rtol, atol)
 
-    def __call__(self, ndim, lb, ub, args):
+    def __call__(self, lb, ub, args):
 
-        if ndim > 1:
+        if len(lb) > 1:
             raise RuntimeError(
                 'QNG integration method is only available for 1-dimensional PDFs')
 
@@ -176,9 +174,9 @@ class QAG(NumIntQ):
         self.__key = key
         self.__workspace_size = workspace_size
 
-    def __call__(self, ndim, lb, ub, args):
+    def __call__(self, lb, ub, args):
 
-        if ndim > 1:
+        if len(lb) > 1:
             raise RuntimeError(
                 'QNG integration method is only available for 1-dimensional PDFs')
 
@@ -211,9 +209,9 @@ class CQUAD(NumIntQ):
 
         self.__workspace_size = workspace_size
 
-    def __call__(self, ndim, lb, ub, args):
+    def __call__(self, lb, ub, args):
 
-        if ndim > 1:
+        if len(lb) > 1:
             raise RuntimeError(
                 'QNG integration method is only available for 1-dimensional PDFs')
 
@@ -243,11 +241,11 @@ class PLAIN(NumIntMonte):
 
         self.calls = calls
 
-    def __call__(self, ndim, lb, ub, args):
+    def __call__(self, lb, ub, args):
 
         config = (self.calls,)
 
-        return self.function(ndim, lb, ub, config, args)
+        return self.function(lb, ub, config, args)
 
 
 class MISER(NumIntMonte):
@@ -293,16 +291,16 @@ class MISER(NumIntMonte):
         self.alpha = alpha
         self.dither = dither
 
-    def __call__(self, ndim, lb, ub, args):
+    def __call__(self, lb, ub, args):
 
-        min_calls = self.min_calls or 16 * ndim  # default value by GSL
+        min_calls = self.min_calls or 16 * len(lb)  # default value by GSL
         min_calls_per_bisection = self.min_calls_per_bisection or 32 * \
             min_calls  # default value by GSL
 
         config = (self.calls, self.estimate_frac, min_calls,
                   min_calls_per_bisection, self.alpha, self.dither)
 
-        return self.function(ndim, lb, ub, config, args)
+        return self.function(lb, ub, config, args)
 
 
 class VEGAS(NumIntMonte):
@@ -311,7 +309,7 @@ class VEGAS(NumIntMonte):
     _stratified = 'stratified'
     _importance_only = 'importance_only'
 
-    def __init__(self, pdf, proxy, calls=10000, alpha=1.5, iterations=5, mode=_importance, rtol=1e-5, atol=0):
+    def __init__(self, pdf, proxy, calls=10000, alpha=1.5, iterations=100, mode=_importance, rtol=1e-5, atol=0):
         '''
         Configurable class to do numerical integration with the VEGAS algorithm.
 
@@ -343,11 +341,11 @@ class VEGAS(NumIntMonte):
         self.alpha = alpha
         self.iterations = iterations
 
-    def __call__(self, ndim, lb, ub, args):
+    def __call__(self, lb, ub, args):
 
         config = (self.calls, self.alpha, self.iterations, self.mode)
 
-        return self.function(ndim, lb, ub, config, args)
+        return self.function(lb, ub, config, args)
 
     @property
     def mode(self):
@@ -422,16 +420,15 @@ def monte_numerical_integral_wrapper(obj, cfunction):
     Wrapper around numerical integration functions using Monte Carlo in a
     library.
     '''
-    cfunction.argtypes = [c_int, c_double_p, c_double_p, py_object, c_double_p]
+    cfunction.argtypes = [c_double_p, c_double_p, py_object, c_double_p]
     cfunction.restype = py_object
 
-    def wrapper(dim, lb, ub, config, args):
+    def wrapper(lb, ub, config, args):
 
         l, u, a = data_types.data_as_c_double(lb, ub, args)
         c = data_types.as_py_object(config)
-        d = data_types.as_integer(dim)
 
-        res, err = cfunction(d, l, u, c, a)
+        res, err = cfunction(l, u, c, a)
 
         check_integration_result(obj, res, err)
 
@@ -440,20 +437,27 @@ def monte_numerical_integral_wrapper(obj, cfunction):
     return wrapper
 
 
-def parse_functions(module):
+def parse_functions(module, ndim):
     '''
     Parse the given module and define the functions to use for numerical
     integration.
 
     :param module: module where to get the functions from.
     :type module: module
+    :param ndim: number of dimensions of the PDF.
+    :type ndim: int
     :returns: functions to do numerical integration.
     :rtype: NumericalIntegration
     '''
-    qng = module.integrate_qng
-    qag = module.integrate_qag
-    cquad = module.integrate_cquad
+    if ndim == 1:
+        qng = module.integrate_qng
+        qag = module.integrate_qag
+        cquad = module.integrate_cquad
+    else:
+        qng = qag = cquad = None
+
     plain = module.integrate_plain
     miser = module.integrate_miser
     vegas = module.integrate_vegas
+
     return NumericalIntegration(qng, qag, cquad, plain, miser, vegas)

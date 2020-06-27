@@ -11,6 +11,7 @@ from .core import CPU
 
 from string import Template
 
+import logging
 import os
 import xml.etree.ElementTree as ET
 
@@ -23,6 +24,9 @@ with open(os.path.join(TEMPLATES_PATH, 'function.c')) as f:
 with open(os.path.join(TEMPLATES_PATH, 'integral.c')) as f:
     INTEGRAL_CACHE = Template(f.read())
 
+with open(os.path.join(TEMPLATES_PATH, 'primitive.c')) as f:
+    PRIMITIVE_CACHE = Template(f.read())
+
 with open(os.path.join(TEMPLATES_PATH, 'evaluators.c')) as f:
     EVALUATORS_CACHE = f.read()  # this is a plain string
 
@@ -31,6 +35,9 @@ with open(os.path.join(TEMPLATES_PATH, 'numerical_integral.c')) as f:
 
 with open(os.path.join(TEMPLATES_PATH, 'whole.c')) as f:
     WHOLE_CACHE = Template(f.read())
+
+
+logger = logging.Logger(__name__)
 
 
 def generate_code(xmlfile, backend, nvar_arg_pars):
@@ -65,8 +72,10 @@ def generate_code(xmlfile, backend, nvar_arg_pars):
     c = root.find('parameters')
     if c is not None:
         params = list(f'double {v}' for _, v in c.items())
+        params_arg_names = [v for _, v in c.items()]
     else:
         params = []
+        params_arg_names = []
 
     format_kwargs['number_of_parameters'] = len(params)
 
@@ -74,6 +83,7 @@ def generate_code(xmlfile, backend, nvar_arg_pars):
     if c is not None:
         n, p = tuple(v for _, v in c.items())
         params += [f'int {n}', f'{double_ptr}{p}']
+        params_arg_names += [n, p]
         format_kwargs['has_variable_parameters'] = 'true'
         format_kwargs['nvar_arg_pars'] = nvar_arg_pars
     else:
@@ -101,17 +111,44 @@ def generate_code(xmlfile, backend, nvar_arg_pars):
     format_kwargs['function'] = FUNCTION_CACHE.substitute(function_code=p.find('code').text,
                                                           function_arguments=', '.join([data_args, params_args]))
 
+    data_arg_names = [v for _, v in d.items()]
+
     # Check if the "integral" field has been filled
-    p = root.find('integral')
+    pi = root.find('integral')
+    pp = root.find('primitive')
 
-    if p is not None:
+    if pi is not None or pp is not None:
 
-        xml_bounds = p.find('bounds')
+        if pi is not None and pp is not None:  # both have been defined
+            logger.info(
+                'Specified integral and primitive for the same PDF, using the former')
 
-        bounds = ', '.join(f'double {v}' for _, v in xml_bounds.items())
+        if pi is not None:  # use the integral
 
-        format_kwargs['integral'] = INTEGRAL_CACHE.substitute(integral_code=p.find('code').text,
-                                                              integral_arguments=', '.join((bounds, params_args)))
+            xml_bounds = pi.find('bounds')
+
+            bounds = ', '.join(f'double {v}' for _, v in xml_bounds.items())
+
+            format_kwargs['integral'] = INTEGRAL_CACHE.substitute(integral_code=pi.find('code').text,
+                                                                  integral_arguments=', '.join((bounds, params_args)))
+
+        else:  # use the primitive
+
+            bounds = ', '.join(f'double {p}_{bd}' for bd in (
+                'min', 'max') for p in data_arg_names)
+
+            famin = ', '.join(
+                s for s in [f'{p}_min' for p in data_arg_names] + params_arg_names)
+            famax = ', '.join(
+                s for s in [f'{p}_max' for p in data_arg_names] + params_arg_names)
+
+            format_kwargs['integral'] = PRIMITIVE_CACHE.substitute(primitive_arguments=', '.join([data_args, params_args]),
+                                                                   primitive_code=pp.find(
+                                                                       'code').text,
+                                                                   integral_arguments=', '.join(
+                                                                       (bounds, params_args)),
+                                                                   primitive_fwd_args_min=famin,
+                                                                   primitive_fwd_args_max=famax)
     else:
         format_kwargs['integral'] = ''
 
@@ -123,3 +160,50 @@ def generate_code(xmlfile, backend, nvar_arg_pars):
     whole_template = WHOLE_CACHE.substitute(**format_kwargs)
 
     return whole_template
+
+
+def xml_from_formula(formula, data_pars, arg_pars, primitive=None):
+    '''
+    Generate XML code using the given formula as a function.
+
+    :param formula: formula associated to the PDF.
+    :type formula: str
+    :param data_pars: data parameters.
+    :type data_pars: Registry(Parameter)
+    :param arg_pars: argument parameters.
+    :type arg_pars: Registry(Parameter)
+    :param primitive: if provided, use this formula in order to calculate
+       the primitive.
+    :type primitive: str or None
+    '''
+    top = ET.Element('PDF')
+
+    if os.linesep in formula:
+        raise ValueError('Line breaks are not allowed inside formulas')
+
+    ET.SubElement(
+        top, 'parameters', {p.name: p.name for p in arg_pars})
+
+    function = ET.SubElement(top, 'function')
+    ET.SubElement(function, 'data', {p.name: p.name for p in data_pars})
+    code = ET.SubElement(function, 'code')
+    code.text = f'return {formula}'
+
+    if primitive is not None:
+
+        if os.linesep in primitive:
+            raise ValueError('Line breaks are not allowed inside formulas')
+
+        primitive_element = ET.SubElement(top, 'primitive')
+        bounds = {}
+
+        for p in data_pars:
+            bounds[f'{p.name}_min'] = f'{p.name}_min'
+            bounds[f'{p.name}_max'] = f'{p.name}_max'
+
+        bounds = ET.SubElement(primitive_element, 'bounds', bounds)
+
+        code = ET.SubElement(primitive_element, 'code')
+        code.text = f'return {primitive}'
+
+    return ET.tostring(top, encoding='unicode')

@@ -25,9 +25,7 @@ double function_proxy(double x, void *vparams) {
 #endif
 
 /// Function proxy to integrate using Monte Carlo methods
-double monte_function_proxy(double *data, size_t dim, void *vparams) {
-
-  (void)(dim); // suppress warnings for unused parameters
+double monte_function_proxy(double *data, size_t, void *vparams) {
 
   double *params = (double *)vparams;
 
@@ -100,23 +98,23 @@ PyObject *integrate_cquad(double lb, double ub, PyObject *config,
 #endif
 
 /// Exposed function to integrate using plain MonteCarlo
-PyObject *integrate_plain(size_t dim, double *lb, double *ub, PyObject *config,
+PyObject *integrate_plain(double *lb, double *ub, PyObject *config,
                           double *params) {
 
-  gsl_monte_function func = {&monte_function_proxy, dim, params};
+  gsl_monte_function func = {&monte_function_proxy, NDIM, params};
 
   double res, err;
 
   gsl_rng *r = gsl_rng_alloc(gsl_rng_default);
 
   // Define the state
-  gsl_monte_plain_state *s = gsl_monte_plain_alloc(dim);
+  gsl_monte_plain_state *s = gsl_monte_plain_alloc(NDIM);
 
   int calls;
   PyArg_ParseTuple(config, "i", &calls);
 
   // Calculate the integral
-  gsl_monte_plain_integrate(&func, lb, ub, dim, calls, r, s, &res, &err);
+  gsl_monte_plain_integrate(&func, lb, ub, NDIM, calls, r, s, &res, &err);
 
   gsl_monte_plain_free(s);
 
@@ -126,17 +124,17 @@ PyObject *integrate_plain(size_t dim, double *lb, double *ub, PyObject *config,
 }
 
 /// Exposed function to integrate using the MISER method
-PyObject *integrate_miser(size_t dim, double *lb, double *ub, PyObject *config,
+PyObject *integrate_miser(double *lb, double *ub, PyObject *config,
                           double *params) {
 
-  gsl_monte_function func = {&monte_function_proxy, dim, params};
+  gsl_monte_function func = {&monte_function_proxy, NDIM, params};
 
   double res, err;
 
   gsl_rng *r = gsl_rng_alloc(gsl_rng_default);
 
   // Define the state
-  gsl_monte_miser_state *s = gsl_monte_miser_alloc(dim);
+  gsl_monte_miser_state *s = gsl_monte_miser_alloc(NDIM);
 
   int calls;
   double estimate_frac;
@@ -158,7 +156,7 @@ PyObject *integrate_miser(size_t dim, double *lb, double *ub, PyObject *config,
   gsl_monte_miser_params_set(s, &p);
 
   // Calculate the integral
-  gsl_monte_miser_integrate(&func, lb, ub, dim, calls, r, s, &res, &err);
+  gsl_monte_miser_integrate(&func, lb, ub, NDIM, calls, r, s, &res, &err);
 
   gsl_monte_miser_free(s);
 
@@ -168,17 +166,17 @@ PyObject *integrate_miser(size_t dim, double *lb, double *ub, PyObject *config,
 }
 
 /// Exposed function to integrate using the VEGAS method
-PyObject *integrate_vegas(size_t dim, double *lb, double *ub, PyObject *config,
+PyObject *integrate_vegas(double *lb, double *ub, PyObject *config,
                           double *params) {
 
-  gsl_monte_function func = {&monte_function_proxy, dim, params};
+  gsl_monte_function func = {&monte_function_proxy, NDIM, params};
 
   double res, err;
 
   gsl_rng *r = gsl_rng_alloc(gsl_rng_default);
 
   // Define the state
-  gsl_monte_vegas_state *s = gsl_monte_vegas_alloc(dim);
+  gsl_monte_vegas_state *s = gsl_monte_vegas_alloc(NDIM);
 
   int calls;
   double alpha;
@@ -195,10 +193,10 @@ PyObject *integrate_vegas(size_t dim, double *lb, double *ub, PyObject *config,
   gsl_monte_vegas_params_set(s, &p);
 
   // Calculate the integral
-  gsl_monte_vegas_integrate(&func, lb, ub, dim, calls, r, s, &res, &err);
+  gsl_monte_vegas_integrate(&func, lb, ub, NDIM, calls, r, s, &res, &err);
 
   do {
-    gsl_monte_vegas_integrate(&func, lb, ub, dim, calls, r, s, &res, &err);
+    gsl_monte_vegas_integrate(&func, lb, ub, NDIM, calls, r, s, &res, &err);
 
   } while (fabs(gsl_monte_vegas_chisq(s) - 1.0) > 0.5);
 

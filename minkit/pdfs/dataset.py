@@ -205,6 +205,17 @@ class DataSet(DataObject):
             weights = darray.from_ndarray(weights, aop.backend)
         return cls(data, data_pars, weights)
 
+    def get(self, index):
+        '''
+        Get the values given an index.
+
+        :param index: index to process.
+        :type index: int
+        :returns: Values at the index.
+        :rtype: numpy.ndarray
+        '''
+        return self.__data.get(index)
+
     def make_binned(self, bins=100):
         '''
         Make a binned version of this sample.

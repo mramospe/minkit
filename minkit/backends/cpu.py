@@ -12,6 +12,7 @@ from . import arrays
 from . import core
 from . import gsl_api
 from ..base import data_types
+from ..base.core import temporary_directory
 from ..base.data_types import c_int, c_int_p, c_double, c_double_p
 
 from distutils import ccompiler, sysconfig
@@ -21,7 +22,6 @@ import functools
 import logging
 import numpy as np
 import os
-import tempfile
 
 # Default seed for the random number generators
 DEFAULT_SEED = 49763
@@ -132,7 +132,7 @@ class CPUOperations(object):
         self.__cpu_pdf_cache = {}
 
         if tmpdir is None:
-            self.__tmpdir = tempfile.TemporaryDirectory()
+            self.__tmpdir = temporary_directory()
         else:
             self.__tmpdir = tmpdir
 
@@ -341,7 +341,7 @@ class CPUOperations(object):
             __integral = None
 
         # Parse the numerical integration function
-        numerical_integration = gsl_api.parse_functions(module)
+        numerical_integration = gsl_api.parse_functions(module, ndata_pars)
 
         proxy = core.FunctionsProxy(
             __function, __integral, __evaluate, __evaluate_binned, __evaluate_binned_numerical, numerical_integration)
@@ -407,6 +407,10 @@ class CPUOperations(object):
     def dzeros(self, n, ndim=1):
         return np.zeros(ndim * n, dtype=data_types.cpu_float), ndim
 
+    @core.document_operations_method
+    def argmax(self, a):
+        return a.ua.argmax()
+
     @return_darray
     @core.document_operations_method
     def concatenate(self, arrays, maximum=None):
@@ -464,9 +468,16 @@ class CPUOperations(object):
     @core.document_operations_method
     def make_linear_interpolator(self, xp, yp):
 
-        def wrapper(idx, x):
-            a = np.interp(x.ua[idx::x.ndim], xp.ua, yp.ua)
-            return arrays.darray(a, backend=self.backend)
+        class wrapper:
+
+            @staticmethod
+            def interpolate(idx, x):
+                a = np.interp(x.ua[idx::x.ndim], xp.ua, yp.ua)
+                return arrays.darray(a, backend=self.backend)
+
+            @staticmethod
+            def interpolate_single_value(v):
+                return np.interp(v, xp.ua, yp.ua)
 
         return wrapper
 
@@ -475,9 +486,16 @@ class CPUOperations(object):
 
         spline = make_interp_spline(xp.ua, yp.ua, k=3)  # cubic spline
 
-        def wrapper(idx, x):
-            a = spline(x.ua[idx::x.ndim])
-            return arrays.darray(a, backend=self.backend)
+        class wrapper:
+
+            @staticmethod
+            def interpolate(idx, x):
+                a = spline(x.ua[idx::x.ndim])
+                return arrays.darray(a, backend=self.backend)
+
+            @staticmethod
+            def interpolate_single_value(v):
+                return spline(v)
 
         return wrapper
 

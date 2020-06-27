@@ -321,6 +321,51 @@ def test_evaluation():
 
 @pytest.mark.pdfs
 @pytest.mark.source_pdf
+def test_formulapdf():
+    '''
+    Test the "FormulPDF" class.
+    '''
+    x = minkit.Parameter('x', bounds=(-2. * np.pi, +2 * np.pi))
+    a = minkit.Parameter('a', 1., bounds=(0.9, 1.1))
+    b = minkit.Parameter('b', 0., bounds=(-1, 1))
+    pdf = minkit.FormulaPDF.unidimensional(
+        'pdf', 'pow(sin(a * x + b), 2)', x, [a, b])
+
+    norm = pdf.norm()
+
+    data = pdf.generate(10000)
+
+    with helpers.fit_test(pdf) as test:
+        with minkit.minimizer('uml', pdf, data) as minimizer:
+            test.result = minimizer.migrad()
+
+    # Include the integral
+    pdf = minkit.FormulaPDF.unidimensional('pdf', 'pow(sin(a * x + b), 2)', x, [
+                                           a, b], primitive='- sin(2 * (a * x + b)) -2 * (a * x + b) / (4 * a)')
+
+    assert np.allclose(norm, pdf.norm())
+
+    with helpers.fit_test(pdf) as test:
+        with minkit.minimizer('uml', pdf, data) as minimizer:
+            test.result = minimizer.migrad()
+
+    # In two dimensions
+    x = minkit.Parameter('x', bounds=(0, 10))
+    y = minkit.Parameter('y', bounds=(0, 10))
+    ax = minkit.Parameter('ax', -0.01, bounds=(-1, 0))
+    ay = minkit.Parameter('ay', -0.01, bounds=(-1, 0))
+    pdf = minkit.FormulaPDF(
+        'pdf', 'exp(ax * x) * exp(ay * y)', [x, y], [ax, ay])
+
+    data = pdf.generate(10000)
+
+    with helpers.fit_test(pdf) as test:
+        with minkit.minimizer('uml', pdf, data) as minimizer:
+            test.result = minimizer.migrad()
+
+
+@pytest.mark.pdfs
+@pytest.mark.source_pdf
 def test_display_pdfs():
     '''
     Test that the PDFs are displayed correctly as strings.
@@ -394,6 +439,8 @@ def test_interppdf(tmpdir):
     values = np.exp(-0.5 * centers**2)
 
     ip = minkit.InterpPDF.from_ndarray('ip', m, centers, values)
+
+    ip.max() # check that we can calculate the maximum
 
     # Test the JSON conversion
     with open(os.path.join(tmpdir, 'ip.json'), 'wt') as fi:

@@ -284,6 +284,17 @@ class ArrayOperations(object):
         else:
             return data_types.cpu_real_bool
 
+    def argmax(self, a):
+        '''
+        Return the index with the maximum value.
+
+        :param a: input array.
+        :type a: marray, numpy.ndarray or reikna.cluda.api.Array
+        :returns: Index with the maximum value.
+        :rtype: int
+        '''
+        return self.__oper.argmax(a)
+
     def is_bool(self, a):
         '''
         Check whether the data type of the given array is of boolean type.
