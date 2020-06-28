@@ -21,6 +21,7 @@ import functools
 import logging
 import numpy as np
 import os
+import sys
 import tempfile
 
 # Default seed for the random number generators
@@ -30,6 +31,38 @@ DEFAULT_SEED = 49763
 CFLAGS = os.environ.get('CFLAGS', '').split()
 
 logger = logging.getLogger(__name__)
+
+
+def find_dir(dirname, directory):
+    '''
+    Find a directory in the given directory.
+
+    :param dirname: name of the directory.
+    :type dirname: str
+    :param directory: directory to inspect.
+    :type directory: str
+    :returns: full path to the directory if it is found; None otherwise
+    :rtype: str or None
+    '''
+    for root, dirs, _ in os.walk(directory):
+        if dirname in dirs:
+            return os.path.join(root, dirname)
+
+
+def find_file(filename, directory):
+    '''
+    Find a file in the given directory.
+
+    :param filename: name of the file.
+    :type filename: str
+    :param directory: directory to inspect.
+    :type directory: str
+    :returns: full path to the file if it is found; None otherwise
+    :rtype: str or None
+    '''
+    for root, _, files in os.walk(directory):
+        if filename in files:
+            return os.path.join(root, filename)
 
 
 def return_barray(method):
@@ -201,13 +234,36 @@ class CPUOperations(object):
             compiler = ccompiler.new_compiler()
 
             try:
+                include_dirs = [sysconfig.get_python_inc()]
+
+                # search for GSL headers
+                gsl_incpath = find_dir('gsl', sys.prefix)
+                if gsl_incpath is not None:
+                    include_dirs.append(os.path.dirname(
+                        os.path.abspath(gsl_incpath)))
+
+                # compile the source code
                 objects = compiler.compile(
                     [source], output_dir=self.__tmpdir.name,
-                    include_dirs=[sysconfig.get_python_inc()],
+                    include_dirs=include_dirs,
                     extra_preargs=CFLAGS)
-                libname = os.path.join(self.__tmpdir.name, f'lib{modname}.so')
-                compiler.link(f'{modname} library', objects, libname,
+
+                # search for GSL
+                gsl_libpath = find_file(
+                    compiler.library_filename('gsl', 'shared'), sys.prefix)
+                if gsl_libpath is not None:
+                    library_dirs = [os.path.dirname(
+                        os.path.abspath(gsl_libpath))]
+                else:
+                    library_dirs = None
+
+                # link the source files
+                libname = os.path.join(
+                    self.__tmpdir.name, compiler.library_filename(modname, 'shared'))
+
+                compiler.link(f'{modname} library', objects, libname, library_dirs=library_dirs,
                               extra_preargs=CFLAGS, libraries=['stdc++', 'gsl', 'gslcblas'])
+
             except Exception as ex:
                 nl = len(str(code.count(os.linesep)))
                 code = os.linesep.join(f'{i + 1:>{nl}}: {l}' for i,
