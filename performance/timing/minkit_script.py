@@ -71,7 +71,7 @@ if __name__ == '__main__':
     parser.add_argument('jobtype', type=str, choices=('generate', 'fit'),
                         default='fit',
                         help='Type of job to execute')
-    parser.add_argument('model', type=str, choices=('basic', 'intermediate'),
+    parser.add_argument('model', type=str, choices=('basic', 'intermediate', 'numeric'),
                         default='basic',
                         help='Model to use')
     parser.add_argument('nevts', type=int, default=100000,

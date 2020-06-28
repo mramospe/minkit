@@ -41,3 +41,15 @@ def intermediate(backend):
     pdf = backend.AddPDFs.two_components('pdf', sig, bkg, y)
 
     return pdf
+
+
+def numeric(backend):
+    '''
+    Model where numerical integration is needed (Argus).
+    '''
+    m = minkit.Parameter('m', bounds=(0, 1))
+    mu = minkit.Parameter('mu', 0.9, bounds=(0.5, 1))
+    c = minkit.Parameter('c', 0.2, bounds=(0.01, 2))
+    p = minkit.Parameter('p', 0.6, bounds=(0.1, 1))
+    pdf = minkit.Argus('argus', m, mu, c, p)
+    return pdf
