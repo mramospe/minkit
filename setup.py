@@ -393,7 +393,7 @@ setup(
 
     name='minkit',
 
-    description='Package to perform fits in both CPUs and GPUs',
+    description='Package to perform fits to probability density functions in both CPUs and GPUs',
 
     cmdclass={'apply_copyright': ApplyCopyrightCommand,
               'apply_format': ApplyFormatCommand,

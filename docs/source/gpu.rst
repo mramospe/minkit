@@ -7,11 +7,9 @@ However, the usage of GPUs is supported through the
 `PyCUDA <https://documen.tician.de/pycuda>`__ and
 `PyOpenCL <https://documen.tician.de/pyopencl>`__.
 In order to enable MinKit to work on GPUs, it is necessary to install at least
-two of the previous packages (or both):
-
-.. code-block:: bash
-
-   pip install reikna pycuda pyopencl
+two of the previous packages (or both).
+Please visit :ref:`notes-for-gpu-compatibility` to know about the dependencies
+of the package and the way to install them.
 
 There are two (compatible) ways of specifying the backend in MinKit.
 The environmental variable *MINKIT_BACKEND* controls the default backend

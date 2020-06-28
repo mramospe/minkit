@@ -21,7 +21,6 @@ import functools
 import logging
 import numpy as np
 import os
-import sys
 import tempfile
 
 # Default seed for the random number generators
@@ -234,10 +233,14 @@ class CPUOperations(object):
             compiler = ccompiler.new_compiler()
 
             try:
-                include_dirs = [sysconfig.get_python_inc()]
+                python_inc = sysconfig.get_python_inc()
+
+                include_dirs = [python_inc]
 
                 # search for GSL headers
-                gsl_incpath = find_dir('gsl', sys.prefix)
+                search_prefix = os.path.dirname(python_inc)
+
+                gsl_incpath = find_dir('gsl', search_prefix)
                 if gsl_incpath is not None:
                     include_dirs.append(os.path.dirname(
                         os.path.abspath(gsl_incpath)))
@@ -249,8 +252,11 @@ class CPUOperations(object):
                     extra_preargs=CFLAGS)
 
                 # search for GSL
+                search_prefix = os.path.dirname(
+                    sysconfig.get_python_lib(standard_lib=True))
+
                 gsl_libpath = find_file(
-                    compiler.library_filename('gsl', 'shared'), sys.prefix)
+                    compiler.library_filename('gsl', 'shared'), search_prefix)
                 if gsl_libpath is not None:
                     library_dirs = [os.path.dirname(
                         os.path.abspath(gsl_libpath))]
