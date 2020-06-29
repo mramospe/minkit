@@ -68,7 +68,7 @@ class GPUOperations(object):
         self.__rndm_gen = RandomUniformGenerator(self)
 
         # Compile the functions
-        self.__fbe, self.__rfu, self.__tplf_1d, self.__tplf_2d = make_functions(
+        self.__fbe, self.__rfu, self.__sfu, self.__tplf_1d, self.__tplf_2d = make_functions(
             self)
 
     @property
@@ -320,6 +320,28 @@ class GPUOperations(object):
     @core.document_operations_method
     def iarange(self, n):
         return self.__fbe.arange_int(n, data_types.cpu_int(0))
+
+    @core.document_operations_method
+    def argmax(self, a):
+
+        n = data_types.cpu_int(self.__context.max_local_size)
+
+        indices = self.iarange(a.length)
+        nproc = a.length
+        step = data_types.cpu_int(1)
+        while True:
+
+            gs, ls = self.__context.get_sizes(nproc // n + (nproc % n != 0))
+
+            # provided that the local size is always the same this is fast
+            self.__sfu.get_object(ls).scan_max(
+                n, a.length, indices.ua, a.ua, step, global_size=gs, local_size=ls)
+
+            if gs == ls:
+                return indices.ua[0]
+            else:
+                step *= (ls * n)
+                nproc = gs // ls
 
     def args_to_array(self, a, dtype=data_types.cpu_float):
         if a.dtype != dtype:

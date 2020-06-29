@@ -111,6 +111,25 @@ class FFTCache(FunctionCache):
         return oa
 
 
+class ScanFunctionCache1D(FunctionCache):
+
+    with open(os.path.join(gpu_core.GPU_SRC, 'scan_functions.c')) as f:
+        template = Template(f.read())
+
+    def __init__(self, thread):
+        '''
+        Functions in one dimension with a fixed number of threads per block.
+
+        :param thread: thread to compile the code.
+        '''
+        super().__init__(thread)
+
+    def build_object(self, size):
+        code = ScanFunctionCache1D.template.substitute(
+            threads_per_block=size)
+        return self._thread.compile(code)
+
+
 class TemplateFunctionCache1D(FunctionCache):
 
     with open(os.path.join(gpu_core.GPU_SRC, 'templates_1d.c')) as f:
@@ -120,7 +139,7 @@ class TemplateFunctionCache1D(FunctionCache):
         '''
         Functions in one dimension with a fixed number of threads per block.
 
-        :param thread: thread to compile the FFT.
+        :param thread: thread to compile the code.
         '''
         super().__init__(thread)
 
@@ -139,7 +158,7 @@ class TemplateFunctionCache2D(FunctionCache):
         '''
         Functions in two dimensions with a fixed number of threads per block.
 
-        :param thread: thread to compile the FFT.
+        :param thread: thread to compile the code.
         '''
         super().__init__(thread)
 

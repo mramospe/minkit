@@ -121,6 +121,13 @@ class Context(object):
         '''
         return self.__device
 
+    @property
+    def max_local_size(self):
+        '''
+        Maximum number of threads per block.
+        '''
+        return self.__max_local_size
+
     def _get_sizes_2d_gl(self, size_f, size_s):
         '''
         Return the standard sizes in two dimensions, where the first size is
