@@ -271,6 +271,7 @@ class GPUOperations(object):
             stack.enter_context(self.__fft_cache.activate())
             stack.enter_context(self.__tplf_1d.activate())
             stack.enter_context(self.__tplf_2d.activate())
+            stack.enter_context(self.__sfu.activate())
 
             for c in self.__array_cache.values():
                 stack.enter_context(c.activate())

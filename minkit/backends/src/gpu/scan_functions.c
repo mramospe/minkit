@@ -23,18 +23,16 @@ KERNEL void scan_max(int niter, int length, GLOBAL_MEM int *indices,
 
   value_cache[tid] = MIN_DOUBLE;
 
-  if (gid < length) {
-    for (int i = 0; i < niter; ++i) {
+  for (int i = 0; i < niter; ++i) {
 
-      if (gid + i * step >= length)
-        break;
+    if (gid + i * step >= length)
+      break;
 
-      int mid = indices[gid + i * step];
+    int mid = indices[gid + i * step];
 
-      if (values[mid] > value_cache[tid]) {
-        value_cache[tid] = values[mid];
-        idx_cache[tid] = mid;
-      }
+    if (values[mid] > value_cache[tid]) {
+      value_cache[tid] = values[mid];
+      idx_cache[tid] = mid;
     }
   }
 
