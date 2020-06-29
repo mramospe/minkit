@@ -123,13 +123,13 @@ def test_scipyminimizer():
 
         values = []
         for m in minkit.minimization.scipy_api.SCIPY_CHOICES:
+            g.set_values(**initials)
             with minkit.minimizer('uml', g, data, minimizer=m) as minimizer:
-                g.set_values(**initials)
                 minimizer.minimize()
                 values.append(g.args.copy())
 
+        g.set_values(**initials)
         with minkit.minimizer('uml', g, data, minimizer='minuit') as minimizer:
-            g.set_values(**initials)
             minimizer.migrad()
             reference = g.args.copy()
 
@@ -146,13 +146,13 @@ def test_scipyminimizer():
 
         values = []
         for m in minkit.minimization.scipy_api.SCIPY_CHOICES:
+            g.set_values(**initials)
             with minkit.minimizer('bml', g, data, minimizer=m) as minimizer:
-                g.set_values(**initials)
                 minimizer.minimize()
                 values.append(g.args.copy())
 
+        g.set_values(**initials)
         with minkit.minimizer('bml', g, data, minimizer='minuit') as minimizer:
-            g.set_values(**initials)
             minimizer.migrad()
             reference = g.args.copy()
 
@@ -189,13 +189,13 @@ def test_nloptminimizer():
 
         values = []
         for m in minkit.minimization.nlopt_api.NLOPT_CHOICES:
+            pdf.set_values(**initials)
             with minkit.minimizer('uml', pdf, data, minimizer=m) as minimizer:
-                pdf.set_values(**initials)
                 minimizer.minimize()
                 values.append(pdf.args.copy())
 
+        pdf.set_values(**initials)
         with minkit.minimizer('uml', pdf, data, minimizer='minuit') as minimizer:
-            pdf.set_values(**initials)
             minimizer.migrad()
             reference = pdf.args.copy()
 
@@ -212,13 +212,13 @@ def test_nloptminimizer():
 
         values = []
         for m in minkit.minimization.nlopt_api.NLOPT_CHOICES:
+            pdf.set_values(**initials)
             with minkit.minimizer('bml', pdf, data, minimizer=m) as minimizer:
-                pdf.set_values(**initials)
                 minimizer.minimize()
                 values.append(pdf.args.copy())
 
+        pdf.set_values(**initials)
         with minkit.minimizer('bml', pdf, data, minimizer='minuit') as minimizer:
-            pdf.set_values(**initials)
             minimizer.migrad()
             reference = pdf.args.copy()
 

@@ -324,7 +324,7 @@ class GPUOperations(object):
     @core.document_operations_method
     def argmax(self, a):
 
-        n = data_types.cpu_int(self.__context.max_local_size)
+        n = data_types.cpu_int(self.__context.max_local_size)  # maybe too big?
 
         indices = self.iarange(a.length)
         nproc = a.length
@@ -338,7 +338,7 @@ class GPUOperations(object):
                 n, a.length, indices.ua, a.ua, step, global_size=gs, local_size=ls)
 
             if gs == ls:
-                return indices.ua[0]
+                return indices.ua[0].get()
             else:
                 step *= (ls * n)
                 nproc = gs // ls
@@ -483,7 +483,8 @@ class GPUOperations(object):
     @core.document_operations_method
     def make_linear_interpolator(self, xp, yp):
 
-        cpu_impl = self.__cpu_aop.make_linear_interpolator(xp.ua, yp.ua)
+        context = self.__context
+        fproxy = self.__fbe
 
         class wrapper(object):
 
@@ -494,17 +495,19 @@ class GPUOperations(object):
 
                 out = self.dempty(x.length)
 
-                gs_x, ls_x, gs_y, ls_y = self.__context.get_sizes(
+                gs_x, ls_x, gs_y, ls_y = context.get_sizes(
                     xp.length, out.length)
 
-                self.__fbe.interpolate_linear(xp.length, x.length, out.ua, x.ndim, idx, x.ua, xp.ua, yp.ua,
-                                              global_size=(gs_x, gs_y), local_size=(ls_x, ls_y))
+                fproxy.interpolate_linear(xp.length, x.length, out.ua, x.ndim, idx, x.ua, xp.ua, yp.ua,
+                                          global_size=(gs_x, gs_y), local_size=(ls_x, ls_y))
 
                 return out
 
             @staticmethod
             def interpolate_single_value(v):
-                return cpu_impl.interpolate_single_value(v)
+                x = self.dempty(1)
+                x.ua[0] = v
+                return wrapper.interpolate(0, x).get(0)
 
         return wrapper
 
@@ -519,21 +522,33 @@ class GPUOperations(object):
         t = arrays.darray.from_ndarray(t, self.backend)
         c = arrays.darray.from_ndarray(c, self.backend)
 
-        def wrapper(idx, x):
+        context = self.__context
+        fproxy = self.__fbe
 
-            idx = data_types.as_integer(idx)
+        class wrapper(object):
 
-            out = self.dempty(len(x))
+            @staticmethod
+            def interpolate(idx, x):
 
-            gs_x, ls_x, gs_y, ls_y = self.__context.get_sizes(
-                t.length, out.length)
+                idx = data_types.as_integer(idx)
 
-            lt = data_types.as_integer(len(t) - k - 1)  # len(t) - k - 1
+                out = self.dempty(len(x))
 
-            self.__fbe.interpolate_spline(lt, out.length, out.ua, x.ndim, idx, x.ua, t.ua, c.ua,
+                gs_x, ls_x, gs_y, ls_y = context.get_sizes(
+                    t.length, out.length)
+
+                lt = data_types.as_integer(len(t) - k - 1)  # len(t) - k - 1
+
+                fproxy.interpolate_spline(lt, out.length, out.ua, x.ndim, idx, x.ua, t.ua, c.ua,
                                           global_size=(gs_x, gs_y), local_size=(ls_x, ls_y))
 
-            return out
+                return out
+
+            @staticmethod
+            def interpolate_single_value(v):
+                x = self.dempty(1)
+                x.ua[0] = v
+                return wrapper.interpolate(0, x).get(0)
 
         return wrapper
 

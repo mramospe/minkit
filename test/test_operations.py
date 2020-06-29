@@ -97,6 +97,19 @@ def test_aop():
     # amin
     assert np.allclose(aop.min(ls), 10)
 
+    # argmax
+    x = aop.linspace(0, 10, 11)
+
+    assert aop.argmax(x) == len(x) - 1
+
+    x = aop.dzeros(7653)  # odd number
+
+    x.ua[9] = 1
+    assert aop.argmax(x) == 9
+
+    x.ua[0] = 10
+    assert aop.argmax(x) == 0
+
     # sum
     ls = aop.linspace(1, 100, 100)
     assert np.allclose(aop.sum(ls), 5050)

@@ -44,13 +44,13 @@ KERNEL void scan_max(int niter, int length, GLOBAL_MEM int *indices,
 
     int bid = get_group_id(0);
 
-    int best = 0;
-    double max = value_cache[best];
+    int best = idx_cache[0];
+    double max = value_cache[0];
 
     for (int i = 1; i < THREADS_PER_BLOCK; ++i) {
 
       if (value_cache[i] > max) {
-        best = i;
+        best = idx_cache[i];
         max = value_cache[i];
       }
     }
