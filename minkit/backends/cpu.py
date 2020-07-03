@@ -32,6 +32,38 @@ CFLAGS = os.environ.get('CFLAGS', '').split()
 logger = logging.getLogger(__name__)
 
 
+def find_dir(dirname, directory):
+    '''
+    Find a directory in the given directory.
+
+    :param dirname: name of the directory.
+    :type dirname: str
+    :param directory: directory to inspect.
+    :type directory: str
+    :returns: full path to the directory if it is found; None otherwise
+    :rtype: str or None
+    '''
+    for root, dirs, _ in os.walk(directory):
+        if dirname in dirs:
+            return os.path.join(root, dirname)
+
+
+def find_file(filename, directory):
+    '''
+    Find a file in the given directory.
+
+    :param filename: name of the file.
+    :type filename: str
+    :param directory: directory to inspect.
+    :type directory: str
+    :returns: full path to the file if it is found; None otherwise
+    :rtype: str or None
+    '''
+    for root, _, files in os.walk(directory):
+        if filename in files:
+            return os.path.join(root, filename)
+
+
 def return_barray(method):
     '''
     Wrapper to automatically create a :class:`minkit.barray` object with
@@ -120,9 +152,9 @@ class CPUOperations(object):
 
         :param backend: user interface to the backend.
         :type backend: Backend
-        :param tmpdir: optional temporary directory to write the compiled \
-        libraries. If none is provided, then a proper temporary directory \
-        is created.
+        :param tmpdir: optional temporary directory to write the compiled
+           libraries. If none is provided, then a proper temporary directory
+           is created.
         :type tmpdir: tempfile.TemporaryDirectory or None
         '''
         self.__backend = backend
@@ -201,13 +233,43 @@ class CPUOperations(object):
             compiler = ccompiler.new_compiler()
 
             try:
+                python_inc = sysconfig.get_python_inc()
+
+                include_dirs = [python_inc]
+
+                # search for GSL headers
+                search_prefix = os.path.dirname(python_inc)
+
+                gsl_incpath = find_dir('gsl', search_prefix)
+                if gsl_incpath is not None:
+                    include_dirs.append(os.path.dirname(
+                        os.path.abspath(gsl_incpath)))
+
+                # compile the source code
                 objects = compiler.compile(
                     [source], output_dir=self.__tmpdir.name,
-                    include_dirs=[sysconfig.get_python_inc()],
+                    include_dirs=include_dirs,
                     extra_preargs=CFLAGS)
-                libname = os.path.join(self.__tmpdir.name, f'lib{modname}.so')
-                compiler.link(f'{modname} library', objects, libname,
+
+                # search for GSL
+                search_prefix = os.path.dirname(
+                    sysconfig.get_python_lib(standard_lib=True))
+
+                gsl_libpath = find_file(
+                    compiler.library_filename('gsl', 'shared'), search_prefix)
+                if gsl_libpath is not None:
+                    library_dirs = [os.path.dirname(
+                        os.path.abspath(gsl_libpath))]
+                else:
+                    library_dirs = None
+
+                # link the source files
+                libname = os.path.join(
+                    self.__tmpdir.name, compiler.library_filename(modname, 'shared'))
+
+                compiler.link(f'{modname} library', objects, libname, library_dirs=library_dirs,
                               extra_preargs=CFLAGS, libraries=['stdc++', 'gsl', 'gslcblas'])
+
             except Exception as ex:
                 nl = len(str(code.count(os.linesep)))
                 code = os.linesep.join(f'{i + 1:>{nl}}: {l}' for i,
@@ -341,7 +403,7 @@ class CPUOperations(object):
             __integral = None
 
         # Parse the numerical integration function
-        numerical_integration = gsl_api.parse_functions(module)
+        numerical_integration = gsl_api.parse_functions(module, ndata_pars)
 
         proxy = core.FunctionsProxy(
             __function, __integral, __evaluate, __evaluate_binned, __evaluate_binned_numerical, numerical_integration)
@@ -389,7 +451,7 @@ class CPUOperations(object):
 
     @return_darray
     @core.document_operations_method
-    def fempty(self, size, ndim=1):
+    def dempty(self, size, ndim=1):
         return np.empty(ndim * size, dtype=data_types.cpu_float), ndim
 
     @return_iarray
@@ -399,13 +461,17 @@ class CPUOperations(object):
 
     @return_darray_one_dim
     @core.document_operations_method
-    def fones(self, n):
+    def dones(self, n):
         return np.ones(n, dtype=data_types.cpu_float)
 
     @return_darray
     @core.document_operations_method
-    def fzeros(self, n, ndim=1):
+    def dzeros(self, n, ndim=1):
         return np.zeros(ndim * n, dtype=data_types.cpu_float), ndim
+
+    @core.document_operations_method
+    def argmax(self, a):
+        return a.ua.argmax()
 
     @return_darray
     @core.document_operations_method
@@ -415,6 +481,12 @@ class CPUOperations(object):
             return a[:maximum * arrays[0].ndim], arrays[0].ndim
         else:
             return a, arrays[0].ndim
+
+    @return_darray_one_dim
+    @core.document_operations_method
+    def concatenated_linspace(self, edges, nsteps):
+        l = np.linspace(edges.ua[:-1], edges.ua[1:], nsteps).T
+        return np.delete(l, nsteps * np.arange(1, len(l)))
 
     @core.document_operations_method
     def count_nonzero(self, a):
@@ -427,7 +499,7 @@ class CPUOperations(object):
 
     @return_darray
     @core.document_operations_method
-    def fexp(self, a):
+    def dexp(self, a):
         return np.exp(a.ua), a.ndim
 
     @return_darray_one_dim
@@ -458,9 +530,16 @@ class CPUOperations(object):
     @core.document_operations_method
     def make_linear_interpolator(self, xp, yp):
 
-        def wrapper(idx, x):
-            a = np.interp(x.ua[idx::x.ndim], xp.ua, yp.ua)
-            return arrays.darray(a, backend=self.backend)
+        class wrapper:
+
+            @staticmethod
+            def interpolate(idx, x):
+                a = np.interp(x.ua[idx::x.ndim], xp.ua, yp.ua)
+                return arrays.darray(a, backend=self.backend)
+
+            @staticmethod
+            def interpolate_single_value(v):
+                return np.interp(v, xp.ua, yp.ua)
 
         return wrapper
 
@@ -469,9 +548,16 @@ class CPUOperations(object):
 
         spline = make_interp_spline(xp.ua, yp.ua, k=3)  # cubic spline
 
-        def wrapper(idx, x):
-            a = spline(x.ua[idx::x.ndim])
-            return arrays.darray(a, backend=self.backend)
+        class wrapper:
+
+            @staticmethod
+            def interpolate(idx, x):
+                a = spline(x.ua[idx::x.ndim])
+                return arrays.darray(a, backend=self.backend)
+
+            @staticmethod
+            def interpolate_single_value(v):
+                return spline(v)
 
         return wrapper
 
@@ -515,7 +601,7 @@ class CPUOperations(object):
     @core.document_operations_method
     def logical_and(self, a, b,  out=None):
         if out is None:
-            np.logical_and(a.ua, b.ua)
+            return np.logical_and(a.ua, b.ua)
         else:
             return np.logical_and(a.ua, b.ua, out=out.ua)
 
@@ -574,6 +660,26 @@ class CPUOperations(object):
     @core.document_operations_method
     def set_rndm_seed(self, seed):
         self.__rndm_gen.seed(seed)
+
+    @core.document_operations_method
+    def simpson_factors(self, size, nbins=None):
+
+        if nbins is None:
+            f = self.dones(size)
+            f.ua[1::2] = 4.
+            f.ua[2:-1:2] = 2.
+            return f
+        else:
+            f = self.dempty(nbins * (size - 1) + 1)
+            f.ua[1::2] = 4.
+            f.ua[2::2] = 2.  # last element is corrected in the next line
+            f.ua[0::size - 1] = 1.
+            return f
+
+    @return_darray_one_dim
+    @core.document_operations_method
+    def steps_from_edges(self, edges):
+        return edges.ua[1:] - edges.ua[:-1]
 
     @core.document_operations_method
     def sum(self, a):

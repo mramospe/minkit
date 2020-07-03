@@ -45,8 +45,8 @@ def registry_to_minuit_input(registry):
     :rtype: dict
     '''
     values = {v.name: v.value for v in registry}
-    # 0 for Minuit, None for Minkit
-    errors = {f'error_{v.name}': v.error or 0. for v in registry}
+    # 0 for Minuit, None for MinKit
+    errors = {f'error_{v.name}': v.error for v in registry if v.error is not None}
     limits = {f'limit_{v.name}': v.bounds for v in registry}
     const = {f'fix_{v.name}': v.constant for v in registry}
     return dict(errordef=ERRORDEF, **values, **errors, **limits, **const)
@@ -73,9 +73,9 @@ class MinuitMinimizer(core.Minimizer):
                                        **minimizer_config,
                                        **registry_to_minuit_input(self.__args))
 
-    def _asym_error(self, par, bound, cov, var=1, atol=core.DEFAULT_ASYM_ERROR_ATOL, rtol=core.DEFAULT_ASYM_ERROR_RTOL, maxcall=None):
+    def _asym_error(self, par, bound, var=1, atol=core.DEFAULT_ASYM_ERROR_ATOL, rtol=core.DEFAULT_ASYM_ERROR_RTOL, max_call=None):
         with self._restore_minuit():
-            return super()._asym_error(par, bound, cov, var, atol, rtol, maxcall)
+            return super()._asym_error(par, bound, var, atol, rtol, max_call)
 
     @contextlib.contextmanager
     def _restore_minuit(self):
@@ -231,6 +231,6 @@ class MinuitMinimizer(core.Minimizer):
             yield self
             for p, v, e, f in zip(self.evaluator.args, values, errors, fixed):
                 self.__minuit.values[p.name] = v
-                # 0 for Minuit, None for Minkit
+                # 0 for Minuit, None for MinKit
                 self.__minuit.errors[p.name] = e or 0.
                 self.__minuit.fixed[p.name] = f

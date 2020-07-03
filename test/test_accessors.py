@@ -32,19 +32,12 @@ def test_add_pdf_src(tmpdir):
 
     with open(os.path.join(tmpdir, 'ExistingPDF.xml'), 'wt') as fi:
         fi.write('''
-        <PDF>
-          <parameters a="a"/>
+        <PDF data="x" parameters="a">
           <function>
-            <data x="x"/>
-            <code>
-              return a * x;
-            </code>
+            return a * x;
           </function>
-          <integral>
-            <bounds xmin="xmin" xmax="xmax"/>
-            <code>
-              return 0.5 * a * (xmax * xmax - xmin * xmin);
-            </code>
+          <integral bounds="xmin xmax">
+            return 0.5 * a * (xmax * xmax - xmin * xmin);
           </integral>
         </PDF>
         ''')

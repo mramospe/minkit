@@ -4,13 +4,9 @@
  Copyright (c) 2020 Miguel Ramos Pernas
 -->
 <!--Amoroso PDF-->
-<PDF>
-  <parameters a="a" theta="theta" alpha="alpha" beta="beta"/>
+<PDF data="x" parameters="a theta alpha beta">
   <function>
-    <data x="x"/>
-    <code>
-      double d = (x - a) / theta;
-      return pow(d, alpha * beta - 1) * exp(- pow(d, beta));
-    </code>
+    double d = (x - a) / theta;
+    return pow(d, alpha * beta - 1) * exp(- pow(d, beta));
   </function>
 </PDF>

@@ -15,7 +15,6 @@ import collections
 import contextlib
 import numdifftools
 import numpy as np
-import uncertainties
 import warnings
 
 DEFAULT_ASYM_ERROR_ATOL = 1e-8  # same as numpy.allclose
@@ -34,8 +33,8 @@ def errors_and_covariance_matrix(evaluate, result, hessian_opts=None):
     Calculate the covariance matrix given a function to evaluate the FCN
     and the values of the parameters at the minimum.
 
-    :param evaluate: function used to evaluate the FCN. It must take all the \
-    parameters that are not constant.
+    :param evaluate: function used to evaluate the FCN. It must take all the
+       parameters that are not constant.
     :param result: values at the FCN minimum.
     :type result: numpy.ndarray
     :param hessian_opts: options to be passed to :class:`numdifftools.core.Hessian`.
@@ -45,15 +44,16 @@ def errors_and_covariance_matrix(evaluate, result, hessian_opts=None):
     '''
     hessian_opts = hessian_opts or {}
 
+    # Disable warnings, since "numdifftools" does not allow to set bounds
     with warnings.catch_warnings():
         warnings.simplefilter('ignore')
         hessian = numdifftools.Hessian(
             lambda a: evaluate(*a), **hessian_opts)
         cov = 2. * np.linalg.inv(hessian(result))
 
-    values = uncertainties.correlated_values(result, cov)
+    errors = np.sqrt(np.diag(cov))
 
-    return values, cov
+    return errors, cov
 
 
 def determine_varargs_values_varids(args):
@@ -95,8 +95,8 @@ def _process_parameters(args, wa, values):
     :type values: numpy.ndarray
     :returns: registry of parameters and values.
     :rtype: Registry, numpy.ndarray
-    :raises RuntimeError: If the number of provided sets of values is differet \
-    to the number of profile parameters.
+    :raises RuntimeError: If the number of provided sets of values is differet
+       to the number of profile parameters.
     '''
     values = np.asarray(values)
 
@@ -117,7 +117,7 @@ class Minimizer(object, metaclass=DocMeta):
 
     def __init__(self, evaluator):
         '''
-        Abstract class to serve as an API between Minkit and the different
+        Abstract class to serve as an API between MinKit and the different
         minimization methods.
 
         :param evaluator: evaluator to be used in the minimization.
@@ -127,7 +127,7 @@ class Minimizer(object, metaclass=DocMeta):
 
         self.__eval = evaluator
 
-    def _asym_error(self, par, bound, cov, var=1, atol=DEFAULT_ASYM_ERROR_ATOL, rtol=DEFAULT_ASYM_ERROR_RTOL, maxcall=None):
+    def _asym_error(self, par, bound, var=1, atol=DEFAULT_ASYM_ERROR_ATOL, rtol=DEFAULT_ASYM_ERROR_RTOL, max_call=None):
         '''
         Calculate the asymmetric error using the variation of the FCN from
         *value* to *bound*.
@@ -136,21 +136,16 @@ class Minimizer(object, metaclass=DocMeta):
         :type par: float
         :param bound: bound of the parameter.
         :type bound: float
-        :param cov: covariance matrix. If provided, the initial values of the \
-        parameters will be obtained from it.
-        :type cov: numpy.ndarray
         :param var: squared number of standard deviations.
         :type var: float
         :param atol: absolute tolerance for the error.
         :type atol: float
         :param rtol: relative tolerance for the error.
         :type rtol: float
-        :param maxcall: maximum number of calls to calculate each error bound.
-        :type maxcall: int or None
+        :param max_call: maximum number of calls to calculate each error bound.
+        :type max_call: int or None
         :returns: Absolute value of the error.
         :rtype: float
-        :raises RuntimeError: If the bounds are too small to calculate the \
-        error associated to the provided number of standard deviations.
         '''
         with self.restoring_state():
 
@@ -158,33 +153,23 @@ class Minimizer(object, metaclass=DocMeta):
 
             l, r = par.value, bound  # consider the minimum on the left
 
-            fcn_l = ref_fcn = self._minimize_check_minimum(par)
+            fcn_l = ref_fcn = self.__eval.fcn()  # it must have been minimized
 
-            self._set_parameter_state(par, bound, fixed=True)
-
-            if cov is not None:  # set initial values using the covariance matrix
-                s = data_types.empty_float(len(self.__eval.args))
-                s[self.__eval.args.index(par.name)] = bound
-                vals = np.matmul(cov, s)
-                for p, v in zip(self.__eval.args, vals):
-                    self._set_parameter_state(p, v)
+            self._set_parameter_state(par, value=bound, fixed=True)
 
             fcn_r = self._minimize_check_minimum(par)
 
-            if fcn_r - ref_fcn < var:
-                raise RuntimeError(
-                    'Parameter bounds are smaller than the provided number of standard deviations')
-            elif np.allclose(fcn_r - ref_fcn, var, atol=atol, rtol=rtol):
+            if np.allclose(fcn_r - ref_fcn, var, atol=atol, rtol=rtol):
                 return abs(par.value - bound)
 
             closest_fcn = fcn_r
 
             i = 0
-            while not np.allclose(abs(closest_fcn - ref_fcn), var, atol=atol, rtol=rtol) and (True if maxcall is None else i < maxcall):
+            while (True if max_call is None else i < max_call) and not np.allclose(abs(closest_fcn - ref_fcn), var, atol=atol, rtol=rtol):
 
-                i += 1  # increase the internal counter (for maxcall)
+                i += 1  # increase the internal counter (for max_call)
 
-                self._set_parameter_state(par, 0.5 * (l + r))
+                self._set_parameter_state(par, value=0.5 * (l + r))
 
                 fcn = self._minimize_check_minimum(par)
 
@@ -198,20 +183,23 @@ class Minimizer(object, metaclass=DocMeta):
                 else:
                     bound, closest_fcn = r, fcn_r
 
-            if maxcall is not None and i > maxcall:
+            if max_call is not None and i == max_call:
                 warnings.warn(
                     'Reached maximum number of minimization calls', RuntimeWarning, stacklevel=1)
 
             return abs(initial - bound)
 
-    def _minimize_check_minimum(self, *pars):
+    def _minimize_check_minimum(self, par):
         '''
         Check the minimum of a minimization and warn if it is not valid.
 
+        :param par: parameter to work with.
+        :type par: Parameter
         :returns: Value of the FCN.
         :rtype: float
         '''
         m = self.minimize()
+
         if not m.valid:
             warnings.warn('Minimum is not valid during FCN scan',
                           RuntimeWarning, stacklevel=2)
@@ -244,26 +232,24 @@ class Minimizer(object, metaclass=DocMeta):
         '''
         return self.__eval
 
-    def asymmetric_errors(self, name, cov=None, sigma=1, atol=DEFAULT_ASYM_ERROR_ATOL, rtol=DEFAULT_ASYM_ERROR_RTOL, maxcall=None):
+    def asymmetric_errors(self, name, sigma=1, atol=DEFAULT_ASYM_ERROR_ATOL, rtol=DEFAULT_ASYM_ERROR_RTOL, max_call=None):
         '''
         Calculate the asymmetric errors for the given parameter. This is done
         by subdividing the bounds of the parameter into two till the variation
         of the FCN is one. Unlike MINOS, this method does not treat new
-        minima.
+        minima. Remember that the PDF must have been minimized before a call
+        to this function.
 
         :param name: name of the parameter.
         :type name: str
-        :param cov: covariance matrix. If provided, the initial values of the \
-        parameters will be obtained from them.
-        :type cov: numpy.ndarray or None
         :param sigma: number of standard deviations to compute.
         :type sigma: float
         :param atol: absolute tolerance for the error.
         :type atol: float
         :param rtol: relative tolerance for the error.
         :type rtol: float
-        :param maxcall: maximum number of calls to calculate each error bound.
-        :type maxcall: int or None
+        :param max_call: maximum number of calls to calculate each error bound.
+        :type max_call: int or None
         '''
         par = self.__eval.args.get(name)
 
@@ -271,8 +257,8 @@ class Minimizer(object, metaclass=DocMeta):
 
         var = sigma * sigma
 
-        lo = self._asym_error(par, lb, cov, var, atol, rtol, maxcall)
-        hi = self._asym_error(par, ub, cov, var, atol, rtol, maxcall)
+        lo = self._asym_error(par, lb, var, atol, rtol, max_call)
+        hi = self._asym_error(par, ub, var, atol, rtol, max_call)
 
         par.asym_errors = lo, hi
 
@@ -325,8 +311,8 @@ class Minimizer(object, metaclass=DocMeta):
         :type wa: str or list(str).
         :param values: values for each parameter specified in *wa*.
         :type values: numpy.ndarray
-        :param minimization_results: if set to True, then the results for each \
-        step are returned.
+        :param minimization_results: if set to True, then the results for each
+           step are returned.
         :type minimization_results: bool
         :param minimizer_config: arguments passed to :meth:`Minimizer.minimize`.
         :type minimizer_config: dict or None

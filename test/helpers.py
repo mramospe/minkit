@@ -177,9 +177,6 @@ class fit_test(object):
         '''
         self.fails = fails
 
-        # Must be set after the minimization ends
-        self.result = None
-
         # Number of standard deviations allowed from the fitted value to the initial
         self.nsigma = nsigma
 
@@ -214,35 +211,42 @@ class fit_test(object):
         if any(map(lambda e: e is not None, (exc_type, exc_value, traceback))):
             return
 
-        if self.result is not None:
+        if not self.fails:
 
-            if not self.fails:
+            # Print the result
+            print(self.__fmin)
+            print(self.__results)
 
-                # Print the result
-                print(self.result)
+            # Check that the fit run fine
+            assert not self.__fmin.hesse_failed
 
-                # Check that the fit run fine
-                assert not self.result.hesse_failed
+            # Check the values of the parameters
+            if self.simultaneous:
+                results = minkit.Registry()
+                for c in self.proxy:
+                    results += c.pdf.all_real_args
+            else:
+                results = self.proxy.all_real_args
 
-                # Check the values of the parameters
-                if self.simultaneous:
-                    results = minkit.Registry()
-                    for c in self.proxy:
-                        results += c.pdf.all_real_args
-                else:
-                    results = self.proxy.all_real_args
+            for n, v in self.initials.items():
+                rv = results.get(n)
+                assert np.allclose(
+                    v, rv.value, atol=self.nsigma * rv.error)
 
-                for n, v in self.initials.items():
-                    rv = results.get(n)
-                    assert np.allclose(
-                        v, rv.value, atol=self.nsigma * rv.error)
+            # Reset the values of the PDF(s)
+            if self.simultaneous:
+                for c in self.proxy:
+                    c.pdf.set_values(**self.initials)
+            else:
+                self.proxy.set_values(**self.initials)
 
-                # Reset the values of the PDF(s)
-                if self.simultaneous:
-                    for c in self.proxy:
-                        c.pdf.set_values(**self.initials)
-                else:
-                    self.proxy.set_values(**self.initials)
-        else:
-            raise RuntimeError(
-                'Must set the attribute "result" to the result from the minimization')
+    @property
+    def result(self):
+        '''
+        Result from a Minuit minimization.
+        '''
+        return self.__fmin, self.__results
+
+    @result.setter
+    def result(self, r):
+        self.__fmin, self.__results = r

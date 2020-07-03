@@ -2,12 +2,13 @@ language: python
 os: linux
 env:
   - CFLAGS="-shared -fPIC -std=c++0x"
+branches:
+  exclude:
+    - /doc.*/ # to avoid building the documentation in all the branches
 before_install:
   - python --version
   - sudo apt-get install libgsl-dev
-  - pip install pytest
-  - pip install pytest-cov
-  - pip install codecov
+  - pip install -r test/requirements.txt
 install:
   - pip install -r requirements.txt
   - pip install .
@@ -20,6 +21,8 @@ jobs:
       python: 3.6
     - name: "Python 3.7"
       python: 3.7
+    - name: "Python 3.8"
+      python: 3.8
     - stage: format
       python: 3.7
       before_script:
@@ -34,6 +37,11 @@ jobs:
       after_success: " "
     - stage: documentation
       python: 3.7
+      branches:
+        only:
+          - master
+          - /devel.*/
+          - /doc.*/
       install:
         - sudo apt-get install pandoc graphviz
         - pip install -r requirements.txt

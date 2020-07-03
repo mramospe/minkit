@@ -4,9 +4,7 @@
  Copyright (c) 2020 Miguel Ramos Pernas
 -->
 <!--Exponential x Polynomial PDF-->
-<PDF>
-  <parameters c="c"/>
-  <variable_parameters npars="npars" p="p"/>
+<PDF data="x" parameters="c" variable_parameters="npars p">
   <preamble>
     WITHIN_KERNEL double integral_in_bound(double x, double c, int npars, GLOBAL_MEM double* p) {
 
@@ -34,8 +32,6 @@
     }
   </preamble>
   <function>
-    <data x="x"/>
-    <code>
       double s = 0.;
       for (int n = 0; n &lt; npars + 1; ++n) {
 
@@ -45,14 +41,10 @@
       }
 
       return s * exp(c * x);
-    </code>
   </function>
-  <integral>
-    <bounds xmin="xmin" xmax="xmax"/>
-    <code>
+  <integral bounds="xmin xmax">
       double r = integral_in_bound(xmax, c, npars, p);
       double l = integral_in_bound(xmin, c, npars, p);
       return r - l;
-    </code>
   </integral>
 </PDF>

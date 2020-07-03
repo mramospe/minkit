@@ -126,7 +126,7 @@ def test_constpdf(tmpdir):
 
     with fit_test(pdf) as test:
         with minkit.minimizer('uml', pdf, data, minimizer='minuit') as minuit:
-            test.result, _ = minuit.migrad()
+            test.result = minuit.migrad()
 
     # Test the JSON conversion
     with open(os.path.join(tmpdir, 'pdf.json'), 'wt') as fi:
@@ -182,7 +182,7 @@ def test_convpdfs(tmpdir):
 
     with fit_test(pdf) as test:
         with minkit.minimizer('uml', pdf, data, minimizer='minuit') as minuit:
-            test.result, _ = minuit.migrad()
+            test.result = minuit.migrad()
 
     # Test the JSON conversion
     with open(os.path.join(tmpdir, 'pdf.json'), 'wt') as fi:
@@ -195,6 +195,13 @@ def test_convpdfs(tmpdir):
 
     # Check copying the PDF
     pdf.copy()
+
+    # Test for binned data samples
+    bdata = data.make_binned(20)
+
+    with fit_test(pdf) as test:
+        with minkit.minimizer('bml', pdf, bdata, minimizer='minuit') as minuit:
+            test.result = minuit.migrad()
 
 
 @pytest.mark.pdfs
@@ -248,7 +255,7 @@ def test_prodpdfs(tmpdir):
 
     with fit_test(pdf) as test:
         with minkit.minimizer('uml', pdf, data) as minimizer:
-            test.result, _ = minimizer.migrad()
+            test.result = minimizer.migrad()
 
 
 @pytest.mark.pdfs
@@ -314,6 +321,60 @@ def test_evaluation():
 
 @pytest.mark.pdfs
 @pytest.mark.source_pdf
+def test_formulapdf(tmpdir):
+    '''
+    Test the "FormulaPDF" class.
+    '''
+    x = minkit.Parameter('x', bounds=(-2. * np.pi, +2 * np.pi))
+    a = minkit.Parameter('a', 1., bounds=(0.9, 1.1))
+    b = minkit.Parameter('b', 0., bounds=(-0.1, 0.1))
+    pdf = minkit.FormulaPDF.unidimensional(
+        'pdf', 'pow(sin(a * x + b), 2)', x, [a, b])
+
+    norm = pdf.norm()
+
+    data = pdf.generate(10000)
+
+    with helpers.fit_test(pdf) as test:
+        with minkit.minimizer('uml', pdf, data) as minimizer:
+            test.result = minimizer.migrad()
+
+    # Include the integral
+    pdf = minkit.FormulaPDF.unidimensional('pdf', 'pow(sin(a * x + b), 2)', x, [
+                                           a, b], primitive='- sin(2 * (a * x + b)) -2 * (a * x + b) / (4 * a)')
+
+    assert np.allclose(norm, pdf.norm())
+
+    with helpers.fit_test(pdf) as test:
+        with minkit.minimizer('uml', pdf, data) as minimizer:
+            test.result = minimizer.migrad()
+
+    # In two dimensions
+    x = minkit.Parameter('x', bounds=(0, 10))
+    y = minkit.Parameter('y', bounds=(0, 10))
+    ax = minkit.Parameter('ax', -0.01, bounds=(-1, 0))
+    ay = minkit.Parameter('ay', -0.01, bounds=(-1, 0))
+    pdf = minkit.FormulaPDF(
+        'pdf', 'exp(ax * x) * exp(ay * y)', [x, y], [ax, ay])
+
+    data = pdf.generate(10000)
+
+    with helpers.fit_test(pdf) as test:
+        with minkit.minimizer('uml', pdf, data) as minimizer:
+            test.result = minimizer.migrad()
+
+    # Test the JSON conversion
+    with open(os.path.join(tmpdir, 'pdf.json'), 'wt') as fi:
+        json.dump(minkit.pdf_to_json(pdf), fi)
+
+    with open(os.path.join(tmpdir, 'pdf.json'), 'rt') as fi:
+        p = minkit.pdf_from_json(json.load(fi))
+
+    check_pdfs(p, pdf)
+
+
+@pytest.mark.pdfs
+@pytest.mark.source_pdf
 def test_display_pdfs():
     '''
     Test that the PDFs are displayed correctly as strings.
@@ -374,3 +435,93 @@ def test_restoring_state():
     # The values of the PDF must be those of the first minimization
     for f, s in zip(result, g.real_args):
         helpers.check_parameters(f, s)
+
+
+@pytest.mark.pdfs
+@pytest.mark.source_pdf
+def test_interppdf(tmpdir):
+    '''
+    Test the InterpPDF class.
+    '''
+    m = minkit.Parameter('m', bounds=(-3, +3))
+    centers = np.linspace(*m.bounds, 100)
+    values = np.exp(-0.5 * centers**2)
+
+    ip = minkit.InterpPDF.from_ndarray('ip', m, centers, values)
+
+    ip.max()  # check that we can calculate the maximum
+
+    # Test the JSON conversion
+    with open(os.path.join(tmpdir, 'ip.json'), 'wt') as fi:
+        json.dump(minkit.pdf_to_json(ip), fi)
+
+    with open(os.path.join(tmpdir, 'ip.json'), 'rt') as fi:
+        p = minkit.pdf_from_json(json.load(fi))
+
+    check_pdfs(p, ip)
+
+    # Check copying the PDF
+    ip.copy()
+
+    # Combine the PDF with another
+    k = minkit.Parameter('k', -0.1, bounds=(-1, +1))
+    e = minkit.Exponential('exp', m, k)
+
+    y = minkit.Parameter('y', 0.5, bounds=(0, 1))
+
+    pdf = minkit.AddPDFs.two_components('pdf', ip, e, y)
+
+    data = pdf.generate(10000)
+
+    with fit_test(pdf) as test:
+        with minkit.minimizer('uml', pdf, data, minimizer='minuit') as minimizer:
+            test.result = minimizer.migrad()
+
+    bdata = data.make_binned(20)
+
+    with fit_test(pdf) as test:
+        with minkit.minimizer('bml', pdf, bdata, minimizer='minuit') as minimizer:
+            test.result = minimizer.migrad()
+
+    # Test the construction from a binned data set
+    minkit.InterpPDF.from_binned_dataset('pdf', bdata)
+
+
+@pytest.mark.pdfs
+def test_pdf_max():
+    '''
+    Test the determination of the maximum value of a PDF.
+    '''
+    pdf = helpers.default_gaussian(sigma='s')
+
+    assert np.allclose(pdf.max(normalized=False), 1.)
+
+    pdf.args.get('s').value = 0.01  # a very narrow peak
+
+    assert np.allclose(pdf.max(normalized=False), 1.)
+
+
+@pytest.mark.pdfs
+def test_numerical_integral():
+    '''
+    Test the calculation of numerical integrals.
+    '''
+    pdf = helpers.default_gaussian(data_par='x')
+
+    x = pdf.data_pars.get('x')
+
+    x.set_range('reduced', 0.5 * x.bounds)
+
+    values = {}
+    for m in 'qng', 'qag', 'cquad', 'plain', 'miser', 'vegas':
+        pdf.numint_config = {'method': m}
+        values[m] = pdf.numerical_integral(integral_range='reduced')
+
+    def check_for(methods, rtol):
+        vals = np.fromiter((values[m] for m in methods), dtype=np.float64)
+        mean = np.mean(vals)
+        assert np.allclose(vals, mean, rtol=rtol)
+
+    check_for(values.keys(), rtol=1e-2)  # plain Monte Carlo is less accurate
+    check_for(('qng', 'qag', 'cquad', 'miser', 'vegas'), rtol=5e-5)
+    check_for(('qng', 'qag', 'cquad', 'vegas'), rtol=1e-6)  # more precise

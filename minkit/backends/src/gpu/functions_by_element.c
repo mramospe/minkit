@@ -58,17 +58,6 @@ KERNEL void assign_double_with_offset(int lgth, GLOBAL_MEM double *out,
   out[idx + offset] = in[idx];
 }
 
-/// Assign values
-KERNEL void assign_bool_with_offset(int lgth, GLOBAL_MEM unsigned *out,
-                                    GLOBAL_MEM unsigned *in, int offset) {
-  int idx = get_global_id(0);
-
-  if (idx >= lgth) // pad condition
-    return;
-
-  out[idx + offset] = in[idx];
-}
-
 /// Exponential (complex)
 KERNEL void exponential_complex(int lgth, GLOBAL_MEM double2 *out,
                                 GLOBAL_MEM double2 *in) {
@@ -205,6 +194,25 @@ KERNEL void linspace(int lgth, GLOBAL_MEM double *out, double vmin, double vmax,
     return;
 
   out[idx] = vmin + idx * (vmax - vmin) / (size - 1);
+}
+
+/// Create a concatenated sequence of linspaces
+KERNEL void concatenated_linspace(int lgth, GLOBAL_MEM double *out,
+                                  GLOBAL_MEM double *edges, int nsteps) {
+
+  int idx = get_global_id(0);
+
+  if (idx >= lgth)
+    return;
+
+  int bid = idx / nsteps;
+
+  double vmin = edges[bid];
+  double vmax = edges[bid + 1];
+
+  double step = (vmax - vmin) / (nsteps - 1);
+
+  out[idx] = vmin + step * (idx % nsteps + bid);
 }
 
 /// Logarithm
@@ -375,6 +383,41 @@ KERNEL void real(int lgth, GLOBAL_MEM double *out, GLOBAL_MEM double2 *in) {
   out[idx] = in[idx].x;
 }
 
+/// Calculate the factors for the Simpson's rule in 1D
+KERNEL void simpson_factors_1d(int lgth, GLOBAL_MEM double *out) {
+
+  int idx = get_global_id(0);
+
+  if (idx >= lgth) // pad condition
+    return;
+
+  if (idx == 0 || idx == lgth - 1)
+    out[idx] = 1.;
+  else if (idx % 2 == 0)
+    out[idx] = 2.;
+  else
+    out[idx] = 4.;
+}
+
+/// Calculate the factors for the Simpson's rule in 1D
+KERNEL void simpson_factors_for_bins_1d(int lgth, GLOBAL_MEM double *out,
+                                        int size) {
+
+  int idx = get_global_id(0);
+
+  if (idx >= lgth)
+    return;
+
+  int r = idx % (size - 1);
+
+  if (r == 0)
+    out[idx] = 1.;
+  else if (r % 2 == 0)
+    out[idx] = 2.;
+  else
+    out[idx] = 4.;
+}
+
 /// Get elements from an array by indices
 KERNEL void slice_from_integer(int lgth, GLOBAL_MEM double *out, int ndim,
                                GLOBAL_MEM double *in, GLOBAL_MEM int *indices) {
@@ -401,6 +444,18 @@ KERNEL void stepped_sum(int lgth, GLOBAL_MEM double *out, int nbins,
     s += partial_sum[i * nbins + idx];
 
   out[idx] = s;
+}
+
+/// Calculate the steps associated to a given set of edges
+KERNEL void steps_from_edges(int lgth, GLOBAL_MEM double *out,
+                             GLOBAL_MEM double *edges) {
+
+  int idx = get_global_id(0);
+
+  if (idx >= lgth)
+    return;
+
+  out[idx] = edges[idx + 1] - edges[idx];
 }
 
 /// Take elements from an array after the compact indices are obtained using

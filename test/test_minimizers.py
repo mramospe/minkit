@@ -40,7 +40,7 @@ def test_minimizer():
 
     with helpers.fit_test(g) as test:
         with minkit.minimizer('uml', g, data, minimizer='minuit') as minuit:
-            test.result, _ = pytest.shared_result = minuit.migrad()
+            test.result = pytest.shared_result = minuit.migrad()
 
     pytest.shared_names = [p.name for p in g.all_args]
 
@@ -50,7 +50,7 @@ def test_minimizer():
 
     with g.restoring_state(), helpers.fit_test(g, fails=True) as test:
         with minkit.minimizer('uml', g, data, minimizer='minuit') as minuit:
-            test.result, _ = minuit.migrad()
+            test.result = minuit.migrad()
 
         reg = g.args.copy()
 
@@ -61,14 +61,14 @@ def test_minimizer():
 
     with helpers.fit_test(g) as test:
         with minkit.minimizer('uml', g, data, minimizer='minuit') as minuit:
-            test.result, _ = minuit.migrad()
+            test.result = minuit.migrad()
 
     # Test the binned case
     data = data.make_binned(bins=100)
 
     with helpers.fit_test(g) as test:
         with minkit.minimizer('chi2', g, data, minimizer='minuit') as minuit:
-            test.result, _ = minuit.migrad()
+            test.result = minuit.migrad()
 
 
 @pytest.mark.minimization
@@ -99,7 +99,7 @@ def test_simultaneous_minimizer():
 
     with helpers.fit_test(categories, simultaneous=True) as test:
         with minkit.simultaneous_minimizer(categories, minimizer='minuit') as minuit:
-            test.result, _ = minuit.migrad()
+            test.result = minuit.migrad()
 
 
 @pytest.mark.minimization
@@ -123,13 +123,13 @@ def test_scipyminimizer():
 
         values = []
         for m in minkit.minimization.scipy_api.SCIPY_CHOICES:
+            g.set_values(**initials)
             with minkit.minimizer('uml', g, data, minimizer=m) as minimizer:
-                g.set_values(**initials)
                 minimizer.minimize()
                 values.append(g.args.copy())
 
+        g.set_values(**initials)
         with minkit.minimizer('uml', g, data, minimizer='minuit') as minimizer:
-            g.set_values(**initials)
             minimizer.migrad()
             reference = g.args.copy()
 
@@ -146,13 +146,13 @@ def test_scipyminimizer():
 
         values = []
         for m in minkit.minimization.scipy_api.SCIPY_CHOICES:
+            g.set_values(**initials)
             with minkit.minimizer('bml', g, data, minimizer=m) as minimizer:
-                g.set_values(**initials)
                 minimizer.minimize()
                 values.append(g.args.copy())
 
+        g.set_values(**initials)
         with minkit.minimizer('bml', g, data, minimizer='minuit') as minimizer:
-            g.set_values(**initials)
             minimizer.migrad()
             reference = g.args.copy()
 
@@ -189,13 +189,13 @@ def test_nloptminimizer():
 
         values = []
         for m in minkit.minimization.nlopt_api.NLOPT_CHOICES:
+            pdf.set_values(**initials)
             with minkit.minimizer('uml', pdf, data, minimizer=m) as minimizer:
-                pdf.set_values(**initials)
                 minimizer.minimize()
                 values.append(pdf.args.copy())
 
+        pdf.set_values(**initials)
         with minkit.minimizer('uml', pdf, data, minimizer='minuit') as minimizer:
-            pdf.set_values(**initials)
             minimizer.migrad()
             reference = pdf.args.copy()
 
@@ -212,13 +212,13 @@ def test_nloptminimizer():
 
         values = []
         for m in minkit.minimization.nlopt_api.NLOPT_CHOICES:
+            pdf.set_values(**initials)
             with minkit.minimizer('bml', pdf, data, minimizer=m) as minimizer:
-                pdf.set_values(**initials)
                 minimizer.minimize()
                 values.append(pdf.args.copy())
 
+        pdf.set_values(**initials)
         with minkit.minimizer('bml', pdf, data, minimizer='minuit') as minimizer:
-            pdf.set_values(**initials)
             minimizer.migrad()
             reference = pdf.args.copy()
 
@@ -243,12 +243,14 @@ def test_asymmetric_errors():
         minimizer.minimize()
         minimizer.minuit.print_level = 0
         minimizer.asymmetric_errors('s', sigma=1.)
-        errors = s.asym_errors
+        errors_default = s.asym_errors
         minimizer.minos('s', 1.)
+        errors_minos = s.asym_errors
 
     assert s.asym_errors != ()
 
-    assert np.allclose(s.asym_errors, errors, rtol=1e-4)  # compare with MINOS
+    assert np.allclose(errors_default, errors_minos,
+                       rtol=1e-4)  # same as MINOS
 
     # Test for 2 sigma
     with minkit.minimizer('uml', g, data) as minimizer:

@@ -8,7 +8,6 @@ Application interface to deal with arrays. The different array classes
 can not define the __getitem__ since numpy objects would use it to do
 arithmetic operations.
 '''
-from . import arrays
 from . import core
 from ..base import data_types
 
@@ -27,15 +26,15 @@ class ArrayOperations(object):
 
         :param backend: backend where the operations will be done.
         :type backend: Backend
-        :param kwargs: arguments forwarded to the backend constructor \
-        (cuda and opencl backends only).
+        :param kwargs: arguments forwarded to the backend constructor
+           (cuda and opencl backends only).
         :type kwargs: dict
 
         The possible keyword arguments in GPU backends are:
 
         * *device*: device to be used.
-        * *interactive*: whether to ask the user a device if not specified or
-          if the proposed device is not available.
+
+        * *interactive*: whether to ask the user a device if not specified or if the proposed device is not available.
         '''
         super().__init__()
 
@@ -104,7 +103,7 @@ class ArrayOperations(object):
         :returns: array representation in the given backend.
         :rtype: numpy.ndarray or reikna.cluda.api.Array
 
-        .. warning:: This function must be used carefully since the output array \
+        .. warning:: This function must be used carefully since the output array
            does not track to which backend it belongs.
         '''
         return self.__oper.ndarray_to_backend(a)
@@ -119,9 +118,23 @@ class ArrayOperations(object):
         :param maximum: possible maximum length of the output array.
         :type maximum: int or None
         :returns: concatenated array.
-        :rtype: farray
+        :rtype: darray
         '''
         return self.__oper.concatenate(tuple(a for a in arrays), maximum)
+
+    def concatenated_linspace(self, edges, nsteps):
+        '''
+        Create a set of concatenated arrays obtained from linspace calls with
+        the given edges.
+
+        :param edges: edges of the bins.
+        :type edges: darray
+        :param nsteps: number of steps in the arrays.
+        :type nsteps: int
+        :returns: Concatenated array.
+        :rtype: darray
+        '''
+        return self.__oper.concatenated_linspace(edges, nsteps)
 
     def count_nonzero(self, a):
         '''
@@ -145,7 +158,7 @@ class ArrayOperations(object):
         '''
         return self.__oper.bempty(size)
 
-    def fempty(self, size, ndim=1):
+    def dempty(self, size, ndim=1):
         '''
         Create an empty :class:`darray` instance with the given length.
 
@@ -156,7 +169,7 @@ class ArrayOperations(object):
         :returns: empty array.
         :rtype: darray
         '''
-        return self.__oper.fempty(size, ndim)
+        return self.__oper.dempty(size, ndim)
 
     def iempty(self, size):
         '''
@@ -180,7 +193,7 @@ class ArrayOperations(object):
         '''
         return self.__oper.cexp(a)
 
-    def fexp(self, a):
+    def dexp(self, a):
         '''
         Calculate the exponential of an array of numbers. The input array must
         be unidimensional.
@@ -190,7 +203,7 @@ class ArrayOperations(object):
         :returns: exponential values.
         :rtype: darray
         '''
-        return self.__oper.fexp(a)
+        return self.__oper.dexp(a)
 
     def fftconvolve(self, a, b, data):
         '''
@@ -204,7 +217,7 @@ class ArrayOperations(object):
         :param data: array of data (only 1D is supported).
         :type data: farray
         :returns: convolution of the two arrays.
-        :rtype: farray
+        :rtype: darray
         '''
         return self.__oper.fftconvolve(a, b, data)
 
@@ -270,6 +283,17 @@ class ArrayOperations(object):
             return data_types.cpu_bool
         else:
             return data_types.cpu_real_bool
+
+    def argmax(self, a):
+        '''
+        Return the index with the maximum value.
+
+        :param a: input array.
+        :type a: marray, numpy.ndarray or reikna.cluda.api.Array
+        :returns: Index with the maximum value.
+        :rtype: int
+        '''
+        return self.__oper.argmax(a)
 
     def is_bool(self, a):
         '''
@@ -369,7 +393,7 @@ class ArrayOperations(object):
         :param size: length of the output array.
         :type size: int
         :returns: array.
-        :rtype: farray
+        :rtype: darray
         '''
         return self.__oper.linspace(vmin, vmax, size)
 
@@ -381,7 +405,7 @@ class ArrayOperations(object):
         :param a: input array.
         :type a: farray
         :returns: logarithm values.
-        :rtype: farray
+        :rtype: darray
         '''
         return self.__oper.log(a)
 
@@ -398,11 +422,7 @@ class ArrayOperations(object):
         :returns: array of decisions.
         :rtype: barray
         '''
-        if out is not None:
-            self.__oper.logical_and(a, b, out)
-            return out
-        else:
-            return arrays.barray(*self.__oper.logical_and(a, b), backend=self.backend)
+        return self.__oper.logical_and(a, b, out)
 
     def logical_or(self, a, b, out=None):
         '''
@@ -417,11 +437,7 @@ class ArrayOperations(object):
         :returns: array of decisions.
         :rtype: barray
         '''
-        if out is not None:
-            self.__oper.logical_or(a, b, out)
-            return out
-        else:
-            return arrays.barray(*self.__oper.logical_or(a, b), backend=self.backend)
+        return self.__oper.logical_or(a, b, out)
 
     def max(self, a):
         '''
@@ -435,7 +451,7 @@ class ArrayOperations(object):
         return self.__oper.max(a)
 
     def meshgrid(self, lb, ub, size):
-        '''
+        r'''
         Create a grid of values using the given set of bounds. The size can
         be specified as a single value or as a set of sizes for each dimension.
         If it is a single value, then the output array will be of length
@@ -483,18 +499,18 @@ class ArrayOperations(object):
         '''
         return self.__oper.bzeros(size)
 
-    def fones(self, size):
+    def dones(self, size):
         '''
         Create an array of the given size filled with ones.
 
         :param size: length of the output array.
         :type size: int
         :returns: array of ones.
-        :rtype: farray
+        :rtype: darray
         '''
-        return self.__oper.fones(size)
+        return self.__oper.dones(size)
 
-    def fzeros(self, size, ndim=1):
+    def dzeros(self, size, ndim=1):
         '''
         Create an array of the given size filled with zeros.
 
@@ -503,12 +519,12 @@ class ArrayOperations(object):
         :param ndim: number of dimensions of the output array.
         :type ndim: int
         :returns: array of zeros.
-        :rtype: farray
+        :rtype: darray
         '''
-        return self.__oper.fzeros(size, ndim)
+        return self.__oper.dzeros(size, ndim)
 
     def random_grid(self, lb, ub, size):
-        '''
+        r'''
         Create a random grid using the given bounds. The size can be specified
         as a single value or as a set of sizes for each dimension. If it is a
         single value, then the output array will be of length
@@ -521,7 +537,7 @@ class ArrayOperations(object):
         :param size: size of the grid.
         :type size: int or numpy.ndarray
         :returns: random grid.
-        :rtype: farray
+        :rtype: darray
         '''
         return self.__oper.random_grid(lb, ub, size)
 
@@ -537,7 +553,7 @@ class ArrayOperations(object):
         :param data: data sample.
         :type data: farray
         :returns: reduced data array.
-        :rtype: farray
+        :rtype: darray
         '''
         return self.__oper.restrict_data_size(maximum, data)
 
@@ -561,6 +577,35 @@ class ArrayOperations(object):
         '''
         return self.__oper.shuffling_index(n)
 
+    def simpson_factors(self, size, nbins=None):
+        '''
+        Return an array with the coefficients for the Simpson numerical
+        integration method.
+
+        :param size: number of steps.
+        :type size: int
+        :param nbins: if provided, the factors are returned assuming that
+           there are *size* values for each bin.
+        :param nbins: int or None
+        :returns: Array with the coefficients.
+        :rtype: darray
+        '''
+        if size % 2 == 0:
+            raise ValueError('Size must be an odd number')
+        return self.__oper.simpson_factors(size, nbins)
+
+    def steps_from_edges(self, edges):
+        '''
+        Calculate the bin sizes from the given set of edges. Only works for
+        one-dimensional arrays.
+
+        :param edges: edges defining the bins.
+        :type edges: darray
+        :returns: step for each bin.
+        :rtype: darray
+        '''
+        return self.__oper.steps_from_edges(edges)
+
     def sum(self, a):
         '''
         Sum the elements of the given array.
@@ -579,9 +624,9 @@ class ArrayOperations(object):
         :param arrays: set of arrays.
         :type arrays: tuple(farray)
         :returns: array with the sum.
-        :rtype: farray
+        :rtype: darray
         '''
-        out = self.fzeros(len(arrays[0]))
+        out = self.dzeros(len(arrays[0]))
         for a in arrays:
             out += a
         return out
@@ -602,7 +647,7 @@ class ArrayOperations(object):
         :param values: possible values (or weights) associated to the data sample.
         :type values: farray or None
         :returns: sum inside each bin.
-        :rtype: farray
+        :rtype: darray
         '''
         return self.__oper.sum_inside(indices, gaps, centers, edges, values)
 
@@ -615,7 +660,7 @@ class ArrayOperations(object):
         :param v: mask array.
         :type v: barray
         :returns: slice of the array.
-        :rtype: farray
+        :rtype: darray
         '''
         return self.__oper.slice_from_boolean(a, v)
 
@@ -628,7 +673,7 @@ class ArrayOperations(object):
         :param i: array of indices.
         :type i: iarray
         :returns: slice of the array.
-        :rtype: farray
+        :rtype: darray
         '''
         return self.__oper.slice_from_integer(a, i)
 
@@ -641,7 +686,7 @@ class ArrayOperations(object):
         :param i: column to take the elements.
         :type i: int
         :returns: reduced array.
-        :rtype: farray
+        :rtype: darray
         '''
         return self.__oper.take_column(a, i)
 
@@ -656,7 +701,7 @@ class ArrayOperations(object):
         :param end: where to end taking entries.
         :type end: int or None
         :returns: slice of the array.
-        :rtype: farray
+        :rtype: darray
         '''
         end = end if end is not None else len(a)
         return self.__oper.take_slice(a, start, end)

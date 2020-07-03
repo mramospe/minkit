@@ -30,7 +30,7 @@ def test_sweights():
 
     with helpers.fit_test(pdf) as test:
         with minkit.minimizer('ueml', pdf, data, minimizer='minuit') as minuit:
-            test.result, _ = minuit.migrad()
+            test.result = minuit.migrad()
 
     # Now we fix the parameters that are not yields, and we re-run the fit
     for p in pdf.pdfs:
@@ -39,7 +39,7 @@ def test_sweights():
 
     with helpers.fit_test(pdf) as test:
         with minkit.minimizer('ueml', pdf, data, minimizer='minuit') as minuit:
-            test.result, _ = minuit.migrad()
+            test.result = minuit.migrad()
 
     result = pdf.args.copy()
 

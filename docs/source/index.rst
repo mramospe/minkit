@@ -6,17 +6,12 @@
 Introduction
 ============
 
-This package provides tools to fit probability density functions (PDFs) to both unbinned and binned data, using different minimizers (like `Minuit <https://iminuit.readthedocs.io/en/latest/reference.html>`__).
-The MinKit package appears as an alternative to existing minimization packages, like `RooFit <https://root.cern.ch/roofit>`__.
-The idea is to provide a friendly pure python API to do minimization and calculations with PDFs.
-It has support for both CPU and GPU backends, being very easy for the user to change from one to the other.
-PDFs are implemented in C++, OpenCL and CUDA, allowing a fast evaluation of the functions.
-
-The package is built on top of the `numpy <https://numpy.org>`__ and `iminuit <https://iminuit.readthedocs.io/en/latest>`__ packages.
-The interface with CUDA and OpenCL is handled using `reikna <http://reikna.publicfields.net>`__, which is itself an API for `PyCUDA <https://documen.tician.de/pycuda>`__ and `PyOpenCL <https://documen.tician.de/pyopencl>`__.
-
-Basic example
-=============
+This package provides tools to fit probability density functions (PDFs) to both unbinned and binned data, using different minimizers.
+MinKit offers a common interface to use `iminuit <https://iminuit.readthedocs.io/en/latest>`__, `SciPy <https://docs.scipy.org/doc>`__ or `NLopt <https://nlopt.readthedocs.io/en/latest>`__ minimizers.
+In order to do numerical integrations, the `GSL <https://www.gnu.org/software/gsl/doc/html>`__ libraries are used.
+The utilization of both CPU and GPU devices is supported.
+For GPU backends, it is relied in the `Reikna <http://reikna.publicfields.net/en/latest>`__ package, that is a common interface for `PyCUDA <https://documen.tician.de/pycuda>`__ and `PyOpenCL <https://documen.tician.de/pyopencl>`__.
+It is not necessary to have the previous packages installed if working only with CPU backends.
 
 Classes meant for the user are imported directly from the main module
 
@@ -42,16 +37,11 @@ The sample can be easily fitted calling:
 
 After this process, the parameters of the PDF take values corresponding to the minimization point.
 
-Documentation and advanced examples
-===================================
-
-If you are looking for more specific information, then jump to any of the
-following sections:
-
 .. toctree::
    :maxdepth: 2
 
    installation
    user
+   gpu
    reference
    performance

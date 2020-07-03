@@ -29,7 +29,7 @@ gh-pages: html
 # Target to update the notebooks. Notebooks are rebuilt in-place, so to avoid
 # circular dependencies the target runs every time we call it.
 %.ipynb: FORCE
-	jupyter nbconvert --execute --to notebook --output $(subst $(NOTEBOOKS_DIR)/,,$@) --output-dir $(NOTEBOOKS_DIR) $@
+	jupyter nbconvert --execute --to notebook --ExecutePreprocessor.timeout=600 --output $(subst $(NOTEBOOKS_DIR)/,,$@) --output-dir $(NOTEBOOKS_DIR) $@
 
 # Target for Jupyter notebooks
 notebooks: $(ALLNOTEBOOKS);
@@ -39,14 +39,20 @@ FORCE: ;
 
 # Catch-all target: route all unknown targets to Sphinx using the new
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
-html: Makefile $(PROJECT_SOURCES) notebooks
+%-doc: Makefile $(PROJECT_SOURCES) notebooks
 	@if [ -d $(BUILDDIR)/doctrees ]; then rm -r $(BUILDDIR)/doctrees; fi
 	@if [ -d source/api ]; then rm -r source/api; fi
-	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
+	@$(SPHINXBUILD) -M $(subst -doc,,$@) "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
+
 
 # Only to be used when the notebooks have already been created and only
 # parts of the code not related to the API are modified.
-html-no-notebooks: Makefile $(PROJECT_SOURCES)
+%-no-notebooks: Makefile $(PROJECT_SOURCES)
 	@if [ -d $(BUILDDIR)/doctrees ]; then rm -r $(BUILDDIR)/doctrees; fi
 	@if [ -d source/api ]; then rm -r source/api; fi
-	@$(SPHINXBUILD) -M html "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
+	@$(SPHINXBUILD) -M $(subst -no-notebooks,,$@) "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
+
+# Shortcuts
+html: html-doc;
+
+latexpdf: latexpdf-doc;

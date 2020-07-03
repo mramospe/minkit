@@ -180,25 +180,25 @@ array  = {self.as_ndarray()}'''
         '''
         return self.__class__(self.__array.copy(), self.__length, self.__backend)
 
-    def get(self, i):
+    def get(self, index):
         '''
         Get an element of the array. The output type depends on the type of
         array.
 
-        :param i: index.
-        :type i: int
+        :param index: index to access.
+        :type index: int
         :returns: value at the given index.
         :rtype: float, int or bool
         :raises IndexError: If there is an attempt to access an element out of range.
         '''
-        if i >= self.__length:
+        if index >= self.__length:
             raise IndexError(
                 f'Index is out of range for array of length {self.__length}')
 
         if core.is_gpu_backend(self.__aop.backend.btype):
-            return self.__array[i].get()
+            return self.__array[index].get()
         else:
-            return self.__array[i]
+            return self.__array[index]
 
     def to_backend(self, backend):
         '''
@@ -551,6 +551,27 @@ array  = {self.as_ndarray()}'''
         '''
         raise exceptions.MethodNotDefinedError(cls, 'from_ndarray')
 
+    def get(self, index):
+        '''
+        Get an element of the array. If the number of dimensions is greater
+        than one, the output contains the value of each column in the array
+        at the given index.
+
+        :param index: index to access.
+        :type index: int
+        :returns: value(s) at the given index.
+        :rtype: numpy.ndarray
+        :raises IndexError: If there is an attempt to access an element out of range.
+        '''
+        if index >= self.__ndim * self.length:
+            raise IndexError(
+                f'Index is out of range for array of length {self.length} and {self.__ndim} dimensions')
+
+        if core.is_gpu_backend(self.aop.backend.btype):
+            return data_types.fromiter_float((self.ua[index * self.__ndim + i].get() for i in range(self.__ndim)))
+        else:
+            return data_types.fromiter_float((self.ua[index * self.__ndim + i] for i in range(self.__ndim)))
+
     def to_backend(self, backend):
 
         if self.aop.backend is backend:
@@ -672,6 +693,15 @@ class darray(farray):
         :rtype: darray
         '''
         return self.__class__(self.ua**n, self.ndim, self.length, self.backend)
+
+    def argmax(self):
+        '''
+        Return the index with the maximum value.
+
+        :returns: Index with the maximum value.
+        :rtype: int
+        '''
+        return self.aop.argmax(self)
 
     def min(self):
         '''

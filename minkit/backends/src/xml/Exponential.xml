@@ -4,21 +4,14 @@
  Copyright (c) 2020 Miguel Ramos Pernas
 -->
 <!--Exponential PDF-->
-<PDF>
-  <parameters k="k"/>
+<PDF data="x" parameters="k">
   <function>
-    <data x="x"/>
-    <code>
       return exp(k * x);
-    </code>
   </function>
-  <integral>
-    <bounds xmin="xmin" xmax="xmax"/>
-    <code>
+  <integral bounds="xmin xmax">
       if (k != 0)
          return 1. / k * (exp(k * xmax) - exp(k * xmin));
       else
          return xmax - xmin;
-    </code>
   </integral>
 </PDF>

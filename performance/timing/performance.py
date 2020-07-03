@@ -21,7 +21,7 @@ number_of_events = [1000, 10000, 100000, 1000000, 10000000]
 logger = logging.getLogger(__name__)
 
 # Format for the plots
-matplotlib.rcParams['figure.figsize'] = (16, 4)
+matplotlib.rcParams['figure.figsize'] = (12, 5)
 matplotlib.rcParams['font.family'] = 'serif'
 matplotlib.rcParams['font.size'] = 20
 matplotlib.rcParams['legend.fontsize'] = 15
@@ -40,7 +40,7 @@ def run(jobtype, model, repetitions, directory, backends):
     Main function to execute.
     '''
     # Run with minkit
-    for bk in {'cpu', 'opencl', 'cuda'}.intersection(backends):
+    for bk in sorted({'cpu', 'opencl', 'cuda'}.intersection(backends)):
 
         logger.info(f'Processing for backend "{bk}" and model "{model}"')
 
@@ -61,7 +61,7 @@ def run(jobtype, model, repetitions, directory, backends):
                 raise RuntimeError(f'Job failed with errors:\n{stderr}')
 
     # Run with RooFit
-    for bk in {'roofit'}.intersection(backends):
+    for bk in sorted({'roofit'}.intersection(backends)):
 
         logger.info(f'Processing for backend "{bk}" and model "{model}"')
 
@@ -85,7 +85,7 @@ def plot(files, output, show):
     Generate output plots.
     '''
     # Get the data and plot the results
-    fig, (ax, lax) = plt.subplots(1, 2, figsize=(12, 6))
+    fig, (ax, lax) = plt.subplots(1, 2)
 
     values = np.empty((len(files), len(number_of_events)), dtype=np.float64)
     errors = np.empty((len(files), len(number_of_events)), dtype=np.float64)
@@ -131,10 +131,10 @@ def plot(files, output, show):
         a.set_xticks(number_of_events)
 
         if a.get_yscale() == 'log':
-            a.legend(loc='lower right')
+            a.legend(loc='best')
             t.set_yscale('log', nonposy='clip')
         else:
-            a.legend(loc='upper left')
+            a.legend(loc='best')
 
     fig.tight_layout()
 
@@ -156,7 +156,7 @@ if __name__ == '__main__':
 
     parser_run = subparsers.add_parser('run', help=run.__doc__)
     parser_run.set_defaults(function=run)
-    parser_run.add_argument('model', type=str, choices=('basic', 'intermediate'),
+    parser_run.add_argument('model', type=str, choices=('basic', 'intermediate', 'numeric'),
                             default='basic',
                             help='Model to use')
     parser_run.add_argument('jobtype', type=str, choices=('generate', 'fit'),

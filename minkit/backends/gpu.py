@@ -38,10 +38,13 @@ class GPUOperations(object):
         '''
         Initialize the class with the interface to the user backend.
 
-        :param kwargs: it may contain any of the following values: \
-        - interactive: (bool) whether to select the device manually (defaults to False) \
-        - device: (int) number of the device to use (defaults to None).
+        :param kwargs: configuration for the device lookup (see below for details).
         :type kwargs: dict
+
+        * *interactive*: (bool) whether to select the device manually
+           (defaults to False).
+
+        * *device*: (int) number of the device to use (defaults to None).
 
         .. note:: The device can be selected using the MINKIT_DEVICE environment variable.
         '''
@@ -51,7 +54,7 @@ class GPUOperations(object):
         self.__backend = backend
 
         self.__tmpdir = tempfile.TemporaryDirectory()
-        self.__cpu_aop = cpu.CPUOperations(self.__tmpdir)
+        self.__cpu_aop = cpu.CPUOperations(self.__tmpdir.name)
 
         # Cache for GPU objects
         self.__array_cache = {}
@@ -65,7 +68,7 @@ class GPUOperations(object):
         self.__rndm_gen = RandomUniformGenerator(self)
 
         # Compile the functions
-        self.__fbe, self.__rfu, self.__tplf_1d, self.__tplf_2d = make_functions(
+        self.__fbe, self.__rfu, self.__sfu, self.__tplf_1d, self.__tplf_2d = make_functions(
             self)
 
     @property
@@ -174,7 +177,7 @@ class GPUOperations(object):
 
             if len(args) == 0:
                 # It seems we can not pass a null pointer in OpenCL
-                ac = self.fzeros(1).ua
+                ac = self.dzeros(1).ua
             else:
                 ac = self.args_to_array(args, dtype=data_types.cpu_float)
 
@@ -194,7 +197,7 @@ class GPUOperations(object):
 
             if len(args) == 0:
                 # It seems we can not pass a null pointer in OpenCL
-                ac = self.fzeros(1).ua
+                ac = self.dzeros(1).ua
             else:
                 ac = self.args_to_array(
                     args, dtype=data_types.cpu_float)
@@ -216,7 +219,7 @@ class GPUOperations(object):
 
                 if len(args) == 0:
                     # It seems we can not pass a null pointer in OpenCL
-                    ac = self.fzeros(1).ua
+                    ac = self.dzeros(1).ua
                 else:
                     ac = self.args_to_array(
                         args, dtype=data_types.cpu_float)
@@ -268,6 +271,7 @@ class GPUOperations(object):
             stack.enter_context(self.__fft_cache.activate())
             stack.enter_context(self.__tplf_1d.activate())
             stack.enter_context(self.__tplf_2d.activate())
+            stack.enter_context(self.__sfu.activate())
 
             for c in self.__array_cache.values():
                 stack.enter_context(c.activate())
@@ -318,6 +322,28 @@ class GPUOperations(object):
     def iarange(self, n):
         return self.__fbe.arange_int(n, data_types.cpu_int(0))
 
+    @core.document_operations_method
+    def argmax(self, a):
+
+        n = data_types.cpu_int(self.__context.max_local_size)  # maybe too big?
+
+        indices = self.iarange(a.length)
+        nproc = a.length
+        step = data_types.cpu_int(1)
+        while True:
+
+            gs, ls = self.__context.get_sizes(nproc // n + (nproc % n != 0))
+
+            # provided that the local size is always the same this is fast
+            self.__sfu.get_object(ls).scan_max(
+                n, a.length, indices.ua, a.ua, step, global_size=gs, local_size=ls)
+
+            if gs == ls:
+                return indices.ua[0].get()
+            else:
+                step *= (ls * n)
+                nproc = gs // ls
+
     def args_to_array(self, a, dtype=data_types.cpu_float):
         if a.dtype != dtype:
             a = a.astype(dtype)
@@ -329,7 +355,7 @@ class GPUOperations(object):
 
     @core.document_operations_method
     def product_by_zero_is_zero(self, f, s):
-        out = self.fempty(len(f))
+        out = self.dempty(len(f))
         gs, ls = self.__context.get_sizes(f.length)
         self.__fbe.product_by_zero_is_zero(f.length, out.ua, f.ua, s.ua,
                                            global_size=gs, local_size=ls)
@@ -343,21 +369,11 @@ class GPUOperations(object):
             np.fromiter(map(len, arrs), dtype=data_types.cpu_int))
 
         # Parse the data type
-        dtype = arrs[0].dtype
-
         ndim = arrs[0].ndim
 
-        if dtype == data_types.cpu_float:
-            function = self.__fbe.assign_double_with_offset
-            out = self.fzeros(maximum, ndim)
-        elif dtype == data_types.cpu_bool:
-            function = self.__fbe.assign_bool_with_offset
-            out = self.bempty(maximum)
-        else:
-            raise NotImplementedError(
-                f'Function not implemented for data type "{dtype}"')
+        out = self.dzeros(maximum, ndim)
 
-        # Looop over the arrays till the output has the desired length
+        # Loop over the arrays till the output has the desired length
         offset = data_types.cpu_int(0)
         for a in arrs:
 
@@ -367,12 +383,28 @@ class GPUOperations(object):
             m = ndim * data_types.cpu_int(
                 l if l + offset <= maximum else maximum - offset)
 
-            gs, ls = self.__context.get_sizes(a.length)
+            gs, ls = self.__context.get_sizes(a.size)
 
-            function(m, out.ua, a.ua, ndim * offset,
-                     global_size=gs, local_size=ls)
+            self.__fbe.assign_double_with_offset(m, out.ua, a.ua, ndim * offset,
+                                                 global_size=gs, local_size=ls)
 
             offset += l
+
+        return out
+
+    @core.document_operations_method
+    def concatenated_linspace(self, edges, nsteps):
+
+        nbins = len(edges) - 1
+
+        out = self.dempty(nbins * nsteps - (nbins - 1))
+
+        nsteps = data_types.cpu_int(nsteps)
+
+        gs, ls = self.__context.get_sizes(out.length)
+
+        self.__fbe.concatenated_linspace(
+            out.length, out.ua, edges.ua, nsteps, global_size=gs, local_size=ls)
 
         return out
 
@@ -385,7 +417,7 @@ class GPUOperations(object):
         return self.get_array_cache(data_types.cpu_bool).get_array(size)
 
     @core.document_operations_method
-    def fempty(self, size, ndim=1):
+    def dempty(self, size, ndim=1):
         return self.get_array_cache(data_types.cpu_float).get_array(size, ndim)
 
     @core.document_operations_method
@@ -393,7 +425,7 @@ class GPUOperations(object):
         return self.get_array_cache(data_types.cpu_int).get_array(size)
 
     @core.document_operations_method
-    def fones(self, n):
+    def dones(self, n):
         return self.__fbe.ones_double(n)
 
     @core.document_operations_method
@@ -401,7 +433,7 @@ class GPUOperations(object):
         return self.__fbe.ones_bool(n)
 
     @core.document_operations_method
-    def fzeros(self, n, ndim=1):
+    def dzeros(self, n, ndim=1):
         out = self.get_array_cache(data_types.cpu_float).get_array(n, ndim)
         gs, ls = self.__context.get_sizes(out.size)
         self.__fbe.zeros_double(
@@ -417,7 +449,7 @@ class GPUOperations(object):
         return self.__fbe.exponential_complex(a)
 
     @core.document_operations_method
-    def fexp(self, a):
+    def dexp(self, a):
         return self.__fbe.exponential_double(a)
 
     @core.document_operations_method
@@ -452,19 +484,31 @@ class GPUOperations(object):
     @core.document_operations_method
     def make_linear_interpolator(self, xp, yp):
 
-        def wrapper(idx, x):
+        context = self.__context
+        fproxy = self.__fbe
 
-            idx = data_types.as_integer(idx)
+        class wrapper(object):
 
-            out = self.fempty(x.length)
+            @staticmethod
+            def interpolate(idx, x):
 
-            gs_x, ls_x, gs_y, ls_y = self.__context.get_sizes(
-                xp.length, out.length)
+                idx = data_types.as_integer(idx)
 
-            self.__fbe.interpolate_linear(xp.length, x.length, out.ua, x.ndim, idx, x.ua, xp.ua, yp.ua,
+                out = self.dempty(x.length)
+
+                gs_x, ls_x, gs_y, ls_y = context.get_sizes(
+                    xp.length, out.length)
+
+                fproxy.interpolate_linear(xp.length, x.length, out.ua, x.ndim, idx, x.ua, xp.ua, yp.ua,
                                           global_size=(gs_x, gs_y), local_size=(ls_x, ls_y))
 
-            return out
+                return out
+
+            @staticmethod
+            def interpolate_single_value(v):
+                x = self.dempty(1)
+                x.ua[0] = v
+                return wrapper.interpolate(0, x).get(0)
 
         return wrapper
 
@@ -479,21 +523,33 @@ class GPUOperations(object):
         t = arrays.darray.from_ndarray(t, self.backend)
         c = arrays.darray.from_ndarray(c, self.backend)
 
-        def wrapper(idx, x):
+        context = self.__context
+        fproxy = self.__fbe
 
-            idx = data_types.as_integer(idx)
+        class wrapper(object):
 
-            out = self.fempty(len(x))
+            @staticmethod
+            def interpolate(idx, x):
 
-            gs_x, ls_x, gs_y, ls_y = self.__context.get_sizes(
-                t.length, out.length)
+                idx = data_types.as_integer(idx)
 
-            lt = data_types.as_integer(len(t) - k - 1)  # len(t) - k - 1
+                out = self.dempty(len(x))
 
-            self.__fbe.interpolate_spline(lt, out.length, out.ua, x.ndim, idx, x.ua, t.ua, c.ua,
+                gs_x, ls_x, gs_y, ls_y = context.get_sizes(
+                    t.length, out.length)
+
+                lt = data_types.as_integer(len(t) - k - 1)  # len(t) - k - 1
+
+                fproxy.interpolate_spline(lt, out.length, out.ua, x.ndim, idx, x.ua, t.ua, c.ua,
                                           global_size=(gs_x, gs_y), local_size=(ls_x, ls_y))
 
-            return out
+                return out
+
+            @staticmethod
+            def interpolate_single_value(v):
+                x = self.dempty(1)
+                x.ua[0] = v
+                return wrapper.interpolate(0, x).get(0)
 
         return wrapper
 
@@ -589,7 +645,7 @@ class GPUOperations(object):
             np.cumprod(n, dtype=data_types.cpu_int) // n[0])
 
         # Evaluate the function
-        out = self.fzeros(lgth, ndim)
+        out = self.dzeros(lgth, ndim)
 
         gs, ls = self.__context.get_sizes(out.length)
 
@@ -616,9 +672,9 @@ class GPUOperations(object):
         dest = self.__rndm_gen.generate(n, ndim)
 
         # Build the output array
-        out = self.fzeros(n, ndim)
+        out = self.dzeros(n, ndim)
 
-        gs, ls = self.__context.get_sizes(out.length // ndim)
+        gs, ls = self.__context.get_sizes(out.length)
 
         self.__fbe.parse_random_grid(out.length, out.ua, ndim, lb, ub, dest.ua,
                                      global_size=gs, local_size=ls)
@@ -640,6 +696,28 @@ class GPUOperations(object):
         self.__rndm_gen.seed(seed)
 
     @core.document_operations_method
+    def simpson_factors(self, size, nbins=None):
+
+        size = data_types.cpu_int(size)
+
+        if nbins is None:
+            return self.__fbe.simpson_factors_1d(size)
+        else:
+            out = self.dempty(nbins * (size - 1) + 1)
+            gs, ls = self.__context.get_sizes(out.length)
+            self.__fbe.simpson_factors_for_bins_1d(
+                out.length, out.ua, size, global_size=gs, local_size=ls)
+            return out
+
+    @core.document_operations_method
+    def steps_from_edges(self, edges):
+        out = self.dempty(len(edges) - 1)
+        gs, ls = self.__context.get_sizes(out.length)
+        self.__fbe.steps_from_edges(out.length, out.ua, edges.ua,
+                                    global_size=gs, local_size=ls)
+        return out
+
+    @core.document_operations_method
     def sum(self, a):
         return self.__rfu.rsum(a)
 
@@ -658,7 +736,7 @@ class GPUOperations(object):
 
         ndata_blocks = data_types.cpu_int(gs_data // ls_data)
 
-        partial_sum = self.fzeros(nbins * ndata_blocks)
+        partial_sum = self.dzeros(nbins * ndata_blocks)
 
         if values is None:
             self.__tplf_2d.get_object((ls_data, ls_bins)).sum_inside_bins(lgth, nbins, partial_sum.ua, centers.ndim, centers.ua, gaps, edges.ua,
@@ -668,7 +746,7 @@ class GPUOperations(object):
                                                                                       global_size=(gs_data, gs_bins), local_size=(ls_data, ls_bins))
 
         # Sum entries in each bin
-        out = self.fzeros(nbins)
+        out = self.dzeros(nbins)
 
         self.__fbe.stepped_sum(out.length, out.ua, nbins, ndata_blocks, partial_sum.ua,
                                global_size=gs_bins, local_size=ls_bins)
@@ -689,7 +767,7 @@ class GPUOperations(object):
         nz = data_types.cpu_int(self.count_nonzero(valid))
 
         if nz == 0:
-            return self.fempty(0, a.ndim)  # empty array
+            return self.dempty(0, a.ndim)  # empty array
 
         # Calculate the compact indices
         indices = self.__fbe.invalid_indices(len(valid))
@@ -702,7 +780,7 @@ class GPUOperations(object):
                                                       valid.ua, global_size=gs, local_size=ls)
 
         # Build the output array
-        out = self.fzeros(nz, a.ndim)
+        out = self.dzeros(nz, a.ndim)
 
         self.__fbe.take(indices.length, out.ua, a.ndim, sizes.ua,
                         indices.ua, a.ua, global_size=gs, local_size=ls)
@@ -714,7 +792,7 @@ class GPUOperations(object):
 
         l = len(indices)
 
-        out = self.fzeros(l, a.ndim)
+        out = self.dzeros(l, a.ndim)
 
         gs, ls = self.__context.get_sizes(l)
 
@@ -728,7 +806,7 @@ class GPUOperations(object):
 
         i = data_types.as_integer(i)
 
-        out = self.fzeros(a.length)
+        out = self.dzeros(a.length)
 
         gs, ls = self.__context.get_sizes(out.length)
 
@@ -742,7 +820,7 @@ class GPUOperations(object):
 
         start, end = data_types.as_integer(start, end)
 
-        out = self.fzeros(end - start)
+        out = self.dzeros(end - start)
 
         gs, ls = self.__context.get_sizes(out.length)
 
@@ -805,7 +883,7 @@ class RandomUniformGenerator(object):
         :return: Array with values between 0 and 1.
         :rtype: darray
         '''
-        dest = self.__aop.fzeros(lgth, ndim)
+        dest = self.__aop.dzeros(lgth, ndim)
 
         l = (dest.size // 4) + (dest.size %
                                 4 != 0)  # each thread sets 4 numbers

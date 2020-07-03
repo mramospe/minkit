@@ -135,7 +135,7 @@ def make_functions(ops_mgr):
                 getattr(funcs_by_element, function)))
 
     # These functions create e new array of doubles
-    for function in ('linspace', 'ones_double'):
+    for function in ('linspace', 'ones_double', 'simpson_factors_1d'):
         setattr(funcs_by_element, function, create_double(
                 getattr(funcs_by_element, function)))
 
@@ -161,8 +161,11 @@ def make_functions(ops_mgr):
 
     reduce_functions = ReduceFunctionsProxy(amax, amin, rsum, count_nonzero)
 
+    # Reduce function
+    scan_functions = gpu_cache.ScanFunctionCache1D(ops_mgr.context)
+
     # Templated functions
     templated_functions_1d = gpu_cache.TemplateFunctionCache1D(ops_mgr.context)
     templated_functions_2d = gpu_cache.TemplateFunctionCache2D(ops_mgr.context)
 
-    return funcs_by_element, reduce_functions, templated_functions_1d, templated_functions_2d
+    return funcs_by_element, reduce_functions, scan_functions, templated_functions_1d, templated_functions_2d

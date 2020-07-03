@@ -51,8 +51,8 @@ def scaled_pdf_values(pdf, grid, data_values, edges, range=parameters.FULL, comp
     :type edges: numpy.ndarray or tuple(numpy.ndarray, ...)
     :param range: normalization range.
     :type range: str
-    :param component: if provided, then *pdf* is assumed to be a :class:`AddPDFs` \
-    class, and the values associated to the given component will be calculated.
+    :param component: if provided, then *pdf* is assumed to be a :class:`AddPDFs`
+       class, and the values associated to the given component will be calculated.
     :type component: str or None
     :returns: Normalized values of the PDF
     :rtype: numpy.ndarray
@@ -107,38 +107,36 @@ def calculate_projection(grid, pdf_values, edges, projection, size):
 
 
 def data_plotting_arrays(data, **kwargs):
-    '''
+    r'''
     Get the values from a data sample for plotting.
     The possibilities for *kwargs* differ from the binned and unbinned cases:
 
     **Unbinned**
 
-    - *bins* (int or tuple(int, ...)): number of bins per \
-    dimension of data.
+    * *bins* (int or tuple(int, ...)): number of bins per dimension of data. By default use 100 bins.
 
-    - *projection* (str): project the output data in the given dimension.
+    * *projection* (str): project the output data in the given dimension.
 
-    - *sw2* (bool): if the sample has weights and is set to True, return also the errors \
-    calculated as the square root of the sum of weights per bin: \
-    :math:`\\sigma_j = \\sqrt{\\sum_i^n (\\omega_j^i)^2}`
+    * *sw2* (bool): if the sample has weights and is set to True, return also the errors.
+       The errors are calculated as the square root of the sum of weights per
+       bin: :math:`\sigma_j = \sqrt{\sum_i^n (\omega_j^i)^2}`
 
     **Binned**
 
-    - *rebin* (int or tuple(int, ...)): change the bins \
-    by mergin *rebin* bins together.
+    * *rebin* (int or tuple(int, ...)): change the bins by mergin *rebin* bins together.
 
-    - *projection* (str): project the output data in the given dimension.
+    * *projection* (str): project the output data in the given dimension.
 
     :param data: data sample.
     :type data: DataSet or BinnedDataSet
     :param kwargs: keyword arguments.
     :type kwargs: dict
-    :returns: In the unbinned case, the values, list of edges, and the errors if *sw2* is set \
-    to True. In the binned case, the values and the list of edges. If the has only one \
-    dimension, the edges are returned as a single array.
+    :returns: In the unbinned case, the values, list of edges, and the errors if *sw2* is set
+       to True. In the binned case, the values and the list of edges. If the has only one
+       dimension, the edges are returned as a single array.
     :rtype: numpy.ndarray, (numpy.ndarray or list(numpy.ndarray)), (numpy.ndarray)
-    :raises ValueError: If the rebinning argument is not a proper divisor of \
-    the number of bins, or if its dimension does not match that of the data.
+    :raises ValueError: If the rebinning argument is not a proper divisor of
+       the number of bins, or if its dimension does not match that of the data.
     '''
     projection = kwargs.get('projection', None)
 
@@ -151,7 +149,7 @@ def data_plotting_arrays(data, **kwargs):
     if data._sample_type == dataset.UNBINNED:
 
         # Exclusive options for unbinned samples
-        bins = kwargs.get('bins', None)
+        bins = kwargs.get('bins', 100)
         sw2 = kwargs.get('sw2', None)
 
         # Make the histogram of values (common for any case)
@@ -258,21 +256,21 @@ def pdf_plotting_arrays(pdf, data_values, edges, range=parameters.FULL, componen
     :type edges: numpy.ndarray or tuple(numpy.ndarray, ...)
     :param range: normalization range.
     :type range: str
-    :param component: if provided, then *pdf* is assumed to be a :class:`AddPDFs` \
-    class, and the values associated to the given component will be calculated.
+    :param component: if provided, then *pdf* is assumed to be a :class:`AddPDFs`
+       class, and the values associated to the given component will be calculated.
     :type component: str or None
     :param projection: calculate the projection on a given variable.
     :type projection: str or None
-    :param size: number of points to evaluate. If the range is disjoint, then this \
-    size corresponds to the number of points per subrange.
+    :param size: number of points to evaluate. If the range is disjoint, then this
+       size corresponds to the number of points per subrange.
     :type size: int
-    :returns: Normalized values of the PDF and tuple with the centers in each \
-    dimension. In the 1D case, the array of centers is directly returned. \
-    If the range is disjoint, the result is a tuple of the previously mentioned \
-    quantities, one per subrange.
+    :returns: Normalized values of the PDF and tuple with the centers in each
+       dimension. In the 1D case, the array of centers is directly returned.
+       If the range is disjoint, the result is a tuple of the previously mentioned
+       quantities, one per subrange.
     :rtype: numpy.ndarray or tuple(numpy.ndarray, ...), numpy.ndarray
-    :raises RuntimeError: If the number of data parameters is greater than one \
-    and no projection is specified.
+    :raises RuntimeError: If the number of data parameters is greater than one
+       and no projection is specified.
 
     .. note:: The input edges must be consistent with the range for plotting.
     '''

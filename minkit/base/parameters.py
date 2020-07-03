@@ -6,6 +6,7 @@
 '''
 Define classes and functions to work with parameters.
 '''
+from . import blinding
 from . import core
 from . import data_types
 from . import dependencies
@@ -13,7 +14,6 @@ from . import exceptions
 
 import collections
 import contextlib
-import functools
 import logging
 import numpy as np
 
@@ -23,135 +23,6 @@ __all__ = ['ParameterBase', 'Parameter', 'Formula', 'Registry']
 FULL = 'full'
 
 logger = logging.getLogger(__name__)
-
-
-def check_return_none(method):
-    '''
-    Decorator for methods with a single argument that will return None if
-    the input argument is None.
-    '''
-    @functools.wraps(method)
-    def wrapper(self, arg):
-        if arg is None:
-            return arg
-        else:
-            return method(self, arg)
-    return wrapper
-
-
-class Blinding(object):
-
-    def __init__(self, center, scale):
-        r'''
-        Object to blind the value of a parameter.
-
-        :param center: center of the transformation.
-        :type center: float
-        :param scale: scale of the transformation.
-        :type scale: float
-        '''
-        super().__init__()
-
-        self.__center = center
-        self.__scale = scale
-
-    @property
-    def state(self):
-        '''
-        Center and scale of the blinding transformation.
-
-        :type: tuple(float, float)
-        '''
-        return self.__center, self.__scale
-
-    @classmethod
-    def build(cls, center, scale):
-        '''
-        Build the instance using a center and a scale. The actual value of
-        these attributes will be obtained from two pseudorandom numbers.
-
-        :param center: prototype for the center.
-        :type center: float
-        :param scale: prototype for the scale.
-        :type scale:
-        '''
-        c = center * core.GLOBAL_RND_GEN.uniform(-1, +1)
-        s = core.GLOBAL_RND_GEN.uniform(1, scale)
-        return cls(c, s)
-
-    @check_return_none
-    def blind(self, value):
-        '''
-        Get the blinded value associated to that given.
-
-        :param value: value to blind.
-        :type value: float
-        :returns: Blinded value.
-        :rtype: float
-        '''
-        return self.__scale * (value + self.__center)
-
-    @check_return_none
-    def blind_error(self, error):
-        '''
-        Get the blinded value of the given error.
-
-        :param error: error to blind.
-        :type error: float
-        :returns: Blinded error.
-        :rtype: float
-        '''
-        return abs(self.__scale) * error
-
-    def blind_value_error(self, value, error):
-        '''
-        Blind the provided value and error.
-
-        :param value: value to blind.
-        :type value: float
-        :param error: error to blind.
-        :type error: float
-        :returns: Blinded value and error.
-        :rtype: float, float
-        '''
-        return self.blind(value), self.blind_error(error)
-
-    @check_return_none
-    def unblind(self, value):
-        '''
-        Get the unblinded value associated to that given.
-
-        :param value: value to unblind.
-        :type value: float
-        :returns: Unblinded value.
-        :rtype: float
-        '''
-        return value / self.__scale - self.__center
-
-    @check_return_none
-    def unblind_error(self, error):
-        '''
-        Get the unblinded value for the given error.
-
-        :param error: error to unblind.
-        :type error: float
-        :returns: Unblinded error.
-        :rtype: float
-        '''
-        return error / abs(self.__scale)
-
-    def unblind_value_error(self, value, error):
-        '''
-        Unblind the provided value and error.
-
-        :param value: value to unblind.
-        :type value: float
-        :param error: error to unblind.
-        :type error: float
-        :returns: Unblinded value and error.
-        :rtype: float, float
-        '''
-        return self.unblind(value), self.unblind_error(error)
 
 
 class ParameterBase(object, metaclass=core.DocMeta):
@@ -221,7 +92,7 @@ class ParameterBase(object, metaclass=core.DocMeta):
 
 class Parameter(ParameterBase):
 
-    def __init__(self, name, value=None, bounds=None, ranges=None, error=None, constant=False, asym_errors=None, blind_config=None):
+    def __init__(self, name, value=None, bounds=None, ranges=None, error=None, constant=False, asym_errors=None, blind=None):
         '''
         Object to represent a parameter for a PDF.
 
@@ -239,8 +110,9 @@ class Parameter(ParameterBase):
         :type constant: bool
         :param asym_errors: asymmetric errors.
         :type asym_errors: tuple(float, float) or None
-        :param blind_config: if provided, set the blinding configuration.
-        :type blind_config: tuple(float, float)
+        :param blind: if provided, set the blinding configuration.
+           Arguments are forwarded to :meth:`Parameter.set_blinding_configuration`.
+        :type blind: dict
         :ivar name: name of the parameter.
 
         .. note::
@@ -253,23 +125,28 @@ class Parameter(ParameterBase):
         '''
         super().__init__()
 
+        self.name = name  # the only attribute that can be freely modified
+
         self.__constant = constant
         self.__ranges = {}
 
-        self.blind_config = blind_config  # must set it before any value or error
+        if blind is None:
+            self.__blind = None
+        else:
+            self.set_blinding_configuration(**blind)
 
-        self.name = name  # the only attribute that can be freely modified
+        with self.blind(status=False):
 
-        self.bounds = bounds  # this sets the FULL range
-        self.error = error
-        self.asym_errors = asym_errors if asym_errors is None else tuple(
-            asym_errors)
+            self.bounds = bounds  # this sets the FULL range
+            self.error = error
+            self.asym_errors = asym_errors if asym_errors is None else tuple(
+                asym_errors)
 
-        self.value = value  # transforms it into a float
+            self.value = value  # transforms it into a float
 
-        if ranges is not None:
-            for n, r in ranges.items():
-                self.set_range(n, r)
+            if ranges is not None:
+                for n, r in ranges.items():
+                    self.set_range(n, r)
 
     def __repr__(self):
         '''
@@ -305,6 +182,15 @@ class Parameter(ParameterBase):
             self.__asym_errors = tuple(map(self.__blind.unblind_error, errors))
 
     @property
+    def blinded(self):
+        '''
+        Whether the parameter has been blinded.
+
+        :type: bool
+        '''
+        return self.__blind is not None
+
+    @property
     def bounds(self):
         '''
         Bounds of the parameter, defining the *full* range.
@@ -334,37 +220,12 @@ class Parameter(ParameterBase):
         if values is None:
             self.__bounds = values
         else:
-            self.__bounds = data_types.array_float(values)
+            if self.__blind is None:
+                self.__bounds = data_types.array_float(values)
+            else:
+                self.__bounds = data_types.fromiter_float(
+                    map(self.__blind.unblind, values))
         self.__ranges[FULL] = self.__bounds
-
-    @property
-    def blind_config(self):
-        '''
-        Blinding state of the parameter. The blinding state is specified as
-        follows:
-
-        .. code-block:: python
-
-           p = minkit.Parameter('p', 0.5, bounds=(0, 1))
-           p.blind_config = None # the parameter is not blinded (default)
-           p.blind_config = 10, 2 # set the offset and scale for blinding
-
-        The last line gives the arguments to calculate the blinding
-        coefficients. The actual value of the coefficients is obtained from
-        pseudorandom numbers using the specified values.
-
-        :getter: Return the object used to blind and unblind the parameter.
-        :setter: Set the blinding state of the parameter.
-        '''
-        return self.__blind
-
-    @blind_config.setter
-    def blind_config(self, cs):
-
-        if cs is None:
-            self.__blind = None
-        else:
-            self.__blind = Blinding.build(*cs)
 
     @property
     def constant(self):
@@ -428,8 +289,8 @@ class Parameter(ParameterBase):
 
         :param status: blinding status.
         :type status: bool
-        :raises RuntimeError: If the parameter is requested to be blinded and \
-        no blinding configuration is present.
+        :raises RuntimeError: If the parameter is requested to be blinded and
+           no blinding configuration is present.
         '''
         if self.__blind is None and status == True:
             raise RuntimeError(
@@ -469,14 +330,30 @@ class Parameter(ParameterBase):
 
         obj['ranges'] = {n: o for n, o in obj['ranges'].items()}
 
-        bc = obj.pop('blind')
+        blind = obj.pop('blind')
 
-        instance = cls(**obj)
+        if blind is None:
+            return cls(**obj)
+        else:
 
-        if bc is not None:
-            instance.__blind = Blinding(*bc)
+            blinder = blinding.initialize_from_args(**blind)
 
-        return instance
+            # Saved values are blinded
+            value, bounds, error, asym_errors = obj['value'], obj['bounds'], obj['error'], obj['asym_errors']
+
+            obj['value'] = value if value is None else blinder.unblind(value)
+            obj['bounds'] = bounds if bounds is None else tuple(
+                map(blinder.unblind, bounds))
+            obj['error'] = error if error is None else blinder.unblind_error(
+                error)
+            obj['asym_errors'] = asym_errors if asym_errors is None else tuple(
+                map(blinder.unblind_error, asym_errors))
+
+            instance = cls(**obj)
+
+            instance.__blind = blinder  # do not recalculate the offset and/or scale
+
+            return instance
 
     def get_range(self, name):
         '''
@@ -488,6 +365,37 @@ class Parameter(ParameterBase):
         :rtype: numpy.ndarray
         '''
         return self.__ranges[name]
+
+    def set_blinding_configuration(self, offset=None, scale=None):
+        r'''
+        Define the blinding configuration of the parameter. Once this method
+        is called, the parameter is considered to be on a *blinded* state. The
+        keyword arguments depend on the method used.
+
+        :param offset: prototype of the blinding offset.
+        :type offset: float or None
+        :param scale: prototype of the blinding scale.
+        :type scale: float or None
+
+        The blinding method depends on the provided arguments:
+
+        * *offset*:
+           Use :math:`v^\prime = v + \beta` as the transformation function.
+           The absolute error of the blinded parameter is the same as
+           as that of the true value. Only the argument *offset* is accepted.
+
+        * *scale*:
+           The function :math:`v^\prime = \alpha v` is used to blind values.
+           This method allows to preserve the relative error after blinding. The
+           argument *scale* is accepted.
+
+        * *offset* and *scale*:
+           The blinding transformation is :math:`v^\prime = \alpha (v + \beta)`.
+        '''
+        if offset is None and scale is None:
+            self.__blind = None
+        else:
+            self.__blind = blinding.build_blinding(offset, scale)
 
     def set_range(self, name, values):
         '''
@@ -536,6 +444,7 @@ class Parameter(ParameterBase):
                 'bounds': bounds,
                 'ranges': {n: r.tolist() for n, r in self.__ranges.items() if n != FULL},
                 'error': self.error,
+                'asym_errors': self.asym_errors,
                 'blind': self.__blind if self.__blind is None else self.__blind.state,
                 'constant': self.constant}
 
@@ -551,9 +460,10 @@ class Formula(ParameterBase):
         of indices or a mixture of the two, like:
 
         * *Parameter names*: "a * b" will multiply *a* and *b*.
+
         * *Indices*: "{0} * {1}" will multiply the first and second elements in *pars*.
-        * *Mixed*: "{a} * {b} + {1}" will multiply *a* and *b* and sum the second element \
-        in *pars*.
+
+        * *Mixed*: "{a} * {b} + {1}" will multiply *a* and *b* and sum the second element in *pars*.
 
         :param name: name of the parameter.
         :type name: str
@@ -696,8 +606,8 @@ class Registry(list):
         :type other: Registry
         :returns: This object with the new elements added.
         :rtype: Registry
-        :raises ValueError: If an element is found with the same name as \
-        another in the new registry, but they are different instances.
+        :raises ValueError: If an element is found with the same name as
+           another in the new registry, but they are different instances.
         '''
         for el in filter(lambda p: p.name in self.names, other):
             self._raise_if_not_same(el)
@@ -710,8 +620,8 @@ class Registry(list):
         The name of the element is assumed to be already in the registry.
 
         :param el: object to check.
-        :raises ValueError: If an element is found with the same name as \
-        another in the new registry, but they are different instances.
+        :raises ValueError: If an element is found with the same name as
+           another in the new registry, but they are different instances.
         '''
         curr = self.get(el.name)
         if curr is not el:
@@ -746,8 +656,8 @@ class Registry(list):
 
         :param el: new element to add.
         :type el: object
-        :raises ValueError: If an element is found with the same name as \
-        that provided, but they are different instances.
+        :raises ValueError: If an element is found with the same name as
+           that provided, but they are different instances.
         '''
         if el.name not in self.names:
             super().append(el)
@@ -834,8 +744,8 @@ class Registry(list):
         :type i: int
         :param p: object to insert.
         :type p: object
-        :raises ValueError: If an element is found with the same name as \
-        that provided, but they are different instances.
+        :raises ValueError: If an element is found with the same name as
+           that provided, but they are different instances.
         '''
         if p.name in self.names:
             self._raise_if_not_same(p)

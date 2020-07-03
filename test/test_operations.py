@@ -43,7 +43,7 @@ def test_aop():
     assert np.allclose(ones.as_ndarray(), np.ones(
         n, dtype=data_types.cpu_bool))
 
-    ones = aop.fones(n)  # Keep as double
+    ones = aop.dones(n)  # Keep as double
     assert np.allclose(ones.as_ndarray(), np.ones(n))
 
     assert np.allclose((ones * ones).as_ndarray(), np.ones(n))
@@ -52,7 +52,7 @@ def test_aop():
     zeros = aop.bzeros(n)
     assert np.allclose(zeros.as_ndarray(), np.zeros(n))
 
-    zeros = aop.fzeros(n)  # Keep as double
+    zeros = aop.dzeros(n)  # Keep as double
     assert np.allclose(zeros.as_ndarray(), np.zeros(n))
 
     assert np.allclose((zeros * zeros).as_ndarray(), np.zeros(n))
@@ -64,12 +64,12 @@ def test_aop():
     assert np.allclose(aop.count_nonzero(zeros), 0)
 
     # Exponential
-    zeros = aop.fzeros(n)
-    ez = aop.fexp(zeros)
+    zeros = aop.dzeros(n)
+    ez = aop.dexp(zeros)
     assert np.allclose(ez.as_ndarray(), np.ones(n))
 
     # Logarithm
-    ones = aop.fones(n)
+    ones = aop.dones(n)
     lo = aop.log(ones)
     assert np.allclose(lo.as_ndarray(), np.zeros(n))
 
@@ -84,11 +84,11 @@ def test_aop():
     e = np.linspace(10.5, 19.5, 9)
 
     interpolator = aop.make_linear_interpolator(x, y)
-    r = interpolator(0, i)
+    r = interpolator.interpolate(0, i)
     assert np.allclose(r.as_ndarray(), e)
 
     interpolator = aop.make_spline_interpolator(x, y)
-    r = interpolator(0, i)
+    r = interpolator.interpolate(0, i)
     assert np.allclose(r.as_ndarray(), e)
 
     # amax
@@ -96,6 +96,19 @@ def test_aop():
 
     # amin
     assert np.allclose(aop.min(ls), 10)
+
+    # argmax
+    x = aop.linspace(0, 10, 11)
+
+    assert aop.argmax(x) == len(x) - 1
+
+    x = aop.dzeros(7653)  # odd number
+
+    x.ua[9] = 1
+    assert aop.argmax(x) == 9
+
+    x.ua[0] = 10
+    assert aop.argmax(x) == 0
 
     # sum
     ls = aop.linspace(1, 100, 100)
@@ -133,20 +146,37 @@ def test_aop():
 
     # meshgrid
     n = 1000
-    lb = np.array([1.], dtype=data_types.cpu_float)
-    ub = np.array([2.], dtype=data_types.cpu_float)
-    mm = aop.meshgrid(lb, ub, np.array([n], dtype=data_types.cpu_int))
+    lb = data_types.array_float([1.],)
+    ub = data_types.array_float([2.])
+    mm = aop.meshgrid(lb, ub, data_types.array_int([n]))
     nm = np.linspace(lb.item(), ub.item(), n)
     assert np.allclose(mm.as_ndarray(), nm)
 
-    lb = np.array([0., 1.], dtype=data_types.cpu_float)
-    ub = np.array([1., 2.], dtype=data_types.cpu_float)
-    mm = aop.meshgrid(lb, ub, np.array([n, n], dtype=data_types.cpu_int))
+    lb = data_types.array_float([0., 1.])
+    ub = data_types.array_float([1., 2.])
+    mm = aop.meshgrid(lb, ub, data_types.array_int([n, n]))
 
     ng = np.array([a.flatten() for a in np.meshgrid(
         *tuple(np.linspace(l, u, n) for l, u in zip(lb, ub)))]).T.flatten()
 
     assert np.allclose(mm.as_ndarray(), ng)
+
+    # random_grid (do not use a symmetric range around 0)
+    n = 10000
+    lb = data_types.array_float([0, 0])
+    ub = data_types.array_float([20, 20])
+    u = aop.random_grid(lb, ub, n)
+
+    assert u.length == n
+    assert u.size == 2 * n
+
+    x = aop.take_column(u, 0)
+    y = aop.take_column(u, 1)
+
+    for i in range(u.ndim):
+        c = 0.5 * (lb[i] + ub[i])
+        g = aop.count_nonzero(aop.take_column(u, i) >= c) / len(u)
+        assert np.allclose(g, 0.5, rtol=0.05)
 
     # slice_from_boolean
     u = aop.random_uniform(0, 1, 10000)
@@ -167,7 +197,7 @@ def test_aop():
     r = aop.sum_inside(i, g, c, e)
     assert np.allclose(r.as_ndarray(), np.full(len(r), 10))
 
-    v = aop.fzeros(len(c))
+    v = aop.dzeros(len(c))
     r = aop.sum_inside(i, g, c, e, v)
     assert np.allclose(r.as_ndarray(), np.zeros(len(r)))
 
@@ -204,6 +234,18 @@ def test_aop():
 
     assert np.allclose(aop.sum(fr) * (x[1] - x[0]), 1.)
 
+    # Simpson's rule
+    with pytest.raises(ValueError):
+        aop.simpson_factors(4)
+
+    s = aop.simpson_factors(5).as_ndarray()
+    assert np.allclose(s, [1, 4, 2, 4, 1])
+
+    s = aop.simpson_factors(5, 3).as_ndarray()
+    r = np.ones(len(s))
+    r[:-1] = np.tile([1, 4, 2, 4], 3)
+    assert np.allclose(s, r)
+
 
 @pytest.mark.core
 @pytest.mark.operations
@@ -214,5 +256,5 @@ def test_display_arrays():
     print(aop.bzeros(10))  # array of booleans
     print(aop.carange(10))  # array of complex numbers
     print(aop.iarange(10))  # array of integers
-    print(aop.fzeros(10))  # array of doubles dim 1
-    print(aop.fzeros(10, 2))  # array of doubles dim 2
+    print(aop.dzeros(10))  # array of doubles dim 1
+    print(aop.dzeros(10, 2))  # array of doubles dim 2

@@ -7,9 +7,11 @@
 Base classes to define PDF data_types.
 '''
 from . import dataset
+from ..backends import autocode
 from ..backends import gsl_api
 
-from ..backends.core import common_backend, is_gpu_backend, parse_backend
+from ..backends.arrays import darray
+from ..backends.core import add_pdf_src, common_backend, is_gpu_backend, parse_backend
 from ..base import core
 from ..base import bindings
 from ..base import data_types
@@ -17,26 +19,35 @@ from ..base import dependencies
 from ..base import exceptions
 from ..base import parameters
 
+from scipy.optimize import curve_fit as scipy_curve_fit
+from scipy.optimize import minimize as scipy_minimize
+
 import contextlib
 import functools
 import logging
 import numpy as np
 import os
+import tempfile
 import textwrap
+import threading
 import warnings
 
-__all__ = ['AddPDFs', 'ConvPDFs', 'MultiPDF', 'pdf_from_json', 'pdf_to_json',
+__all__ = ['AddPDFs', 'ConvPDFs', 'FormulaPDF', 'InterpPDF', 'MultiPDF', 'pdf_from_json', 'pdf_to_json',
            'PDF', 'ProdPDFs', 'register_pdf', 'SourcePDF']
 
 # Number of points to use to evaluate a binned sample
 DEFAULT_EVB_SIZE = 100
 
 # Default size of the grid for the convolution PDFs
-DEFAULT_CONV_SIZE = 10000
+DEFAULT_INTERP_SIZE = 10000
 
 # Default number of events to generate in a single step
 DEFAULT_GEN_SIZE_CPU = 10000
 DEFAULT_GEN_SIZE_GPU = 100000
+
+# Tolerance on the determination of maximum values
+MAX_TOL = 1e-7
+MAX_CALL = None
 
 # Cache types
 BIND = 'bind'
@@ -48,6 +59,23 @@ CACHE_TYPES = (BIND, CONST)
 PDF_REGISTRY = {}
 
 logger = logging.getLogger(__name__)
+
+
+def asymptotic_maximum(x, a, b, c):
+    '''
+    Function that represents the evolution of a maximum value as a function
+    of the amount of random numbers generated.
+
+    :param x: amount of random numbers generated.
+    :type x: numpy.ndarray
+    :param a: scale.
+    :type a: float
+    :param b: slope.
+    :type b: float
+    :param c: asymptote.
+    :type c: float
+    '''
+    return a * np.exp(-b * x) + c
 
 
 def register_pdf(cl):
@@ -133,13 +161,54 @@ def safe_division(first, second):
         return first / np.nextafter(0, np.infty)
 
 
+def _interpolation_evaluate_binned(aop, interpolator, par, data, evb_size, normalized=True):
+    '''
+    Evaluate on a binned sample using the given interpolator.
+
+    :param aop: instance to do array operations.
+    :type aop: ArrayOperations
+    :param interpolator: instance to interpolate.
+    :param par: parameter in the interpolation.
+    :type par: Parameter
+    :param data: data samples.
+    :type data: BinnedDataSet
+    :param evb_size: number of elements to consider per bin.
+    :type evb_size: int
+    :param normalized: whether to normalized the output.
+    :type normalized: bool
+    :returns: interpolated values.
+    :rtype: darray
+    '''
+    edges = data[par.name]
+
+    nsteps = evb_size if evb_size % 2 != 0 else evb_size + 1
+
+    grid = dataset.adaptive_grid(aop, par, edges, nsteps)
+
+    pdf_values = interpolator.interpolate(0, grid.values)
+    pdf_values *= aop.simpson_factors(nsteps, len(edges) - 1)
+
+    gaps = data_types.full_int(1, 1)
+    # dataset.edges_indices(gaps, edges)
+    indices = data_types.array_int([0, len(edges)])
+
+    out = aop.sum_inside(indices, gaps, grid.values, edges, pdf_values)
+    out *= aop.steps_from_edges(edges)
+    out /= (3. * (nsteps - 1))
+
+    if normalized:
+        return safe_division(out, out.sum())
+    else:
+        return out
+
+
 class PDF(object, metaclass=core.DocMeta):
 
     # Allow to define if a PDF object depends on other PDFs. All PDF objects
     # with this value set to "True" must have the property "pdfs" implemented.
     _dependent = False
 
-    def __init__(self, name, data_pars, arg_pars, backend=None):
+    def __init__(self, name, data_pars, arg_pars=None, backend=None):
         '''
         Build the class from a name, a set of data parameters and argument parameters.
         The first correspond to those that must be present on any :class:`DataSet` or
@@ -151,19 +220,19 @@ class PDF(object, metaclass=core.DocMeta):
         :param data_pars: data parameters.
         :type data_pars: Registry(Parameter)
         :param arg_pars: argument parameters.
-        :type arg_pars: Registry(Parameter)
+        :type arg_pars: Registry(Parameter) or None
         :param backend: backend where the PDF will operate.
         :type backend: Backend or None
         :ivar name: name of the PDF.
-        :ivar evb_size: number of points to use when evaluating the PDF \
-        numerically on a binned data set.
+        :ivar evb_size: number of points to use when evaluating the PDF
+           numerically on a binned data set.
         '''
         self.name = name
         # Number of points to consider when evaluating numerically a binned sample
         self.evb_size = DEFAULT_EVB_SIZE
         self.__aop = parse_backend(backend)
         self.__data_pars = data_pars
-        self.__arg_pars = arg_pars
+        self.__arg_pars = arg_pars if arg_pars is not None else parameters.Registry()
 
         # The cache is saved on a dictionary, and inherited classes must avoid colliding names
         self.__cache = None
@@ -240,6 +309,114 @@ class PDF(object, metaclass=core.DocMeta):
         self.__cache = None
         self.__cache_type = None
 
+    def _max(self, bounds, normalized, range=parameters.FULL, tol=MAX_TOL, min_points=4, max_call=MAX_CALL, sampling_size=None):
+        '''
+        Calculate the maximum value of the PDF in the given range.
+
+        :param bounds: bounds of the data parameters.
+        :type bounds: numpy.ndarray
+        :param normalized: if set to True, the result corresponds to the
+           maximum of the normalized PDF.
+        :type normalized: bool
+        :param range: normalization range.
+        :type range: str
+        :param tol: relative dispersion that is allowed for convergence.
+        :type tol: float
+        :param min_points: minimum number of points to estimate the maximum. It
+           must be greater than four.
+        :type min_points: int
+        :param max_call: maximum number of iterations to perform.
+        :type max_call: int
+        :param sampling_size: number of elements to generate in each call.
+        :type sampling_size: int
+        :type scipy_fmin_opts: dict
+        :returns: Maximum value.
+        :rtype: float
+        '''
+        if sampling_size is None:
+            if is_gpu_backend(self.__aop.backend.btype):
+                sampling_size = DEFAULT_GEN_SIZE_GPU
+            else:
+                sampling_size = DEFAULT_GEN_SIZE_CPU
+
+        if min_points > 4:
+            raise ValueError(
+                'Minimum number of iterations must be greater than four')
+
+        if max_call is not None and max_call < min_points:
+            raise ValueError(
+                'Maximum number of iterations must be greater than the minimum number of points')
+
+        maximums = []
+
+        new_max = 0.
+
+        i = 0
+
+        while True:
+
+            # calculate a new maximum
+            grid = dataset.uniform_sample(
+                self.__aop, self.data_pars, bounds, sampling_size)
+
+            imax = self.__call__(grid, range, normalized).argmax()
+
+            initials = grid.get(imax)
+
+            # calculate the maximum from a fit
+            def wrapper(values):
+                for p, v in zip(self.data_pars, values):
+                    p.value = v
+                # we are minimizing
+                return -1 * self.function(range, normalized)
+
+            bds = np.array([p.bounds for p in self.data_pars])
+
+            with self.restoring_state():
+
+                res = scipy_minimize(wrapper, initials, bounds=bds)
+
+                if not res.success:  # use only successful minimizations
+                    continue
+
+                # invert to get the maximum
+                maximums.append(-1 * wrapper(res.x))
+
+            new_max = max(maximums[-1], new_max)
+
+            if i + 1 >= min_points:
+
+                m = np.array(maximums)
+
+                maxs = m[(tol * new_max + m) > new_max]
+
+                if len(maxs) >= min_points:
+
+                    if np.allclose(maxs[1:] / maxs[:-1], 1., rtol=tol):
+                        # the fit would fail, since they are all equal
+                        return new_max
+
+                    x = np.arange(len(maxs))
+                    y = np.sort(maxs)
+
+                    popt, pcov = scipy_curve_fit(asymptotic_maximum, x, y,
+                                                 bounds=([-np.infty, 0, maxs[-1]], [0, np.infty, np.infty]))
+
+                    if np.sqrt(pcov[-1][-1]) / popt[-1] < tol:  # valid maximum
+                        return popt[-1]  # asymptote
+
+                    maximums = maxs.tolist()  # avoid large lists of values
+
+            if max_call is not None and i == max_call:
+                break
+            else:
+                i += 1
+
+        warnings.warn(
+            'Maximum number of function evaluations reached to calculate the maximum value', RuntimeWarning)
+
+        return new_max
+
     def copy(self, backend=None):
         '''
         Create a copy of this PDF.
@@ -291,30 +468,38 @@ class PDF(object, metaclass=core.DocMeta):
         # Use the correct constructor
         return cl.from_json_object(obj, pars, backend)
 
-    def _generate_single_bounds(self, size, mapsize, gensize, safe_factor, bounds):
+    def _generate_single_bounds(self, size, mapsize, gensize, bounds, max_opts=None):
         '''
         Generate data in a single range given the bounds of the different data parameters.
 
         :param size: size (or minimum size) of the output sample.
         :type size: int
-        :param mapsize: number of points to consider per dimension (data parameter) \
-        in order to calculate the maximum value of the PDF.
+        :param mapsize: number of points to consider per dimension (data parameter)
+           in order to calculate the maximum value of the PDF.
         :type mapsize: int
         :param gensize: number of entries to generate per iteration.
         :type gensize: int
-        :param safe_factor: additional factor to multiply the numerically calculated \
-        maximum of the function. In general this must be modified if the function is \
-        not well-behaved.
-        :type safe_factor: float
+        :param max_opts: keyword arguments to be passed to the :meth:`PDF.max`
+           function. Allowed arguments are shown below.
+        :type max_opts: dict or None
         :param bounds: bounds of the different data parameters (must be sorted).
         :type bounds: numpy.ndarray
         :returns: Output sample.
         :rtype: DataSet
-        '''
-        grid = dataset.evaluation_grid(
-            self.__aop, self.data_pars, bounds, mapsize)
 
-        m = safe_factor * self.__call__(grid, normalized=False).max()
+        Arguments that can be passed in *max_opts* are:
+
+        * *tol*: relative tolerance allowed for the determination of the maximum.
+
+        * *max_call*: maximum number of iterations allowed.
+
+        * *sampling_size*: size of the samples used to calculate the maximum.
+
+        .. seealso:: :meth:`PDF.max`
+        '''
+        max_opts = max_opts or {}
+
+        m = self._max(bounds, normalized=False, **max_opts)
 
         samples = []
 
@@ -427,7 +612,7 @@ class PDF(object, metaclass=core.DocMeta):
         Prepare an object that will be called many times with the same set of
         values.
         This is usefull for PDFs using a cache, to avoid creating it many times
-        in sucessive calls to :meth:`PDF.__call__`.
+        in successive calls to :meth:`PDF.__call__`.
 
         :param range: normalization range.
         :type range: str
@@ -437,7 +622,7 @@ class PDF(object, metaclass=core.DocMeta):
         with self.using_cache(BIND):
             yield bindings.bind_class_arguments(self, range=range, normalized=normalized)
 
-    def generate(self, size=10000, mapsize=1000, gensize=None, safe_factor=1.1, range=parameters.FULL):
+    def generate(self, size=10000, mapsize=1000, gensize=None, range=parameters.FULL, max_opts=None):
         '''
         Generate random data.
         A call to :meth:`PDF.bind` is implicit, since several calls will be done
@@ -445,21 +630,30 @@ class PDF(object, metaclass=core.DocMeta):
 
         :param size: size (or minimum size) of the output sample.
         :type size: int
-        :param mapsize: number of points to consider per dimension (data parameter) \
-        in order to calculate the maximum value of the PDF.
+        :param mapsize: number of points to consider per dimension (data parameter)
+           in order to calculate the maximum value of the PDF.
         :type mapsize: int
-        :param gensize: number of entries to generate per iteration. By default it \
-        is set to :math:`10^4` and :math:`10^5` for CPU and GPU backends, \
-        respectively.
+        :param gensize: number of entries to generate per iteration. By default it
+           is set to :math:`10^4` and :math:`10^5` for CPU and GPU backends,
+           respectively.
         :type gensize: int or None
-        :param safe_factor: additional factor to multiply the numerically calculated \
-        maximum of the function. In general this must be modified if the function is \
-        not well-behaved.
-        :type safe_factor: float
+        :param max_opts: keyword arguments to be passed to the :meth:`PDF.max`
+           function. Allowed arguments are shown below.
+        :type max_opts: dict or None
         :param range: range of the data parameters where to generate data.
         :type range: str
         :returns: Output sample.
         :rtype: DataSet
+
+        Arguments that can be passed in *max_opts* are:
+
+        * *tol*: relative tolerance allowed for the determination of the maximum.
+
+        * *max_call*: maximum number of iterations allowed.
+
+        * *sampling_size*: size of the samples used to calculate the maximum.
+
+        .. seealso:: :meth:`PDF.max`
         '''
         if gensize is None:
             if is_gpu_backend(self.__aop.backend.btype):
@@ -473,7 +667,7 @@ class PDF(object, metaclass=core.DocMeta):
 
             if len(bounds) == 1:
                 result = proxy._generate_single_bounds(
-                    size, mapsize, gensize, safe_factor, bounds[0])
+                    size, mapsize, gensize, bounds[0], max_opts)
             else:
                 # Get the associated number of entries per bounds
                 fracs = data_types.empty_float(len(bounds))
@@ -496,7 +690,7 @@ class PDF(object, metaclass=core.DocMeta):
                 samples = []
                 for e, b in zip(entries, bounds):
                     samples.append(proxy._generate_single_bounds(
-                        e, mapsize, gensize, safe_factor, b))
+                        e, mapsize, gensize, b, max_opts))
                 result = dataset.DataSet.merge(samples)
 
         return result
@@ -522,6 +716,54 @@ class PDF(object, metaclass=core.DocMeta):
         :rtype: float
         '''
         return self.numerical_integral(integral_range, range)
+
+    def max(self, range=parameters.FULL, normalized=True, tol=MAX_TOL, min_points=4, max_call=MAX_CALL, sampling_size=None):
+        r'''
+        Calculate the maximum value of the PDF in the given range.
+
+        :param range: range to consider.
+        :type range: str
+        :param normalized: if set to True, the result corresponds to the
+           maximum of the normalized PDF.
+        :type normalized: bool
+        :param sampling_size: size of the samples to use to determine the maximum.
+        :type sampling_size: int
+        :param tol: relative dispersion that is allowed for convergence.
+        :type tol: float
+        :param min_points: minimum number of points to estimate the maximum. It
+           must be greater than four.
+        :type min_points: int
+        :param max_call: maximum number of iterations to perform. Must be greater
+           than two.
+        :type max_call: int
+        :param sampling_size: number of elements to generate in each call.
+        :type sampling_size: int
+        :returns: Maximum value.
+        :rtype: float
+
+        The maximum is calculated from successive random samples of size
+        equal to *sampling_size*. Afterwards, a fit is done in order to polish
+        the minimum. Once the minimization was done at least *min_points* times,
+        a final fit to the function
+
+        .. math::
+           f(n) = \alpha e^{-\beta n} + \delta
+
+        is done, where *n* is the iteration number and :math:`f(n)` is the
+        global maximum in that iteration. The value of :math:`\delta` is
+        returned as long as the error satisfies the given tolerance. To improve
+        the performance, only the iterations where the achieved maximum is
+        within the tolerance with respect to the global maximum are considered.
+        The parameter :math:`\delta` is minimized in such a way that it is
+        always greater or equal to the global maximum achieved from the random
+        samples.
+
+        .. note::
+           For two-dimensional PDFs, the process of calculating the maximum
+           can turn really slow, so you might want to consider reducing the
+           precision of the maximum value.
+        '''
+        return max(self._max(bds, normalized, range, tol, min_points, max_call, sampling_size) for bds in parameters.bounds_for_range(self.data_pars, range))
 
     def numerical_integral(self, integral_range=parameters.FULL, range=parameters.FULL):
         '''
@@ -603,12 +845,15 @@ class PDF(object, metaclass=core.DocMeta):
         '''
         Safe method to enable a cache of the PDF. There are two types of cache:
 
-        * *const*: it means that we plan to call the :class:`PDF` consecutively
+        * *const*: evaluation with a fixed *constant* state.
+          It means that we plan to call the :class:`PDF` consecutively
           in the same data set, but the value of the parameters that are not
           constant is allowed to change. This means that any :class:`PDF` that
           has all its arguments as constant is assumed to have the same value
           in each evaluation.
-        * *bind*: this is reserved for those processes where the normalization
+
+        * *bind*: evaluation with the same parameter values and bounds.
+          This is reserved for those processes where the normalization
           range will be the same, as well as the values of the parameters of the
           :class:`PDF`. However, the function can be called in different data
           sets.
@@ -616,7 +861,7 @@ class PDF(object, metaclass=core.DocMeta):
         :param ctype: cache type.
         :type ctype: str
 
-        .. warning:: It is responsibility of the user to ensure that the \
+        .. warning:: It is responsibility of the user to ensure that the
            conditions for the cache to be valid are preserved.
         '''
         self._enable_cache(ctype)
@@ -672,10 +917,13 @@ class SourcePDF(PDF):
 
         # Access the PDF
         self.__function_proxies = self.aop.access_pdf(
-            self.__class__.__name__, ndata_pars=len(data_pars), nvar_arg_pars=nvar_arg_pars)
+            self.pdf_class_name, ndata_pars=len(data_pars), nvar_arg_pars=nvar_arg_pars)
 
         # Integral configuration (must be done after the proxies are defined)
-        self.numint_config = {'method': 'vegas'}
+        if len(data_pars) == 1:
+            self.numint_config = {'method': 'cquad'}
+        else:
+            self.numint_config = {'method': 'vegas'}
 
     def _norm(self, values, range=parameters.FULL):
         '''
@@ -719,20 +967,54 @@ class SourcePDF(PDF):
         '''
         args = data_types.fromiter_float((v.value for v in self.args))
 
-        return self.numint_config(len(self.data_pars), *bounds, args)
+        return self.numint_config(*bounds, args)
+
+    @property
+    def pdf_class_name(self):
+        '''
+        Name of the PDF class.
+
+        :type: str
+        '''
+        return self.__class__.__name__
 
     @property
     def numint_config(self):
         '''
         Configuration of the numerical integration method.
 
-        :getter: Return a configurable object for the specified numerical \
-        integration method.
-        :setter: Set the configuration to do a numerical integration from a \
-        dictionary.
+        :getter: Return a configurable object for the specified numerical
+           integration method.
+        :setter: Set the configuration to do a numerical integration from a
+           dictionary.
 
         The dictionary must contain at least the key "method", and the rest of
-        the keys depend on it:
+        the keys depend on it. For unidimensional PDFs, it is possible to use
+        quadrature methods to evaluate the integrals. The available methods are:
+
+        * *qng*: use  the fixed Gauss-Kronrod-Patterson abscissae to sample the
+          integrand at a maximum of 87 points. This method must be used only in
+          smooth functions.
+        * *qag*: determination of numerical integrals using a simple adaptive
+          integration procedure of interval subdivision based on the error.
+
+          * *limit*: maximum number of subintervals. Must be smaller than the
+            workspace size.
+          * *key*: Gauss-Kronrod rule to use. Keys go from 1 to 6,
+            corresponding to the 15, 21, 31, 41, 51 and 61 point rules.
+          * *workspace_size*: size reserved in memory to store values. The
+            space is related to pairs of doubles.
+
+        * *cquad*: this is the default method used to evaluate numerical
+          integrals. It uses a doubly-adaptive general-purpose based on the
+          Clenshaw-Curtis quadrature rules.
+
+          * *workspace_size*: size reserved in memory to store values. The
+            space is related to pairs of doubles.
+
+        For multidimensional PDFs, only Monte Carlo methods are available to
+        determine the integral. These are also available for unidimensional
+        PDFs.
 
         * *plain*: use a plain Monte Carlo algorithm to evaluate the integral.
           Use the argument "calls" in order to define the number of calls to do
@@ -771,11 +1053,14 @@ class SourcePDF(PDF):
            pdf.numint_config = {'method': 'vegas': 'calls': 100}
 
         In addition, it is possible to define a maximum tolerance for the
-        relative error on the calculation of the integral, which is set through
-        the *tolerance* key.
-        For more information about the algorithms please consult the Monte Carlo
-        section of the GNU scientific library, at
-        `GSL <https://www.gnu.org/software/gsl/doc/html/montecarlo.html>`__.
+        relative and absolute error on the calculation of the integral, which
+        is set through the *rtol* and *atol* keys, respectively.
+        For the quadrature-based algorithms, the numerical integration will
+        be done till the desired tolerance is achieved.
+        For more information about the algorithms please consult the sections
+        about `numerical <https://www.gnu.org/software/gsl/doc/html/integration.html>`__
+        and `Monte Carlo <https://www.gnu.org/software/gsl/doc/html/montecarlo.html>`__.
+        integration of the GNU scientific library.
         '''
         return self.__num_intgrl_config
 
@@ -784,17 +1069,11 @@ class SourcePDF(PDF):
 
         dct = dict(dct)
 
-        method = dct.pop('method')
+        method = dct.pop('method').upper()
 
-        if method == gsl_api.PLAIN:
-            self.__num_intgrl_config = gsl_api.PlainConfig(
-                self.__function_proxies.numerical_integral, **dct)
-        elif method == gsl_api.MISER:
-            self.__num_intgrl_config = gsl_api.MiserConfig(
-                self.__function_proxies.numerical_integral, **dct)
-        elif method == gsl_api.VEGAS:
-            self.__num_intgrl_config = gsl_api.VegasConfig(
-                self.__function_proxies.numerical_integral, **dct)
+        if hasattr(gsl_api, method):
+            self.__num_intgrl_config = getattr(gsl_api, method)(self,
+                                                                self.__function_proxies.numerical_integral, **dct)
         else:
             raise ValueError(
                 f'Unknown numerical integration method "{method}"')
@@ -806,7 +1085,7 @@ class SourcePDF(PDF):
         fvals = data_types.fromiter_float((v.value for v in self.args))
 
         # Prepare the data arrays I/O
-        out = self.aop.fempty(len(data))
+        out = self.aop.dempty(len(data))
 
         di = data_types.fromiter_int(
             (i for i, p in enumerate(data.data_pars) if p in self.data_pars))
@@ -828,7 +1107,7 @@ class SourcePDF(PDF):
         gaps_idx = data_types.array_int(
             [data.data_pars.index(p.name) for p in self.data_pars])
 
-        out = self.aop.fempty(len(data))
+        out = self.aop.dempty(len(data))
 
         if self.__function_proxies.evaluate_binned is not None:
             self.__function_proxies.evaluate_binned(
@@ -906,12 +1185,12 @@ class SourcePDF(PDF):
         if integral_range == range:
             return 1.
         else:
-            num = self._raw_integral(self, integral_range)
-            den = self._raw_integral(self, range)
+            num = self._raw_integral(integral_range)
+            den = self._raw_integral(range)
             res = num / den
             if res > 1.:
                 warnings.warn(
-                    f'Numerical integral for PDF {self.name} is out of bounds; returning one', RuntimeWarning)
+                    f'Numerical integral for PDF "{self.name}" is out of bounds; returning one', RuntimeWarning)
                 return 1.
             else:
                 return res
@@ -924,6 +1203,106 @@ class SourcePDF(PDF):
 
         return {'class': self.__class__.__name__,  # Save also the class name of the PDF
                 'name': self.name,
+                'data_pars': self.data_pars.names,
+                'arg_pars': self.args.names}
+
+
+@register_pdf
+class FormulaPDF(SourcePDF):
+
+    _tmpdir = None
+    _tmpdir_lock = threading.Lock()
+
+    def __init__(self, name, formula, data_pars, arg_pars, primitive=None, backend=None):
+        '''
+        Create a PDF from a simple formula. The string describing the formula
+        can contain any basic mathematical functions. If *primitive* is provided
+        it will be used in order to calculate the normalization. The formula
+        is compiled at runtime.
+
+        :param name: name of the PDF.
+        :type name: str
+        :param formula: formula associated to the PDF.
+        :type formula: str
+        :param data_pars: data parameters.
+        :type data_pars: Registry(Parameter)
+        :param arg_pars: argument parameters.
+        :type arg_pars: Registry(Parameter)
+        :param primitive: if provided, use this formula in order to calculate
+           the primitive.
+        :type primitive: str or None
+        :param backend: backend to build the PDF.
+        :type backend: Backend or None
+        '''
+        with FormulaPDF._tmpdir_lock:
+
+            if FormulaPDF._tmpdir is None:
+                FormulaPDF._tmpdir = tempfile.TemporaryDirectory()
+                add_pdf_src(FormulaPDF._tmpdir.name)
+
+            # create the XML file to save the PDF
+            self.__file = tempfile.NamedTemporaryFile(
+                'w+t', suffix='.xml', dir=FormulaPDF._tmpdir.name, delete=False)
+
+        # keep the arguments so we can save the class to JSON
+        self.__formula = formula
+        self.__primitive = primitive
+
+        code = autocode.xml_from_formula(
+            formula, data_pars, arg_pars, primitive)
+
+        self.__file.write(code)
+
+        self.__file.seek(0)  # rewind the file so it can be read
+
+        # initialize the base class
+        super().__init__(name, data_pars, arg_pars, backend=backend)
+
+    @classmethod
+    def from_json_object(cls, obj, pars, backend=None):
+
+        data_pars = list(map(pars.get, obj['data_pars']))
+        arg_pars = list(map(pars.get, obj['arg_pars']))
+
+        return cls(obj['name'], obj['formula'], data_pars, arg_pars, obj['primitive'], backend=backend)
+
+    @classmethod
+    def unidimensional(cls, name, formula, data_par, arg_pars, primitive=None, backend=None):
+        '''
+        Build the PDF for unidimensional functions.
+
+        :param name: name of the PDF.
+        :type name: str
+        :param formula: formula associated to the PDF.
+        :type formula: str
+        :param data_par: data parameters.
+        :type data_par: Parameter
+        :param arg_pars: argument parameters.
+        :type arg_pars: Registry(Parameter)
+        :param primitive: if provided, use this formula in order to calculate
+           the primitive.
+        :type primitive: str or None
+        :param backend: backend to build the PDF.
+        :type backend: Backend or None
+        '''
+        return cls(name, formula, [data_par], arg_pars, primitive, backend)
+
+    @property
+    def pdf_class_name(self):
+        '''
+        Name of the PDF class.
+
+        :type: str
+        '''
+        name, _ = os.path.splitext(os.path.basename(self.__file.name))
+        return name
+
+    def to_json_object(self):
+
+        return {'class': self.__class__.__name__,  # Save also the class name of the PDF
+                'name': self.name,
+                'formula': self.__formula,
+                'primitive': self.__primitive,
                 'data_pars': self.data_pars.names,
                 'arg_pars': self.args.names}
 
@@ -1042,12 +1421,6 @@ class MultiPDF(PDF):
         for pdf in self.pdfs:
             pdf._free_cache()
 
-    @contextlib.contextmanager
-    def bind(self, range=parameters.FULL, normalized=True):
-
-        with self.using_cache(BIND), super().bind(range, normalized) as base:
-            yield base
-
     def component(self, name):
         '''
         Get the :class:`PDF` object with the given name.
@@ -1105,7 +1478,7 @@ class AddPDFs(MultiPDF):
 
         yields = self.yields
 
-        out = self.aop.fzeros(len(data))
+        out = self.aop.dzeros(len(data))
         for y, pdf in zip(yields, self.pdfs):
             out += y * pdf(data, range, normalized=True)
 
@@ -1119,7 +1492,7 @@ class AddPDFs(MultiPDF):
 
         yields = self.yields
 
-        out = self.aop.fzeros(len(data))
+        out = self.aop.dzeros(len(data))
         for y, pdf in zip(yields, self.pdfs):
             out += y * pdf.evaluate_binned(data)
 
@@ -1147,9 +1520,9 @@ class AddPDFs(MultiPDF):
         :type first: PDF
         :param second: second PDF to use.
         :type second: PDF
-        :param yf: yield associated to the first PDF, if both "yf" and "ys" \
-        are provided. If "ys" is not provided, then "yf" is the faction \
-        associated to the first PDF.
+        :param yf: yield associated to the first PDF, if both "yf" and "ys"
+           are provided. If "ys" is not provided, then "yf" is the faction
+           associated to the first PDF.
         :type yf: Parameter
         :param ys: possible yield for the second PDF.
         :type ys: Parameter or None
@@ -1166,6 +1539,18 @@ class AddPDFs(MultiPDF):
         :type: bool
         '''
         return len(self.pdfs) == len(self.args)
+
+    def function(self, range=parameters.FULL, normalized=True):
+
+        yields = self.yields
+
+        v = np.sum(data_types.fromiter_float(
+            (y * pdf.function(range, normalized=True) for y, pdf in zip(yields, self.pdfs))))
+
+        if normalized:
+            return v / np.sum(yields)
+        else:
+            return v
 
     def integral(self, integral_range=parameters.FULL, range=parameters.FULL):
 
@@ -1191,6 +1576,12 @@ class AddPDFs(MultiPDF):
         s = np.sum(yields)
 
         return np.sum(data_types.fromiter_float((y * pdf.numerical_integral(integral_range, range) for y, pdf in enumerate(yields, self.pdfs)))) / s
+
+    @allows_bind_cache
+    @allows_const_cache
+    def numerical_normalization(self, range=parameters.FULL):
+
+        return self.norm(range)
 
     def to_backend(self, backend):
 
@@ -1220,11 +1611,11 @@ class ConvPDFs(MultiPDF):
         :type first: PDF
         :param second: second PDF.
         :type second: PDF
-        :param range: range of the convolution. This is needed in case part of the \
-        PDFs lie outside the evaluation range. It is set to "full" by default.
+        :param range: range of the convolution. This is needed in case part of the
+           PDFs lie outside the evaluation range. It is set to "full" by default.
         :type range: str or None
-        :raises ValueError: If an attempt to define convolution in more than \
-        one dimension is done.
+        :raises ValueError: If an attempt to define convolution in more than
+           one dimension is done.
         '''
         if len(first.data_pars) != 1 or len(second.data_pars) != 1:
             raise ValueError(
@@ -1236,7 +1627,8 @@ class ConvPDFs(MultiPDF):
 
         # The convolution size and range can be changed by the user
         self.range = range or parameters.FULL
-        self.conv_size = DEFAULT_CONV_SIZE
+        self.evb_size = DEFAULT_EVB_SIZE
+        self.conv_size = DEFAULT_INTERP_SIZE
 
     def __repr__(self):
         out = f'{self.__class__.__name__}({self.name}):{os.linesep}'
@@ -1263,22 +1655,37 @@ class ConvPDFs(MultiPDF):
         for b in parameters.bounds_for_range(self.data_pars, range):
 
             grid = dataset.evaluation_grid(self.aop,
-                                           self.data_pars, b, size=self.conv_size)
+                                           self.data_pars, b, size=self.__conv_size + 1)
 
-            pdf_values = interpolator(0, grid.values)
+            pdf_values = interpolator.interpolate(0, grid.values)
 
-            pdf_values *= (grid.values.get(1) - grid.values.get(0))
+            pdf_values *= (grid.values.get(1) - grid.values.get(0)
+                           ) / (3. * self.__conv_size)
+            pdf_values *= self.aop.simpson_factors(self.__conv_size + 1)
 
             s += pdf_values.sum()
 
         return s
 
     @property
+    def conv_size(self):
+        '''
+        Size of the sample used to calculate the convolution. It must be an
+        odd number.
+        '''
+        return self.__conv_size
+
+    @conv_size.setter
+    def conv_size(self, size):
+        if size % 2 != 0:
+            raise ValueError('Size must be an even number')
+        self.__conv_size = size
+
+    @property
     def interpolation_method(self):
         '''
         Function used to do the interpolation.
 
-        :getter: Function used to do the interpolation.
         :setter: Set the function to use from a string.
         '''
         return self.__interp
@@ -1299,7 +1706,7 @@ class ConvPDFs(MultiPDF):
 
         idx = data.data_pars.index(self.data_pars[0].name)
 
-        pdf_values = interpolator(idx, data.values)
+        pdf_values = interpolator.interpolate(idx, data.values)
 
         if normalized:
             return pdf_values / self._norm(interpolator, range)
@@ -1311,14 +1718,20 @@ class ConvPDFs(MultiPDF):
 
         interpolator = self.convolve(normalized=True)
 
-        idx = data.data_pars.index(self.data_pars[0].name)
+        par = self.data_pars[0]
 
-        out = interpolator(idx, data.values)
+        return _interpolation_evaluate_binned(self.aop, interpolator, par, data, self.evb_size, normalized)
+
+    def function(self, range=parameters.FULL, normalized=True):
+
+        interpolator = self.convolve(normalized)
+
+        v = interpolator.interpolate_single_value(self.data_pars[0].value)
 
         if normalized:
-            return safe_division(out, out.sum())
+            return v / self._norm(interpolator, range)
         else:
-            return out
+            return v
 
     @classmethod
     def from_json_object(cls, obj, pars, pdfs):
@@ -1340,8 +1753,8 @@ class ConvPDFs(MultiPDF):
         :type normalized: bool
         :returns: Data and result of the evaluation.
         :rtype: numpy.ndarray, numpy.ndarray
-        :raises RuntimeError: If the bounds of the parameter in the \
-        convolution range are disjointed.
+        :raises RuntimeError: If the bounds of the parameter in the
+           convolution range are disjointed.
         '''
         first, second = tuple(self.pdfs)
 
@@ -1353,7 +1766,7 @@ class ConvPDFs(MultiPDF):
 
         # Only works for the 1-dimensional case
         grid = dataset.evaluation_grid(self.aop,
-                                       self.data_pars, bounds[0], size=self.conv_size)
+                                       self.data_pars, bounds[0], size=self.__conv_size)
 
         fv = first(grid, self.range, normalized)
         sv = second(grid, self.range, normalized)
@@ -1390,7 +1803,7 @@ class ConvPDFs(MultiPDF):
     @allows_const_cache
     def numerical_normalization(self, range=parameters.FULL):
 
-        return 1.
+        return self.norm(range)
 
     def to_backend(self, backend):
 
@@ -1427,7 +1840,7 @@ class ProdPDFs(MultiPDF):
     @allows_const_cache
     def __call__(self, data, range=parameters.FULL, normalized=True):
 
-        out = self.aop.fones(len(data))
+        out = self.aop.dones(len(data))
         for pdf in self.pdfs:
             out *= pdf(data, range, normalized=normalized)
 
@@ -1442,7 +1855,7 @@ class ProdPDFs(MultiPDF):
     @allows_const_cache
     def evaluate_binned(self, data, normalized=True):
 
-        out = self.aop.fones(len(data))
+        out = self.aop.dones(len(data))
         for pdf in self.pdfs:
             out *= pdf.evaluate_binned(data, normalized=False)
 
@@ -1450,6 +1863,10 @@ class ProdPDFs(MultiPDF):
             return safe_division(out, out.sum())
         else:
             return out
+
+    def function(self, range=parameters.FULL, normalized=True):
+
+        return np.prod(data_types.fromiter_float((pdf.function(range, normalized) for pdf in self.pdfs)))
 
     @classmethod
     def from_json_object(cls, obj, pars, pdfs):
@@ -1492,6 +1909,230 @@ class ProdPDFs(MultiPDF):
         return {'class': self.__class__.__name__,  # Save also the class name of the PDF
                 'name': self.name,
                 'pdfs': self.pdfs.names}
+
+
+@register_pdf
+class InterpPDF(PDF):
+
+    def __init__(self, name, data_par, centers, values, backend=None):
+        '''
+        Represent the convolution of two different PDFs.
+
+        :param name: name of the PDF.
+        :type name: str
+        :param data_par: data parameter to consider.
+        :type data_par: Parameter
+        :param centers: centers to use in the interpolation process.
+        :type centers: darray
+        :param values: values to use in the interpolation process.
+        :type values: darray
+        :param backend: backend to build the PDF.
+        :type backend: Backend or None
+        :raises ValueError: If an attempt to define the PDF in more than
+           one dimension is done.
+        '''
+        super().__init__(name, parameters.Registry(
+            [data_par]), backend=backend)
+
+        self.__centers = centers
+        self.__values = values
+
+        self.interpolation_method = 'spline'
+
+        self.evb_size = DEFAULT_EVB_SIZE
+        self.interp_size = DEFAULT_INTERP_SIZE
+
+    def __repr__(self):
+        vmin = self.__centers.min()
+        vmax = self.__centers.max()
+        size = len(self.__centers)
+        return f'{self.__class__.__name__}({self.name}, range=({vmin}, {vmax}), size={size})'
+
+    def _norm(self, range=parameters.FULL):
+        '''
+        Calculate the normalization using the processed interpolation values
+        and the integration range.
+
+        :param range: normalization range.
+        :type range: str
+        :returns: Normalization.
+        :rtype: float
+        '''
+        # we are using the a grid of dimension one
+        s = 0
+        for b in parameters.bounds_for_range(self.data_pars, range):
+
+            grid = dataset.evaluation_grid(self.aop,
+                                           self.data_pars, b, size=self.__interp_size + 1)
+
+            pdf_values = self.__interpolator.interpolate(0, grid.values)
+
+            pdf_values *= (grid.values.get(1) - grid.values.get(0)) / 3.
+            pdf_values *= self.aop.simpson_factors(self.__interp_size + 1)
+
+            s += pdf_values.sum()
+
+        return s
+
+    @property
+    def interp_size(self):
+        '''
+        Size of the sample used to calculate the convolution. It must be an
+        odd number.
+        '''
+        return self.__interp_size
+
+    @interp_size.setter
+    def interp_size(self, size):
+        if size % 2 != 0:
+            raise ValueError('Size must be an even number')
+        self.__interp_size = size
+
+    @property
+    def interpolation_method(self):
+        '''
+        Function used to do the interpolation.
+
+        :setter: Set the function to use from a string.
+        '''
+        return self.__interpolator
+
+    @interpolation_method.setter
+    def interpolation_method(self, method):
+        if method == 'linear':
+            self.__interpolator = self.aop.make_linear_interpolator(
+                self.__centers, self.__values)
+        elif method == 'spline':
+            self.__interpolator = self.aop.make_spline_interpolator(
+                self.__centers, self.__values)
+        else:
+            raise ValueError(f'Unknown interpolation method "{method}"')
+
+    @classmethod
+    def from_binned_dataset(cls, name, data):
+        '''
+        Build the instance from a binned data set. The data set must be
+        unidimensional.
+
+        :param name: name of the PDF.
+        :type name: str
+        :param data: binned data set.
+        :type data: BinnedDataSet
+        '''
+        data_par = data.data_pars[0]
+        edges, values = data[data_par.name].as_ndarray(
+        ), data.values.as_ndarray()
+
+        centers = 0.5 * (edges[1:] + edges[:-1])
+
+        return cls.from_ndarray(name, data_par, centers, values, backend=data.backend)
+
+    @classmethod
+    def from_ndarray(cls, name, data_par, centers, values, backend=None):
+        '''
+        Build the class from :class:`numpy.ndarray` instances.
+
+        :param name: name of the PDF.
+        :type name: str
+        :param data_par: data parameter.
+        :type data_par: Parameter
+        :param centers: centers to use in the interpolation.
+        :type centers: numpy.ndarray
+        :param values: values to use in the interpolation.
+        :type values: numpy.ndarray
+        :param backend: backend where the PDF will operate.
+        :type backend: Backend or None
+        '''
+        aop = parse_backend(backend)
+        c = darray.from_ndarray(centers, aop.backend)
+        v = darray.from_ndarray(values, aop.backend)
+        return cls(name, data_par, c, v, backend)
+
+    @allows_const_cache
+    def __call__(self, data, range=parameters.FULL, normalized=True):
+
+        idx = data.data_pars.index(self.data_pars[0].name)
+
+        pdf_values = self.__interpolator.interpolate(idx, data.values)
+
+        if normalized:
+            return pdf_values / self._norm(range)
+        else:
+            return pdf_values
+
+    @allows_const_cache
+    def evaluate_binned(self, data, normalized=True):
+
+        par = self.data_pars[0]
+
+        return _interpolation_evaluate_binned(self.aop, self.__interpolator, par, data, self.evb_size, normalized)
+
+    @classmethod
+    def from_json_object(cls, obj, pars, backend):
+
+        data_par = pars.get(obj['data_par']['name'])
+
+        c, v = data_types.array_float(
+            obj['centers']), data_types.array_float(obj['values'])
+
+        return cls.from_ndarray(obj['name'], data_par, c, v, backend)
+
+    def function(self, range=parameters.FULL, normalized=True):
+        '''
+        Evaluate the function.
+
+        :param range: normalization range.
+        :type range: str
+        :param normalized: whether to return a normalized value.
+        :type normalized: bool
+        :returns: Value of the PDF.
+        :rtype: float
+        '''
+        v = self.__interpolator.interpolate_single_value(
+            self.data_pars[0].value)
+
+        if normalized:
+            n = self._norm(range)
+            return safe_division(v, n)
+        else:
+            return v
+
+    @allows_bind_cache
+    @allows_const_cache
+    def norm(self, range=parameters.FULL):
+        return self._norm(range)
+
+    def numerical_integral(self, integral_range=parameters.FULL, range=parameters.FULL):
+
+        if integral_range == range:
+            return 1.
+
+        num = self._norm(integral_range)
+        den = self._norm(range)
+
+        return num / den
+
+    @allows_bind_cache
+    @allows_const_cache
+    def numerical_normalization(self, range=parameters.FULL):
+
+        return self.norm(range)
+
+    def to_backend(self, backend):
+
+        c, v = self.__centers.to_backend(
+            backend), self.__values.to_backend(backend)
+
+        return self.__class__(self.name, self.data_pars, c, v, backend)
+
+    def to_json_object(self):
+
+        return {'class': self.__class__.__name__,  # Save also the class name of the PDF
+                'name': self.name,
+                # there is only one element
+                'data_par': self.data_pars[0].to_json_object(),
+                'centers': self.__centers.as_ndarray().tolist(),
+                'values': self.__values.as_ndarray().tolist()}
 
 
 def pdf_from_json(obj, backend=None):

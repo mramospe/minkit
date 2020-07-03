@@ -121,6 +121,13 @@ class Context(object):
         '''
         return self.__device
 
+    @property
+    def max_local_size(self):
+        '''
+        Maximum number of threads per block.
+        '''
+        return self.__max_local_size
+
     def _get_sizes_2d_gl(self, size_f, size_s):
         '''
         Return the standard sizes in two dimensions, where the first size is
@@ -301,7 +308,7 @@ def device_lookup(devices, device=None, interactive=False):
 
     if not interactive:
         # Use the default value
-        logger.info('Using the first encountered device')
+        logger.warning('Using the first encountered device')
         return default
     else:
         # Ask the user to select a device
@@ -325,10 +332,13 @@ def initialize_gpu(backend, **kwargs):
 
     :param backend: backend to use. It must be any of "cuda" or "opencl".
     :type backend: str
-    :param kwargs: it may contain any of the following values: \
-    - interactive: (bool) whether to select the device manually (defaults to False) \
-    - device: (int) number of the device to use (defaults to None).
+    :param kwargs: configuration for the device lookup (see below for details).
     :type kwargs: dict
+
+    * *interactive*: (bool) whether to select the device manually
+       (defaults to False).
+
+    * *device*: (int) number of the device to use (defaults to None).
 
     .. note:: The device can be selected using the MINKIT_DEVICE environment variable.
     '''

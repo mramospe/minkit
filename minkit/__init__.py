@@ -34,15 +34,20 @@ class Backend(object):
         module. Any object depending on a backend can be directly built using
         this class, which will forward itself during its construction.
 
-        :param btype: backend type ('cpu', 'cuda', 'opencl').
+        :param btype: backend type (*cpu*, *cuda*, *opencl*).
         :type btype: str
-        :param kwargs: arguments forwarded to the backend constructor \
-        (cuda and opencl backends only). See below for more details.
+        :param kwargs: arguments forwarded to the backend constructor
+           (cuda and opencl backends only). See below for more details.
         :type kwargs: dict
 
         The keyword arguments can contain any of the following:
-        * device
-        * interactive
+
+        * *device*: and integer defining the device to use.
+
+        * *interactive*: whether to ask the user to select or correct the input device or not.
+          If any problem appears and this argument is set to False (default),
+          the first encountered device will be used and a warning will be displayed.
+
         These arguments are only available in *cuda* and *opencl* backends only.
         '''
         super(Backend, self).__init__()
@@ -108,9 +113,9 @@ Wrapper around the "{func.__name__}" function, which automatically sets the back
         '''
         Initialize the wrapped class.
 
-        :param args: arguments forwarded to the __init__ function.
+        :param args: arguments forwarded to the :meth:`object_wrapper.__init__` function.
         :type args: tuple
-        :param kwargs: arguments forwarded to the __init__ function.
+        :param kwargs: arguments forwarded to the :meth:`object_wrapper.__init__` function.
         :type kwargs: dict
         :returns: Wrapped object.
         '''

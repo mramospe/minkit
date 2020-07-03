@@ -41,3 +41,15 @@ def intermediate():
     pdf = rt.RooAddPdf('pdf', 'pdf', sig, bkg, y)
 
     return pdf, [m, c, s, a, n, k, y], [sig, bkg]
+
+
+def numeric():
+    '''
+    Model where numerical integration is needed (Argus).
+    '''
+    m = rt.RooRealVar('m', 'm', 0, 1)
+    mu = rt.RooRealVar('mu', 'mu', 0.9, 0.5, 1)
+    c = rt.RooRealVar('c', 'c', 0.2, 0.01, 2)
+    p = rt.RooRealVar('p', 'p', 0.7, 0.1, 1)
+    pdf = rt.RooArgusBG('pdf', 'pdf', m, mu, c, p)
+    return pdf, [m, mu, c, p], []

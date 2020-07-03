@@ -86,7 +86,7 @@ def test_formula(tmpdir):
 
     with helpers.fit_test(g) as test:
         with minkit.minimizer('uml', g, data, minimizer='minuit') as minuit:
-            test.result, _ = minuit.migrad()
+            test.result = minuit.migrad()
 
     # Test the JSON (only for formula)
     with open(os.path.join(tmpdir, 'r.json'), 'wt') as fi:
@@ -120,7 +120,7 @@ def test_formula(tmpdir):
 
     with helpers.fit_test(g) as test:
         with minkit.minimizer('uml', g, data, minimizer='minuit') as minuit:
-            test.result, _ = minuit.migrad()
+            test.result = minuit.migrad()
 
     # Test the JSON (only for formula)
     with open(os.path.join(tmpdir, 'r.json'), 'wt') as fi:
@@ -161,14 +161,14 @@ def test_range():
 
     with helpers.fit_test(e) as test:
         with minkit.minimizer('uml', e, data, minimizer='minuit', range='sides') as minuit:
-            test.result, _ = minuit.migrad()
+            test.result = minuit.migrad()
 
     # Test generation of data only in the range
     data = e.generate(10000, range='sides')
 
     with helpers.fit_test(e) as test:
         with minkit.minimizer('uml', e, data, minimizer='minuit', range='sides') as minuit:
-            test.result, _ = minuit.migrad()
+            test.result = minuit.migrad()
 
 
 @pytest.mark.core
@@ -229,7 +229,7 @@ def test_blinding(tmpdir):
 
     p = minkit.Parameter('p', value=iv, bounds=ib)
 
-    p.blind_config = 10, 2
+    p.set_blinding_configuration(scale=10, offset=2)
 
     assert not np.allclose(p.value, iv)  # value is hidden
     assert not np.allclose(p.bounds, ib)  # bounds are hidden
@@ -238,19 +238,22 @@ def test_blinding(tmpdir):
         assert np.allclose(p.value, iv)
         assert np.allclose(p.bounds, ib)
 
+    hv = p.value
+
     # Test the blinding state in JSON files
     with open(os.path.join(tmpdir, 'p.json'), 'wt') as fi:
         json.dump(p.to_json_object(), fi)
 
     with open(os.path.join(tmpdir, 'p.json'), 'rt') as fi:
-        minkit.Parameter.from_json_object(json.load(fi))
+        pn = minkit.Parameter.from_json_object(json.load(fi))
 
-    assert not np.allclose(p.value, iv)  # value is still hidden
-    assert not np.allclose(p.bounds, ib)  # bounds are still hidden
+    assert not np.allclose(pn.value, iv)  # value is still hidden
+    assert np.allclose(pn.value, hv)  # blinded value is the same as before
+    assert not np.allclose(pn.bounds, ib)  # bounds are still hidden
 
-    with p.blind(status=False):
-        assert np.allclose(p.value, iv)
-        assert np.allclose(p.bounds, ib)
+    with pn.blind(status=False):
+        assert np.allclose(pn.value, iv)
+        assert np.allclose(pn.bounds, ib)
 
     # Gaussian model with a blinded center
     pdf = helpers.default_gaussian(center='c')
@@ -264,7 +267,7 @@ def test_blinding(tmpdir):
 
     initial = pdf.get_values()
 
-    c.blind_config = 10, 2
+    c.set_blinding_configuration(scale=10, offset=2)
 
     for m in 'minuit', 'L-BFGS-B', 'COBYLA':  # test all the minimizers
 
@@ -297,7 +300,7 @@ def test_blinding(tmpdir):
 
     iv = nsig.value
 
-    nsig.blind_config = 10000, 100
+    nsig.set_blinding_configuration(scale=10000, offset=100)
 
     helpers.randomize(pdf)
     with minkit.minimizer('ueml', pdf, data) as minimizer:
@@ -357,3 +360,39 @@ def test_blinding(tmpdir):
         errors = nsig.asym_errors
         with nsig.blind(status=False):
             assert not np.allclose(errors, nsig.asym_errors)
+
+    # Check that with an offset-based blinding the error of the true value
+    # is the same to that of the blinded.
+    pdf = helpers.default_gaussian(center='c')
+
+    data = pdf.generate(10000)
+
+    c = pdf.args.get('c')
+
+    c.set_blinding_configuration(offset=2)
+
+    helpers.randomize(pdf)
+    with minkit.minimizer('uml', pdf, data) as minimizer:
+
+        minimizer.minimize()
+
+        blinded = c.error
+        with c.blind(status=False):
+            unblinded = c.error
+
+        assert np.allclose(blinded, unblinded)
+
+    # Check that with an scale-based blinding the relative error of the true
+    # value is the same to that of the blinded
+    c.set_blinding_configuration(scale=100)
+
+    helpers.randomize(pdf)
+    with minkit.minimizer('uml', pdf, data) as minimizer:
+
+        minimizer.minimize()
+
+        blinded = c.error / c.value
+        with c.blind(status=False):
+            unblinded = c.error / c.value
+
+        assert np.allclose(blinded, unblinded)
