@@ -14,7 +14,7 @@ from . import gsl_api
 from ..base import data_types
 from ..base.data_types import c_int, c_int_p, c_double, c_double_p
 
-from distutils import ccompiler, sysconfig
+from distutils import ccompiler, sysconfig, unixccompiler
 from scipy.interpolate import make_interp_spline
 import ctypes
 import functools
@@ -245,11 +245,20 @@ class CPUOperations(object):
                     include_dirs.append(os.path.dirname(
                         os.path.abspath(gsl_incpath)))
 
+                if isinstance(compiler, unixccompiler.UnixCCompiler):
+                    if '-fPIC' not in CFLAGS:
+                        # for the shared libraries
+                        extra_cflags = ['-fPIC'] + CFLAGS
+                    else:
+                        extra_cflags = CFLAGS
+                else:
+                    extra_cflags = CFLAGS
+
                 # compile the source code
                 objects = compiler.compile(
                     [source], output_dir=self.__tmpdir.name,
                     include_dirs=include_dirs,
-                    extra_preargs=CFLAGS)
+                    extra_preargs=CFLAGS + extra_cflags)
 
                 # search for GSL
                 search_prefix = os.path.dirname(
@@ -268,7 +277,7 @@ class CPUOperations(object):
                     self.__tmpdir.name, compiler.library_filename(modname, 'shared'))
 
                 compiler.link(f'{modname} library', objects, libname, library_dirs=library_dirs,
-                              extra_preargs=CFLAGS, libraries=['stdc++', 'gsl', 'gslcblas'])
+                              extra_preargs=CFLAGS + extra_cflags, libraries=['stdc++', 'gsl', 'gslcblas'])
 
             except Exception as ex:
                 nl = len(str(code.count(os.linesep)))

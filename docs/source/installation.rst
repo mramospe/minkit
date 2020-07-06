@@ -36,7 +36,7 @@ variables set before running any script. In Ubuntu, this can be done executing:
 .. code-block:: bash
 
    sudo apt-get install libgsl-dev
-   export CFLAGS="$CFLAGS -fPIC -std=c++11 -I/usr/include"
+   export CFLAGS="$CFLAGS -std=c++11 -I/usr/include"
    export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/lib/x86_64-linux-gnu"
 
 Installation with CONDA
