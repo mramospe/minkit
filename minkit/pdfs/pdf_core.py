@@ -32,7 +32,7 @@ import textwrap
 import threading
 import warnings
 
-__all__ = ['AddPDFs', 'ConvPDFs', 'FormulaPDF', 'InterpPDF', 'MultiPDF', 'pdf_from_json', 'pdf_to_json',
+__all__ = ['AddPDFs', 'ConvPDFs', 'FormulaPDF', 'HistPDF', 'InterpPDF', 'MultiPDF', 'pdf_from_json', 'pdf_to_json',
            'PDF', 'ProdPDFs', 'register_pdf', 'SourcePDF']
 
 # Number of points to use to evaluate a binned sample
@@ -202,11 +202,85 @@ def _interpolation_evaluate_binned(aop, interpolator, par, data, evb_size, norma
         return out
 
 
-class PDF(object, metaclass=core.DocMeta):
+class BasePDF(object, metaclass=core.DocMeta):
 
     # Allow to define if a PDF object depends on other PDFs. All PDF objects
     # with this value set to "True" must have the property "pdfs" implemented.
     _dependent = False
+
+    def __init__(self, name, data_pars, backend):
+
+        super().__init__()
+
+        self.name = name
+        self.__data_pars = parameters.Registry(data_pars)
+        self.__aop = parse_backend(backend)
+
+    @property
+    def all_pars(self):
+        '''
+        All the parameters associated to this class.
+        This includes also any :class:`ParameterFormula` and the data parameters.
+
+        :type: Registry(Parameter)
+        '''
+        return self.data_pars
+
+    @property
+    def data_pars(self):
+        return self.__data_pars
+
+    @property
+    def aop(self):
+        '''
+        Object to do operations on arrays.
+
+        :type: ArrayOperations
+        '''
+        return self.__aop
+
+    @property
+    def backend(self):
+        '''
+        Backend where this PDF lives.
+        '''
+        return self.__aop.backend
+
+    @property
+    def data_pars(self):
+        '''
+        Data parameters.
+        '''
+        return self.__data_pars
+
+    @classmethod
+    def from_json_object(cls, obj, pars, backend):
+        '''
+        Build a PDF from a JSON object.
+        This object must represent the internal structure of the PDF.
+
+        :param obj: JSON object.
+        :type obj: dict
+        :param pars: parameter to build the PDF.
+        :type pars: Registry
+        :param backend: backend to build the PDF.
+        :type backend: Backend
+        :returns: This type of PDF constructed together with its parameters.
+
+        .. seealso:: :meth:`PDF.to_json_object`
+        '''
+        class_name = obj['class']
+        if class_name == 'BasePDF' or class_name = 'PDF':
+            raise exceptions.MethodNotDefinedError(cls, 'from_json_object')
+        cl = PDF_REGISTRY.get(class_name, None)
+        if cl is None:
+            raise RuntimeError(
+                f'Class "{class_name}" does not appear in the registry')
+        # Use the correct constructor
+        return cl.from_json_object(obj, pars, backend)
+
+
+class PDF(BasePDF, metaclass=core.DocMeta):
 
     def __init__(self, name, data_pars, arg_pars=None, backend=None):
         '''
@@ -269,24 +343,6 @@ class PDF(object, metaclass=core.DocMeta):
             out += textwrap.indent(f'{os.linesep}Arguments:{os.linesep}' + textwrap.indent(os.linesep.join(tuple(str(p)
                                                                                                                  for p in self.args)), ' '), ' ')
         return out
-
-    @property
-    def aop(self):
-        '''
-        Object to do operations on arrays.
-
-        :type: ArrayOperations
-        '''
-        return self.__aop
-
-    @property
-    def backend(self):
-        '''
-        Backend interface.
-
-        :type: Backend
-        '''
-        return self.__aop.backend
 
     def _enable_cache(self, ctype):
         '''
@@ -441,32 +497,6 @@ class PDF(object, metaclass=core.DocMeta):
         '''
         raise exceptions.MethodNotDefinedError(
             self.__class__, 'evaluate_binned')
-
-    @classmethod
-    def from_json_object(cls, obj, pars, backend):
-        '''
-        Build a PDF from a JSON object.
-        This object must represent the internal structure of the PDF.
-
-        :param obj: JSON object.
-        :type obj: dict
-        :param pars: parameter to build the PDF.
-        :type pars: Registry
-        :param backend: backend to build the PDF.
-        :type backend: Backend
-        :returns: This type of PDF constructed together with its parameters.
-
-        .. seealso:: :meth:`PDF.to_json_object`
-        '''
-        class_name = obj['class']
-        if class_name == 'PDF':
-            raise exceptions.MethodNotDefinedError(cls, 'from_json_object')
-        cl = PDF_REGISTRY.get(class_name, None)
-        if cl is None:
-            raise RuntimeError(
-                f'Class "{class_name}" does not appear in the registry')
-        # Use the correct constructor
-        return cl.from_json_object(obj, pars, backend)
 
     def _generate_single_bounds(self, size, mapsize, gensize, bounds, max_opts=None):
         '''
@@ -879,6 +909,148 @@ class PDF(object, metaclass=core.DocMeta):
             for p in self.all_pars:
                 stack.enter_context(p.restoring_state())
             yield self
+
+
+class HistPDF(object):
+
+    _dependent = False
+
+    def __init__(self, name, data_pars, edges, gaps, values, backend=None):
+        '''
+        This special kind of object represents the integral of a PDF on a
+        set of bins. Unlike the other PDFs, this object does not inherit
+        from :class:`PDF`, since only the :meth:`HistPDF.evaluate_binned`
+        method is defined. It is possible to combine this object in
+        :class:`AddPDFs` and :class:`ProdPDFs` objects, as long as the
+        methods called only imply the use of the :meth:`HistPDF.evaluate_binned`
+        function. As a consquence, evaluating this object in unbinned data
+        samples is not allowed, as well as event sampling.
+
+        :param name: name of the PDF.
+        :type name: str
+        :param data_pars: data parameters.
+        :type data_pars: Registry(Parameter)
+        :param edges: edges of the bins.
+        :type edges: darray
+        :param gaps: array defining the gaps between edges.
+        :type gaps: numpy.ndarray
+        :param values: values of the PDF in the different bins.
+        :type values: numpy.ndarray
+        :param backend: backend where this PDF lives.
+        :type backend: Backend or None
+        '''
+        super().__init__()
+
+        self.__name = name
+
+        self.__aop = parse_backend(backend)
+        self.__data_pars = parameters.Registry(data_pars)
+
+        self.__edges = edges
+        self.__gaps = data_types.array_int(gaps)
+        self.__values = values / values.sum() # normalize the PDF
+
+    def evaluate_binned(self, *args, **kwargs):
+        '''
+        Evaluate the PDF over a binned sample. This is the only way to evaluate
+        the PDF. It is responsibility of the user to evaluate the PDF on a
+        data sample with the same bin edges as for this PDF.
+
+        :returns: Values from the evaluation.
+        :rtype: farray
+        '''
+        return self.__values
+
+    def norm(self, *args, **kwargs):
+        '''
+        This type of PDFs are always normalized, so the output is always one.
+        '''
+        return 1.
+
+    @classmethod
+    def from_dataset(cls, name, dataset):
+        '''
+        Build the class from a binned data set.
+
+        :param name: name of the PDF.
+        :type name: str
+        :param dataset: binned data set.
+        :type dataset: BinnedDataSet
+        '''
+        return cls(name, dataset.data_pars, dataset.edges,  dataset.gaps, dataset.values, dataset.backend)
+
+    @classmethod
+    def from_json_object(cls, obj, pars, backend):
+        '''
+        Build the class from a JSON-like object.
+
+        :param obj: JSON object.
+        :type obj: dict
+        :param pars: parameters to use.
+        :type pars: Registry(Parameter)
+        :param backend: backend where the PDF will live.
+        :type backend: Backend
+        '''
+        aop = parse_backend(backend)
+
+        data_pars = list(map(pars.get, obj['data_pars']))
+
+        edges = darray.from_ndarray(np.asarray(obj['edges']), aop.backend)
+        gaps = darray.from_ndarray(np.asarray(obj['gaps']), aop.backend)
+        values = darray.from_ndarray(np.asarray(obj['values']), aop.backend)
+
+        return cls(obj['name'], data_pars, edges, gaps, values, backend)
+
+    @classmethod
+    def from_ndarray(cls, edges, data_par, values, backend=None):
+        '''
+        Build the class from the array of edges and values.
+
+        :param edges: edges of the bins.
+        :type edges: numpy.ndarray
+        :param data_par: data parameter.
+        :type data_par: Parameter
+        :param values: values at each bin.
+        :type values: numpy.ndarray
+        :param backend: backend where the data set is built.
+        :type backend: Backend or None
+        :returns: Binned data set.
+        :rtype: BinnedDataSet
+        '''
+        aop = parse_backend(backend)
+        edges = darray.from_ndarray(edges, aop.backend)
+        values = darray.from_ndarray(values, aop.backend)
+        return cls(edges, [1], parameters.Registry([data_par]), values, backend)
+
+    def to_backend(self, backend):
+        '''
+        Initialize this class in a different backend.
+
+        :param backend: new backend.
+        :type backend: Backend
+        :returns: An instance of this class in the new backend.
+        '''
+        edges = self.__edges.to_backend(backend)
+        values = self.__values.to_backend(backend)
+        return self.__class__(self.__name, self.__data_pars, edges, self.__gaps, values, backend)
+
+    def to_json_object(self):
+        '''
+        Dump the PDF information into a JSON object.
+        The PDF can be constructed at any time by calling :meth:`PDF.from_json_object`.
+
+        :returns: Object that can be saved into a JSON file.
+        :rtype: dict
+
+        .. seealso:: :meth:`PDF.from_json_object`
+        '''
+        return {
+            'name': self.__name,
+            'data_pars': self.__data_pars.names,
+            'edges': self.__edges.as_ndarray().tolist(),
+            'gaps': self.__gaps.tolist(),
+            'values': self.__values.as_ndarray().tolist(),
+        }
 
 
 class SourcePDF(PDF):
