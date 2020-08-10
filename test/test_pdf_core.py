@@ -518,9 +518,6 @@ def test_interppdf(tmpdir):
         with minkit.minimizer('bml', pdf, bdata, minimizer='minuit') as minimizer:
             test.result = minimizer.migrad()
 
-    # Test the construction from a binned data set
-    minkit.InterpPDF.from_binned_dataset('pdf', bdata)
-
 
 @pytest.mark.pdfs
 def test_pdf_max():

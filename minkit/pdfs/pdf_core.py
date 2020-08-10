@@ -2166,25 +2166,6 @@ class InterpPDF(PDF):
             raise ValueError(f'Unknown interpolation method "{method}"')
 
     @classmethod
-    def from_binned_dataset(cls, name, data):
-        '''
-        Build the instance from a binned data set. The data set must be
-        unidimensional.
-
-        :param name: name of the PDF.
-        :type name: str
-        :param data: binned data set.
-        :type data: BinnedDataSet
-        '''
-        data_par = data.data_pars[0]
-        edges, values = data[data_par.name].as_ndarray(
-        ), data.values.as_ndarray()
-
-        centers = 0.5 * (edges[1:] + edges[:-1])
-
-        return cls.from_ndarray(name, data_par, centers, values, backend=data.backend)
-
-    @classmethod
     def from_ndarray(cls, name, data_par, centers, values, backend=None):
         '''
         Build the class from :class:`numpy.ndarray` instances.
