@@ -208,6 +208,8 @@ class BasePDF(object, metaclass=core.DocMeta):
     # with this value set to "True" must have the property "pdfs" implemented.
     _dependent = False
 
+    _has_args = False
+
     def __init__(self, name, data_pars, backend):
 
         super().__init__()
@@ -225,10 +227,6 @@ class BasePDF(object, metaclass=core.DocMeta):
         :type: Registry(Parameter)
         '''
         return self.data_pars
-
-    @property
-    def data_pars(self):
-        return self.__data_pars
 
     @property
     def aop(self):
@@ -270,7 +268,7 @@ class BasePDF(object, metaclass=core.DocMeta):
         .. seealso:: :meth:`PDF.to_json_object`
         '''
         class_name = obj['class']
-        if class_name == 'BasePDF' or class_name = 'PDF':
+        if class_name == 'BasePDF' or class_name == 'PDF':
             raise exceptions.MethodNotDefinedError(cls, 'from_json_object')
         cl = PDF_REGISTRY.get(class_name, None)
         if cl is None:
@@ -280,7 +278,9 @@ class BasePDF(object, metaclass=core.DocMeta):
         return cl.from_json_object(obj, pars, backend)
 
 
-class PDF(BasePDF, metaclass=core.DocMeta):
+class PDF(BasePDF):
+
+    _has_args = True
 
     def __init__(self, name, data_pars, arg_pars=None, backend=None):
         '''
@@ -301,18 +301,15 @@ class PDF(BasePDF, metaclass=core.DocMeta):
         :ivar evb_size: number of points to use when evaluating the PDF
            numerically on a binned data set.
         '''
-        self.name = name
         # Number of points to consider when evaluating numerically a binned sample
         self.evb_size = DEFAULT_EVB_SIZE
-        self.__aop = parse_backend(backend)
-        self.__data_pars = data_pars
         self.__arg_pars = arg_pars if arg_pars is not None else parameters.Registry()
 
         # The cache is saved on a dictionary, and inherited classes must avoid colliding names
         self.__cache = None
         self.__cache_type = None
 
-        super().__init__()
+        super().__init__(name, data_pars, backend)
 
     @allows_const_cache
     def __call__(self, data, range=parameters.FULL, normalized=True):
@@ -390,7 +387,7 @@ class PDF(BasePDF, metaclass=core.DocMeta):
         :rtype: float
         '''
         if sampling_size is None:
-            if is_gpu_backend(self.__aop.backend.btype):
+            if is_gpu_backend(self.aop.backend.btype):
                 sampling_size = DEFAULT_GEN_SIZE_GPU
             else:
                 sampling_size = DEFAULT_GEN_SIZE_CPU
@@ -413,7 +410,7 @@ class PDF(BasePDF, metaclass=core.DocMeta):
 
             # calculate a new maximum
             grid = dataset.uniform_sample(
-                self.__aop, self.data_pars, bounds, sampling_size)
+                self.aop, self.data_pars, bounds, sampling_size)
 
             imax = self.__call__(grid, range, normalized).argmax()
 
@@ -537,11 +534,11 @@ class PDF(BasePDF, metaclass=core.DocMeta):
         while n < size:
 
             d = dataset.uniform_sample(
-                self.__aop, self.data_pars, bounds, gensize)
+                self.aop, self.data_pars, bounds, gensize)
 
             f = self.__call__(d, normalized=False)
 
-            u = self.__aop.random_uniform(0, m, len(d))
+            u = self.aop.random_uniform(0, m, len(d))
 
             r = d.subset(u < f)
 
@@ -627,15 +624,6 @@ class PDF(BasePDF, metaclass=core.DocMeta):
         '''
         return all(p.constant for p in self.all_real_args)
 
-    @property
-    def data_pars(self):
-        '''
-        Data parameters this object directly depends on.
-
-        :type: Registry(Parameter)
-        '''
-        return self.__data_pars
-
     @contextlib.contextmanager
     def bind(self, range=parameters.FULL, normalized=True):
         '''
@@ -686,7 +674,7 @@ class PDF(BasePDF, metaclass=core.DocMeta):
         .. seealso:: :meth:`PDF.max`
         '''
         if gensize is None:
-            if is_gpu_backend(self.__aop.backend.btype):
+            if is_gpu_backend(self.aop.backend.btype):
                 gensize = DEFAULT_GEN_SIZE_GPU
             else:
                 gensize = DEFAULT_GEN_SIZE_CPU
@@ -707,7 +695,7 @@ class PDF(BasePDF, metaclass=core.DocMeta):
 
                 fracs /= fracs.sum()
 
-                u = self.__aop.random_uniform(0, 1, size)
+                u = self.aop.random_uniform(0, 1, size)
 
                 entries = data_types.empty_int(len(bounds))
                 for i, f in enumerate(fracs[:-1]):
@@ -911,7 +899,7 @@ class PDF(BasePDF, metaclass=core.DocMeta):
             yield self
 
 
-class HistPDF(object):
+class HistPDF(BasePDF):
 
     _dependent = False
 
@@ -939,16 +927,11 @@ class HistPDF(object):
         :param backend: backend where this PDF lives.
         :type backend: Backend or None
         '''
-        super().__init__()
-
-        self.__name = name
-
-        self.__aop = parse_backend(backend)
-        self.__data_pars = parameters.Registry(data_pars)
+        super().__init__(name, data_pars, backend)
 
         self.__edges = edges
         self.__gaps = data_types.array_int(gaps)
-        self.__values = values / values.sum() # normalize the PDF
+        self.__values = values / values.sum()  # normalize the PDF
 
     def evaluate_binned(self, *args, **kwargs):
         '''
@@ -968,7 +951,7 @@ class HistPDF(object):
         return 1.
 
     @classmethod
-    def from_dataset(cls, name, dataset):
+    def from_binned_dataset(cls, name, dataset):
         '''
         Build the class from a binned data set.
 
@@ -1002,14 +985,16 @@ class HistPDF(object):
         return cls(obj['name'], data_pars, edges, gaps, values, backend)
 
     @classmethod
-    def from_ndarray(cls, edges, data_par, values, backend=None):
+    def from_ndarray(cls, name, data_par, edges, values, backend=None):
         '''
         Build the class from the array of edges and values.
 
-        :param edges: edges of the bins.
-        :type edges: numpy.ndarray
+        :param name: Name of the PDF.
+        :type name: str
         :param data_par: data parameter.
         :type data_par: Parameter
+        :param edges: edges of the bins.
+        :type edges: numpy.ndarray
         :param values: values at each bin.
         :type values: numpy.ndarray
         :param backend: backend where the data set is built.
@@ -1020,7 +1005,7 @@ class HistPDF(object):
         aop = parse_backend(backend)
         edges = darray.from_ndarray(edges, aop.backend)
         values = darray.from_ndarray(values, aop.backend)
-        return cls(edges, [1], parameters.Registry([data_par]), values, backend)
+        return cls(name, parameters.Registry([data_par]), edges, [1], values, backend)
 
     def to_backend(self, backend):
         '''
@@ -1032,7 +1017,7 @@ class HistPDF(object):
         '''
         edges = self.__edges.to_backend(backend)
         values = self.__values.to_backend(backend)
-        return self.__class__(self.__name, self.__data_pars, edges, self.__gaps, values, backend)
+        return self.__class__(self.name, self.data_pars, edges, self.__gaps, values, backend)
 
     def to_json_object(self):
         '''
@@ -1045,8 +1030,8 @@ class HistPDF(object):
         .. seealso:: :meth:`PDF.from_json_object`
         '''
         return {
-            'name': self.__name,
-            'data_pars': self.__data_pars.names,
+            'name': self.name,
+            'data_pars': self.data_pars.names,
             'edges': self.__edges.as_ndarray().tolist(),
             'gaps': self.__gaps.tolist(),
             'values': self.__values.as_ndarray().tolist(),
@@ -1523,7 +1508,7 @@ class MultiPDF(PDF):
     def all_args(self):
 
         args = parameters.Registry(super().all_args)
-        for p in self.__pdfs:
+        for p in filter(lambda p: p._has_args, self.__pdfs):
             args += p.all_args
 
         return args
@@ -1583,14 +1568,14 @@ class MultiPDF(PDF):
 
         super()._enable_cache(ctype)
 
-        for pdf in self.pdfs:
+        for pdf in filter(lambda p: p._has_args, self.pdfs):
             pdf._enable_cache(ctype)
 
     def _free_cache(self):
 
         super()._free_cache()
 
-        for pdf in self.pdfs:
+        for pdf in filter(lambda p: p._has_args, self.pdfs):
             pdf._free_cache()
 
     def component(self, name):

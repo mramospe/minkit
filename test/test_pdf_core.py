@@ -40,6 +40,41 @@ def test_pdf():
 
 
 @pytest.mark.pdfs
+@setting_seed
+def test_histpdf():
+    '''
+    Test the HistPDF class
+    '''
+    pdf = helpers.default_add_pdfs()
+
+    build_data = pdf.pdfs.get('gaussian').generate(10000).make_binned(100)
+
+    fit_data = pdf.generate(10000).make_binned(100)
+
+    exp_pdf = pdf.pdfs.get('exponential')
+
+    # construct from numpy arrays
+    minkit.HistPDF.from_ndarray(
+        '', pdf.data_pars[0], build_data.edges.as_ndarray(), build_data.values.as_ndarray())
+
+    # construct from a data set
+    hist_pdf = minkit.HistPDF.from_binned_dataset('hist_pdf', build_data)
+
+    y = minkit.Parameter('y', 0.5, (0, 1))
+
+    pdf = minkit.AddPDFs.two_components('pdf', hist_pdf, exp_pdf, y)
+
+    # test a simple fit
+    with helpers.fit_test(pdf) as test:
+        with minkit.minimizer('bml', pdf, fit_data) as minimizer:
+            test.result = minimizer.migrad()
+
+    # one can not generate data with this kind of PDF
+    with pytest.raises(TypeError):
+        pdf.generate(10000)
+
+
+@pytest.mark.pdfs
 @pytest.mark.multipdf
 @setting_seed
 def test_addpdfs(tmpdir):
